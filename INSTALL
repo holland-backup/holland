@@ -1,0 +1,57 @@
+FIXME: This is rough and to the point.... needs fluff.
+
+
+UNPACK THE SOURCE:
+
+        you@linuxbox ~]$ tar -zxvf holland-x.y.z.tar.gz
+
+
+LOCAL DEVELOPMENT INSTALLATION:
+
+        you@linuxbox ~] cd ./holland-x.y.z
+        you@linuxbox holland-x.y.z] ./devtools/mkvirtenv.sh
+        
+    Optionally, for target testing...  add the --no-deps option to force 
+    holland to rely on system dependencies (such as MySQL-python).
+    
+
+SOURCE INSTALLATION:
+
+    Install Holland Core:
+
+        you@linuxbox ~]$ cd ./holland-x.y.z/holland-core
+        you@linuxbox holland-core]$ sudo python setup.py install
+
+
+    Install Holland Core Plugins:
+
+        you@linuxbox holland-x.y.z]$ cd plugins/holland.lib.common
+        you@linuxbox holland.lib.common]$ sudo python setup.py install
+
+        you@linuxbox holland-x.y.z]$ cd plugins/holland.lib.mysql
+        you@linuxbox holland.lib.mysql]$ sudo python setup.py install
+
+
+    Install Optional Plugins (see plugins/ACTIVE):
+    
+        you@linuxbox holland-x.y.z]$ cd plugins/<plugin_dir>
+        you@linuxbox holland.<plugin_dir>]$ sudo python setup.py install
+
+
+
+UBUNTU INSTALLATION:
+
+    you@linuxbox holland-x.y.z]$ cp -a distribution/ubuntu/ubuntu.jaunty debian
+    you@linuxbox holland-x.y.z]$ dpkg-buildpackage -us -uc
+
+
+ 
+REDHAT/FEDORA/CENTOS/ETC INSTALLATION:
+
+    root@linuxbox ~]# cp -a holland-x.y.z/distribution/holland.spec /usr/src/redhat/SPECS
+    root@linuxbox ~]# cp -a holland-x.y.z.tar.gz /usr/src/redhat/SOURCES 
+    root@linuxbox ~]# cd /usr/src/redhat
+    root@linuxbox /usr/src/redhat]# rpmbuild -ba SPECS/holland.spec
+    
+    
+    

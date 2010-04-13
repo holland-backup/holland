@@ -1,0 +1,23 @@
+This package was debianized by BJ Dierkes <wdierkes@rackspace.com> on
+Sat, 02 May 2009 13:41:21 -0500.
+
+It was downloaded from <http://gforge.rackspace.com/svn/holland/>
+
+Upstream Authors:
+
+    Andrew Garner <andrew.garner@rackspace.com>
+    Jason Koelker <jason.koelkder@rackspace.com>
+    BJ Dierkes <wdierkes@rackspace.com>
+    Tim Soderstrom <tsoderst@rackspace.com> 
+
+Copyright:
+
+    <Copyright (C) 2009 Rackspace US, Inc.>
+
+License:
+
+    Proprietary/None 
+
+The Debian packaging is copyright 2009, Rackspace US, Inc. and is currently
+not licensed.
+

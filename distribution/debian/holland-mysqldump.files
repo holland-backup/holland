@@ -1,0 +1,3 @@
+usr/share/holland/plugins/holland.backup.mysqldump-*.egg
+etc/holland/backupsets/examples/mysqldump.conf
+etc/holland/providers/mysqldump.conf

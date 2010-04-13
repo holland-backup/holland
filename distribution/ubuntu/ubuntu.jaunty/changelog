@@ -1,0 +1,25 @@
+holland (0.9.0-1) jaunty; urgency=low
+
+  * Latest build from trunk
+  * Incremented .DEB version numbers to match current beta version
+
+ -- Tim Soderstrom <tsoderst@rackspace.com>  Thu, 14 May 2009 16:37:00 -0600
+
+holland (0.4-2) jaunty; urgency=low
+
+  * Latest build from trunk 
+  * Adding holland-commvault package
+  * Depends: mysqlclient15off, python-setuptools
+  * Properly install scripts to sbin directory
+  * Fixed python library path
+  * Added holland.lib.mysql plugin to common package [#1294]
+  * Fixed missing config/backupsets/examples files
+  * Added Depends: python-louie
+
+ -- BJ Dierkes <wdierkes@wdierkes-linux>  Wed, 06 May 2009 18:23:01 -0400
+
+holland (0.3.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- BJ Dierkes <wdierkes@rackspace.com>  Sat, 02 May 2009 13:41:21 -0500

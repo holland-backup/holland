@@ -1,0 +1,40 @@
+from setuptools import setup, find_packages
+
+version = '0.9.9dev'
+
+setup(name='holland.backup.mysqldump',
+      version=version,
+      description="MySQLDump Backup/Restore Plugins",
+      long_description="""\
+      Plugin support to provide backup and restore functionality
+      through mysqldump backups
+      """,
+      classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      keywords='',
+      author='Rackspace',
+      author_email='support@rackspace.com',
+      url='https://gforge.rackspace.com/gf/project/holland',
+      license='Other/Proprietary License',
+      packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
+      include_package_data=True,
+      zip_safe=True,
+      test_suite='tests',
+      tests_require=[
+        'holland >= 0.9.6',
+      ],
+      install_requires=[
+        # 'nose', # Not required, but needed if you want to run nose tests...
+      ],
+      extras_require = {
+        'mysql' : 'holland.lib.mysql',
+        'common' : 'holland.lib.common'
+      },
+      entry_points="""
+      [holland.backup]
+      mysqldump = holland.backup.mysqldump:provider [mysql, common]
+
+      [holland.restore]
+      mysqldump = holland.restore.mysqldump:MySQLRestore
+      """,
+      namespace_packages=['holland', 'holland.backup'],
+    )

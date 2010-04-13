@@ -1,0 +1,61 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE=1
+
+PYVERS=$(shell pyversions -vr)
+PKGDIR=$(CURDIR)/debian/pylvmbackup
+
+# if $py_setup_install_args will contain "--install-layout=deb" dist-packages
+# will be used instead of site-packages for Python >= 2.6;
+# --install-layout=deb and python.mk are available since python >= 2.5.4-1~,
+# here's backwards compatible code:
+-include /usr/share/python/python.mk
+ifeq (,$(py_libdir))
+    py_libdir = /usr/lib/python$(subst python,,$(1))/site-packages
+endif
+
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -rf dist build
+	find . -name '*\.py[co]' -delete
+	dh_clean build-docs $(PYVERS:%=install-python%) install-stamp
+
+build: build-docs
+
+build-docs:
+	dh_testdir
+	dh_installdirs
+	touch $@
+
+install: build install-stamp
+
+install-stamp: $(PYVERS:%=install-python%)
+	dh_installdirs
+	touch $@
+
+install-python%:
+	python$* setup.py install --root $(PKGDIR) \
+		--single-version-externally-managed $(py_setup_install_args)
+
+binary-indep: build install
+	dh_testdir -i
+	dh_testroot -i
+	dh_installchangelogs
+	dh_installdocs -i
+	dh_installman -i
+	dh_install -i
+	dh_pysupport -i
+	dh_compress -i -X.py
+	dh_fixperms -i
+	dh_installdeb -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i -- -Z bzip2
+
+binary-arch:
+
+binary: binary-indep binary-arch
+
+.PHONY: build clean binary-indep binary-arch binary install

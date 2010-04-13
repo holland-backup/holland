@@ -1,0 +1,3 @@
+usr/share/holland/plugins/holland.backup.maatkit-*.egg
+etc/holland/backupsets/examples/maatkit.conf
+etc/holland/providers/maatkit.conf

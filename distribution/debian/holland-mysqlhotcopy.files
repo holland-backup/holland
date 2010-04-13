@@ -1,0 +1,3 @@
+usr/share/holland/plugins/holland.backup.mysqlhotcopy-*.egg
+etc/holland/backupsets/examples/mysqlhotcopy.conf
+etc/holland/providers/mysqlhotcopy.conf

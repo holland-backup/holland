@@ -1,0 +1,3 @@
+usr/share/holland/plugins/holland.backup.example*.egg
+etc/holland/providers/example.conf
+etc/holland/backupsets/examples/example.conf

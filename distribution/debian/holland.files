@@ -1,0 +1,8 @@
+usr/lib/python*.*/*-packages/holland-*.egg-info
+usr/lib/python*.*/*-packages/holland-*-nspkg.pth
+usr/lib/python*.*/*-packages/holland
+etc/holland/holland.conf
+etc/holland/README
+etc/holland/providers/README
+etc/holland/backupsets/default.conf
+usr/sbin/holland

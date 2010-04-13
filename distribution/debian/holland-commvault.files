@@ -1,0 +1,4 @@
+usr/lib/python*.*/*-packages/holland_commvault*.egg-info
+usr/lib/python*.*/*-packages/holland_commvault-*-nspkg.pth
+usr/lib/python*.*/*-packages/holland_commvault*/
+usr/sbin/holland_cvmysqlsv

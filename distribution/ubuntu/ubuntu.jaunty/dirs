@@ -1,0 +1,7 @@
+usr/sbin
+/etc/holland
+/etc/holland/plugins.d
+/var/spool/holland
+/usr/share/holland
+/usr/share/holland/plugins
+/var/log/holland

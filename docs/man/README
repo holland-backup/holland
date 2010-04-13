@@ -1,0 +1,4 @@
+Holland manpages.  These are written in restructured
+text and converted to the man format using rst2man
+from the docutils sandbox at:
+http://docutils.sourceforge.net/sandbox/manpage-writer/

@@ -1,0 +1,17 @@
+Source: pylvmbackup
+Section: utils
+Priority: extra
+Maintainer: Andrew Garner <andrew.garner@rackspace.com>
+Build-Depends: debhelper (>= 5.0.38)
+Build-Depends-Indep: python-support (>= 0.5.3)
+Standards-Version: 3.8.0
+Homepage: https://gforge.rackspace.com/gf/holland
+
+Package: pylvmbackup
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
+Description: Utility for creating backups via LVM snapshots
+ pylvmbackup is a script for creating backups via LVM snapshots. pylvmbackup
+ can acquire MySQL locks to ensure consistency and perform InnoDB recovery
+ prior to making a backup. This script is inspired heavily by the excellent
+ mylvmbackup and other attempts are automating LVM snapshot based backups.
