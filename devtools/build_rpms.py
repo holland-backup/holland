@@ -6,12 +6,30 @@ import re
 import tarfile
 from subprocess import Popen, PIPE 
 from tempfile import mkdtemp
+from optparse import OptionParser, IndentedHelpFormatter
+
+VERSION='0.1'
 
 config = {}
 config['srcdir'] = os.getcwd()
 config['topdir'] = mkdtemp(prefix="%s/" % os.environ['HOME'])
 config['spec'] = './distribution/holland.spec'
 
+def get_opts_args():
+    fmt = IndentedHelpFormatter(
+            indent_increment=4, max_help_position=32, width=77, short_first=1
+            )
+    parser = OptionParser(formatter=fmt, version=VERSION)
+    parser.usage = """ devtools/build_rpms.py --(OPTIONS)"""
+
+    parser.add_option('--tmpdir', action='store', dest='tmpdir',
+                      help="tmp directory to build in.")
+    parser.add_option('--just-source', action='store', dest='just_source',
+                      help="just build the source rpm")
+    parser.add_option('--clean', action='store_true', dest='clean',
+                      help="remove directory after building (for testing)")
+    (cli_opts, cli_args) = parser.parse_args()
+    return (cli_opts, cli_args)
 
 def prep_buildroot():
     version, dev_tag = get_holland_version()
@@ -52,7 +70,7 @@ def build_srpm():
     retcode = os.system(cmd)
     return retcode
         
-def build_rpms(just_source=False):
+def build_rpms():
     version, dev_tag = get_holland_version()
     if dev_tag:
         dev_option = "--define='src_dev_tag dev'"
@@ -79,14 +97,22 @@ def get_holland_version():
     return version, dev_tag
  
     
+def exit(code=0, clean=False):
+    if clean:
+        if os.path.exists(cli_opts.tmpdir):
+            print "cleaning %s" % config['topdir']
+            shutil.rmtree(config['topdir'])
+    sys.exit(code)
+    
 def main():
-    just_source = False
-    try:
-        if sys.argv[1] == '--just-source':
-            just_source = True
-    except IndexError, e:
-        pass
-
+    (cli_opts, cli_args) = get_opts_args()
+    (version, dev_tag) = get_holland_version()
+    
+    if cli_opts.tmpdir:
+        if not os.path.exists(cli_opts.tmpdir):
+            os.makedirs(cli_opts.tmpdir)
+        config['topdir'] = mkdtemp(prefix="%s/" % cli_opts.tmpdir)
+        
     prep_buildroot()
     retcode = build_srpm()
     if int(retcode) != 0:
@@ -95,23 +121,23 @@ def main():
         print
         print "Please correct the above errors"
         print
-        sys.exit()
+        exit(1, cli_opts.clean)
 
-    if not just_source:
-        retcode = build_rpms(just_source)
+    if not cli_opts.just_source:
+        retcode = build_rpms()
+
+    print
+    print '-' * 77
+    print 
 
     if int(retcode) == 0:
-        print
-        print '-' * 77
-        print 
-        print "Holland %s built in %s" % (get_holland_version()[0], config['topdir'])
-        print
+        print "Holland %s%s built in %s" % (version, dev_tag, config['topdir'])
+        exit(0, cli_opts.clean)
     else:     
-        print
-        print '-' * 77
-        print 
-        print "Holland %s build FAILED!  Files in " % get_holland_version()[0]
-        print
+        print "Holland %s%s build FAILED!  Files in %s" % (version, dev_tag, 
+                                                           config['topdir'])
+        exit(1, cli_opts.clean)
+    print
     
 if __name__ == '__main__':
     main()
