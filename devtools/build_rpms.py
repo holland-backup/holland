@@ -99,7 +99,7 @@ def get_holland_version():
     
 def exit(code=0, clean=False):
     if clean:
-        if os.path.exists(cli_opts.tmpdir):
+        if os.path.exists(config['topdir']):
             print "cleaning %s" % config['topdir']
             shutil.rmtree(config['topdir'])
     sys.exit(code)
