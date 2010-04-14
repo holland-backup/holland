@@ -1,4 +1,3 @@
-
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 %{!?pybasever: %define pybasever %(%{__python} -c "import sys ; print sys.version[0:3]")}
 
@@ -103,13 +102,9 @@ find ./ -name setup.cfg -exec rm -f {} \;
 sed -i 's/^backupsets = default/backupsets = /g' config/holland.conf
 
 %build
-# build core
-pushd holland-core
 %{__python} setup.py build 
-
 # FIX ME - Tests fail
 #%{__python} setup.py test 
-popd
 
 
 %install
@@ -124,13 +119,11 @@ popd
              %{buildroot}%{_mandir}/man1 \
              %{buildroot}%{_sysconfdir}
 
-pushd holland-core
 %{__python} setup.py install \
     --prefix=%{_prefix} \
     --root=%{buildroot} \
     --skip-build \
     --install-scripts=%{_sbindir}
-popd
 
 # plugins
 for plugin in $(cat plugins/ACTIVE); do
@@ -139,19 +132,11 @@ for plugin in $(cat plugins/ACTIVE); do
         install -m 0640 config/providers/$short_name.conf \
             %{buildroot}%{_confdir}/providers/
     fi
-    pushd plugins/$plugin
-    %{__python} setup.py bdist_egg -d %{buildroot}%{_plugindir}
-    popd
-done
-
-# addons
-for addon in $(cat addons/ACTIVE); do
-    pushd addons/$addon
-    %{__python} setup.py install \
-        --prefix=%{_prefix} \
-        --root=%{buildroot} \
-        --install-scripts=%{_sbindir}
-    popd
+    cd plugins/$plugin
+    %{__python} setup.py install --prefix=%{_prefix} --root=%{buildroot} --install-scripts=%{_sbindir} --record=rpm_manifest.txt
+    # clip extraneous egg-info/ entries - we only capture the directory
+    %{__sed} -i -e '\_.*.egg-info/_d' rpm_manifest.txt 
+    cd -
 done
 
 install -m 0640 config/holland.conf %{buildroot}%{_confdir}/holland.conf
@@ -192,43 +177,35 @@ EOF
 %{python_sitelib}/%{name}-%{src_version}-py%{pybasever}.egg-info
 %{_mandir}/man1/holland*.1.gz
 
-%files common
+%files common -f plugins/holland.lib.common/rpm_manifest.txt
 %defattr(-, root, root)
-%{_plugindir}/holland.lib.common-*.egg
-%{_plugindir}/holland.lib.mysql-*.egg
+%{python_sitelib}/holland.lib.mysql-%{src_version}-py%{pybasever}-nspkg.pth
+%{python_sitelib}/holland.lib.mysql-%{src_version}-py%{pybasever}.egg-info
 
-%files mysqldump
+%files mysqldump -f plugins/holland.backup.mysqldump/rpm_manifest.txt
 %defattr(-, root, root)
 %attr(640,root,root) %config(noreplace) %{_confdir}/providers/mysqldump.conf
-%{_plugindir}/holland.backup.mysqldump-*.egg
 
-%files mysqlhotcopy
+%files mysqlhotcopy -f plugins/holland.backup.mysqlhotcopy/rpm_manifest.txt
 %defattr(-, root, root)
 %attr(640,root,root) %config(noreplace) %{_confdir}/providers/mysqlhotcopy.conf
-%{_plugindir}/holland.backup.mysqlhotcopy-*.egg
 
-%files maatkit
+%files maatkit -f plugins/holland.backup.maatkit/rpm_manifest.txt
 %defattr(-, root, root)
 %attr(640,root,root) %config(noreplace) %{_confdir}/providers/maatkit.conf
-%{_plugindir}/holland.backup.maatkit-*.egg
 
-%files example
+%files example -f plugins/holland.backup.example/rpm_manifest.txt
 %defattr(-, root, root)
-%{_plugindir}/holland.backup.example-*.egg
 %attr(640,root,root) %config(noreplace) %{_confdir}/providers/example.conf
 
-%files mysqllvm
+%files mysqllvm -f plugins/holland.backup.mysql-lvm/rpm_manifest.txt
 %defattr(-, root, root)
-%{_plugindir}/holland.backup.mysql_lvm*.egg
 %attr(640,root,root) %config(noreplace) %{_confdir}/providers/mysql-lvm.conf
 
-%if %{with_mysqlcmds}
-%files example
-%defattr(-, root, root)
-%{_plugindir}/holland.backup.example-*.egg
-%endif
-
 %changelog
+* Wed Apr 14 2010 Andrew Garner <andrew.garner@rackspace.com> - 0.9.9-2
+- Updated rpm for new tree layout
+
 * Tue Apr 13 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-1.rs
 - Removed -commvault subpackage
 - Removed mysql-lvm config file hack
