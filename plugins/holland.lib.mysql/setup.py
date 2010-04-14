@@ -18,7 +18,6 @@ setup(name='holland.lib.mysql',
       include_package_data=True,
       zip_safe=True,
       tests_require=['mocker==0.10.1', 'coverage==2.85'],
-      install_requires=['MySQL-python'],
       test_suite='tests',
       entry_points="""
       # -*- Entry points: -*-
