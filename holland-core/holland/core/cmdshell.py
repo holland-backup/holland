@@ -9,14 +9,13 @@ from holland.core.config.checks import is_logging_level
 HOLLAND_VERSION = get_distribution('holland').version
 HOLLAND_BANNER = """
 Holland Backup v%s
-Copyright (c) 2008 Rackspace US, Inc.
+Copyright (c) 2008-2010 Rackspace US, Inc.
+More info available at http://hollandbackup.org
 
 [[[[[[[]]]]]]] [[[[[[[]]]]]]]
 [[[[[[[]]]]]]]       [[[[[[[]]]]]]]
 [[[[[[[]]]]]]] [[[[[[[]]]]]]]
 [[[[[[[]]]]]]] [[[[[[[]]]]]]]
-
-bugs/requests/flames > https://gforge.rackspace.com/gf/project/holland
 
 """ % HOLLAND_VERSION
 
