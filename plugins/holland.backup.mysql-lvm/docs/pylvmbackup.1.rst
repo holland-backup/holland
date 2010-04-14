@@ -112,7 +112,7 @@ SEE ALSO
 ========
 
 * ``mylvmbackup <http://www.lenzg.net/mylvmbackup>``
-* ``holland <https://gforge.rackspace.com/gf/holland>``
+* ``holland <http://hollandbackup.org>``
 
 BUGS
 ====

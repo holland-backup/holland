@@ -5,7 +5,7 @@ Maintainer: Andrew Garner <andrew.garner@rackspace.com>
 Build-Depends: debhelper (>= 5.0.38)
 Build-Depends-Indep: python-support (>= 0.5.3)
 Standards-Version: 3.8.0
-Homepage: https://gforge.rackspace.com/gf/holland
+Homepage: http://hollandbackup.org 
 
 Package: pylvmbackup
 Architecture: all

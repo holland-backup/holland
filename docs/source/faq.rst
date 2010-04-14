@@ -40,8 +40,12 @@ with Holland, MySQL, and backups in general:
     
 * **I found a bug in Holland, what do I do?**
 
-    As of this writing, Holland was still very much a work in progress. If
-    you have found a bug and are a Rackspace employee, please visit our 
-    internal gForge project and file a new Tracker item. Please describe
-    the bug in as a great of detail as possible and include at least part
-    of the Holland log (with full debugging enabled).
+    Bugs and feature requests are tracked via our GitHub project:
+
+        http://github.com/holland-backup/holland/issues
+
+    
+    The Holland Core Developers can also be contacted via our mailing list:
+
+        holland-devel@googlegroups.com
+

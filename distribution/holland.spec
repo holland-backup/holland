@@ -20,7 +20,7 @@ Version: %{src_version}%{?src_dev_tag}
 Release: 2.rs%{?dist}
 License: Proprietary 
 Group: Applications/Databases 
-URL: https://gforge.rackspace.com/gf/project/holland
+URL: http://hollandbackup.org 
 Vendor: Rackspace US, Inc.
 Source0: %{name}-%{src_version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -232,6 +232,7 @@ EOF
 * Tue Apr 13 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-1.rs
 - Removed -commvault subpackage
 - Removed mysql-lvm config file hack
+- Changed URL to http://hollandbackup.org
 
 * Thu Apr 07 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.8-2.rs
 - Rename holland-lvm to holland-mysqllvm, Obsoletes: holland-lvm
