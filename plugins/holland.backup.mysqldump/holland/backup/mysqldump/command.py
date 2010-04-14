@@ -189,7 +189,8 @@ class MySQLDump(object):
         if databases is ALL_DATABASES:
             args.append('--all-databases')
         else:
-            args.append('--databases')
+            if len(databases) > 1:
+                args.append('--databases')
             args.extend(databases)
 
         LOG.info("Executing: %s", subprocess.list2cmdline(args))
