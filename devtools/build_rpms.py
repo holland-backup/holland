@@ -3,12 +3,13 @@
 import sys, os
 import shutil
 import re
-from subprocess import Popen, PIPE 
 import tarfile
+from subprocess import Popen, PIPE 
+from tempfile import mkdtemp
 
 config = {}
 config['srcdir'] = os.getcwd()
-config['topdir'] = os.path.join(os.path.dirname(os.getcwd()), '_holland_rpmbuildroot')
+config['topdir'] = mkdtemp(prefix="%s/" % os.environ['HOME'])
 config['spec'] = './distribution/holland.spec'
 
 
