@@ -52,6 +52,13 @@ REDHAT/FEDORA/CENTOS/ETC INSTALLATION:
     root@linuxbox ~]# cp -a holland-x.y.z.tar.gz /usr/src/redhat/SOURCES 
     root@linuxbox ~]# cd /usr/src/redhat
     root@linuxbox /usr/src/redhat]# rpmbuild -ba SPECS/holland.spec
+
+    Alternatively you can use a build script:
+
+    you@linuxbox ~]$ tar -zxvf holland-x.y.z
+    you@linuxbox ~]$ cd holland-x.y.z 
+    you@linuxbox ~]$ python devtools/build_rpms.py
+
     
     
     
