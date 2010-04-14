@@ -1,9 +1,3 @@
-# Setting initial dist defaults.  Do not modify these.
-# Note: Mock sets these up... but we need to default for manual builds.
-%{!?el3:%define el3 0}
-%{!?el4:%define el4 0}
-%{!?el5:%define el5 0}
-%{!?rhel:%define rhel 'empty'}
 
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 %{!?pybasever: %define pybasever %(%{__python} -c "import sys ; print sys.version[0:3]")}
@@ -17,14 +11,14 @@
 %define with_mysqlcmds 0
 
 # used by dev tools
-%define src_version @@@VERSION@@@
+%define src_version @@@VERSION@@@ 
 
 
-Summary: Holland is a Pluggable Backup Framework 
+Summary: Pluggable Backup Framework 
 Name: holland
 Version: %{src_version}%{?src_dev_tag} 
-Release: 1.rs%{?dist}
-License: Undetermined 
+Release: 2.rs%{?dist}
+License: Proprietary 
 Group: Applications/Databases 
 URL: https://gforge.rackspace.com/gf/project/holland
 Vendor: Rackspace US, Inc.
@@ -43,83 +37,70 @@ configurable database backups.
 
 
 %package common
-Summary: Holland Common Library Plugins
+Summary: Common Library Plugins for Holland
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}, mysql, MySQL-python
 
 %description common
-Holland Common Library Plugins
+Common Library Plugins for Holland
 
 %package mysqldump
-Summary: Holland MySQL Dump Backup Provider Plugin
+Summary: MySQL Dump Backup Provider Plugin for Holland
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 
 %description mysqldump
-Holland MySQL Dump Backup Provider Plugin
+MySQL Dump Backup Provider Plugin for Holland.
 
 %package example
-Summary: Holland Example Backup Provider Plugin
+Summary: Example Backup Provider Plugin for Holland
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 
 %description example 
-Holland Example Backup Provider Plugin
+Example Backup Provider Plugin for Holland.
 
 %package maatkit 
-Summary: Holland Maatkit Backup Provider Plugin
+Summary: Maatkit Backup Provider Plugin for Holland
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}, %{name}-common = %{version}-%{release}
 Requires: maatkit
 
 %description maatkit
-Holland Maatkit Backup Provider Plugin
+Maatkit Backup Provider Plugin for Holland
 
 %package mysqlhotcopy
-Summary: Holland MySQL Hot Copy Backup Provider Plugin
+Summary: MySQL Hot Copy Backup Provider Plugin for Holland
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}, %{name}-common = %{version}-%{release}
 
 %description mysqlhotcopy
-Holland MySQL Hot Copy Backup Provider Plugin
+MySQL Hot Copy Backup Provider Plugin for Holland.
 
-%package commvault 
-Summary: Holland CommVault Addon
+%package mysqllvm 
+Summary: MySQL LVM Backup Provider Plugin for Holland
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}, %{name}-common = %{version}-%{release}
-
-%description commvault 
-This package provides the holland commvault command plugin, enabling CommVault
-environments to trigger a backup through holland.
-
-%package mysql-lvm 
-Summary: Holland LVM Backup Provider Plugin
-Group: Development/Libraries
-Provides: holland-lvm = 0.9.8
-Obsoletes: holland-lvm < 0.9.8
-Requires: %{name} = %{version}-%{release}, %{name}-common = %{version}-%{release}
+Obsoletes: %{name}-lvm < 0.9.8
 Requires: lvm2, mysql-server, MySQL-python, tar
 
-%description mysql-lvm
-Holland LVM Backup Provider Plugin
+%description mysqllvm
+MySQL LVM Backup Provider Plugin for Holland.
 
 %if %{with_mysqlcmds}
 %package mysqlcmds
-Summary: Holland MySQL support commands
+Summary: MySQL Support Commands for Holland
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}, %{name}-mysqldump = %{version}-%{release}, mysql
 
 %description mysqlcmds
-Holland MySQL support commands.
+MySQL Support Commands for Holland.
 %endif
 
 %prep
 %setup -q -n %{name}-%{src_version}
 find ./ -name setup.cfg -exec rm -f {} \;
 sed -i 's/^backupsets = default/backupsets = /g' config/holland.conf
-
-# FIX ME: remove this after its removed in trunk
-rm -rf plugins/holland.lib.common/holland/lib/compression.old/
 
 %build
 # build core
@@ -140,12 +121,14 @@ popd
              %{buildroot}%{_confdir} \
              %{buildroot}%{_confdir}/providers \
              %{buildroot}%{_confdir}/backupsets \
+             %{buildroot}%{_mandir}/man1 \
              %{buildroot}%{_sysconfdir}
 
 pushd holland-core
 %{__python} setup.py install \
     --prefix=%{_prefix} \
     --root=%{buildroot} \
+    --skip-build \
     --install-scripts=%{_sbindir}
 popd
 
@@ -174,6 +157,8 @@ done
 install -m 0640 config/holland.conf %{buildroot}%{_confdir}/holland.conf
 cp -a config/backupsets/examples %{buildroot}%{_confdir}/backupsets
 
+# man
+install -m 0644 docs/man/holland*.1 %{buildroot}%{_mandir}/man1
 
 # logrotate
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/logrotate.d
@@ -189,28 +174,23 @@ EOF
 %clean
 [ "%{buildroot}" != "/" ] && rm -rf %{buildroot}
 
-%pre
-%post
-%preun
-%postun
-
 %files
 %defattr(-, root, root)
 %doc docs config 
 %{python_sitelib}/holland
-%attr(0644,root,root) %{_sysconfdir}/logrotate.d/holland
-%attr(0750,root,root) %dir %{_backupdir}
-%attr(0750,root,root) %dir %{_logdir}
+%attr(0644,root,root) %config(noreplace) %{_sysconfdir}/logrotate.d/holland
+%attr(0755,root,root) %dir %{_backupdir}
+%attr(0755,root,root) %dir %{_logdir}
 %attr(655,root,root)%dir  %{_plugindir}
-%attr(750,root,root) %{_sbindir}/holland
-%attr(750,root,root) %dir %{_confdir}
-%attr(750,root,root) %dir %{_confdir}/backupsets
+%attr(754,root,root) %{_sbindir}/holland
+%attr(755,root,root) %dir %{_confdir}
+%attr(755,root,root) %dir %{_confdir}/backupsets
 %attr(640,root,root) %{_confdir}/backupsets/*
-%attr(750,root,root) %dir %{_confdir}/providers
+%attr(755,root,root) %dir %{_confdir}/providers
 %attr(640,root,root) %config(noreplace) %{_confdir}/holland.conf
 %{python_sitelib}/%{name}-%{src_version}-py%{pybasever}-nspkg.pth
 %{python_sitelib}/%{name}-%{src_version}-py%{pybasever}.egg-info
-
+%{_mandir}/man1/holland*.1.gz
 
 %files common
 %defattr(-, root, root)
@@ -235,18 +215,12 @@ EOF
 %files example
 %defattr(-, root, root)
 %{_plugindir}/holland.backup.example-*.egg
-%attr(640,root,root) %dir %{_confdir}/providers/example.conf
+%attr(640,root,root) %config(noreplace) %{_confdir}/providers/example.conf
 
-%files commvault 
+%files mysqllvm
 %defattr(-, root, root)
-%{python_sitelib}/holland_commvault-*.egg-info*
-%{python_sitelib}/holland_commvault
-%{_sbindir}/holland_cvmysqlsv
-
-%files mysql-lvm
-%defattr(-, root, root)
+%{_plugindir}/holland.backup.mysql_lvm*.egg
 %attr(640,root,root) %config(noreplace) %{_confdir}/providers/mysql-lvm.conf
-%{_plugindir}/holland.backup.mysql_lvm-*.egg
 
 %if %{with_mysqlcmds}
 %files example
@@ -255,6 +229,19 @@ EOF
 %endif
 
 %changelog
+* Tue Apr 13 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-1.rs
+- Removed -commvault subpackage
+- Removed mysql-lvm config file hack
+
+* Thu Apr 07 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.8-2.rs
+- Rename holland-lvm to holland-mysqllvm, Obsoletes: holland-lvm
+- Manually install mysql-lvm.conf provider config (fixed in 0.9.9)
+- Install man files to _mandir
+- Make logrotate.d/holland config(noreplace)
+
+* Fri Apr 02 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.8-1.rs
+- Latest stable source from upstream.
+
 * Wed Dec 09 2009 BJ Dierkes <wdierkes@rackspace.com> - 0.9.7dev-1.rs
 - Latest development trunk.
 - Adding /etc/logrotate.d/holland logrotate script.
