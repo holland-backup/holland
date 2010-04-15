@@ -147,6 +147,9 @@ def install_configs(env_root):
 
     if os.path.exists(join(env_root, 'etc', 'holland')):
         shutil.rmtree(join(env_root, 'etc', 'holland'))
+    # copytree doesn't create all dirs on python 2.4
+    if not os.path.exists(join(env_root, 'etc')):
+        os.makedirs(join(env_root, 'etc'))
     shutil.copytree(join(HOLLAND_ROOT, 'test_config'),
                     join(env_root, 'etc', 'holland'))
 
