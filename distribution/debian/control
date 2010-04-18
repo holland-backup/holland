@@ -67,9 +67,3 @@ Description: holland mysql command plugins
  This package provides some MySQL commands for Holland to assist with
  mysqldump backups.
 
-Package: holland-commvault
-Architecture: all
-Depends: holland (>= ${source:Version}), ${python:Depends}
-Description: holland commvault command plugin 
- this package provides the holland commvault command plugin, enabling commvault
- environments to trigger a backup through holland. 
