@@ -13,7 +13,7 @@ VERSION='0.1'
 config = {}
 config['srcdir'] = os.getcwd()
 config['topdir'] = mkdtemp(prefix="%s/" % os.environ['HOME'])
-config['spec'] = './distribution/holland.spec'
+config['spec'] = './contrib/holland.spec'
 
 def get_opts_args():
     fmt = IndentedHelpFormatter(
@@ -88,7 +88,7 @@ def get_holland_version():
     version = None
     dev_tag = None
     version = Popen(['python', 'setup.py', '--version'], stdout=PIPE, cwd=
-                    os.path.join(config['srcdir'], 'holland-core'))\
+                    os.path.join(config['srcdir']))\
                     .communicate()[0].strip('\n')
     if int(version.split('.')[2])%2 != 0:
         dev_tag = 'dev'
