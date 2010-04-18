@@ -73,7 +73,7 @@ def run_setup_develop(cwd, env):
 def install_holland(virtual_env):
     """Install holland-core"""
     env = dict(virtual_env)
-    holland_core = join(HOLLAND_ROOT, 'holland-core')
+    holland_core = join(HOLLAND_ROOT)
     ret = run_setup_develop(cwd=holland_core, env=env)
     if ret != 0:
         logging.error("Failed to install holland-core")
@@ -91,18 +91,6 @@ def install_plugins(virtual_env):
             logging.error("Failed to install plugin %s", plugin_dir)
         else:
             logging.info("Installed plugin %s", plugin_dir)
-
-def install_addons(virtual_env):
-    """Install (active) Holland addons"""
-    logging.info("Installing holland addons")
-    for plugin_dir in open(join(HOLLAND_ROOT, 'addons', 'ACTIVE')):
-        plugin_dir = plugin_dir.rstrip()
-        addon_path = join(HOLLAND_ROOT, 'addons', plugin_dir)
-        ret = run_setup_develop(cwd=addon_path, env=virtual_env)
-        if ret != 0:
-            logging.error("Failed to install addon %s", plugin_dir)
-        else:
-            logging.info("Installed holland addon %s", plugin_dir)
 
 if curses:
     COLOR_NAMES = "BLACK RED GREEN YELLOW BLUE MAGENTA CYAN WHITE"
@@ -177,7 +165,6 @@ def main(args=None):
                        unzip_setuptools=False, use_distribute=opts.distribute)
     virtualenv = make_env(home_dir)
     install_holland(virtualenv)
-    install_addons(virtualenv)
     install_plugins(virtualenv)
     install_configs(home_dir)
     result = start_shell(virtualenv)
