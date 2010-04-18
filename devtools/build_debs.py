@@ -47,9 +47,10 @@ holland (%(version)s-local-%(today)s) unstable; urgency=low
                         
 def check_prereq():
     control_file = join(config['debian'], 'control')
-    assert os.path.exists('/usr/bin/dpkg-checkbuilddeps') or \
-            os.path.exists('/usr/bin/debuild'), \
+    assert os.path.exists('/usr/bin/dpkg-checkbuilddeps'), \
         "dpkg-dev required to build the Holland debian packages"
+    assert os.path.exists('/usr/bin/debuild'), \
+        "devscripts required to build the Holland debian packages"
 
     args = ['dpkg-checkbuilddeps', control_file]
     logging.info("Checking prereqs. Running %s", subprocess.list2cmdline(args))
