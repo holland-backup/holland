@@ -9,10 +9,10 @@ from os.path import join, dirname, abspath
 
 config = {}
 config['srcdir'] = abspath(join(dirname(__file__), '..'))
-config['debian'] = join(config['srcdir'], 'distribution', 'debian')
+config['debian'] = join(config['srcdir'], 'contrib', 'debian')
 
 def holland_version():
-    holland_core_dir = join(config['srcdir'], 'holland-core')
+    holland_core_dir = join(config['srcdir'])
     args = ['python', 'setup.py', '--version']
     return subprocess.Popen(args, stdout=subprocess.PIPE, cwd=holland_core_dir).communicate()[0].strip()
 
@@ -63,7 +63,10 @@ def prep_tree():
     dst = join(config['srcdir'], 'debian')
     
     if os.path.exists(dst):
-        shutil.rmtree(dst)
+        if os.path.islink(dst):
+            os.unlink(dst)
+        else:
+            shutil.rmtree(dst)
  
     shutil.copytree(src, dst)
     logging.info("Copied %s to %s", src, dst)
