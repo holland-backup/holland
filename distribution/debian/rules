@@ -27,13 +27,17 @@ clean:
 	dh_testroot
 	rm -f build-stamp configure-stamp
 
-	@for ADDON in $(HOLLAND_CORE) $(shell ls -d $(CURDIR)/addons/*/); \
-	do cd $$ADDON ; \
+	cd $(CURDIR)/holland-core ; \
 		$(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) clean; \
 	done
 
-	@for PLUGIN in $(shell ls -d $(CURDIR)/plugins/*/); \
-	do cd $$PLUGIN ; \
+	@for ADDON in $(shell cat $(CURDIR)/addons/ACTIVE); \
+	do cd $(CURDIR)/addons/$$ADDON ; \
+		$(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) clean; \
+	done
+
+	@for PLUGIN in $(shell cat $(CURDIR)/plugins/ACTIVE); \
+	do cd $(CURDIR)/plugins/$$PLUGIN ; \
 	    $(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) clean; \
 	done
 	dh_clean 
@@ -44,8 +48,7 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	@for ADDON in $(HOLLAND_CORE) $(shell ls -d $(CURDIR)/addons/*/); \
-	do cd $$ADDON ; \
+	cd $(CURDIR)/holland-core ; \
 		$(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) install \
 			--no-compile \
 			--prefix=/usr \
@@ -55,8 +58,19 @@ install: build
 			$(py_setup_install_args); \
 	done
 
-	@for PLUGIN in $(shell ls -d $(CURDIR)/plugins/*/); \
-	do cd $$PLUGIN ; \
+	@for ADDON in $(shell cat $(CURDIR)/addons/ACTIVE); \
+	do cd $(CURDIR)/addons/$$ADDON ; \
+		$(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) install \
+			--no-compile \
+			--prefix=/usr \
+			--root=$(CURDIR)/debian/tmp \
+			--install-scripts=$(SBINDIR) \
+			--single-version-externally-managed \
+			$(py_setup_install_args); \
+	done
+
+	@for PLUGIN in $(shell cat $(CURDIR)/plugins/ACTIVE); \
+	do cd $(CURDIR)/plugins/$$PLUGIN ; \
 	    $(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) \
             bdist_egg -d $(CURDIR)/debian/tmp$(PLUGINDIR) ; \
 	done
@@ -74,11 +88,6 @@ binary-indep: install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs
-# lintian is sometimes complaining about no python dependency when we use 
-# setuptools to generate console_scripts.  This quiets the error in affected
-# modules.
-	install -m644 debian/holland-commvault.lintian-overrides \
-		debian/holland-commvault/usr/share/lintian/overrides/holland-commvault
 	dh_installdocs
 	dh_installexamples
 	dh_install
