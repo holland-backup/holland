@@ -9,7 +9,7 @@
 PYTHON=python
 PLUGINDIR=/usr/share/holland/plugins
 SBINDIR=/usr/sbin
-HOLLAND_CORE=$(CURDIR)/holland-core
+HOLLAND_CORE=$(CURDIR)
 
 configure: configure-stamp
 configure-stamp:
@@ -27,12 +27,7 @@ clean:
 	dh_testroot
 	rm -f build-stamp configure-stamp
 
-	cd $(CURDIR)/holland-core ; \
-		$(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) clean; \
-	done
-
-	@for ADDON in $(shell cat $(CURDIR)/addons/ACTIVE); \
-	do cd $(CURDIR)/addons/$$ADDON ; \
+	cd $(CURDIR) ; \
 		$(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) clean; \
 	done
 
@@ -48,18 +43,7 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	cd $(CURDIR)/holland-core ; \
-		$(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) install \
-			--no-compile \
-			--prefix=/usr \
-			--root=$(CURDIR)/debian/tmp \
-			--install-scripts=$(SBINDIR) \
-			--single-version-externally-managed \
-			$(py_setup_install_args); \
-	done
-
-	@for ADDON in $(shell cat $(CURDIR)/addons/ACTIVE); \
-	do cd $(CURDIR)/addons/$$ADDON ; \
+	cd $(CURDIR) ; \
 		$(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) install \
 			--no-compile \
 			--prefix=/usr \
