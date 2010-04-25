@@ -7,8 +7,8 @@ MySQL LVM Provider Configuration [mysql-lvm]
 
     The size of the snapshot itself. By default it is 20% of the size of  the 
     MySQL LVM mount or the remaining free-space in the Volume Group (if there 
-    is less than 20% available). If snapshot-size is defined, the number
-    represents the size of the snapshot in megabytes.
+    is less than 20% available) up to 15GB. If snapshot-size is defined, the 
+    number represents the size of the snapshot in megabytes.
 
 **snapshot-name** = <name>
 
