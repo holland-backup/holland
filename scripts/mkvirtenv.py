@@ -80,11 +80,15 @@ def install_holland(virtual_env):
     else:
         logging.info("Installed holland-core.")
 
-def install_plugins(virtual_env):
+def install_plugins(virtual_env, egg_env):
     """Install (active) holland plugins"""
     logging.info("Installing holland plugins")
     for plugin_dir in open(join(HOLLAND_ROOT, 'plugins', 'ACTIVE')):
         plugin_dir = plugin_dir.rstrip()
+        if plugin_dir in egg_env:
+            logging.info("%r found in test environment. Not installing.", 
+                         plugin_dir)
+            continue
         plugin_path = join(HOLLAND_ROOT, 'plugins', plugin_dir)
         ret = run_setup_develop(cwd=plugin_path, env=virtual_env)
         if ret != 0:
@@ -133,14 +137,19 @@ def install_configs(env_root):
     holland_bk_etc = join(env_root, 'etc', 'holland', 'backupsets')
     holland_pv_etc = join(env_root, 'etc', 'holland', 'providers')
 
-    if os.path.exists(join(env_root, 'etc', 'holland')):
-        shutil.rmtree(join(env_root, 'etc', 'holland'))
+    if os.path.exists(holland_etc):
+        logging.info("An existing config already exists in %s. Not installing test configs.",
+                        holland_etc)
+        return
     # copytree doesn't create all dirs on python 2.4
     if not os.path.exists(join(env_root, 'etc')):
         os.makedirs(join(env_root, 'etc'))
     shutil.copytree(join(HOLLAND_ROOT, 'test_config'),
                     join(env_root, 'etc', 'holland'))
 
+def find_egg_env(path):
+    from pkg_resources import Environment
+    return Environment([path])
 
 def main(args=None):
     """Main script entry point"""
@@ -164,8 +173,13 @@ def main(args=None):
     create_environment(home_dir, site_packages=True, clear=opts.clear,
                        unzip_setuptools=False, use_distribute=opts.distribute)
     virtualenv = make_env(home_dir)
-    install_holland(virtualenv)
-    install_plugins(virtualenv)
+    egg_env = find_egg_env(os.path.join(home_dir, 'lib', 'python2.4', 'site-packages'))
+    if 'holland' in egg_env:
+        logging.info("'holland' found in environment. Not reinstalling.")
+    else:
+        install_holland(virtualenv)
+    install_plugins(virtualenv, egg_env)
+
     install_configs(home_dir)
     result = start_shell(virtualenv)
     logging.info("Exiting virtual environment[%d]", result)
