@@ -5,14 +5,13 @@ import shutil
 import re
 import tarfile
 from subprocess import Popen, PIPE 
-from tempfile import mkdtemp
 from optparse import OptionParser, IndentedHelpFormatter
 
-VERSION='0.1'
+VERSION='0.2'
 
 config = {}
 config['srcdir'] = os.getcwd()
-config['topdir'] = mkdtemp(prefix="%s/" % os.environ['HOME'])
+config['topdir'] = os.path.join(os.environ['HOME'], 'holland-buildroot')
 config['spec'] = './contrib/holland.spec'
 
 def get_opts_args():
@@ -22,7 +21,7 @@ def get_opts_args():
     parser = OptionParser(formatter=fmt, version=VERSION)
     parser.usage = """ devtools/build_rpms.py --(OPTIONS)"""
 
-    parser.add_option('--tmpdir', action='store', dest='tmpdir',
+    parser.add_option('--topdir', action='store', dest='topdir',
                       help="tmp directory to build in.")
     parser.add_option('--just-source', action='store', dest='just_source',
                       help="just build the source rpm")
@@ -33,13 +32,11 @@ def get_opts_args():
 
 def prep_buildroot():
     version, dev_tag = get_holland_version()
-    if os.path.exists(config['topdir']):
-        shutil.rmtree(config['topdir'])
-    dest_srcdir = os.path.join(config['topdir'], 'SOURCES', 'holland-%s' % version)    
     dirs = ['RPMS', 'SRPMS', 'BUILD', 'SPECS', 'SOURCES']
     for d in dirs:
-        os.makedirs(os.path.join(config['topdir'], d))
-    
+        path = os.path.join(config['topdir'], d)
+        if not os.path.exists(path):
+            os.makedirs(path)
     f = open(config['spec'], 'r')
     data = f.read()
     f.close()
@@ -50,11 +47,10 @@ def prep_buildroot():
     f.write(data)
     f.close()
  
-    shutil.copytree(config['srcdir'], dest_srcdir)
-    os.chdir(os.path.join(config['topdir'], 'SOURCES'))
-    t = tarfile.open('%s.tar.gz' % dest_srcdir, 'w:gz')
-    t.add(os.path.basename(dest_srcdir))
-    t.close()
+    cmd = "git archive --prefix=holland-%s/ HEAD > %s/SOURCES/holland-%s.tar.gz" % \
+                (version, config['topdir'], version)
+    print cmd
+    os.system(cmd)
 
 
 def build_srpm():
@@ -64,7 +60,6 @@ def build_srpm():
     else:
         dev_option = ''
 
-    os.chdir(config['topdir'])
     cmd = "rpmbuild -bs %s/SPECS/holland.spec --define='_topdir %s' %s" % \
            (config['topdir'], config['topdir'], dev_option)
     retcode = os.system(cmd)
@@ -77,9 +72,9 @@ def build_rpms():
     else:
         dev_option = ''
 
-    os.chdir(config['topdir'])
     cmd = "rpmbuild -bb %s/SPECS/holland.spec --define='_topdir %s' %s" % \
            (config['topdir'], config['topdir'], dev_option)
+    print cmd
     retcode = os.system(cmd)
     return retcode
 
@@ -108,10 +103,10 @@ def main():
     (cli_opts, cli_args) = get_opts_args()
     (version, dev_tag) = get_holland_version()
     
-    if cli_opts.tmpdir:
-        if not os.path.exists(cli_opts.tmpdir):
-            os.makedirs(cli_opts.tmpdir)
-        config['topdir'] = mkdtemp(prefix="%s/" % cli_opts.tmpdir)
+    if cli_opts.topdir:
+        if not os.path.exists(os.path.abspath(cli_opts.topdir)):
+            os.makedirs(os.path.abspath(cli_opts.topdir))
+        config['topdir'] = os.path.abspath(cli_opts.topdir) 
         
     prep_buildroot()
     retcode = build_srpm()
