@@ -33,37 +33,40 @@ Architecture: all
 Depends: holland (>= ${source:Version}), python-mysqldb (>= 1.2)
 Recommends: mysql-client (>= 4.1)
 Description: Holland Common Library Plugins
- This package provides the common holland plugins that are generally used by
- other plugins.
+ This package provides support for common holland functionality used by
+ various holland plugins.
 
 Package: holland-mysqldump
 Architecture: all
 Depends: holland (>= ${source:Version}), holland-common(>= ${source:Version}), mysql-client (>= 4.1)
-Description: Holland MySQL Dump Backup Provider Plugin
- This package provides the holland mysqldump plugin. 
+Description: Holland mysqldump backup plugin
+ This package provides a plugin to perform backups of a MySQL database using 
+ the mysqldump command.
  
 Package: holland-example
 Architecture: all
 Depends: holland (>= ${source:Version})
-Description: Holland Example Backup Provider Plugin 
- This package provides the holland example plugin. 
+Description: Holland Example Backup Plugin 
+ This package provides an example of a holland plugin. 
 
 Package: holland-maatkit
 Architecture: all
 Depends: holland (>= ${source:Version}), maatkit, holland-common (>= ${source:Version})
-Description: Holland Maatkit Library Plugins
- This package provides the holland maatkit plugin. 
+Description: Holland maatkit backup plugin
+ This package provides a holland plugin to perform backups of a MySQL database
+ using the Maatkit's mk-parallel-backup script. [experimental]
 
 Package: holland-mysqlhotcopy
 Architecture: all
 Depends: holland (>= ${source:Version}), holland-common (>= ${source:Version})
-Description: Holland MySQL Hot Copy Backup Provider Plugin 
- This package provides the Holland mysqlhotcopy plugin. 
+Description: Holland "mysqlhotcopy" backup plugin
+ This package provides a holland plugin to perform backups of raw datafiles in
+ a MySQL instance.  This is intended to backup MyISAM or other non-transactional
+ data that can be safely copied with an active table lock. [experimental]
 
-Package: holland-mysqlcmds
+Package: holland-mysql-lvm
 Architecture: all
-Depends: holland (>= ${source:Version}), holland-common (>= ${source:Version}), mysql-client (>= 4.1)
-Description: holland mysql command plugins
- This package provides some MySQL commands for Holland to assist with
- mysqldump backups.
-
+Depends: holland(>= ${source:Version}), lvm2
+Description: Holland MySQL/LVM snapshot backup plugin
+ This package provides a plugin to perform LVM snapshots for a MySQL instance
+ with the holland backup framework.
