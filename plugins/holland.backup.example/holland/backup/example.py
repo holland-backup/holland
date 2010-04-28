@@ -28,7 +28,7 @@ class ExamplePlugin(object):
         self.target_directory = target_directory
         self.dry_run = dry_run
         LOG.info("Validating config")
-        self.config.validate(CONFIGSPEC)
+        self.config.validate_config(CONFIGSPEC)
 
     def estimate_backup_size(self):
         """Estimate the size (in bytes) of the backup this plugin would
@@ -43,9 +43,9 @@ class ExamplePlugin(object):
         Do what is necessary to perform and validate a successful backup.
         """
         if self.dry_run:
-            LOG.info("[Dry run] Backup run")
+            LOG.info("[Dry run] Example Plugin - test backup run")
         else:
-            LOG.info("Backup run")
+            LOG.info("Example plugin - real backup run")
 
     def info(self):
         """Provide extra information about the backup this plugin produced
