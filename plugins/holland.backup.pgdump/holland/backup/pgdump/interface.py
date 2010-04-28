@@ -13,6 +13,12 @@ LOG = logging.getLogger(__name__)
 # This is a specification of what our configuration must include
 # values are validate.py functions.  See:
 # http://www.voidspace.org.uk/python/validate.html
+
+# NOTE: this configuration isn't actually obeyed by the implementation
+#       These are just various options that *might* be useful for pg_dump
+#       to support (namely database/schema/table inclusion/exclusion).
+# Anyone who picks up this plugin will likely want to trim or add to this
+# as it makes sense
 CONFIGSPEC = """
 [pgdump]
 data-only               = boolean(default=no)
