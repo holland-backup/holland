@@ -19,6 +19,6 @@ setup(name='holland.backup.pgdump',
       # holland looks for plugins in holland.backup
       entry_points="""
       [holland.backup]
-      pgdump = holland.backup.pgdump:Pgdump
+      pgdump = holland.backup.pgdump:PgDump
       """
 )

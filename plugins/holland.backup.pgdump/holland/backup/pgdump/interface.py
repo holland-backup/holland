@@ -50,6 +50,10 @@ lock-wait-timeout       = string(default=None)
 no-tablespaces          = boolean(default=False)
 verbose                 = boolean(default=None)
 
+[compression]
+method = option('gzip', 'none', default='gzip')
+level = integer(min=0, default=1)
+
 [pgauth]
 username = string(default=None)
 role = string(default=None)
