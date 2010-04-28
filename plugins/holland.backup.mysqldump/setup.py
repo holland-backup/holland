@@ -12,7 +12,7 @@ setup(name='holland.backup.mysqldump',
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='',
       author='Rackspace',
-      author_email='support@rackspace.com',
+      author_email='holland-devel@googlegroups.com',
       url='http://hollandbackup.org',
       license='GNU GPLv2',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests', 'tests.*']),
