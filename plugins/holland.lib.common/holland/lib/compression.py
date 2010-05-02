@@ -8,6 +8,7 @@ LOGGER = logging.getLogger(__name__)
 
 COMPRESSION_METHODS = {
     'gzip'  : ('gzip', '.gz'),
+    'pigz'  : ('pigz', '.gz'),
     'bzip2' : ('bzip2', '.bz2'),
     'lzop'  : ('lzop', '.lzo'),
     'lzma'  : ('xz', '.xz'),

@@ -32,7 +32,7 @@ extra-flush-tables = boolean(default=yes)
 
 
 [compression]
-method = option('none', 'gzip', 'bzip2', 'lzop', default='gzip')
+method = option('none', 'gzip', 'pigz', 'bzip2', 'lzop', default='gzip')
 level = integer(min=0, max=9, default=1)
 
 [mysql:client]

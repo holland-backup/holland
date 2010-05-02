@@ -64,7 +64,7 @@ bin-log-position    = boolean(default=false)
 # Only applicable to certain archive types
 # (e.g. zip only supports 'zlib' internal compression)
 [compression]
-method              = option('none','gzip','bzip2','lzma','lzop',default='gzip')
+method              = option('none','gzip','pigz','bzip2','lzma','lzop',default='gzip')
 inline              = boolean(default=false)
 level               = integer(default=1,min=0,max=9)
 bin-path            = string(default=None)
