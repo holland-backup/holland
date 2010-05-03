@@ -1,8 +1,0 @@
-Holland Test Suite v0.005.011.usesomethingelse.Beta145
-
-Usage:
-
-* Install Holland :)
-* Install Maatkit (maatkit.org)
-* Load the Holland test databases (run populate.sh in the test_dbs directory)
-* Run test_backups.sh (Note that it will copy test backup-sets to /etc/holland/backupsets)
