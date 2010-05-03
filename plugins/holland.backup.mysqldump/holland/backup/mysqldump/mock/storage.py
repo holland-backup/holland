@@ -44,36 +44,36 @@ opened for writing.  Add a 'b' to the mode for binary files.
 Add a '+' to the mode to allow simultaneous reading and writing.
 The preferred way to open a file is with the builtin open() function."""
 
-    @property
     def mode(self):
         "file mode, one of r(+)(b), w(+)(b) or a(+)(b)"
         return self._mode
-        
-    @property
+    mode = property(mode)
+
     def name(self):
         "file name"
         return self._name
-    
-    @property
+    name = property(name)
+
     def closed(self):
         "True if the file is closed"
         return self._closed
-    
-    @property
+    closed = property(closed)
+
     def encoding(self):
         "file encoding"
         return None
-    
-    @property
+    encoding = property(encoding)
+
     def errors(self):
         "Unicode error handler"
         return None
-    
-    @property
+    errors = property(errors)
+
     def newlines(self):
         "end-of-line convention used in this file"
         return None
-    
+    newlines = property(newlines)
+
     _closed = False
     _mode = 'r'
     
@@ -441,18 +441,18 @@ _store = {}
 class backend(object):
     "Example backend."
     
-    @staticmethod
     def CheckForFile(filename):
         return filename in _store
-    
-    @staticmethod
+    CheckForFile = staticmethod(CheckForFile)
+
     def DeleteFile(filename):
         del _store[filename]
-    
-    @staticmethod
+    DeleteFile = staticmethod(DeleteFile)
+
     def LoadFile(filename):
         return _store[filename]
-    
-    @staticmethod
+    LoadFile = staticmethod(LoadFile)
+
     def SaveFile(filename, data):
         _store[filename] = data
+    SaveFile = staticmethod(SaveFile)

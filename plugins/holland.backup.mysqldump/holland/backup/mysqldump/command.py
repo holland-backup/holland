@@ -47,12 +47,12 @@ class MyOptionChecker(object):
         try:
             option, arg = self.OPTION_ARG_CRE.search(option).groups()
         except AttributeError:
-            raise MyOptionError("Invalid option %r" % option)
+            raise MyOptionError("Unsupported option %r" % option)
 
         option = option.replace('_', '-')
 
         if option not in self._options:
-            raise MyOptionError("Invalid option %r" % option)
+            raise MyOptionError("Unsupported option %r" % option)
         my_option = self._options[option]
         my_option.check(self.version, arg)
 
@@ -127,9 +127,15 @@ MYSQLDUMP_OPTIONS = [
 
 def mysqldump_version(command):
     """Return the version of the given mysqldump command"""
-    LOG.debug("Executing: %s", subprocess.list2cmdline([command, '--version']))
+    args = [
+        command,
+        '--no-defaults',
+        '--version',
+    ]
+    LOG.debug("Executing: %s", subprocess.list2cmdline(args))
     try:
-        output = subprocess.Popen([command, '--version'], stdout=subprocess.PIPE).communicate()[0]
+        output = subprocess.Popen(args,
+                                  stdout=subprocess.PIPE).communicate()[0]
     except OSError, exc:
         if exc.errno == ENOENT:
             raise MySQLDumpError("'%s' does not exist" % command)
@@ -141,17 +147,20 @@ def mysqldump_version(command):
         return tuple([int(digit) for digit in
                         re.search(r'(\d+)[.](\d+)[.](\d+)', output).groups()])
     except AttributeError, exc:
-        raise MySQLDumpError("Failed to determine mysqldump version for %s", command)
+        raise MySQLDumpError("Failed to determine mysqldump version for %s" % \
+                             command)
 
 class MySQLDump(object):
     """mysqldump command runner"""
     def __init__(self,
                  defaults_file,
-                 cmd_path='mysqldump'):
+                 cmd_path='mysqldump',
+                 extra_defaults=False):
         if not os.path.exists(cmd_path):
             raise MySQLDumpError("'%s' does not exist" % cmd_path)
         self.cmd_path = cmd_path
         self.defaults_file = defaults_file
+        self.extra_defaults = extra_defaults
         self.version = mysqldump_version(cmd_path)
         self.version_str = u'.'.join([str(digit) for digit in self.version])
         self.mysqldump_optcheck = MyOptionChecker(self.version)
@@ -164,10 +173,9 @@ class MySQLDump(object):
         when mysqldump is actually run via the instances .run() method
         """
         if option in self.options:
-            LOG.warn("mysqldump option '%s' already requested. skipping.", option)
-        else:
-            self.mysqldump_optcheck.check_option(option)
-            self.options.append(option)
+            LOG.warn("mysqldump option '%s' already requested.", option)
+        self.options.append(option)
+        self.mysqldump_optcheck.check_option(option)
 
     def run(self, databases, stream, additional_options=None):
         """Run mysqldump with the options configured on this instance"""
@@ -180,7 +188,10 @@ class MySQLDump(object):
         args = [ self.cmd_path, ]
 
         if self.defaults_file:
-            args.append('--defaults-file=%s' % self.defaults_file)
+            if self.extra_defaults:
+                args.append('--defaults-extra-file=%s' % self.defaults_file)
+            else:
+                args.append('--defaults-file=%s' % self.defaults_file)
 
         args.extend([str(opt) for opt in self.options])
 
@@ -196,14 +207,18 @@ class MySQLDump(object):
 
         LOG.info("Executing: %s", subprocess.list2cmdline(args))
 	errlog = TemporaryFile()
-        pid = subprocess.Popen(args, stdout=stream.fileno(), stderr=errlog.fileno(), close_fds=True)
+        pid = subprocess.Popen(args, 
+                               stdout=stream.fileno(), 
+                               stderr=errlog.fileno(), 
+                               close_fds=True)
         status = pid.wait()
         try:
             errlog.flush()
             errlog.seek(0)
             for line in errlog:
-                LOG.error("%s [%d]: %s", self.cmd_path, pid.pid, line.rstrip())
+                LOG.error("%s[%d]: %s", self.cmd_path, pid.pid, line.rstrip())
         finally:
             errlog.close()
 	if status != 0:
-            raise MySQLDumpError("mysqldump exited with non-zero status %d" % pid.returncode)
+            raise MySQLDumpError("mysqldump exited with non-zero status %d" % \
+                                 pid.returncode)

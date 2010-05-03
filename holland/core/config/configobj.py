@@ -2443,7 +2443,7 @@ def get_extra_values(conf, _prepend=()):
     """
     out = []
     
-    out.extend((_prepend, name) for name in conf.extra_values)
+    out.extend([(_prepend, name) for name in conf.extra_values])
     for name in conf.sections:
         if name not in conf.extra_values:
             out.extend(get_extra_values(conf[name], _prepend + (name,)))

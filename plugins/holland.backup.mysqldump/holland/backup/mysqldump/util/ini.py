@@ -36,6 +36,10 @@ Example:
 # An ini parser that supports ordered sections/options
 # Also supports updates, while preserving structure
 # Backward-compatiable with ConfigParser
+try:
+    set
+except NameError:
+    from sets import Set as set
 
 import re
 from ConfigParser import DEFAULTSECT, ParsingError, MissingSectionHeaderError

@@ -10,7 +10,8 @@ from holland.backup.mysqldump.base import start
 from holland.backup.mysqldump.util import INIConfig, update_config
 from holland.backup.mysqldump.util.ini import OptionLine, CommentLine
 from holland.backup.mysqldump.mysql.option import load_options, write_options
-from holland.backup.mysqldump.command import MySQLDump, MyOptionError
+from holland.backup.mysqldump.command import MySQLDump, MySQLDumpError, \
+                                             MyOptionError
 from holland.backup.mysqldump.mock import MockEnvironment
 
 LOG = logging.getLogger(__name__)
@@ -18,6 +19,7 @@ LOG = logging.getLogger(__name__)
 # We validate our config against the following spec
 CONFIGSPEC = """
 [mysqldump]
+extra-defaults      = boolean(default=no)
 mysql-binpath       = force_list(default=list())
 
 lock-method         = option('flush-lock', 'lock-tables', 'single-transaction', 'auto-detect', 'none', default='auto-detect')
@@ -131,7 +133,10 @@ class MySQLDumpPlugin(object):
         LOG.info("Using mysqldump executable: %s", mysqldump_bin)
 
         # setup the mysqldump environment
-        mysqldump = MySQLDump(defaults_file, mysqldump_bin)
+        extra_defaults = config['extra-defaults']
+        mysqldump = MySQLDump(defaults_file, 
+                              mysqldump_bin, 
+                              extra_defaults=extra_defaults)
         LOG.info("mysqldump version %s", '.'.join([str(digit)
                 for digit in mysqldump.version]))
         options = collect_mysqldump_options(config, mysqldump, self.client)
@@ -140,11 +145,14 @@ class MySQLDumpPlugin(object):
         os.mkdir(os.path.join(self.target_directory, 'backup_data'))
 
         try:
-            start(mysqldump=mysqldump,
-                  schema=self.schema,
-                  lock_method=config['lock-method'],
-                  file_per_database=config['file-per-database'],
-                  open_stream=self._open_stream)
+            try:
+                start(mysqldump=mysqldump,
+                      schema=self.schema,
+                      lock_method=config['lock-method'],
+                      file_per_database=config['file-per-database'],
+                      open_stream=self._open_stream)
+            except MySQLDumpError, exc:
+                raise BackupError(str(exc))
         finally:
             if self.config['mysqldump']['stop-slave']:
                 _start_slave(self.client, self.config['mysql:replication'])
@@ -246,12 +254,7 @@ def validate_mysqldump_options(mysqldump, options):
             mysqldump.add_option(option)
             LOG.info("Using mysqldump option %s", option)
         except MyOptionError, exc:
-            LOG.error("Invalid mysqldump option: '%s'", option)
-            error = True
-
-    if error:
-        raise BackupError("One or more invalid mysqldump options specified. "
-                          "Aborting.")
+            LOG.warning(str(exc))
 
 
 def _stop_slave(client, config=None):
