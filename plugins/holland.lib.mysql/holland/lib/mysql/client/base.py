@@ -119,8 +119,8 @@ class MySQLClient(object):
         for row in cursor:
             row = dict(zip(names, row))
             row['database'] = database
-            row['data_size'] = row.pop('data_length')
-            row['index_size'] = row.pop('index_length')
+            row['data_size'] = (row.pop('data_length') or 0)
+            row['index_size'] = (row.pop('index_length') or 0)
             if row['engine'] is None and row['comment'] == 'VIEW':
                 row['engine'] = 'VIEW'
             row['is_transactional'] = row.get('engine', '').lower() in ['innodb']
@@ -151,8 +151,8 @@ class MySQLClient(object):
         """
         sql = ("SELECT TABLE_SCHEMA AS `database`, "
                "          TABLE_NAME AS `name`, "
-               "          DATA_LENGTH AS `data_size`, "
-               "          INDEX_LENGTH AS `index_size`, "
+               "          COALESCE(DATA_LENGTH, 0) AS `data_size`, "
+               "          COALESCE(INDEX_LENGTH, 0) AS `index_size`, "
                "          COALESCE(ENGINE, 'view') AS `engine`, "
                "          TRANSACTIONS = 'YES' AS `is_transactional` "
                "FROM INFORMATION_SCHEMA.TABLES "
