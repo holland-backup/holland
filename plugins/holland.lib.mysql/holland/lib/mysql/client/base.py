@@ -121,7 +121,9 @@ class MySQLClient(object):
             row['database'] = database
             row['data_size'] = row.pop('data_length')
             row['index_size'] = row.pop('index_length')
-            row['is_transactional'] = row['engine'].lower() in ['innodb']
+            if row['engine'] is None and row['comment'] == 'VIEW':
+                row['engine'] = 'VIEW'
+            row['is_transactional'] = row.get('engine', '').lower() in ['innodb']
             for key in row.keys():
                 valid_keys = [
                     'database',
@@ -151,7 +153,7 @@ class MySQLClient(object):
                "          TABLE_NAME AS `name`, "
                "          DATA_LENGTH AS `data_size`, "
                "          INDEX_LENGTH AS `index_size`, "
-               "          ENGINE AS `engine`, "
+               "          COALESCE(ENGINE, 'view') AS `engine`, "
                "          TRANSACTIONS = 'YES' AS `is_transactional` "
                "FROM INFORMATION_SCHEMA.TABLES "
                "JOIN INFORMATION_SCHEMA.ENGINES USING (ENGINE) "
