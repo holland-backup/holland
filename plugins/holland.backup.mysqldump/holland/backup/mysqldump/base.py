@@ -6,6 +6,8 @@ from holland.lib.safefilename import encode
 from holland.backup.mysqldump.command import ALL_DATABASES
 from holland.backup.mysqldump.mock.env import MockEnvironment
 
+LOG = logging.getLogger(__name__)
+
 def dry_run(*args, **kwargs):
     """Run a backup in no-op mode"""
     env = MockEnvironment()
@@ -14,6 +16,8 @@ def dry_run(*args, **kwargs):
         start(*args, **kwargs)
     finally:
         env.restore_environment()
+
+def run(mysqldump, config): pass
 
 def start(mysqldump,
           schema=None,
@@ -39,14 +43,15 @@ def start(mysqldump,
         flush_logs = '--flush-logs' in mysqldump.options
         if flush_logs:
             mysqldump.options.remove('--flush-logs')
+        last = len(target_databases)
         for count, db in enumerate(target_databases):
             more_options = [mysqldump_lock_option(lock_method, [db])]
             # add --flush-logs only to the last mysqldump run
-            if flush_logs and count + 1 == len(target_databases):
+            if flush_logs and count == last:
                 more_options.append('--flush-logs')
             db_name = encode(db.name)[0]
             if db_name != db.name:
-                logging.warning("Encoding file-name for database %s to %s", db.name, db_name)
+                LOG.warning("Encoding file-name for database %s to %s", db.name, db_name)
             stream = open_stream('%s.sql' % db_name, 'w')
             mysqldump.run([db.name], stream, more_options)
     else:
