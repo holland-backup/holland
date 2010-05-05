@@ -243,7 +243,7 @@ def validate_mysqldump_options(mysqldump, options):
             mysqldump.add_option(option)
             LOG.info("Using mysqldump option %s", option)
         except MyOptionError, exc:
-            LoG.error("Invalid mysqldump option: '%s'", option)
+            LOG.error("Invalid mysqldump option: '%s'", option)
             error = True
 
     if error:
