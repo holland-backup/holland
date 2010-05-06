@@ -4,7 +4,8 @@ import os
 import logging
 from holland.core.exceptions import BackupError
 from holland.lib.compression import open_stream
-import holland.lib.mysql
+from holland.lib.mysql import MySQLSchema, include_glob, exclude_glob, \
+			      DatabaseIterator, TableIterator, connect
 from holland.backup.mysqldump.base import start
 from holland.backup.mysqldump.util import INIConfig, update_config
 from holland.backup.mysqldump.util.ini import OptionLine, CommentLine
@@ -69,10 +70,8 @@ class MySQLDumpPlugin(object):
         # Setup a discovery shell to find schema items
         # This will iterate over items during the estimate
         # or backup phase, which will call schema.refresh()
-        self.schema = holland.lib.mysql.MySQLSchema()
+        self.schema = MySQLSchema()
         config = self.config['mysqldump']
-        include_glob = holland.lib.mysql.include_glob
-        exclude_glob = holland.lib.mysql.exclude_glob
         self.schema.add_database_filter(include_glob(*config['databases']))
         self.schema.add_database_filter(
                 exclude_glob(*config['exclude-databases'])
@@ -83,14 +82,14 @@ class MySQLDumpPlugin(object):
         self.schema.add_engine_filter(exclude_glob(*config['exclude-engines']))
 
         self.mysql_config = make_mysql_config(self.config['mysql:client'])
-        self.client = holland.lib.mysql.connect(self.mysql_config['client'])
+        self.client = connect(self.mysql_config['client'])
 
     def estimate_backup_size(self):
         """Estimate the size of the backup this plugin will generate"""
         try:
             self.client.connect()
-            db_iter = holland.lib.mysql.DatabaseIterator(self.client)
-            tbl_iter = holland.lib.mysql.TableIterator(self.client)
+            db_iter = DatabaseIterator(self.client)
+            tbl_iter = TableIterator(self.client)
             self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
             return sum([db.size for db in self.schema.databases])
         finally:
