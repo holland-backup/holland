@@ -194,6 +194,15 @@ class MySQLDump(object):
             args.extend(databases)
 
         LOG.info("Executing: %s", subprocess.list2cmdline(args))
-        pid = subprocess.Popen(args, stdout=stream.fileno(), stderr=TemporaryFile(), close_fds=True)
-        if pid.wait() != 0:
+	errlog = TemporaryFile()
+        pid = subprocess.Popen(args, stdout=stream.fileno(), stderr=errlog.fileno(), close_fds=True)
+        status = pid.wait()
+        try:
+            errlog.flush()
+            errlog.seek(0)
+            for line in errlog:
+                LOG.error("%s [%d]: %s", self.cmd_path, pid.pid, line.rstrip())
+        finally:
+            errlog.close()
+	if status != 0:
             raise MySQLDumpError("mysqldump exited with non-zero status %d" % pid.returncode)
