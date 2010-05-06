@@ -90,7 +90,11 @@ class MySQLDumpPlugin(object):
             self.client.connect()
             db_iter = DatabaseIterator(self.client)
             tbl_iter = TableIterator(self.client)
-            self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
+            try:
+                self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
+            except MySQLError, exc:
+                LOG.error("Failed to read MySQL metadata. [%d] %s", *exc.args)
+                raise BackupError("Failed to estimate backup size from MySQL metadata")
             return sum([db.size for db in self.schema.databases])
         finally:
             self.client.disconnect()
