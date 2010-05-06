@@ -5,7 +5,7 @@ import logging
 from holland.core.exceptions import BackupError
 from holland.lib.compression import open_stream
 from holland.lib.mysql import MySQLSchema, include_glob, exclude_glob, \
-			      DatabaseIterator, TableIterator, connect
+			      DatabaseIterator, TableIterator, connect, MySQLError
 from holland.backup.mysqldump.base import start
 from holland.backup.mysqldump.util import INIConfig, update_config
 from holland.backup.mysqldump.util.ini import OptionLine, CommentLine
@@ -90,7 +90,11 @@ class MySQLDumpPlugin(object):
             self.client.connect()
             db_iter = DatabaseIterator(self.client)
             tbl_iter = TableIterator(self.client)
-            self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
+            try:
+                self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
+            except MySQLError, exc:
+                LOG.error("Failed to read MySQL metadata. [%d] %s", *exc.args)
+                raise BackupError("Failed to estimate backup size from MySQL metadata")
             return sum([db.size for db in self.schema.databases])
         finally:
             self.client.disconnect()
@@ -113,7 +117,8 @@ class MySQLDumpPlugin(object):
     def _backup(self):
         """Real backup method.  May raise BackupError exceptions"""
         if self.config['mysqldump']['stop-slave']:
-            _stop_slave(self.client)
+            self.config.setdefault('mysql:replication', {})
+            _stop_slave(self.client, self.config['mysql:replication'])
 
         config = self.config['mysqldump']
 
@@ -143,7 +148,7 @@ class MySQLDumpPlugin(object):
                   open_stream=self._open_stream)
         finally:
             if self.config['mysqldump']['stop-slave']:
-                _start_slave(self.client)
+                _start_slave(self.client, self.config['mysql:replication'])
 
     def _open_stream(self, path, mode):
         """Open a stream through the holland compression api, relative to
@@ -257,34 +262,45 @@ def _stop_slave(client, config=None):
         LOG.info("Stopped slave")
     except MySQLError, exc:
         raise BackupError("Failed to stop slave[%d]: %s" % exc.args)
-    if config:
+    if config is not None:
         try:
             slave_info = client.show_slave_status()
-            master_info = client.show_master_status()
+            # update config with replication info
+            config['slave_master_log_pos'] = slave_info['exec_master_log_pos']
+            config['slave_master_log_file'] = slave_info['relay_master_log_file']
         except MySQLError, exc:
             raise BackupError("Failed to acquire slave status[%d]: %s" % \
                                 exc.args)
-        # update config with replication info
-        config['slave_master_log_position'] = slave_info['exec_master_log_pos']
-        config['slave_master_log_file'] = slave_info['exec_master_log_file']
-        if master_info:
-            config['master_log_file'] = master_info['master_log_file']
-            config['master_log_pos'] = master_info['master_log_pos']
+        try:
+            master_info = client.show_master_status()
+            if master_info:
+                config['master_log_file'] = master_info['file']
+                config['master_log_pos'] = master_info['position']
+        except MySQLError, exc:
+            raise BackupError("Failed to acquire master status [%d] %s" % exc.args)
+
     LOG.info("MySQL Replication has been stopped.")
 
 def _start_slave(client, config=None):
     """Start MySQL replication"""
     try:
         slave_info = client.show_slave_status()
-        master_info = client.show_master_status()
+        if slave_info and slave_info['exec_master_log_pos'] != config['slave_master_log_pos']:
+            LOG.warning("ALERT! Slave position changed during backup")
     except MySQLError, exc:
         LOG.warning("Failed to sanity check replication[%d]: %s",
                          *exc.args)
 
-    if slave_info['exec_master_log_pos'] != config['slave_master_log_pos']:
-        logger.warning("ALERT! Slave position changed during backup")
-    if master_info['position'] != config['master_log_pos']:
-        logger.warning("ALERT! Binary log position changed during backup!")
+    try:
+        master_info = client.show_master_status()
+        if master_info and master_info['position'] != config['master_log_pos']:
+            LOG.warning("Sanity check on master status failed.  "
+                    "Previously recorded %s:%s but currently found %s:%s",
+                    config['master_log_file'], config['master_log_pos'],
+                    master_info['file'], master_info['position'])
+            LOG.warning("ALERT! Binary log position changed during backup!")
+    except MySQLError, exc:
+        LOG.warning("Failed to sanity check master status. [%d] %s", *exc.args)
 
     try:
         client.start_slave()
