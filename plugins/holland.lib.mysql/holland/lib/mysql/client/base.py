@@ -113,7 +113,12 @@ class MySQLClient(object):
         """
         sql = "SHOW TABLE STATUS FROM `%s`" % database.replace('`','``')
         cursor = self.cursor()
-        cursor.execute(sql)
+        try:
+            cursor.execute(sql)
+        except MySQLError, exc:
+            LOG.error("MySQL reported an error while running %s. [%d] %s", 
+                      sql, *exc.args)
+            raise
         names = [info[0].lower() for info in cursor.description]
         result = []
         for row in cursor:
