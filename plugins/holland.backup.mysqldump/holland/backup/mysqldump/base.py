@@ -2,7 +2,7 @@
 
 import logging
 from holland.core.exceptions import BackupError
-import holland.lib.safefilename
+from holland.lib.safefilename import encode
 from holland.backup.mysqldump.command import ALL_DATABASES
 from holland.backup.mysqldump.mock.env import MockEnvironment
 
@@ -44,7 +44,7 @@ def start(mysqldump,
             # add --flush-logs only to the last mysqldump run
             if flush_logs and count + 1 == len(target_databases):
                 more_options.append('--flush-logs')
-            db_name = holland.lib.safefilename.encode(db.name)[0]
+            db_name = encode(db.name)[0]
             if db_name != db.name:
                 logging.warning("Encoding file-name for database %s to %s", db.name, db_name)
             stream = open_stream('%s.sql' % db_name, 'w')
