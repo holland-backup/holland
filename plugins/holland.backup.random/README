@@ -1,0 +1,7 @@
+Random Backup Plugin
+
+This plugin backs up random data from /dev/random. It is meant to be used as a 
+practical example of a real, albeit simple, plugin.
+
+For more information please consult the holland manual or visit the holland
+wiki at http://hollandbackup.org.
