@@ -6,7 +6,7 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        3%{?dist}
+Release:        5%{?dist}
 Summary:        Pluggable Backup Framework
 
 Group:          Applications/Archiving
@@ -23,7 +23,6 @@ Requires:       python-setuptools
 A pluggable backup framework which focuses on, but is not limited to, highly
 configurable database backups.
 
-
 %package common
 Summary:        Common library functionality for Holland Plugins
 License:        GPLv2
@@ -33,15 +32,21 @@ Requires:       %{name} = %{version}-%{release} MySQL-python
 %description common
 Library for common functionality used by holland plugins
 
-
 %package example
 Summary: Example Backup Provider Plugin for Holland
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 
-
 %description example
 Example Backup Plugin for Holland
+
+%package random
+Summary: Random Backup Provider Plugin for Holland
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+
+%description random
+Random Backup Provider Plugin for Holland
 
 %package maatkit
 Summary: Holland mk-parallel-dump plugin
@@ -53,7 +58,6 @@ Requires: maatkit
 This plugin provides support for holland to perform MySQL backups using the 
 mk-parallel-dump script from the Maatkit toolkit.  
 
-
 %package mysqldump
 Summary: Logical mysqldump backup plugin for Holland
 License: GPLv2
@@ -63,7 +67,6 @@ Requires: %{name} = %{version}-%{release} %{name}-common = %{version}-%{release}
 %description mysqldump
 This plugin allows holland to perform logical backups of a MySQL database
 using the mysqldump command.
-
 
 %package mysqlhotcopy
 Summary: Raw non-transactional backup plugin for Holland
@@ -75,7 +78,6 @@ Requires: %{name} = %{version}-%{release} %{name}-common = %{version}-%{release}
 This plugin allows holland to perform backups of MyISAM and other 
 non-transactional table types in MySQL by issuing a table lock and copying the
 raw files from the data directory.
-
 
 %package mysqllvm
 Summary: Holland LVM snapshot backup plugin for MySQL 
@@ -90,11 +92,9 @@ Requires: lvm2 MySQL-python tar
 This plugin allows holland to perform LVM snapshot backups of a MySQL database
 and to generate a tar archive of the raw data directory.
 
-
 %prep
 %setup -q
 find ./ -name setup.cfg -exec rm -f {} \;
-
 
 %build
 %{__python} setup.py build
@@ -118,6 +118,11 @@ cd plugins/holland.backup.example
 %{__python} setup.py build
 cd -
 
+# plugin : holland.backup.random
+cd plugins/holland.backup.random
+%{__python} setup.py build
+cd -
+
 # plugin : holland.backup.maatkit
 cd plugins/holland.backup.maatkit
 %{__python} setup.py build
@@ -137,7 +142,6 @@ cd -
 cd plugins/holland.backup.mysql-lvm
 %{__python} setup.py build
 cd -
-
 
 %install
 rm -rf %{buildroot}
@@ -188,13 +192,20 @@ cd plugins/holland.backup.example
 cd -
 install -m 0640 config/providers/example.conf %{buildroot}%{_sysconfdir}/holland/providers/
 
+# plugin : holland.backup.random
+cd plugins/holland.backup.random
+%{__python} setup.py install -O1 --skip-build --root %{buildroot}
+cd -
+install -m 0640 config/providers/random.conf %{buildroot}%{_sysconfdir}/holland/providers/
+
 # plugin : holland.backup.maatkit
 cd plugins/holland.backup.maatkit
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 cd -
 install -m 0640 config/providers/maatkit.conf %{buildroot}%{_sysconfdir}/holland/providers/
 
-install -m 0640 config/providers/mysqldump.conf %{buildroot}%{_sysconfdir}/holland/providers/
+#install -m 0640 config/providers/mysqldump.conf %{buildroot}%{_sysconfdir}/holland/providers/
+
 # plugin : holland.backup.mysqldump
 cd plugins/holland.backup.mysqldump
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
@@ -273,6 +284,14 @@ exit 0
 %{python_sitelib}/holland.backup.example-%{version}-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/example.conf
 
+%files random
+%defattr(-,root,root,-)
+%doc plugins/holland.backup.random/{README,LICENSE}
+%{python_sitelib}/holland/backup/random.py*
+%{python_sitelib}/holland.backup.random-%{version}-*-nspkg.pth
+%{python_sitelib}/holland.backup.random-%{version}-*.egg-info
+%config(noreplace) %{_sysconfdir}/holland/providers/random.conf
+
 %files maatkit
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.maatkit/{README,LICENSE}
@@ -309,6 +328,9 @@ exit 0
 
 
 %changelog
+* Fri May 14 2010 Tim Soderstrom <tsoderst@racksapce.com> - 0.9.9-5
+- Added random plugin
+
 * Mon May 10 2010 Andrew Garner <andrew.garner@rackspace.com> - 0.9.9-4
 - Added missingok to holland.logrotate
 
