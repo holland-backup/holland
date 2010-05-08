@@ -182,7 +182,7 @@ stop-time               = float(default=0)
 estimated-size          = float(default=0)
 on-disk-size            = float(default=0)
 estimated-size-factor   = float(default=1.0)
-backups-to-keep          = integer(min=1, default=1)
+backups-to-keep          = integer(min=0, default=1)
 """.splitlines()
 
 class Backup(object):

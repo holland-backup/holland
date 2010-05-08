@@ -48,11 +48,12 @@ def verify_space(required_space, target_directory):
                             format_bytes(available_space),
                             target_directory))
 
-def purge_old_backups(backupset, backups_to_keep=1):
+def purge_old_backups(backupset, backups_to_keep=1, exclude=()):
     assert backups_to_keep > 0
     LOGGER.info("Purging old backups from backupset '%s'", backupset)
     backupset = spool.find_backupset(backupset)
-    backups = backupset.list_backups(reverse=True)
+    backups = [bk for bk in backupset.list_backups(reverse=True) 
+                if bk not in exclude]
     # Make sure we keep holland:backup.backups-to-keep
     LOGGER.info("Found %d backups.  Keeping %d", len(backups), backups_to_keep)
     purge_list = []
@@ -75,6 +76,8 @@ def purge_old_backups(backupset, backups_to_keep=1):
             backup.purge()
 
 def backup(backupset_name, dry_run=False, skip_purge=False):
+
+
     # May raise a ConfigError if not backupset is found
     LOGGER.info("Loading config for backupset %s", backupset_name)
     try:
@@ -110,7 +113,6 @@ def backup(backupset_name, dry_run=False, skip_purge=False):
     backup_job.validate_config()
     if not dry_run:
         backup_job.prepare()
-
     # Plugin may fail to initialize due to programming error
     LOGGER.debug("Initializing backup plugin instance")
     try:
@@ -144,24 +146,30 @@ def backup(backupset_name, dry_run=False, skip_purge=False):
         if not dry_run:
             raise
 
+    if not dry_run:
+        LOGGER.info("Purging old backup jobs")
+        purge_old_backups(backupset_name, 
+                          backup_job.config.lookup('holland:backup.backups-to-keep'),
+                          exclude=[backup_job])
+
     # Start backup
     backup_job.config['holland:backup']['start-time'] = time.time()
     # initialize spool directory
     if not dry_run:
         backup_job.prepare()
+
+    exc = None
     try:
         LOGGER.info("Starting backup[%s] via plugin %s", 
                     backup_job.name,
                     backupset_cfg.lookup('holland:backup.plugin'))
         plugin.backup()
     except KeyboardInterrupt:
-        raise BackupError("Interrupted")
-    except Exception, e:
-        if isinstance(e, BackupError):
-            raise e
-        else:
+        exc = BackupError("Interrupted")
+    except Exception, exc:
+        if not isinstance(exc, BackupError):
             LOGGER.debug("Unexpected exception when running backups.", exc_info=True)
-            raise BackupError(e)
+            exc = BackupError(exc)
 
     backup_job.config['holland:backup']['stop-time'] = time.time()
     backup_interval = (backup_job.config['holland:backup']['stop-time'] -
@@ -173,7 +181,7 @@ def backup(backupset_name, dry_run=False, skip_purge=False):
         LOGGER.info("Backup completed in %s", 
                     format_interval(backup_interval))
 
-    if not dry_run:
+    if not dry_run and exc is None:
         final_size = directory_size(backup_job.path)
         LOGGER.info("Final on-disk backup size: %s %.2f%% of estimated size %s", 
                     format_bytes(final_size), 
@@ -182,7 +190,8 @@ def backup(backupset_name, dry_run=False, skip_purge=False):
         backup_job.config['holland:backup']['on-disk-size'] = final_size
         LOGGER.debug("Flushing backup job")
         backup_job.flush()
-        purge_old_backups(backupset_name, backup_job.config.lookup('holland:backup.backups-to-keep'))
 
-    if sys.exc_info() != (None, None, None):
+    if exc is not None:
+        LOGGER.warning("Purging this backup (%s) due to failure", backup_job.name)
+        backup_job.purge()
         raise
