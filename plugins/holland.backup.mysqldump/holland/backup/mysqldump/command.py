@@ -110,6 +110,7 @@ MYSQLDUMP_OPTIONS = [
     MyOption('--insert-ignore', min_version=(4,1,12)),
     MyOption('--routines', min_version=(5,0,13)),
     MyOption('--events', min_version=(5,1,8)),
+    MyOption('--max-allowed-packet', arg='\w'),
 
     # options that take arguments
     MyOption('--default-character-set', arg='\w'),
