@@ -11,8 +11,6 @@ Table of Contents
    commands
    overview
    config        
-   faq
-   api
 
 Indices and tables
 ------------------
