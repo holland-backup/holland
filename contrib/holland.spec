@@ -217,7 +217,7 @@ exit 0
 %{python_sitelib}/holland-%{version}-*.egg-info
 %{_mandir}/man1/holland.1*
 %{_localstatedir}/log/holland/
-
+%{python_sitelib}/holland/commands/*.py*
 %{_sysconfdir}/holland/backupsets/examples
 %attr(0750,root,root) %dir %{_sysconfdir}/holland/
 %attr(0750,root,root) %dir %{_sysconfdir}/holland/backupsets
