@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #    Copyright © 2007, 2008 Torsten Bronger <bronger@physik.rwth-aachen.de>
