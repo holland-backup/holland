@@ -1,0 +1,6 @@
+This plugin provides functionality to perform LVM snapshots for a MYSQL
+database. This includes optionally quiescing MyISAM tables to disk via
+FLUSH TABLES WITH READ LOCK, obtaining binary log information as well as
+running through InnoDB recovery at backup time.
+
+Backup format is a (optionally compressed) tar archive using GNU tar.
