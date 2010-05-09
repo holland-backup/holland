@@ -1,3 +1,0 @@
-usr/share/holland/plugins/holland.backup.mysql_lvm-*.egg
-etc/holland/backupsets/examples/mysql-lvm.conf
-etc/holland/providers/mysql-lvm.conf
