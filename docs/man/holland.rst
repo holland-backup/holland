@@ -7,11 +7,11 @@ pluggable database backup agent
 ---------------------------------------------
 
 :Author: Andrew Garner <andrew.garner@rackspace.com>
-:Date:   2009-04-09
+:Date:   2009-05-08
 :Copyright: Other/Proprietary
-:Version: 0.1
+:Version: 0.9.9
 :Manual section: 1
-:Manual group: text processing
+:Manual group: Holland Backup Framework
 
 .. TODO: authors and author with name <email>
 
@@ -40,6 +40,7 @@ task. The currently available backup plugins include:
 
 * mysqldump
 * mysqlhotcopy (raw file backups for non-transactional tables)
+* mysql-lvm (raw file backups using LVM filesystem snasphots)
 * maatkit (mk-parallel-dump)
 
 Command plugins are used to add additional commands to the holland shell.
@@ -67,9 +68,7 @@ OPTIONS
 PROBLEMS
 ========
 
-1. holland is still an alpha-quality product and is not recommended for production use.
-2. operational windows are not yet supported
-3. restore is still a manual process
+1. restore is still a manual process
 
 SEE ALSO
 ========
@@ -77,14 +76,6 @@ SEE ALSO
 * `Python Eggs <http://peak.telecommunity.com/DevCenter/PythonEggs>`
 * `pkg_resources <http://peak.telecommunity.com/DevCenter/PkgResources>`
 * `Plugins Using Eggs <http://ianbicking.org/docs/pycon2006/plugins.html>`
-
-BUGS
-====
-
-* mk-config is new and has various formatting issues  
-* purge is run at the end of every backup.  If a backup is interrupted, 
-  purge will be delayed until the end of the next successful backup run.
-* disk-space estimations are still quite rough and may overestimate in many cases.
-  As a workaround, most plugins provide a scale factor setting to adjust estimates 
-  accordingly.
-
+* ``man holland-mysqlhotcopy``
+* ``man holland-mysqldump``
+* ``man holland-mysqllvm``
