@@ -111,7 +111,7 @@ def main():
     try:
         try:
             prep_tree()
-            build_deb()
+            return build_deb()
         except AssertionError, exc:
             logging.fatal("%s", exc)
             return 1
