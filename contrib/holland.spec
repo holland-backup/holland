@@ -152,7 +152,7 @@ cat > %{buildroot}%{_sysconfdir}/logrotate.d/holland <<EOF
 EOF
 
 # holland-core
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
+%{__python} setup.py install -O1 --skip-build --root %{buildroot} --install-scripts %{_sbindir}
 %{__mkdir_p} -p %{buildroot}%{_mandir}/man1
 install -m 0644 docs/man/holland.1 %{buildroot}%{_mandir}/man1
 # ensure we can %ghost this - we should own the directory
@@ -210,10 +210,9 @@ exit 0
 %files
 %defattr(-,root,root,-)
 %doc README INSTALL LICENSE config/backupsets/examples/ docs/build/html/
-%{_bindir}/holland
+%{_sbindir}/holland
 %dir %{python_sitelib}/holland/
 %{python_sitelib}/holland/core/
-%{python_sitelib}/holland/cli/
 %{python_sitelib}/holland-%{version}-*-nspkg.pth
 %{python_sitelib}/holland-%{version}-*.egg-info
 %{_mandir}/man1/holland.1*
