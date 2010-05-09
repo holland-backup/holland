@@ -1,0 +1,50 @@
+====================
+holland-mysqlhotcopy
+====================
+
+-----------------------------------
+Non-transactional backups for MySQL
+-----------------------------------
+
+:Author: Andrew Garner <andrew.garner@rackspace.com>
+:Date:   2009-05-08
+:Copyright: GPLv2
+:Version: 0.9.9
+:Manual section: 1
+:Manual group: Holland Backup Framework
+
+.. TODO: authors and author with name <email>
+
+SYNOPSIS
+========
+
+$ holland backup mysqlhotcopy
+$ holland mk-config mysqlhotcopy
+
+DESCRIPTION
+===========
+
+This plugin does not call the mysqlhotcopy command.  Rather this is a 
+reimplementation that provides much of the same functionality.
+
+holland-mysqlhotcopy provides a backup plugin through which raw database 
+backups can be made safely.  This plugin issues a table lock and flushes
+MySQL tables either via LOCK TABLES ... READ LOCAL followed by an explicit
+FLUSH TABLES query, or by issuing a global FLUSH TABLES WITH READ LOCK query.
+
+While this lock is held, the plugin create an archive of the MySQL datadir.
+
+Currently holland-mysqlhotcopy supports multiple archive types:
+
+* tar
+* zip (zip64)
+* directory
+
+All the archive types support optional compression.
+
+
+SEE ALSO
+========
+
+* ``man 1 mysqlhotcopy``
+* ``man 1 holland``
