@@ -1,0 +1,12 @@
+Maatkit backup plugin
+======================
+This plugin uses mk-parallel-dump from the Maatkit toolkit to perform logical 
+MySQL backups.
+
+This plugin should be considered experimental.  mk-parallel-dump is not 
+intended for backups per the Maatkit documentation - this should only
+be used to facilitate exports after understanding the limitations
+of the mk-parallel-dump tool.
+
+Please see the Maatkit documentation for more information:
+http://www.maatkit.org/doc/mk-parallel-dump.html
