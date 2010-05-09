@@ -34,6 +34,15 @@ Requires:       %{name} = %{version}-%{release} MySQL-python
 Library for common functionality used by holland plugins
 
 
+%package example
+Summary: Example Backup Provider Plugin for Holland
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+
+
+%description example
+Example Backup Plugin for Holland
+
 %package maatkit
 Summary: Holland mk-parallel-dump plugin
 Group: Development/Libraries
@@ -104,6 +113,11 @@ cd plugins/holland.lib.mysql
 %{__python} setup.py build
 cd -
 
+# plugin : holland.backup.example
+cd plugins/holland.backup.example
+%{__python} setup.py build
+cd -
+
 # plugin : holland.backup.maatkit
 cd plugins/holland.backup.maatkit
 %{__python} setup.py build
@@ -155,7 +169,6 @@ EOF
 %{__python} setup.py install -O1 --skip-build --root %{buildroot} --install-scripts %{_sbindir}
 %{__mkdir_p} -p %{buildroot}%{_mandir}/man1
 install -m 0644 docs/man/holland.1 %{buildroot}%{_mandir}/man1
-# ensure we can %ghost this - we should own the directory
 %{__mkdir_p} %{buildroot}%{python_sitelib}/holland/{lib,backup,commands,restore}
 
 # library : holland.lib.common
@@ -167,6 +180,12 @@ cd -
 cd plugins/holland.lib.mysql
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 cd -
+
+# plugin : holland.backup.example
+cd plugins/holland.backup.example
+%{__python} setup.py install -O1 --skip-build --root %{buildroot}
+cd -
+install -m 0640 config/providers/example.conf %{buildroot}%{_sysconfdir}/holland/providers/
 
 # plugin : holland.backup.maatkit
 cd plugins/holland.backup.maatkit
@@ -244,6 +263,14 @@ exit 0
 %{python_sitelib}/holland.lib.common-%{version}-*.egg-info
 %{python_sitelib}/holland.lib.mysql-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.lib.mysql-%{version}-*.egg-info
+
+%files example
+%defattr(-,root,root,-)
+%doc plugins/holland.backup.example/{README,LICENSE}
+%{python_sitelib}/holland/backup/example.py*
+%{python_sitelib}/holland.backup.example-%{version}-*-nspkg.pth
+%{python_sitelib}/holland.backup.example-%{version}-*.egg-info
+%config(noreplace) %{_sysconfdir}/holland/providers/example.conf
 
 %files maatkit
 %defattr(-,root,root,-)
