@@ -1,0 +1,4 @@
+usr/lib/python*.*/*-packages/holland.backup.maatkit-*.egg-info
+usr/lib/python*.*/*-packages/holland.backup.maatkit-*-nspkg.pth
+usr/lib/python*.*/*-packages/holland/backup/maatkit.py*
+etc/holland/providers/maatkit.conf

@@ -1,0 +1,4 @@
+usr/lib/python*.*/*-packages/holland.backup.example-*.egg-info
+usr/lib/python*.*/*-packages/holland.backup.example-*-nspkg.pth
+usr/lib/python*.*/*-packages/holland/backup/example.py*
+etc/holland/providers/example.conf

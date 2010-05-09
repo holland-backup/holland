@@ -1,0 +1,4 @@
+usr/lib/python*.*/*-packages/holland.backup.mysqldump-*.egg-info
+usr/lib/python*.*/*-packages/holland.backup.mysqldump-*-nspkg.pth
+usr/lib/python*.*/*-packages/holland/backup/mysqldump/
+etc/holland/providers/mysqldump.conf

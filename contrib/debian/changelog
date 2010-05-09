@@ -1,0 +1,11 @@
+holland (0.9.9-2) unstable; urgency=low
+
+  * Remove .egg file dependency
+
+ -- Andrew Garner <andrew.garner@rackspace.com>  Sun, 09 May 2010 04:36:17 -0500
+
+holland (0.9.9-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Andrew Garner <andrew.garner@rackspace.com>  Sun, 09 May 2010 03:52:44 -0500

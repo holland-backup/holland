@@ -1,0 +1,4 @@
+usr/lib/python*.*/*-packages/holland.backup.mysqlhotcopy-*.egg-info
+usr/lib/python*.*/*-packages/holland.backup.mysqlhotcopy-*-nspkg.pth
+usr/lib/python*.*/*-packages/holland/backup/mysqlhotcopy.py*
+etc/holland/providers/mysqlhotcopy.conf

@@ -1,0 +1,101 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+-include /usr/share/python/python.mk
+
+PYTHON=python
+PLUGINDIR=/usr/share/holland/plugins
+SBINDIR=/usr/sbin
+HOLLAND_CORE=$(CURDIR)
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	touch configure-stamp
+
+
+build: build-stamp
+build-stamp: configure-stamp  
+	dh_testdir
+	touch $@
+
+clean: 
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+
+	@for ADDON in $(HOLLAND_CORE); \
+	do cd $$ADDON ; \
+		$(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) clean; \
+	done
+
+	@for PLUGIN in $(shell ls -d $(CURDIR)/plugins/*/); \
+	do cd $$PLUGIN ; \
+	    $(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) clean; \
+	done
+	dh_clean 
+
+install: build 
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	cd docs && make text
+	@for ADDON in $(HOLLAND_CORE); \
+	do cd $$ADDON ; \
+		$(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) install \
+			--no-compile \
+			--prefix=/usr \
+			--root=$(CURDIR)/debian/tmp \
+			--install-scripts=$(SBINDIR) \
+			--single-version-externally-managed \
+			$(py_setup_install_args); \
+	done
+
+	@for PLUGIN in $(shell ls -d $(CURDIR)/plugins/*/); \
+	do cd $$PLUGIN ; \
+	    $(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) install \
+			--no-compile \
+			--prefix=/usr \
+			--root=$(CURDIR)/debian/tmp \
+			--install-scripts=$(SBINDIR) \
+			--single-version-externally-managed \
+			$(py_setup_install_args); \
+	done
+    
+	mkdir -p $(CURDIR)/debian/tmp/etc/holland
+	mkdir -p $(CURDIR)/debian/tmp/etc/holland/backupsets
+	mkdir -p $(CURDIR)/debian/tmp/etc/holland/providers
+	@for name in $(shell ls $(CURDIR)/config/); \
+	do cp -a $(CURDIR)/config/$$name $(CURDIR)/debian/tmp/etc/holland; \
+	done
+# This should probably be a patch
+	@sed -i 's/^backupsets = default/backupsets = /g' $(CURDIR)/debian/tmp/etc/holland/holland.conf
+
+binary-indep: install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs
+	dh_installdocs
+	dh_installexamples
+	dh_install
+	dh_movefiles
+#	dh_installlogrotate
+#	dh_installcron
+	dh_installman
+	dh_pysupport
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep
+.PHONY: build clean binary install configure
