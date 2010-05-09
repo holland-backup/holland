@@ -19,21 +19,21 @@ opposed to putting quotes around all statements.
 
 Below are a few examples of how these can be applied:
 
-Default (backup everything):
-::
-    databases = *
-    tables = *
+Default (backup everything)::
 
-Using database inclusion and exclusions:
-::
-    databases = drupal*, smf_forum, 
-    exclude-databases = drupal5
+  databases = *
+  tables = *
 
-Including Tables:
-::
-    tables = phpBB.sucks, drupal6.node*, smf_forum.*
+Using database inclusion and exclusions::
 
-Excluding Tables:
-::
-    exclude-tables = mydb.uselesstable1, x_cart.*, *.sessions
+ databases = drupal*, smf_forum, 
+ exclude-databases = drupal5
+
+Including Tables::
+
+  tables = phpBB.sucks, drupal6.node*, smf_forum.*
+
+Excluding Tables::
+
+  exclude-tables = mydb.uselesstable1, x_cart.*, *.sessions
 

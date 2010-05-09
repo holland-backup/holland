@@ -81,11 +81,11 @@ mysqldump Provider Configuration [mysqldump]
     or for point in time recovery using the master's binary log. This 
     information is found within the 'backup.conf' file located in the
     backup-set destination directory 
-    (/var/spool/holland/<backup-set>/<backup> by default). For example:
-    ::
-        [mysql:replication]
-        slave_master_log_pos = 4512
-        slave_master_log_file = 260792-mmm-agent1-bin-log.000001
+    (/var/spool/holland/<backup-set>/<backup> by default). For example::
+    
+      [mysql:replication]
+      slave_master_log_pos = 4512
+      slave_master_log_file = 260792-mmm-agent1-bin-log.000001
     
 **flush-logs** = yes | no
     
