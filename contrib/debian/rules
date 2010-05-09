@@ -91,7 +91,9 @@ binary-indep: install
 	dh_link
 	dh_strip
 	dh_compress
-	dh_fixperms
+	chmod 0750 debian/holland/etc/holland/backupsets
+	chmod 0750 debian/holland/var/log/holland
+	dh_fixperms -X etc/holland/backupsets -X var/log/holland
 	dh_installdeb
 	dh_gencontrol
 	dh_md5sums
