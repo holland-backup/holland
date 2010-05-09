@@ -282,7 +282,16 @@ exit 0
 
 %changelog
 * Sat May 8 2010 Andrew Garner <andrew.garner@rackspace.com> - 0.9.9-3
-- Major spec cleanup
+- Cleaned up /usr/share/docs/holland-* to only include html user documentation
+  rather than everything in docs/
+- /var/spool/holland and /var/log/holland/ are no longer world-readable
+- /etc/holland/backupsets/examples is now a symlink to examples in the
+  /usr/share/docs/holland-* directory
+- The plugins/ACTIVE file is no longer used in order to have more flexibility
+  in handling each individual plugin
+- The setup.py --record mechanism is no longer used
+- holland/{lib,commands,backup,restore} are now owned by the main holland
+  package.
 
 * Wed Apr 14 2010 Andrew Garner <andrew.garner@rackspace.com> - 0.9.9-2
 - Updated rpm for new tree layout
