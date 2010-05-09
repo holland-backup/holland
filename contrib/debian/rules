@@ -84,7 +84,7 @@ binary-indep: install
 	dh_installexamples
 	dh_install
 	dh_movefiles
-#	dh_installlogrotate
+	dh_installlogrotate
 #	dh_installcron
 	dh_installman
 	dh_pysupport
