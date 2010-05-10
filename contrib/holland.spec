@@ -157,10 +157,11 @@ install -m 0750 -d %{buildroot}%{_localstatedir}/log/holland/
 # logrotate
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/logrotate.d
 cat > %{buildroot}%{_sysconfdir}/logrotate.d/holland <<EOF
-/var/log/holland/holland.log {
+/var/log/holland.log /var/log/holland/holland.log {
     rotate 4
     weekly
     compress
+    missingok
     create root adm
 }
 EOF
@@ -308,6 +309,9 @@ exit 0
 
 
 %changelog
+* Mon May 10 2010 Andrew Garner <andrew.garner@rackspace.com> - 0.9.9-4
+- Added missingok to holland.logrotate
+
 * Sat May 8 2010 Andrew Garner <andrew.garner@rackspace.com> - 0.9.9-3
 - Cleaned up /usr/share/docs/holland-* to only include html user documentation
   rather than everything in docs/
