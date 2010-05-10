@@ -43,7 +43,7 @@ file-per-database   = boolean(default=yes)
 additional-options  = force_list(default=list())
 
 [compression]
-method        = option('none', 'gzip', 'bzip2', 'lzma', 'lzop', default='gzip')
+method        = option('none', 'gzip', 'pigz', 'bzip2', 'lzma', 'lzop', default='gzip')
 inline              = boolean(default=yes)
 level               = integer(min=0, max=9, default=1)
 
