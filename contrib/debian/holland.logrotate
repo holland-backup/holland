@@ -1,6 +1,7 @@
 /var/log/holland/holland.log {
-    rotate 4
+    rotate 5
     weekly
     compress
-    create root adm
+    notifempty
+    missingok
 }
