@@ -36,6 +36,16 @@ subprocess.call([
     stderr=errorLog)
 subprocess.call([pwd + '/sandbox/mysql/start'], stdout=outputLog, stderr=errorLog)
 
+# Run Maatkit before backup
+maatkit_output = open('results/before-restore.mkt', 'w')
+subprocess.call(shlex.split('mk-table-checksum localhost' +
+    ' --port=' + config.get('sandbox', 'port') +
+    ' --user=' + config.get('sandbox', 'user') +
+    ' --password=' + config.get('sandbox', 'password')),
+    stdout=maatkit_output,
+    stderr=errorLog)
+maatkit_output.close()
+
 # Setup Holland virtual environment
 if not os.path.exists(config.get('global', 'holland_install_dir')):
     os.mkdir(config.get('global', 'holland_install_dir'))
@@ -82,6 +92,8 @@ subprocess.call(shlex.split(
     'bin/holland --config-file=' + 
     'etc/holland/holland.conf bk'),
     cwd=holland_path)
+
+
 
 # Cleanup
 subprocess.call([pwd + '/sandbox/mysql/stop'])
