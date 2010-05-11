@@ -216,7 +216,7 @@ class MySQLDump(object):
             errlog.flush()
             errlog.seek(0)
             for line in errlog:
-                LOG.error("%s [%d]: %s", self.cmd_path, pid.pid, line.rstrip())
+                LOG.error("%s[%d]: %s", self.cmd_path, pid.pid, line.rstrip())
         finally:
             errlog.close()
 	if status != 0:
