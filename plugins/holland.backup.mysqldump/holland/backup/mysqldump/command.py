@@ -127,9 +127,15 @@ MYSQLDUMP_OPTIONS = [
 
 def mysqldump_version(command):
     """Return the version of the given mysqldump command"""
-    LOG.debug("Executing: %s", subprocess.list2cmdline([command, '--version']))
+    args = [
+        command,
+        '--no-defaults',
+        '--version',
+    ]
+    LOG.debug("Executing: %s", subprocess.list2cmdline(args))
     try:
-        output = subprocess.Popen([command, '--version'], stdout=subprocess.PIPE).communicate()[0]
+        output = subprocess.Popen(args,
+                                  stdout=subprocess.PIPE).communicate()[0]
     except OSError, exc:
         if exc.errno == ENOENT:
             raise MySQLDumpError("'%s' does not exist" % command)
@@ -141,7 +147,8 @@ def mysqldump_version(command):
         return tuple([int(digit) for digit in
                         re.search(r'(\d+)[.](\d+)[.](\d+)', output).groups()])
     except AttributeError, exc:
-        raise MySQLDumpError("Failed to determine mysqldump version for %s", command)
+        raise MySQLDumpError("Failed to determine mysqldump version for %s" % \
+                             command)
 
 class MySQLDump(object):
     """mysqldump command runner"""
@@ -200,7 +207,10 @@ class MySQLDump(object):
 
         LOG.info("Executing: %s", subprocess.list2cmdline(args))
 	errlog = TemporaryFile()
-        pid = subprocess.Popen(args, stdout=stream.fileno(), stderr=errlog.fileno(), close_fds=True)
+        pid = subprocess.Popen(args, 
+                               stdout=stream.fileno(), 
+                               stderr=errlog.fileno(), 
+                               close_fds=True)
         status = pid.wait()
         try:
             errlog.flush()
@@ -210,4 +220,5 @@ class MySQLDump(object):
         finally:
             errlog.close()
 	if status != 0:
-            raise MySQLDumpError("mysqldump exited with non-zero status %d" % pid.returncode)
+            raise MySQLDumpError("mysqldump exited with non-zero status %d" % \
+                                 pid.returncode)
