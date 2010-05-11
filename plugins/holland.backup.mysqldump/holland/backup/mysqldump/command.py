@@ -47,12 +47,12 @@ class MyOptionChecker(object):
         try:
             option, arg = self.OPTION_ARG_CRE.search(option).groups()
         except AttributeError:
-            raise MyOptionError("Invalid option %r" % option)
+            raise MyOptionError("Unsupported option %r" % option)
 
         option = option.replace('_', '-')
 
         if option not in self._options:
-            raise MyOptionError("Invalid option %r" % option)
+            raise MyOptionError("Unsupported option %r" % option)
         my_option = self._options[option]
         my_option.check(self.version, arg)
 

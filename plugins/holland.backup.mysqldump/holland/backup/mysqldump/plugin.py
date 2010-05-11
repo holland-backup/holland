@@ -250,12 +250,7 @@ def validate_mysqldump_options(mysqldump, options):
             mysqldump.add_option(option)
             LOG.info("Using mysqldump option %s", option)
         except MyOptionError, exc:
-            LOG.error("Invalid mysqldump option: '%s'", option)
-            error = True
-
-    if error:
-        raise BackupError("One or more invalid mysqldump options specified. "
-                          "Aborting.")
+            LOG.warning("'%s' : %s", option, str(exc))
 
 
 def _stop_slave(client, config=None):
