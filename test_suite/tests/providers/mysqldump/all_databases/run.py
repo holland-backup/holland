@@ -16,16 +16,15 @@ def execute(cmd, config):
 # Setup
 pwd = os.getcwd()
 config = ConfigParser.ConfigParser()
-config.read('test.conf')
-outputLog = open('results/output.log', 'w')
-errorLog = open('results/error.log', 'w')
+config.read('config/test.conf')
+outputLog = open(config.get('global', 'output_log'), 'w')
+errorLog = open(config.get('global', 'error_log'), 'w')
 
 # Create a sandbox
-
 subprocess.call([
     'make_sandbox', 
     config.get('sandbox','tarball'),
-    '--upper_directory=' + config.get('sandbox','upper_directory'),
+    '--upper_directory=' + pwd + '/' + config.get('sandbox','upper_directory'),
     '--sandbox_directory=' + config.get('sandbox','sandbox_directory'),
     '--datadir_from=' + config.get('sandbox', 'datadir_from'),
     '--sandbox_port=' + config.get('sandbox', 'port'),
@@ -35,11 +34,11 @@ subprocess.call([
     ], 
     stdout=outputLog,
     stderr=errorLog)
+subprocess.call([pwd + '/sandbox/mysql/start'], stdout=outputLog, stderr=errorLog)
 
 # Setup Holland virtual environment
-if not(os.path.exists(config.get('global', 'holland_install_dir'))):
+if not os.path.exists(config.get('global', 'holland_install_dir')):
     os.mkdir(config.get('global', 'holland_install_dir'))
-
 holland_path = pwd + '/' + config.get('global', 'holland_install_dir')
 status = subprocess.call(['virtualenv', holland_path]) 
 os.environ['PATH'] = os.path.join(holland_path, 'bin') + ':' + os.environ['PATH']
@@ -47,7 +46,6 @@ subprocess.call(['python', 'setup.py', 'install'],
     cwd=config.get('global', 'holland_repository'),
     stdout=outputLog,
     stderr=errorLog)
-
 plugin_dir=config.get('global', 'holland_repository') + '/plugins'
 for plugin in open(plugin_dir + '/ACTIVE', 'r'):
     subprocess.call(['python', 'setup.py', 'install'], 
@@ -56,23 +54,39 @@ for plugin in open(plugin_dir + '/ACTIVE', 'r'):
         stderr=errorLog)
 
 # Copy Config Files
-if not(os.path.exists(config.get('global', 'holland_install_dir') + '/etc')):
+running_config_dir=config.get('global', 'holland_install_dir') + '/etc/holland'
+if not os.path.exists(config.get('global', 'holland_install_dir') + '/etc'):
     os.mkdir(config.get('global', 'holland_install_dir') + '/etc')
+if not os.path.exists(config.get('global', 'holland_install_dir') + '/etc/holland'):
+    os.mkdir(config.get('global', 'holland_install_dir') + '/etc/holland')
 shutil.copytree(
-    config.get('global', 'holland_config_dir'), 
-    config.get('global', 'holland_install_dir') + '/etc/holland')
+    config.get('global', 'backupset_config_dir'),
+    running_config_dir + '/backupsets')
+shutil.copytree(
+    config.get('global', 'provider_config_dir'),
+    running_config_dir + '/providers')
+
+# Generate holland.conf from main test config
+holland_config = ConfigParser.ConfigParser()
+holland_config.add_section('holland')
+for item, value in config.items('holland'):
+    holland_config.set('holland', item, value)
+holland_config_file = open(running_config_dir + '/holland.conf', 'w')
+holland_config.write(holland_config_file)
+holland_config_file.close()
 
 # Back some shit up, w00!
 holland_path = pwd + '/' + config.get('global', 'holland_install_dir')
-status = subprocess.call(['virtualenv', holland_path])
-subprocess.call([
-    'holland', 
-    '--config-file=' + config.get('global', 'holland_config_dir'), 
-    'bk'],
-    cwd=config.get('global', 'holland_repository'),
-    shell=True)
+subprocess.call(['virtualenv', holland_path])
+subprocess.call(shlex.split(
+    'bin/holland --config-file=' + 
+    'etc/holland/holland.conf bk'),
+    cwd=holland_path)
 
 # Cleanup
-subprocess.call([pwd + '/sandbox/mysql/stop'], shell=True)
+subprocess.call([pwd + '/sandbox/mysql/stop'])
 shutil.rmtree(pwd + '/sandbox/mysql')
 shutil.rmtree(pwd + '/' + config.get('global', 'holland_install_dir'))
+outputLog.close() 
+errorLog.close()
+

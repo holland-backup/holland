@@ -1,0 +1,3 @@
+* Implement check_call instead of call for exception handling
+    (must be emulated in Python 2.4 or earlier)
+* Pull providers from git
