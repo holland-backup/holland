@@ -18,6 +18,7 @@ LOG = logging.getLogger(__name__)
 # We validate our config against the following spec
 CONFIGSPEC = """
 [mysqldump]
+extra-defaults      = boolean(default=no)
 mysql-binpath       = force_list(default=list())
 
 lock-method         = option('flush-lock', 'lock-tables', 'single-transaction', 'auto-detect', 'none', default='auto-detect')
@@ -131,7 +132,10 @@ class MySQLDumpPlugin(object):
         LOG.info("Using mysqldump executable: %s", mysqldump_bin)
 
         # setup the mysqldump environment
-        mysqldump = MySQLDump(defaults_file, mysqldump_bin)
+        extra_defaults = config['extra-defaults']
+        mysqldump = MySQLDump(defaults_file, 
+                              mysqldump_bin, 
+                              extra_defaults=extra_defaults)
         LOG.info("mysqldump version %s", '.'.join([str(digit)
                 for digit in mysqldump.version]))
         options = collect_mysqldump_options(config, mysqldump, self.client)

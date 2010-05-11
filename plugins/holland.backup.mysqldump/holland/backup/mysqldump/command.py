@@ -147,11 +147,13 @@ class MySQLDump(object):
     """mysqldump command runner"""
     def __init__(self,
                  defaults_file,
-                 cmd_path='mysqldump'):
+                 cmd_path='mysqldump',
+                 extra_defaults=False):
         if not os.path.exists(cmd_path):
             raise MySQLDumpError("'%s' does not exist" % cmd_path)
         self.cmd_path = cmd_path
         self.defaults_file = defaults_file
+        self.extra_defaults = extra_defaults
         self.version = mysqldump_version(cmd_path)
         self.version_str = u'.'.join([str(digit) for digit in self.version])
         self.mysqldump_optcheck = MyOptionChecker(self.version)
@@ -164,10 +166,9 @@ class MySQLDump(object):
         when mysqldump is actually run via the instances .run() method
         """
         if option in self.options:
-            LOG.warn("mysqldump option '%s' already requested. skipping.", option)
-        else:
-            self.mysqldump_optcheck.check_option(option)
-            self.options.append(option)
+            LOG.warn("mysqldump option '%s' already requested.", option)
+        self.options.append(option)
+        self.mysqldump_optcheck.check_option(option)
 
     def run(self, databases, stream, additional_options=None):
         """Run mysqldump with the options configured on this instance"""
@@ -180,7 +181,10 @@ class MySQLDump(object):
         args = [ self.cmd_path, ]
 
         if self.defaults_file:
-            args.append('--defaults-file=%s' % self.defaults_file)
+            if self.extra_defaults:
+                args.append('--defaults-extra-file=%s' % self.defaults_file)
+            else:
+                args.append('--defaults-file=%s' % self.defaults_file)
 
         args.extend([str(opt) for opt in self.options])
 
