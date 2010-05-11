@@ -4,10 +4,10 @@
 Specify various compression settings, such as compression utility,
 compression level, etc.
 
-**method** = gzip | bzip | lzop | xz
+**method** = gzip | pigz | bzip | lzop | lzma 
 
     Define which compression method to use. Note that ``lzop`` and 
-    ``xz`` may not be available on every system and may need to be compiled 
+    ``lzma`` may not be available on every system and may need to be compiled 
     / installed.
     
 **inline** = yes | no
