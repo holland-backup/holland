@@ -6,5 +6,5 @@ usr/lib/python*.*/*-packages/holland/lib/archive/
 usr/lib/python*.*/*-packages/holland/lib/mysql/
 usr/lib/python*.*/*-packages/holland.lib.common-*.egg-info
 usr/lib/python*.*/*-packages/holland.lib.common-*-nspkg.pth
-usr/lib/python*.*/*-packages/holland.lib.mysql-*-py*.*.egg-info
+usr/lib/python*.*/*-packages/holland.lib.mysql-*.egg-info
 usr/lib/python*.*/*-packages/holland.lib.mysql-*-nspkg.pth
