@@ -126,7 +126,30 @@ def build_mysql_config(mysql_config):
         _my_config = load_options(config)
         defaults_config.update(_my_config)
 
+    if mysql_config['password'] is not None:
+        password = mysql_config['password']
+        if password.startswith('file:'):
+            password = process_password_file(password[5:])
+            mysql_config['password'] = password
+
     for key in ('user', 'password', 'socket', 'host', 'port'):
         if key in mysql_config and mysql_config[key]:
             defaults_config['client'][key] = mysql_config[key]
     return defaults_config
+
+def process_password_file(path):
+    """Read the file at `path` and return the
+    contents of the file
+
+    :param path: file path to read a passwrod from
+    :returns: password contained in `path`
+    """
+    # XXX: Should this handle IOError directly?
+    try:
+        # strip trailing whitespace
+        password = open(path, 'r').read().rstrip()
+        LOG.info("Loaded password file %s", path)
+        return password
+    except IOError, exc:
+        LOG.error("Failed to load password file %s: %s", path, str(exc))
+        raise
