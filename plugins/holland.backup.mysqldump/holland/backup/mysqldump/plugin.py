@@ -91,14 +91,15 @@ class MySQLDumpPlugin(object):
 
     def estimate_backup_size(self):
         """Estimate the size of the backup this plugin will generate"""
+        LOG.info("Estimating size of mysqldump backup")
         try:
-            self.client.connect()
             db_iter = DatabaseIterator(self.client)
             tbl_iter = TableIterator(self.client)
             try:
+                self.client.connect()
                 self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
             except MySQLError, exc:
-                raise BackupError("Failed to estimate backup size from MySQL metadata")
+                raise BackupError("MySQL Error [%d] %s" % exc.args)
             return sum([db.size for db in self.schema.databases])
         finally:
             self.client.disconnect()
