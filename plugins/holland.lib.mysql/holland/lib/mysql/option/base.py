@@ -153,3 +153,4 @@ def process_password_file(path):
     except IOError, exc:
         LOG.error("Failed to load password file %s: %s", path, str(exc))
         raise
+
