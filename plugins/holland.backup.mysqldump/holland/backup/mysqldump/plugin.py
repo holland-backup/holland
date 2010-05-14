@@ -5,11 +5,14 @@ import logging
 from holland.core.exceptions import BackupError
 from holland.lib.compression import open_stream
 from holland.lib.mysql import MySQLSchema, include_glob, exclude_glob, \
-			      DatabaseIterator, TableIterator, connect, MySQLError
+			      DatabaseIterator, TableIterator, \
+                              connect, MySQLError
 from holland.backup.mysqldump.base import start
 from holland.backup.mysqldump.util import INIConfig, update_config
 from holland.backup.mysqldump.util.ini import OptionLine, CommentLine
-from holland.backup.mysqldump.mysql.option import load_options, write_options
+from holland.lib.mysql.option import load_options, \
+                                     write_options, \
+                                     build_mysql_config
 from holland.backup.mysqldump.command import MySQLDump, MySQLDumpError, \
                                              MyOptionError
 from holland.backup.mysqldump.mock import MockEnvironment
@@ -83,7 +86,7 @@ class MySQLDumpPlugin(object):
         self.schema.add_engine_filter(include_glob(*config['engines']))
         self.schema.add_engine_filter(exclude_glob(*config['exclude-engines']))
 
-        self.mysql_config = make_mysql_config(self.config['mysql:client'])
+        self.mysql_config = build_mysql_config(self.config['mysql:client'])
         self.client = connect(self.mysql_config['client'])
 
     def estimate_backup_size(self):
@@ -124,9 +127,9 @@ class MySQLDumpPlugin(object):
         config = self.config['mysqldump']
 
         # setup defaults_file with ignore-table exclusions
-        add_exclusions(self.schema, self.mysql_config)
         defaults_file = os.path.join(self.target_directory, 'my.cnf')
         write_options(self.mysql_config, defaults_file)
+        add_exclusions(self.schema, defaults_file)
 
         # find the path to the mysqldump command
         mysqldump_bin = find_mysqldump(path=config['mysql-binpath'])
@@ -310,34 +313,31 @@ def _start_slave(client, config=None):
     except MySQLError, exc:
         raise BackupError("Failed to restart slave [%d] %s" % exc.args)
 
-def make_mysql_config(mysql_config):
-    """Given a mysql:client config, create a config object
-    that represents the auth parameters"""
-    defaults_config = INIConfig()
-    defaults_config._new_namespace('client')
-    for config in mysql_config['defaults-extra-file']:
-        LOG.info("Loading %s [%s]", config, os.path.expanduser(config))
-        _my_config = load_options(config)
-        update_config(defaults_config, _my_config)
-
-    for key in ('user', 'password', 'socket', 'host', 'port'):
-        if key in mysql_config and mysql_config[key]:
-            defaults_config['client'][key] = mysql_config[key]
-    return defaults_config
-
 def add_exclusions(schema, config):
     """Given a MySQLSchema add --ignore-table options in a [mysqldump]
     section for any excluded tables.
 
-    This will also add comments detailing any databases that are entirely
-    skipped
     """
-    section = config._new_namespace('mysqldump')
+
+    exclusions = []
     for db in schema.databases:
         if db.excluded:
-            LOG.info("Excluding entire %s database", db.name)
-            section._lines[0].contents.append(CommentLine("database '%s' excluded"))
+            continue
         for table in db.tables:
             if table.excluded:
                 LOG.info("Excluding table %s.%s", table.database, table.name)
-                section._lines[0].contents.append(OptionLine("ignore-table", table.database + '.' + table.name))
+                exclusions.append("ignore-table = " + table.database + '.' + table.name)
+
+    if not exclusions:
+        return
+
+    try:
+        my_cnf = open(config, 'a')
+        print >>my_cnf
+        print >>my_cnf, "[mysqldump]"
+        for excl in exclusions:
+            print >>my_cnf, excl
+        my_cnf.close()
+    except IOError, exc:
+        LOG.error("Failed to write ignore-table exclusions to %s", config)
+        raise
