@@ -6,7 +6,7 @@ setup(name='holland.backup.sqlite',
       version=version,
       description="SQLite Backup Plugin for Holland",
       long_description="""\
-      Dump SQLite databases into pure ASCII SQL Syntax for archiving.
+      Dump SQLite databases into pure ASCII SQL text for archiving.
       """,
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='sqlite backup',
