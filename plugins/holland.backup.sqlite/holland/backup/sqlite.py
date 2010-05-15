@@ -25,10 +25,38 @@ class SQLitePlugin(object):
         self.config = config
         self.target_directory = target_directory
         self.dry_run = dry_run
+        self.invalid_databases = []
+        
         LOG.info("Validating config: %s", self.name)
-        LOG.debug("Validated config: %r", self.config)
         self.config.validate_config(CONFIGSPEC)
+        LOG.debug("Validated config: %r", self.config)
+        
+        self.sqlite_bin = self.config['sqlite']['binary']
+        self._check()
+        
+    def _check(self):
+        LOG.info("Checking that SQLite backups can run.")
+        if not os.path.exists(self.sqlite_bin):
+            raise BackupError, \
+                "SQLite binary [%s] doesn't exist!" % self.sqlite_bin    
+                
+        for db in self.config['sqlite']['databases']:
+            path = os.path.abspath(os.path.expanduser(db))
+            if not os.path.exists(path):
+                LOG.error("SQLite database [%s] doesn't exist!" % path)
+                self.invalid_databases.append(db)
+                continue
+                
+            process = Popen([self.sqlite_bin, path, '.exit'], 
+                            stdin=open('/dev/null', 'r'), 
+                            stdout=open('/dev/null', 'w'), 
+                            stderr=PIPE)
+            _, stderroutput = process.communicate()
 
+            if process.returncode != 0:
+              LOG.error(stderroutput)
+              self.invalid_databases.append(db)
+                            
     def estimate_backup_size(self):
         """
         Return total estimated size of all databases we are backing up (does 
@@ -36,9 +64,9 @@ class SQLitePlugin(object):
         """
         total_size = 0
         for db in self.config['sqlite']['databases']:
+            if db in self.invalid_databases:
+                continue
             path = os.path.abspath(os.path.expanduser(db))
-            if not os.path.exists(path):
-                raise BackupError, "sqlite database [%s] doesn't exist." % path
             total_size += os.path.getsize(path)
         return total_size
 
@@ -47,25 +75,32 @@ class SQLitePlugin(object):
         Use the internal '.dump' functionality built into SQLite to dump the 
         pure ASCII SQL Text and write that to disk.
         """
+        
         zopts = (self.config['compression']['method'], 
                  int(self.config['compression']['level']))
-        LOG.info("SQLite binary is [%s]" % self.config['sqlite']['binary'])         
-        
+        LOG.info("SQLite binary is [%s]" % self.sqlite_bin)         
         for db in self.config['sqlite']['databases']:
             path = os.path.abspath(os.path.expanduser(db))
+            
+            if db in self.invalid_databases:
+                LOG.warn("Skipping invalid SQLite database at [%s]" % path)
+                continue
+            
             LOG.info("Backing up SQLite database at [%s]" % path)
-            dest = os.path.join(self.target_directory, '%s.tar' % \
+            dest = os.path.join(self.target_directory, '%s.sql' % \
                                 os.path.basename(path))                    
             dest = open_stream(dest, 'w', *zopts)
-            cmd = "%s %s" % (self.config['sqlite']['binary'], 
-                                            path)
-            res = Popen(cmd.split(), stdin=PIPE, stdout=PIPE)
-            
-            # trigger sqlite to dump its data
-            res.stdin.write(".dump\n")
-            stdout, stderr = res.communicate()
-            if stderr:
-                raise BackupError, "SQLite Backup Error: %s" % stderror
-            dest.write(stdout)
+            process = Popen([self.sqlite_bin, path, '.dump'], 
+                            stdin=open('/dev/null', 'r'), stdout=dest, 
+                            stderr=PIPE)
+            _, stderroutput = process.communicate()
             dest.close()
-        
+
+            if process.returncode != 0:
+              LOG.error(stderroutput)
+              raise BackupError("SQLite '.dump' of [%s] failed" % path)
+
+        # Raise for invalid databases after we successfully backup the others
+        if len(self.invalid_databases) > 0:
+            raise BackupError, "Invalid database(s): %s" % self.invalid_databases
+            
