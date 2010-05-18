@@ -221,10 +221,12 @@ class Backup(object):
         if data_only:
             # only purge data - preserve metadata
             # FIXME: this would be a more sensical scheme
-            shutil.rmtree(os.path.join(self.path, 'data'))
+            if os.path.exists(os.path.join(self.path, 'data')):
+                shutil.rmtree(os.path.join(self.path, 'data'))
         else:
             # purge the entire backup directory
-            shutil.rmtree(self.path)
+            if os.path.exists(self.path):
+                shutil.rmtree(self.path)
     
     def exists(self):
         """

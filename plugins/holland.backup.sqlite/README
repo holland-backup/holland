@@ -1,0 +1,14 @@
+
+This plugin provides a proper means of backing up an SQLite database that
+may or may not be in use.  The backup dumps the SQLite database into pure
+ASCII SQL text that can then be archived safely.
+
+To enable backups simply add a backup set similar to:
+
+    [holland:backup]
+    plugin = sqlite
+
+    [sqlite]    
+    databases = /path/to/sqlite_database1.db, /path/to/sqlite_database2.db 
+    binary = /usr/bin/sqlite3
+
