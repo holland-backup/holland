@@ -32,9 +32,12 @@ class SQLitePlugin(object):
         LOG.debug("Validated config: %r", self.config)
         
         self.sqlite_bin = self.config['sqlite']['binary']
-        self._check()
+        self.check()
         
-    def _check(self):
+    def info(self):
+        return "SQLite backup plugin for Holland."
+        
+    def check(self):
         LOG.info("Checking that SQLite backups can run.")
         if not os.path.exists(self.sqlite_bin):
             raise BackupError, \
@@ -46,17 +49,18 @@ class SQLitePlugin(object):
                 LOG.error("SQLite database [%s] doesn't exist!" % path)
                 self.invalid_databases.append(db)
                 continue
-                
+            
             process = Popen([self.sqlite_bin, path, '.exit'], 
                             stdin=open('/dev/null', 'r'), 
                             stdout=open('/dev/null', 'w'), 
                             stderr=PIPE)
             _, stderroutput = process.communicate()
-
+            
             if process.returncode != 0:
-              LOG.error(stderroutput)
-              self.invalid_databases.append(db)
-                            
+                LOG.error(stderroutput)
+                self.invalid_databases.append(db)
+
+                                
     def estimate_backup_size(self):
         """
         Return total estimated size of all databases we are backing up (does 
@@ -86,10 +90,15 @@ class SQLitePlugin(object):
                 LOG.warn("Skipping invalid SQLite database at [%s]" % path)
                 continue
             
-            LOG.info("Backing up SQLite database at [%s]" % path)
-            dest = os.path.join(self.target_directory, '%s.sql' % \
-                                os.path.basename(path))                    
-            dest = open_stream(dest, 'w', *zopts)
+            if self.dry_run:
+                LOG.info("Backing up SQLite database at [%s] (dry run)" % path)
+                dest = open('/dev/null', 'w')
+            else:
+                LOG.info("Backing up SQLite database at [%s]" % path)
+                dest = os.path.join(self.target_directory, '%s.sql' % \
+                                    os.path.basename(path))                    
+                dest = open_stream(dest, 'w', *zopts)
+                
             process = Popen([self.sqlite_bin, path, '.dump'], 
                             stdin=open('/dev/null', 'r'), stdout=dest, 
                             stderr=PIPE)
