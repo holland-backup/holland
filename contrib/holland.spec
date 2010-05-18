@@ -106,72 +106,54 @@ SQLite Backup Provider Plugin for Holland
 %setup -q
 find ./ -name setup.cfg -exec rm -f {} \;
 
+# cleanup, will be removed upstream at some point
+rm plugins/ACTIVE
+
+# incomplete/not ready
+rm -rf plugins/holland.backup.pgsql
+
 %build
 %{__python} setup.py build
+
+# docs
 pushd docs
 make html
 rm -f build/html/.buildinfo
 popd
 
-# library : holland.lib.common
-pushd plugins/holland.lib.common
-%{__python} setup.py build
-popd
-
-# library : holland.lib.mysql
-pushd plugins/holland.lib.mysql
-%{__python} setup.py build
-popd
-
-# plugin : holland.backup.example
-pushd plugins/holland.backup.example
-%{__python} setup.py build
-popd
-
-# plugin : holland.backup.random
-pushd plugins/holland.backup.random
-%{__python} setup.py build
-popd
-
-# plugin : holland.backup.maatkit
-pushd plugins/holland.backup.maatkit
-%{__python} setup.py build
-popd
-
-# plugin : holland.backup.mysqldump
-pushd plugins/holland.backup.mysqldump
-%{__python} setup.py build
-popd
-
-# plugin : holland.backup.mysqlhotcopy
-pushd plugins/holland.backup.mysqlhotcopy
-%{__python} setup.py build
-popd
-
-# plugin : holland.backup.mysql-lvm
-pushd plugins/holland.backup.mysql-lvm
-%{__python} setup.py build
-popd
-
-# plugin : holland.backup.sqlite
-pushd plugins/holland.backup.sqlite
-%{__python} setup.py build
-popd
+# plugins
+for i in $(ls ./plugins);
+    pushd plugins/%{i}
+        %{__python} setup.py build
+    popd
+done
 
 %install
 rm -rf %{buildroot}
 
-# /etc configs
 install -m 0750 -d %{buildroot}%{_sysconfdir}/holland/{backupsets,providers}
-install -m 0640 config/holland.conf %{buildroot}%{_sysconfdir}/holland/
-ln -s ../../..%{_docdir}/%{name}-%{version}/examples \
-    %{buildroot}%{_sysconfdir}/%{name}/backupsets/examples
-
-# backup directory
 install -m 0750 -d %{buildroot}%{_localstatedir}/spool/holland
-
-# log directory
 install -m 0750 -d %{buildroot}%{_localstatedir}/log/holland/
+
+# holland-core
+%{__python} setup.py install -O1 --skip-build --root %{buildroot} --install-scripts %{_sbindir}
+%{__mkdir_p} -p %{buildroot}%{_mandir}/man1
+install -m 0644 docs/man/holland.1 %{buildroot}%{_mandir}/man1
+%{__mkdir_p} %{buildroot}%{python_sitelib}/holland/{lib,backup,commands,restore}
+
+# all plugins
+for i in $(ls ./plugins);
+    pushd plugins/%{i}
+        %{__python} setup.py install -O1 --skip-build --root %{buildroot}
+    popd
+done
+
+# install configs
+install -m 0640 config/holland.conf %{buildroot}%{_sysconfdir}/holland/
+#install -m 0640 backupsets/examples/* %{buildroot}%{_sysconfdir}/%{name}/backupsets/examples
+#install -m 0640 config/providers/* %{buildroot}%{_sysconfdir}/holland/providers/
+install -c -m 0644 plugins/holland.backup.mysqlhotcopy/docs/man/holland-mysqlhotcopy.5 \
+                   %{buildroot}%{_mandir}/man5
 
 # logrotate
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/logrotate.d
@@ -185,75 +167,9 @@ cat > %{buildroot}%{_sysconfdir}/logrotate.d/holland <<EOF
 }
 EOF
 
-# holland-core
-%{__python} setup.py install -O1 --skip-build --root %{buildroot} --install-scripts %{_sbindir}
-%{__mkdir_p} -p %{buildroot}%{_mandir}/man1
-install -m 0644 docs/man/holland.1 %{buildroot}%{_mandir}/man1
-%{__mkdir_p} %{buildroot}%{python_sitelib}/holland/{lib,backup,commands,restore}
-
-# library : holland.lib.common
-pushd plugins/holland.lib.common
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
-popd
-
-# library : holland.lib.mysql
-pushd plugins/holland.lib.mysql
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
-popd
-
-# plugin : holland.backup.example
-pushd plugins/holland.backup.example
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
-popd
-install -m 0640 config/providers/example.conf %{buildroot}%{_sysconfdir}/holland/providers/
-
-# plugin : holland.backup.random
-pushd plugins/holland.backup.random
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
-popd
-install -m 0640 config/providers/random.conf %{buildroot}%{_sysconfdir}/holland/providers/
-
-# plugin : holland.backup.maatkit
-pushd plugins/holland.backup.maatkit
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
-popd
-install -m 0640 config/providers/maatkit.conf %{buildroot}%{_sysconfdir}/holland/providers/
-
-# plugin : holland.backup.mysqldump
-pushd plugins/holland.backup.mysqldump
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
-popd
-install -m 0640 config/providers/mysqldump.conf %{buildroot}%{_sysconfdir}/holland/providers/
-
-# plugin : holland.backup.mysqlhotcopy
-pushd plugins/holland.backup.mysqlhotcopy
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
-mkdir -p %{buildroot}%{_mandir}/man5
-install -c -m 0644 docs/man/holland-mysqlhotcopy.5 %{buildroot}%{_mandir}/man5
-popd
-install -m 0640 config/providers/mysqlhotcopy.conf %{buildroot}%{_sysconfdir}/holland/providers/
-
-# plugin : holland.backup.mysql-lvm
-pushd plugins/holland.backup.mysql-lvm
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
-popd
-install -m 0640 config/providers/mysql-lvm.conf %{buildroot}%{_sysconfdir}/holland/providers/
-
-# plugin : holland.backup.sqlite
-pushd plugins/holland.backup.sqlite
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
-popd
-install -m 0640 config/providers/sqlite.conf %{buildroot}%{_sysconfdir}/holland/providers/
 
 %clean
 rm -rf %{buildroot}
-
-
-%pre
-if [ $1 -gt 1 -a -d /etc/holland/backupsets/examples/ ]; then
-    mv /etc/holland/backupsets/examples/ /etc/holland/backupsets/examples.rpmsave
-fi
-exit 0
 
 
 %files
