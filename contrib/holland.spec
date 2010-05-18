@@ -110,7 +110,7 @@ find ./ -name setup.cfg -exec rm -f {} \;
 rm plugins/ACTIVE
 
 # incomplete/not ready
-rm -rf plugins/holland.backup.pgsql
+rm -rf plugins/holland.backup.pgdump
 
 %build
 %{__python} setup.py build
@@ -122,8 +122,8 @@ rm -f build/html/.buildinfo
 popd
 
 # plugins
-for i in $(ls ./plugins);
-    pushd plugins/%{i}
+for i in $(ls ./plugins); do
+    pushd plugins/${i}
         %{__python} setup.py build
     popd
 done
@@ -131,9 +131,11 @@ done
 %install
 rm -rf %{buildroot}
 
-install -m 0750 -d %{buildroot}%{_sysconfdir}/holland/{backupsets,providers}
-install -m 0750 -d %{buildroot}%{_localstatedir}/spool/holland
-install -m 0750 -d %{buildroot}%{_localstatedir}/log/holland/
+%{__mkdir} -p 	%{buildroot}%{_sysconfdir}/holland/{backupsets,providers} \
+		%{buildroot}%{_sysconfdir}/holland/backupsets/examples \
+		%{buildroot}%{_localstatedir}/spool/holland \
+		%{buildroot}%{_localstatedir}/log/holland/ \
+		%{buildroot}%{_mandir}/man5
 
 # holland-core
 %{__python} setup.py install -O1 --skip-build --root %{buildroot} --install-scripts %{_sbindir}
@@ -142,16 +144,16 @@ install -m 0644 docs/man/holland.1 %{buildroot}%{_mandir}/man1
 %{__mkdir_p} %{buildroot}%{python_sitelib}/holland/{lib,backup,commands,restore}
 
 # all plugins
-for i in $(ls ./plugins);
-    pushd plugins/%{i}
+for i in $(ls ./plugins); do
+    pushd plugins/${i}
         %{__python} setup.py install -O1 --skip-build --root %{buildroot}
     popd
 done
 
 # install configs
 install -m 0640 config/holland.conf %{buildroot}%{_sysconfdir}/holland/
-#install -m 0640 backupsets/examples/* %{buildroot}%{_sysconfdir}/%{name}/backupsets/examples
-#install -m 0640 config/providers/* %{buildroot}%{_sysconfdir}/holland/providers/
+install -m 0640 config/backupsets/examples/* %{buildroot}%{_sysconfdir}/%{name}/backupsets/examples
+install -m 0640 config/providers/* %{buildroot}%{_sysconfdir}/holland/providers/
 install -c -m 0644 plugins/holland.backup.mysqlhotcopy/docs/man/holland-mysqlhotcopy.5 \
                    %{buildroot}%{_mandir}/man5
 
@@ -184,12 +186,13 @@ rm -rf %{buildroot}
 %{_localstatedir}/log/holland/
 %{python_sitelib}/holland/commands/*.py*
 %{_sysconfdir}/holland/backupsets/examples
-%attr(0750,root,root) %dir %{_sysconfdir}/holland/
-%attr(0750,root,root) %dir %{_sysconfdir}/holland/backupsets
-%attr(0750,root,root) %dir %{_sysconfdir}/holland/providers
+%attr(0755,root,root) %dir %{_sysconfdir}/holland/
+%attr(0755,root,root) %dir %{_sysconfdir}/holland/backupsets
+%attr(0755,root,root) %dir %{_sysconfdir}/holland/providers
+%{_sysconfdir}/holland/providers/README
 %attr(0640,root,root) %config(noreplace) %{_sysconfdir}/holland/holland.conf
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/logrotate.d/holland
-%attr(0750,root,root) %{_localstatedir}/spool/holland
+%attr(0755,root,root) %{_localstatedir}/spool/holland
 # virtual namespaces
 %dir %{python_sitelib}/holland/backup/
 %dir %{python_sitelib}/holland/restore/
@@ -216,6 +219,7 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland/backup/example.py*
 %{python_sitelib}/holland.backup.example-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.example-%{version}-*.egg-info
+%{_sysconfdir}/holland/backupsets/examples/example.conf
 %config(noreplace) %{_sysconfdir}/holland/providers/example.conf
 
 %files random
@@ -224,6 +228,7 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland/backup/random.py*
 %{python_sitelib}/holland.backup.random-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.random-%{version}-*.egg-info
+%{_sysconfdir}/holland/backupsets/examples/random.conf
 %config(noreplace) %{_sysconfdir}/holland/providers/random.conf
 
 %files maatkit
@@ -240,6 +245,7 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland/backup/mysqldump/
 %{python_sitelib}/holland.backup.mysqldump-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.mysqldump-%{version}-*.egg-info
+%{_sysconfdir}/holland/backupsets/examples/mysqldump.conf
 %config(noreplace) %{_sysconfdir}/holland/providers/mysqldump.conf
 
 %files mysqllvm
@@ -249,6 +255,7 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland/restore/lvm.py*
 %{python_sitelib}/holland.backup.mysql_lvm-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.mysql_lvm-%{version}-*.egg-info
+%{_sysconfdir}/holland/backupsets/examples/mysql-lvm.conf
 %config(noreplace) %{_sysconfdir}/holland/providers/mysql-lvm.conf
 
 %files mysqlhotcopy
@@ -257,6 +264,7 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland/backup/mysqlhotcopy.py*
 %{python_sitelib}/holland.backup.mysqlhotcopy-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.mysqlhotcopy-%{version}-*.egg-info
+%{_sysconfdir}/holland/backupsets/examples/mysqlhotcopy.conf
 %config(noreplace) %{_sysconfdir}/holland/providers/mysqlhotcopy.conf
 %{_mandir}/man5/holland-mysqlhotcopy.5*
 
@@ -266,8 +274,8 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland/backup/sqlite.py*
 %{python_sitelib}/holland.backup.sqlite-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.sqlite-%{version}-*.egg-info
+%{_sysconfdir}/holland/backupsets/examples/sqlite.conf
 %config(noreplace) %{_sysconfdir}/holland/providers/sqlite.conf
-%config(noreplace) %{_sysconfdir}/holland/backupsets/examples/sqlite.conf
 
 %changelog
 * Mon May 17 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-6
