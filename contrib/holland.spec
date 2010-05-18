@@ -6,11 +6,11 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Pluggable Backup Framework
-
 Group:          Applications/Archiving
-License:        BSD
+# Holland core (everything under ./holland) is BSD.  Plugins (./plugins) are GPLv2
+License:        BSD and GPLv2
 URL:            http://hollandbackup.org
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -92,56 +92,71 @@ Requires: lvm2 MySQL-python tar
 This plugin allows holland to perform LVM snapshot backups of a MySQL database
 and to generate a tar archive of the raw data directory.
 
+%package sqlite
+Summary: SQLite Backup Provider Plugin for Holland
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
+
+%description sqlite 
+SQLite Backup Provider Plugin for Holland
+
+
 %prep
 %setup -q
 find ./ -name setup.cfg -exec rm -f {} \;
 
 %build
 %{__python} setup.py build
-cd docs
+pushd docs
 make html
 rm -f build/html/.buildinfo
-cd -
+popd
 
 # library : holland.lib.common
-cd plugins/holland.lib.common
+pushd plugins/holland.lib.common
 %{__python} setup.py build
-cd -
+popd
 
 # library : holland.lib.mysql
-cd plugins/holland.lib.mysql
+pushd plugins/holland.lib.mysql
 %{__python} setup.py build
-cd -
+popd
 
 # plugin : holland.backup.example
-cd plugins/holland.backup.example
+pushd plugins/holland.backup.example
 %{__python} setup.py build
-cd -
+popd
 
 # plugin : holland.backup.random
-cd plugins/holland.backup.random
+pushd plugins/holland.backup.random
 %{__python} setup.py build
-cd -
+popd
 
 # plugin : holland.backup.maatkit
-cd plugins/holland.backup.maatkit
+pushd plugins/holland.backup.maatkit
 %{__python} setup.py build
-cd -
+popd
 
 # plugin : holland.backup.mysqldump
-cd plugins/holland.backup.mysqldump
+pushd plugins/holland.backup.mysqldump
 %{__python} setup.py build
-cd -
+popd
 
 # plugin : holland.backup.mysqlhotcopy
-cd plugins/holland.backup.mysqlhotcopy
+pushd plugins/holland.backup.mysqlhotcopy
 %{__python} setup.py build
-cd -
+popd
 
 # plugin : holland.backup.mysql-lvm
-cd plugins/holland.backup.mysql-lvm
+pushd plugins/holland.backup.mysql-lvm
 %{__python} setup.py build
-cd -
+popd
+
+# plugin : holland.backup.sqlite
+pushd plugins/holland.backup.sqlite
+%{__python} setup.py build
+popd
 
 %install
 rm -rf %{buildroot}
@@ -177,55 +192,58 @@ install -m 0644 docs/man/holland.1 %{buildroot}%{_mandir}/man1
 %{__mkdir_p} %{buildroot}%{python_sitelib}/holland/{lib,backup,commands,restore}
 
 # library : holland.lib.common
-cd plugins/holland.lib.common
+pushd plugins/holland.lib.common
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
-cd -
+popd
 
 # library : holland.lib.mysql
-cd plugins/holland.lib.mysql
+pushd plugins/holland.lib.mysql
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
-cd -
+popd
 
 # plugin : holland.backup.example
-cd plugins/holland.backup.example
+pushd plugins/holland.backup.example
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
-cd -
+popd
 install -m 0640 config/providers/example.conf %{buildroot}%{_sysconfdir}/holland/providers/
 
 # plugin : holland.backup.random
-cd plugins/holland.backup.random
+pushd plugins/holland.backup.random
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
-cd -
+popd
 install -m 0640 config/providers/random.conf %{buildroot}%{_sysconfdir}/holland/providers/
 
 # plugin : holland.backup.maatkit
-cd plugins/holland.backup.maatkit
+pushd plugins/holland.backup.maatkit
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
-cd -
+popd
 install -m 0640 config/providers/maatkit.conf %{buildroot}%{_sysconfdir}/holland/providers/
 
-#install -m 0640 config/providers/mysqldump.conf %{buildroot}%{_sysconfdir}/holland/providers/
-
 # plugin : holland.backup.mysqldump
-cd plugins/holland.backup.mysqldump
+pushd plugins/holland.backup.mysqldump
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
-cd -
+popd
 install -m 0640 config/providers/mysqldump.conf %{buildroot}%{_sysconfdir}/holland/providers/
 
 # plugin : holland.backup.mysqlhotcopy
-cd plugins/holland.backup.mysqlhotcopy
+pushd plugins/holland.backup.mysqlhotcopy
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 mkdir -p %{buildroot}%{_mandir}/man5
 install -c -m 0644 docs/man/holland-mysqlhotcopy.5 %{buildroot}%{_mandir}/man5
-cd -
+popd
 install -m 0640 config/providers/mysqlhotcopy.conf %{buildroot}%{_sysconfdir}/holland/providers/
 
 # plugin : holland.backup.mysql-lvm
-cd plugins/holland.backup.mysql-lvm
+pushd plugins/holland.backup.mysql-lvm
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
-cd -
+popd
 install -m 0640 config/providers/mysql-lvm.conf %{buildroot}%{_sysconfdir}/holland/providers/
 
+# plugin : holland.backup.sqlite
+pushd plugins/holland.backup.sqlite
+%{__python} setup.py install -O1 --skip-build --root %{buildroot}
+popd
+install -m 0640 config/providers/sqlite.conf %{buildroot}%{_sysconfdir}/holland/providers/
 
 %clean
 rm -rf %{buildroot}
@@ -233,7 +251,7 @@ rm -rf %{buildroot}
 
 %pre
 if [ $1 -gt 1 -a -d /etc/holland/backupsets/examples/ ]; then
-    mv /etc/holland/backupsets/examples/ /etc/holland/backupsets/example.rpmsave
+    mv /etc/holland/backupsets/examples/ /etc/holland/backupsets/examples.rpmsave
 fi
 exit 0
 
@@ -326,8 +344,20 @@ exit 0
 %config(noreplace) %{_sysconfdir}/holland/providers/mysqlhotcopy.conf
 %{_mandir}/man5/holland-mysqlhotcopy.5*
 
+%files sqlite 
+%defattr(-,root,root,-)
+%doc plugins/holland.backup.sqlite/{README,LICENSE}
+%{python_sitelib}/holland/backup/sqlite.py*
+%{python_sitelib}/holland.backup.sqlite-%{version}-*-nspkg.pth
+%{python_sitelib}/holland.backup.sqlite-%{version}-*.egg-info
+%config(noreplace) %{_sysconfdir}/holland/providers/sqlite.conf
+%config(noreplace) %{_sysconfdir}/holland/backupsets/examples/sqlite.conf
 
 %changelog
+* Mon May 17 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-6
+- Modify license to reflect both BSD and GPLv2
+- Added sqlite plugin
+
 * Fri May 14 2010 Tim Soderstrom <tsoderst@racksapce.com> - 0.9.9-5
 - Added random plugin
 
