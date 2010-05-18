@@ -50,7 +50,7 @@ class SQLitePlugin(object):
                 self.invalid_databases.append(db)
                 continue
             
-            process = Popen([self.sqlite_bin, path, '.exit'], 
+            process = Popen([self.sqlite_bin, path, '.schema'], 
                             stdin=open('/dev/null', 'r'), 
                             stdout=open('/dev/null', 'w'), 
                             stderr=PIPE)

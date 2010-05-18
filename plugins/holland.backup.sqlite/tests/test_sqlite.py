@@ -54,7 +54,7 @@ def test_sqlite_plugin():
     name = 'sqlite/' + time.strftime('%Y%m%d_%H%M%S')
     dry_run = False
     plugin = SQLitePlugin(name, config, config['tmpdir'], dry_run)
-    assert_equals(plugin.estimate_backup_size(), 0)
+    assert_equals(plugin.estimate_backup_size(), 2048)
     plugin.backup()
 
 @with_setup(setup_func, teardown_func)
