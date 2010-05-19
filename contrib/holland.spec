@@ -9,8 +9,7 @@ Version:        %{holland_version}
 Release:        6%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
-# Holland core (everything under ./holland) is BSD.  Plugins (./plugins) are GPLv2
-License:        BSD and GPLv2
+License:        BSD 
 URL:            http://hollandbackup.org
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -279,8 +278,6 @@ rm -rf %{buildroot}
 
 %changelog
 * Mon May 17 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-6
-- Modify license to reflect both BSD and GPLv2 (of Source0), though
-  plugin sub-packages still reflect only GPLv2
 - Added sqlite plugin
 - Loop over plugins rather than explicity build/install each.  Removes
   currently incomplete plugins first (pgdump)
