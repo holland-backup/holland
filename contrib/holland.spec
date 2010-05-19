@@ -6,7 +6,7 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD 
@@ -15,7 +15,7 @@ Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
-BuildRequires:  python-devel python-setuptools
+BuildRequires:  python-devel python-setuptools python-sphinx
 Requires:       python-setuptools
 
 %description
@@ -277,6 +277,9 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/holland/providers/sqlite.conf
 
 %changelog
+* Wed May 19 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-7
+- BuildRequires: python-sphinx (to build docs)
+
 * Mon May 17 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-6
 - Added sqlite plugin
 - Loop over plugins rather than explicity build/install each.  Removes
