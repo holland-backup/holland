@@ -186,13 +186,13 @@ rm -rf %{buildroot}
 %{_localstatedir}/log/holland/
 %{python_sitelib}/holland/commands/*.py*
 %{_sysconfdir}/holland/backupsets/examples
-%attr(0755,root,root) %dir %{_sysconfdir}/holland/
-%attr(0755,root,root) %dir %{_sysconfdir}/holland/backupsets
-%attr(0755,root,root) %dir %{_sysconfdir}/holland/providers
+%attr(0750,root,root) %dir %{_sysconfdir}/holland/
+%attr(0750,root,root) %dir %{_sysconfdir}/holland/backupsets
+%attr(0750,root,root) %dir %{_sysconfdir}/holland/providers
 %{_sysconfdir}/holland/providers/README
 %attr(0640,root,root) %config(noreplace) %{_sysconfdir}/holland/holland.conf
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/logrotate.d/holland
-%attr(0755,root,root) %{_localstatedir}/spool/holland
+%attr(0750,root,root) %{_localstatedir}/spool/holland
 # virtual namespaces
 %dir %{python_sitelib}/holland/backup/
 %dir %{python_sitelib}/holland/restore/
@@ -279,8 +279,11 @@ rm -rf %{buildroot}
 
 %changelog
 * Mon May 17 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-6
-- Modify license to reflect both BSD and GPLv2
+- Modify license to reflect both BSD and GPLv2 (of Source0), though
+  plugin sub-packages still reflect only GPLv2
 - Added sqlite plugin
+- Loop over plugins rather than explicity build/install each.  Removes
+  currently incomplete plugins first (pgdump)
 
 * Fri May 14 2010 Tim Soderstrom <tsoderst@racksapce.com> - 0.9.9-5
 - Added random plugin
