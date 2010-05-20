@@ -1,6 +1,7 @@
 """Command Line Interface"""
 
 import os
+import re
 import logging
 from holland.core.exceptions import BackupError
 from holland.lib.compression import open_stream
@@ -47,6 +48,8 @@ file-per-database   = boolean(default=yes)
 
 additional-options  = force_list(default=list())
 
+estimate-method = string(default='plugin')
+
 [compression]
 method        = option('none', 'gzip', 'pigz', 'bzip2', 'lzma', 'lzop', default='gzip')
 inline              = boolean(default=yes)
@@ -92,6 +95,17 @@ class MySQLDumpPlugin(object):
     def estimate_backup_size(self):
         """Estimate the size of the backup this plugin will generate"""
         LOG.info("Estimating size of mysqldump backup")
+        estimate_method = self.config['mysqldump']['estimate-method']
+
+        if estimate_method.startswith('const:'):
+            try:
+                return parse_size(estimate_method[6:])
+            except ValueError, exc:
+                raise BackupError(str(exc))
+
+        if estimate_method != 'plugin':
+            raise BackupError("Invalid estimate-method '%s'" % estimate_method)
+
         try:
             db_iter = DatabaseIterator(self.client)
             tbl_iter = TableIterator(self.client)
@@ -104,8 +118,23 @@ class MySQLDumpPlugin(object):
         finally:
             self.client.disconnect()
 
+    def _fast_refresh_schema(self):
+        try:
+            db_iter = DatabaseIterator(self.client)
+            tbl_iter = TableIterator(self.client)
+            try:
+                self.client.connect()
+                self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
+            except MySQLError, exc:
+                raise BackupError("MySQL Error [%d] %s" % exc.args)
+        finally:
+            self.client.disconnect()
+
     def backup(self):
         """Run a MySQL backup"""
+
+        if self.schema.timestamp is None:
+            self._fast_refresh_schema()
 
         mock_env = None
         if self.dry_run:
@@ -342,3 +371,24 @@ def add_exclusions(schema, config):
     except IOError, exc:
         LOG.error("Failed to write ignore-table exclusions to %s", config)
         raise
+
+def parse_size(units_string):
+    """Parse a MySQL-like size string into bytes
+    
+    >> parse_size('4G')
+    4294967296
+    """
+
+    units_string = str(units_string)
+
+    units = "kKmMgGtTpPeE"
+
+    match = re.match(r'^(\d+(?:[.]\d+)?)([%s])$' % units, units_string)
+    if not match:
+        raise ValueError("Invalid constant size syntax %r" % units_string)
+    number, unit = match.groups()
+    unit = unit.upper()
+
+    exponent = "KMGTPE".find(unit)
+
+    return int(float(number) * 1024 ** (exponent + 1))
