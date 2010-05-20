@@ -30,6 +30,7 @@ def load_plugin(cfg):
     return plugincls
 
 def _find_existing_parent(path):
+    path = os.path.abspath(path)
     while not os.path.exists(path):
         path, _ = os.path.split(path)
         if _ == '':
