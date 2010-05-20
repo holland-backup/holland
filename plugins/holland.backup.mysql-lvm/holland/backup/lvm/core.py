@@ -14,7 +14,8 @@ def mysql_snapshot_lifecycle(destination=sys.stdout,
                              flush_tables=True,
                              extra_flush_tables=True,
                              innodb_recovery=False,
-                             replication_info_callback=None):
+                             replication_info_callback=None,
+                             log_file=None):
     """Setup a Lvm state for a MySQL environment"""
 
     helper = mysqlhelper.connect(**mysql_auth)
@@ -23,7 +24,7 @@ def mysql_snapshot_lifecycle(destination=sys.stdout,
                                   snapshot_name=snapshot_name,
                                   snapshot_size=snapshot_size,
                                   snapshot_mountpoint=snapshot_mountpoint)
-    archiver = TarBackup(dst=destination)
+    archiver = TarBackup(dst=destination, tarlog=log_file)
     # backup() should be run after everything else
     lifecycle.add_callback('backup', archiver.backup, priority=99)
 

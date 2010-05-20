@@ -16,8 +16,12 @@ class TarBackup(object):
     If dst is a console, an OSError will be raised.
     dst must be a fileobject with a usable fileno() method"""
 
-    def __init__(self, dst=sys.stdout):
+    def __init__(self, dst=sys.stdout, tarlog=None):
         self.dst = dst
+        if tarlog is None:
+            self.tarlog = open('/dev/null', 'w')
+        else:
+            self.tarlog = tarlog
            
     def backup(self, directory):
         """Backup specified directory to dst file descriptor"""
@@ -43,17 +47,14 @@ class TarBackup(object):
         LOGGER.debug("Running %s", subprocess.list2cmdline(argv))
         tar_pid = subprocess.Popen(argv,
                                stdin=open('/dev/null', 'r'),
-                               stdout=os.dup(self.dst.fileno()),
-                               stderr=subprocess.PIPE,
+                               stdout=self.dst.fileno(),
+                               stderr=self.tarlog,
                                close_fds=True)
 
         interrupted = False
-        while True:
+        while tar_pid.poll() is None:
             try:
-                line = tar_pid.stderr.readline().rstrip()
-                if not line:
-                    break
-                LOGGER.info("tar[%d]: %s", tar_pid.pid, line.encode('utf8'))
+                tar_pid.wait()
             except KeyboardInterrupt:
                 interrupted = True
                 LOGGER.info("interrupted in the middle of archiving. "
@@ -61,17 +62,10 @@ class TarBackup(object):
                 try:
                     os.kill(tar_pid.pid, signal.SIGTERM)
                 except OSError, exc:
-                    if exc.errno == errno.ESRCH:
-                        LOGGER.info("tar has already stopped")
-                    else:
+                    if exc.errno != errno.ESRCH:
                         raise
-            except OSError, exc:
-                if exc.errno == errno.EINTR:
-                    continue
-                raise
 
-        status = tar_pid.wait()
-
+        status = tar_pid.poll()
         if status != 0:
             raise IOError("tar exited with non-zero status [%d]" % status)
 

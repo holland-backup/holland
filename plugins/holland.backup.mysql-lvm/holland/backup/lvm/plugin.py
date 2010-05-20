@@ -121,6 +121,7 @@ class LVMBackup(object):
         LOGGER.debug("Instantiating a new LVM snapshot lifecycle")
         lifecycle = mysql_snapshot_lifecycle(destination,
                                              mysql_auth=myauth,
+                                             log_file=open(os.path.join(self.directory, 'archive.log'), 'w'),
                                              replication_info_callback=self._save_replication_info,
                                              **mylvmcfg
                                             )
