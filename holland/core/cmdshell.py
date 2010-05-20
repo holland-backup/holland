@@ -53,11 +53,16 @@ def main():
     if opts.log_level:
         opts.log_level = is_logging_level(opts.log_level)
 
+    if not args:
+        args = ['help']
+
+    if opts.help or args[0] == 'help':
+        if args[0] == 'help':
+            args = args[1:]
+        return run(['help'] + args)
+
     # Bootstrap the environment
     bootstrap(opts)
-
-    if opts.help:
-        args = ['help'] + args
 
     LOGGER.info("Holland %s started with pid %d", HOLLAND_VERSION, os.getpid())
     return run(args)
