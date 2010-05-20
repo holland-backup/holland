@@ -183,6 +183,7 @@ estimated-size          = float(default=0)
 on-disk-size            = float(default=0)
 estimated-size-factor   = float(default=1.0)
 backups-to-keep          = integer(min=0, default=1)
+auto-purge-failures     = boolean(default=yes)
 """.splitlines()
 
 class Backup(object):
