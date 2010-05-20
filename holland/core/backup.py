@@ -52,8 +52,11 @@ def purge_old_backups(backupset, backups_to_keep=1, exclude=()):
     assert backups_to_keep > 0
     LOGGER.info("Purging old backups from backupset '%s'", backupset)
     backupset = spool.find_backupset(backupset)
-    backups = [bk for bk in backupset.list_backups(reverse=True) 
-                if bk not in exclude]
+    if not backupset:
+        backups = []
+    else:
+        backups = [bk for bk in backupset.list_backups(reverse=True) 
+                   if bk not in exclude]
     # Make sure we keep holland:backup.backups-to-keep
     LOGGER.info("Found %d backups.  Keeping %d", len(backups), backups_to_keep)
     purge_list = []
