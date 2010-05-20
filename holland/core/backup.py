@@ -111,8 +111,7 @@ def backup(backupset_name, dry_run=False, skip_purge=False):
     LOGGER.debug("Merging backupset config into local backup.conf config")
     backup_job.config.merge(backupset_cfg)
     backup_job.validate_config()
-    if not dry_run:
-        backup_job.prepare()
+
     # Plugin may fail to initialize due to programming error
     LOGGER.debug("Initializing backup plugin instance")
     try:
@@ -192,6 +191,7 @@ def backup(backupset_name, dry_run=False, skip_purge=False):
         backup_job.flush()
 
     if exc is not None:
-        LOGGER.warning("Purging this backup (%s) due to failure", backup_job.name)
-        backup_job.purge()
+        if backup_job.config['holland:backup']['auto-purge-failures'] is True:
+            LOGGER.warning("Purging this backup (%s) due to failure", backup_job.name)
+            backup_job.purge()
         raise
