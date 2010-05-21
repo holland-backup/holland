@@ -198,7 +198,7 @@ class MySQLClient(object):
         :returns: list of table names
         """
         sql = "SHOW %sTABLES FROM `%s`" % \
-            (['', 'FULL'][int(full)],
+            (['', 'FULL '][int(full)],
              database.replace('`','``'))
         cursor = self.cursor()
         cursor.execute(sql)
@@ -237,11 +237,11 @@ class MySQLClient(object):
         """
 
         sql = "SHOW CREATE TABLE `%s`.`%s`"
+        database = database.replace('`', '``')
+        table = table.replace('`', '``')
         cursor = self.cursor()
         try:
-            if cursor.execute(sql, 
-                              database.replace('`','``'), 
-                              table.replace('`', '``')):
+            if cursor.execute(sql % (database, table)):
                 return cursor.fetchone()[1]
         finally:
             cursor.close()
