@@ -1,6 +1,9 @@
+import logging
 from mocker import Mocker, ANY, CONTAINS, ARGS, KWARGS, MATCH
 import storage
 from _subprocess import PopenMock
+
+LOG = logging.getLogger(__name__)
 
 class MockEnvironment(object):
     def __init__(self):
@@ -58,8 +61,9 @@ def _setup_mysqlclient(mocker):
     mocker.count(min=0,max=None)
 
 def match_mysqldump(param):
-    if isinstance(param, list) and len(param) == 2:
-        return param[0].endswith('mysqldump') and param[1] == '--version'
+    LOG.debug("match_mysqldump %r", param)
+    if param and 'mysqldump' in param[0]:
+        return "--version" in param
     return False
 
 def _setup_subprocess(mocker):
