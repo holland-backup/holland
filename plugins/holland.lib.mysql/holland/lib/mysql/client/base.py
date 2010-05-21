@@ -224,6 +224,28 @@ class MySQLClient(object):
         finally:
             cursor.close()
 
+    def show_create_table(self, database, table):
+        """Fetch DDL for a table
+
+        Runs SHOW CREATE TABLE `database`.`table` and
+        returns only the DDL portion
+
+        :param database: database the table is in
+        :param table: name of the table
+        :raises: MySQLError, if the table does not exist
+        :returns: DDL string for the given string
+        """
+
+        sql = "SHOW CREATE TABLE `%s`.`%s`"
+        cursor = self.cursor()
+        try:
+            if cursor.execute(sql, 
+                              database.replace('`','``'), 
+                              table.replace('`', '``')):
+                return cursor.fetchone()[1]
+        finally:
+            cursor.close()
+
     def show_slave_status(self):
         """Fetch MySQL slave status
 
