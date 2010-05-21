@@ -120,7 +120,7 @@ class LVMBackup(object):
         myauth = mysql_auth_options(self.config['mysql:client'])
         mylvmcfg = mysql_lvm_options(self.config)
 
-        if 'innodb-recovery' in mylvmcfg:
+        if self.config['mysql-lvm']['innodb-recovery']:
             mylvmcfg['innodb-recovery'] = os.path.join(self.directory, 
                                                        'innodb_recovery.log')
 
