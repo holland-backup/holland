@@ -147,6 +147,7 @@ def mysqldump_version(command):
         return tuple([int(digit) for digit in
                         re.search(r'(\d+)[.](\d+)[.](\d+)', output).groups()])
     except AttributeError, exc:
+        LOG.debug("%s provided output %r", subprocess.list2cmdline(args), output)
         raise MySQLDumpError("Failed to determine mysqldump version for %s" % \
                              command)
 
