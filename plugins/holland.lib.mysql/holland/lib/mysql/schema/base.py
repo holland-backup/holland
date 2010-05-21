@@ -1,6 +1,9 @@
 """Summarize a MySQL Schema"""
 
 import time
+import logging
+
+LOG = logging.getLogger(__name__)
 
 class MySQLSchema(object):
     """A catalog summary of a MySQL Instance"""
@@ -246,5 +249,87 @@ class TableIterator(object):
         self.client = client
 
     def __call__(self, database):
+        raise NotImplementedError()
+
+class MetadataTableIterator(TableIterator):
+    """Iterate over SHOW TABLE STATUS in the requested database
+    and yield Table instances
+    """
+
+    def __call__(self, database):
         for metadata in self.client.show_table_metadata(database):
             yield Table(**metadata)
+
+import re
+
+class SimpleTableIterator(MetadataTableIterator):
+    """Iterator over tables returns by the client instance
+
+    Unlike a MetadataTableIterator, this will not lookup the table size
+    but rather just uses SHOW DATABASES/SHOW TABLES/SHOW CREATE TABLE
+
+    SHOW CREATE TABLE is only used for engine lookup in MySQL 5.0.
+    """
+    
+    ENGINE_PCRE = re.compile(r'^[)].*ENGINE=(\S+)', re.M)
+
+    def __init__(self, client, record_engines=False):
+        """Construct a new iterator to produce `Table` instances for the
+        database requested by the __call__ method.
+
+        :param client: `MySQLClient` instance to use to iterate over objects in
+        the specified database
+        """
+        self.client = client
+        self.record_engines = record_engines
+
+    def _faster_mysql51_metadata(self, database):
+        sql = ("SELECT TABLE_SCHEMA AS `database`, "
+               "          TABLE_NAME AS `name`, "
+               "          0 AS `data_size`, "
+               "          0 AS `index_size`, "
+               "          COALESCE(ENGINE, 'view') AS `engine`, "
+               "          TRANSACTIONS = 'YES' AS `is_transactional` "
+               "FROM INFORMATION_SCHEMA.TABLES "
+               "JOIN INFORMATION_SCHEMA.ENGINES USING (ENGINE) "
+               "WHERE TABLE_SCHEMA = %s")
+        cursor = self.client.cursor()
+        try:
+            cursor.execute(sql, database)
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def _lookup_engine(self, database, table):
+        ddl = self.client.show_create_table(database, table)
+        LOG.debug("_lookup_engine(%s,%s) => %s", database, table, ddl)
+        match = self.ENGINE_PCRE.search(ddl)
+        if match:
+            return match.group(1)
+        raise ValueError("Failed to lookup storage engine")
+
+    def __call__(self, database):
+        if self.client.server_version >= (5,1):
+            for metadata in self._faster_mysql51_metadata():
+                yield Table(**metadata)
+        else:
+            for table, kind in self.client.show_tables(database, full=True):
+                metadata = [
+                    ('database', database),
+                    ('name', table),
+                    ('data_size', 0),
+                    ('index_size', 0),
+                ]
+
+                if kind == 'VIEW':
+                    metadata.append(('engine', 'view'))
+                    metadata.append(('is_transactional', 'yes'))
+                else:
+                    if self.record_engines:
+                        engine = self._lookup_engine(database, table).lower()
+                        metadata.append(('engine', engine))
+                        metadata.append(('is_transactional', engine == 'innodb'))
+                    else:
+                        metadata.append(('engine', ''))
+                        metadata.append(('is_transactional', False))
+                yield Table(**dict(metadata))
