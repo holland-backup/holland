@@ -42,7 +42,7 @@ def mysql_snapshot_lifecycle(destination=sys.stdout,
     # we could skip this, but instead we have the callback
     # log an explicit "We skipped innodb recovery"
     if innodb_recovery:
-        ibrecovery = InnoDBRecovery()
+        ibrecovery = InnoDBRecovery(error_log=innodb_recovery)
         # ibrecovery should run before any other backup process,
         # so we lower the callback priority
         lifecycle.add_callback('backup', ibrecovery.run_recovery, priority=0)

@@ -115,13 +115,20 @@ class LVMBackup(object):
         destination = os.path.join(self.directory, 'backup.tar')
         zopts = compression_options(self.config['compression'])
         destination = open_stream(destination, 'w', *zopts)
-        LOGGER.info("Saving snapshot to %s (compression=%s)", destination.name, zopts[0])
+        LOGGER.info("Saving snapshot to %s (compression=%s)",
+                    destination.name, zopts[0])
         myauth = mysql_auth_options(self.config['mysql:client'])
         mylvmcfg = mysql_lvm_options(self.config)
+
+        if 'innodb-recovery' in mylvmcfg:
+            mylvmcfg['innodb-recovery'] = os.path.join(self.directory, 
+                                                       'innodb_recovery.log')
+
+        tar_log = open(os.path.join(self.directory, 'archive.log'), 'w')
         LOGGER.debug("Instantiating a new LVM snapshot lifecycle")
         lifecycle = mysql_snapshot_lifecycle(destination,
                                              mysql_auth=myauth,
-                                             log_file=open(os.path.join(self.directory, 'archive.log'), 'w'),
+                                             log_file=tar_log,
                                              replication_info_callback=self._save_replication_info,
                                              **mylvmcfg
                                             )
@@ -180,7 +187,9 @@ class LVMBackup(object):
                 log_pos = slave_status['exec_master_log_pos']
                 replication_info['slave_master_log_file'] = log_file
                 replication_info['slave_master_log_pos'] = log_pos
-                LOGGER.info("Recorded slave position w/r/t master: slave_master_log_file='%s', slave_master_log_pos=%d",
+                LOGGER.info("Recorded slave position w/r/t master: "
+                            "slave_master_log_file='%s', "
+                            "slave_master_log_pos=%d",
                             log_file, log_pos)
         except MySQLError, exc:
             LOGGER.error("Failed to record MySQL slave log data: [%d] %s", 

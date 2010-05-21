@@ -15,8 +15,9 @@ class InnoDBRecovery(object):
     """Start a bootstrap process on the target MySQL data directory and 
     allow InnoDB recovery to complete."""
 
-    def __init__(self, mysqld=None):
+    def __init__(self, mysqld=None, error_log=None):
         self.mysqld = mysqld
+        self.error_log = error_log
 
     # This should happen before we actually back anything up
     # normal backups should be at priority 50. We are at 10
@@ -27,7 +28,8 @@ class InnoDBRecovery(object):
         tmpdir = _make_mysql_tmpdir()
         status = _bootstrap_mysql(mysqld_path=mysqld_path,
                                   datadir=datadir,
-                                  tmpdir=tmpdir)
+                                  tmpdir=tmpdir,
+                                  error_log=self.error_log)
         try:
             shutil.rmtree(tmpdir)
         except IOError, exc:
@@ -52,7 +54,7 @@ class InnoDBRecovery(object):
         else:
             raise OSError("Could not find mysqld")
         
-def _bootstrap_mysql(mysqld_path, datadir, tmpdir):
+def _bootstrap_mysql(mysqld_path, datadir, tmpdir, error_log):
     """Run mysqld in --bootstrap mode to initiate InnoDB recovery"""
     argv = [
         mysqld_path,
@@ -61,7 +63,9 @@ def _bootstrap_mysql(mysqld_path, datadir, tmpdir):
         '--user=mysql',
         '--bootstrap',
         '--skip-slave-start',
-        '--default-storage-engine=InnoDB'
+        '--skip-log-bin',
+        '--default-storage-engine=InnoDB',
+        '--log-error=%s' % error_log,
     ]
     # This helps silence a MySQL error to clean up the error logs slightly
     relay_log = _find_relay_log(datadir)
