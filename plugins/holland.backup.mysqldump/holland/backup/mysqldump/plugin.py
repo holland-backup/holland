@@ -5,9 +5,10 @@ import re
 import logging
 from holland.core.exceptions import BackupError
 from holland.lib.compression import open_stream
-from holland.lib.mysql import MySQLSchema, include_glob, exclude_glob, \
-			      DatabaseIterator, TableIterator, \
-                              connect, MySQLError
+from holland.lib.mysql import MySQLSchema, connect, MySQLError
+from holland.lib.mysql import include_glob, exclude_glob
+from holland.lib.mysql import DatabaseIterator, MetadataTableIterator, \
+                              SimpleTableIterator
 from holland.backup.mysqldump.base import start
 from holland.backup.mysqldump.util import INIConfig, update_config
 from holland.backup.mysqldump.util.ini import OptionLine, CommentLine
@@ -108,7 +109,7 @@ class MySQLDumpPlugin(object):
 
         try:
             db_iter = DatabaseIterator(self.client)
-            tbl_iter = TableIterator(self.client)
+            tbl_iter = MetadataTableIterator(self.client)
             try:
                 self.client.connect()
                 self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
@@ -121,7 +122,7 @@ class MySQLDumpPlugin(object):
     def _fast_refresh_schema(self):
         try:
             db_iter = DatabaseIterator(self.client)
-            tbl_iter = TableIterator(self.client)
+            tbl_iter = SimpleTableIterator(self.client, record_engines=True)
             try:
                 self.client.connect()
                 self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
