@@ -4,7 +4,8 @@ import re
 import csv
 from cStringIO import StringIO
 from subprocess import Popen, PIPE, STDOUT
-from constants import PVS_ATTR, VGS_ATTR, LVS_ATTR
+
+from holland.lib.lvm.constants import PVS_ATTR, VGS_ATTR, LVS_ATTR
 
 class LVMError(Exception):
     """Error raised upon LVM problem"""
