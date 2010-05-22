@@ -1,7 +1,7 @@
 holland.lib.lvm
 ==================
 
-This package provides common libraries used by plugins implementing LVM 
+This package provides a standard library used by plugins implementing LVM 
 functionality.
 
 The current modules in holland.lib.lvm as of this writing are:
