@@ -1,7 +1,7 @@
 """High-level Object Oriented LVM API"""
 
 import os
-from newraw import pvs, vgs, lvs, blkid
+from holland.lib.lvm.raw import pvs, vgs, lvs, blkid
 
 class Volume(object):
     """Abstract Volume object for LVM Volume implementations
