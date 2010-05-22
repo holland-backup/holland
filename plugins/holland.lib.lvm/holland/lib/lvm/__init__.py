@@ -1,19 +1,18 @@
 """LVM API"""
 
-from fmt import validate_name
-from api import pvs, vgs, lvs, lvsnapshot, lvremove, mount, unmount, LVMError
-from objects import LogicalVolume, VolumeGroup, PhysicalVolume
+from holland.lib.lvm.raw import pvs, vgs, lvs, blkid, mount, umount
+from holland.lib.lvm.base import PhysicalVolume, VolumeGroup, LogicalVolume
 
 __all__ = [
     'pvs',
     'vgs',
     'lvs',
-    'lvsnapshot',
-    'lvremove',
-    'unmount',
+    #'lvsnapshot',
+    #'lvremove',
+    'umount',
     'mount',
-    'LVMError',
-    'validate_name',
+    #'LVMError',
+    'PhysicalVolume',
+    'VolumeGroup',
     'LogicalVolume',
-    'VolumeGroup'
 ]
