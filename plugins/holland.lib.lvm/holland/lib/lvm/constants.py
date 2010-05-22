@@ -67,5 +67,8 @@ LVS_ATTR = [
 #    'regionsize',
     'mirror_log',
     'modules',
-    'vg_name'
+    'vg_name',
+    'vg_extent_size',
+    'vg_extent_count',
+    'vg_free_count',
 ]
