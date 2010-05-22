@@ -1,239 +1,200 @@
-"""Object Oriented LVM interface"""
+"""High-level Object Oriented LVM API"""
 
 import os
-import logging
-from holland.backup.lvm.util.path import getmount, getdevice
-from api import is_lvm_device, pvs, vgs, lvs, mount, unmount, \
-                lvsnapshot, lvremove, LVMError
-from fmt import format_size, parse_size
+from newraw import pvs, vgs, lvs, blkid
 
-__all__ = [
-    'PhysicalVolume',
-    'VolumeGroup',
-    'LogicalVolume',
-    'LVMError'
-]
+class Volume(object):
+    """Abstract Volume object for LVM Volume implementations
 
-class PhysicalVolume(object):
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
+    This class should not directly be instantiated, but rather one
+    of its subclasses such as PhysicalVolume, VolumeGroup or LogicalVolume
+    """
 
-    def find_one(cls, name):
-        for pvinfo in pvs(name):
-            return PhysicalVolume(**pvinfo)
-    find_one = classmethod(find_one)
+    def __new__(cls, *args, **kwargs):
+        if cls is Volume:
+            raise NotImplementedError('Volume is an abstract base class and '
+                                      'should not be directly instantiated')
+        return super(Volume, cls).__new__(cls, *args, **kwargs)
 
-class VolumeGroup(object):
-    """LVM Volume Group"""
-    def __init__(self, **kwargs):
-        # silence pylint
-        self.vg_name = None
-        self.__dict__.update(kwargs)
+    def __init__(self, attributes=()):
+        self.attributes = dict(attributes)
 
-    def find_all(cls, name):
-        """Find all volume groups matching the given name"""
-        result = []
-        for vginfo in vgs(name):
-            logging.debug("Creating VolumeGroup from info %r", vginfo)
-            result.append(VolumeGroup(**vginfo))
-        return result
-    find_all = classmethod(find_all)
-    find = find_all
 
-    def find_one(cls, name):
-        """Find first LVM volume group matching the given name"""
-        for vginfo in vgs(name):
-            logging.debug("Creating VolumeGroup from info %r", vginfo)
-            return VolumeGroup(**vginfo)
-    find_one = classmethod(find_one)
-
-    def lvs(self):
-        """List logical volumes for this volume group"""
-        lv_list = LogicalVolume.find(None)
-        result = []
-        for logical_volume in lv_list:
-            if logical_volume.vg_name == self.vg_name:
-                result.append(logical_volume)
-        return result
-    lvs = property(lvs)
-
-    def __str__(self):
-        """String representation of this volume group"""
-        return repr(self)
-
-    def __repr__(self):
-        """Representation of this volume group"""
-        attributes = ['%s=%r' % (key, value)
-                        for key, value in self.__dict__.items()
-                            if key != 'self']
-        return 'VolumeGroup(%s)' % ','.join(attributes)
-
-class LogicalVolume(object):
-    """LVM Logical Volume"""
-
-    # 15G max snapshot size in bytes
-    # Used when no snapshot size is provided
-    MAX_SNAPSHOT_SIZE = 15*1024**3
-
-    def __init__(self, **kwargs):
-        # silence pylint
-        self.vg_name = None
-        self.lv_name = None
-        self.lv_attr = None
-        self.__dict__.update(kwargs)
-
-    def find_all(cls, name):
-        """Find all logical volumes matching name"""
-        result = []
-        for lvinfo in lvs(name):
-            result.append(LogicalVolume(**lvinfo))
-        return result
-    find_all = classmethod(find_all)
-    find = find_all
-
-    def find_one(cls, name):
-        """Find the first logical volume matching name"""
-        for lvinfo in lvs(name):
-            return LogicalVolume(**lvinfo)
-    find_one = classmethod(find_one)
-
-    def find_mounted(cls, path):
-        """Find a currently mounted logical volume by mountpoint path"""
-        dev = getdevice(getmount(path))
+    def __getattr__(self, key):
         try:
-            return cls.find_one(dev)
-        except LVMError, exc:
-            logging.debug("Failed to find logical volume for device %r (path=%r): %s", dev, path, exc)
-            return None
-    find_mounted = classmethod(find_mounted)
+            return self.attributes[key]
+        except KeyError:
+            return super(Volume, self).__getattr__(key)
+ 
+    def reload(self):
+        """Reload a Volume with underlying data, which may have changed"""
 
-    def vgs(self):
-        """Find volume group for this Logical Volume"""
-        vg_list = VolumeGroup.find(self.vg_name)
+        raise NotImplementedError()
 
-        logging.debug("vg_list => %r", vg_list)
-        #assert len(vg_list) != 0,
-        #    "No volume group found for logical volume %r" % \
-        # (self.lv_name)
-        #assert len(vg_list) == 1,
-        #    "More than one volume group found for logical volume %r" % \
-        #   (self.vg_name)
+    def lookup(cls, pathspec):
+        """Lookup a volume for the pathspec given
 
-        return vg_list[0]
-    vgs = property(vgs)
-    volume_group = vgs
+        This will always return the first volume and raise an error
+        if multiple volumes are found.
 
-    def device_path(self):
-        """Find the canonical path for this logical volume
-
-        This returns a string path of the form
-        /dev/volume-group/logical-volume
+        :returns: Volume instance
         """
-        return os.path.join(os.sep, 'dev',
-                            self.volume_group.vg_name,
-                            self.lv_name)
-    device_path = property(device_path)
+        raise NotImplementedError()
+    lookup = classmethod(lookup)
 
-    def exists(self):
-        """Check whether this logical volume still exists"""
-        return os.path.exists(self.device_path)
+    def search(cls, pathspec=None):
+        """Search for volumes for the pathspec given
 
-    def is_mounted(self):
-        """Check if this logical volume is mounted"""
-        device = os.path.join('/dev', self.vg_name, self.lv_name)
-        real_device_path = os.path.realpath(device)
-        for line in open('/proc/mounts', 'r'):
-            dev = line.split()[0]
-            if os.path.realpath(dev) == real_device_path:
-                return True
-        else:
-            return False
+        This will search for any volumes matching the pathspec and return
+        an iterable to walk across the volumes found.
 
-    def snapshot(self, name=None, size=None):
-        """Snapshot this logical volume with specified name and size"""
-        if not name:
-            name = self.lv_name + '_snapshot'
-        volume_group = self.volume_group
-        if not size:
-            vg_size = int(volume_group.vg_size)
-            vg_free = int(volume_group.vg_free)
-            size = min(vg_size*0.2, vg_free, self.MAX_SNAPSHOT_SIZE)
-        else:
-            size = parse_size(size)
-
-        # floor division to avoid exceeding the actual available extents
-        snapshot_extents = size // int(volume_group.vg_extent_size)
-
-        if snapshot_extents == 0:
-            raise LVMError("No free snapshot space on %s" % str(self))
-
-        if snapshot_extents > volume_group.vg_free_count:
-            raise LVMError(
-                "Excessive snapshot size (%s) exceeds free extents (%d)." % \
-                    (size, self.vg_free_count)
-                )
-
-        lvsnapshot(lv_name='/'.join([self.vg_name, self.lv_name]),
-                   snapshot_name=name,
-                   snapshot_extents=snapshot_extents)
-
-        return LogicalVolume.find('/'.join([self.vg_name, name]))[0]
-
-    def mount(self, path):
-        """Mount this logical volume and the specified path"""
-        device = '/'.join(['/dev', self.vg_name, self.lv_name])
-        logging.info("mounting %s to %s", device, path)
-        options = None
-        if fs_type(device) == 'xfs':
-            options = 'nouuid'
-        mount(device, path, options)
-        assert self.is_mounted() is True, ("Mount of %s to %s failed " + \
-                                           "even though mount() did " + \
-                                           "not raise an error" % \
-                                           (device, path))
-
-    def unmount(self):
-        """Unmount this logical volume"""
-        device = '/'.join(['/dev', self.vg_name, self.lv_name])
-        unmount(device)
-        assert self.is_mounted() is False, "Unmount of %s failed" % (device,)
-
-    def remove(self):
-        """Remove this logical volume, if it is a snapshot"""
-        try:
-            self.refresh()
-        except:
-            logging.error("Failed to refresh %s", self)
-
-        assert self.lv_attr[0] in 'sS', "Only snapshots can be " + \
-                                        "removed via this API"
-
-        if self.lv_attr[0] == 'S':
-            logging.fatal("Snapshot %s exceeded size of %s",
-                            os.path.join('/dev/', self.vg_name, self.lv_name),
-                            format_size(int(self.lv_size)))
-
-        if self.is_mounted():
-            raise AssertionError("Logical volume %r is mounted." %
-                os.path.join(self.vg_name, self.lv_name))
-        lvremove('/'.join([self.vg_name, self.lv_name]))
-
-    def refresh(self):
-        """Refresh this LogicalVolume to match the underlying volume"""
-        for lv in lvs():
-            if lv['lv_uuid'] == self.lv_uuid:
-                self.__dict__.update(lv)
-                return
-        else:
-            raise LVMError("No system logical volume found with uuid %s" % self.lv_uuid)
-
-    def __str__(self):
-        extra = self.lv_attr in 'sS' and '[snapshot]' or ''
-        return os.path.join("%s/dev" % extra,
-                            self.vg_name, self.lv_name)
+        :returns: iterable of Volume instances
+        """
+        raise NotImplementedError()
+    search = classmethod(search)
 
     def __repr__(self):
-        attributes = ['%s=%r' % (key, value)
-                        for key, value in self.__dict__.items()
-                            if key != 'self']
-        return "LogicalVolume(%s)" % ','.join(attributes)
+        return '%s(id=%s)' % (self.__class__.__name__, self.id)
+
+class PhysicalVolume(Volume):
+    """LVM Physical Volume representation"""
+
+    def reload(self):
+        """Reload this PhysicalVolume"""
+        self.attributes, = pvs(self.pv_name)
+
+    def lookup(cls, pathspec):
+        """Lookup a physical volume for the pathspec given
+
+        This will always return the first volume found and raise an error
+        if multiple volumes match ``pathspec``
+
+        :returns: PhysicalVolume instance
+        """
+        try:
+            volume, = pvs(pathspec)
+            return cls(volume)
+        except ValueError:
+            #XX: Perhaps we should be more specific :)
+            raise
+    lookup = classmethod(lookup)
+
+    def search(cls, pathspec=None):
+        """Search for volumes matching ``pathspec``
+
+        This will search for any physical volumes matching ``pathspec`` and
+        return an iterable that provides instance of PhysicalVolume
+
+        :returns: iterable of PhysicalVolume instances
+        """
+
+        for volume in pvs(pathspec):
+            yield volume
+    search = classmethod(search)
+
+    def __repr__(self):
+        return "%s(device=%r)" % (self.__class__.__name__, self.pv_name)
+
+class VolumeGroup(Volume):
+    """LVM VolumeGroup representation"""
+
+    def reload(self):
+        """Reload this VolumeGroup"""
+        self.attributes, = vgs(self.vg_name)
+
+    def lookup(cls, pathspec):
+        """Lookup a volume group for ``pathspec``
+
+        This will always return the first volume group found and raise an error
+        if multiple volumes match ``pathspec``
+
+        :returns: VolumeGroup instance
+        """
+        try:
+            volume, = vgs(pathspec)
+            return cls(volume)
+        except ValueError:
+            #XX: Perhaps we should be more specific :)
+            raise
+    lookup = classmethod(lookup)
+
+    def search(cls, pathspec=None):
+        """Search for volume groups matching ``pathspec``
+
+        This will search for any volume groups matching ``pathspec`` and
+        return an iterable that provides instance of VolumeGroup
+
+        :returns: iterable of VolumeGroup instances
+        """
+
+        for volume in vgs(pathspec):
+            yield cls(volume)
+    search = classmethod(search)
+
+    def __repr__(self):
+        return '%s(vg_name=%s)' % (self.__class__.__name__, self.vg_name)
+
+class LogicalVolume(Volume):
+    """LVM Logical Volume representation"""
+
+    def lookup(cls, pathspec):
+        """Lookup a logical volume for ``pathspec``
+
+        This will always return the first volume group found and raise an error
+        if multiple volumes match ``pathspec``
+
+        :returns: LogicalVolume instance
+        """
+        try:
+            volume, = lvs(pathspec)
+            return cls(volume)
+        except ValueError:
+            #XX: Perhaps we should be more specific :)
+            raise
+    lookup = classmethod(lookup)
+
+    def search(cls, pathspec=None):
+        """Search for logical volumes matching ``pathspec``
+
+        This will search for any logical volumes matching ``pathspec`` and
+        return an iterable that provides instances of LogicalVolume
+
+        :returns: iterable of LogicalVolume instances
+        """
+
+        for volume in lvs(pathspec):
+            yield cls(volume)
+    search = classmethod(search)
+
+    def reload(self):
+        """Reload the data for this LogicalVolume"""
+        self.attributes, = lvs(self.device_name())
+
+    def volume_group(self):
+        """Lookup this LogicalVolume's volume_group
+        
+        :returns: VolumeGroup
+        """
+        return VolumeGroup.lookup(self.vg_name)
+
+    def device_name(self):
+        """Lookup the canonical device name for the underlying locail volume
+
+        :returns: device name string
+        """
+        return os.path.realpath('/dev/' + self.vg_name + '/' + self.lv_name)
+
+    def filesystem(self):
+        """Lookup the filesystem type for the underyling logical volume
+
+        :returns: filesystem type name string
+        """
+        try:
+            device_info, = blkid(self.device_name())
+            return device_info['type']
+        except ValueError:
+            raise
+    filesystem = property(filesystem)
+
+    def __repr__(self):
+        return '%s(device=%r)' % (self.__class__.__name__, self.device_name())
