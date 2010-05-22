@@ -3,12 +3,10 @@
 import re
 import csv
 from cStringIO import StringIO
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, PIPE, STDOUT, list2cmdline
 
 from holland.lib.lvm.constants import PVS_ATTR, VGS_ATTR, LVS_ATTR
-
-class LVMError(Exception):
-    """Error raised upon LVM problem"""
+from holland.lib.lvm.errors import LVMCommandError
 
 def pvs(*physical_volumes):
     """Report information about physical volumes
@@ -33,7 +31,7 @@ def pvs(*physical_volumes):
     stdout, stderr = process.communicate()
 
     if process.returncode != 0:
-        raise LVMError('pvs', process.returncode, stderr)
+        raise LVMCommandError('pvs', process.returncode, stderr)
 
     return parse_lvm_format(PVS_ATTR, stdout)
 
@@ -60,7 +58,7 @@ def vgs(*volume_groups):
     stdout, stderr = process.communicate()
 
     if process.returncode != 0:
-        raise LVMError('vgs', process.returncode, stderr)
+        raise LVMCommandError('vgs', process.returncode, stderr)
 
     return parse_lvm_format(VGS_ATTR, stdout)
 
@@ -90,7 +88,7 @@ def lvs(*volume_groups):
     stdout, stderr = process.communicate()
 
     if process.returncode != 0:
-        raise LVMError('lvs', process.returncode, stderr)
+        raise LVMCommandError('lvs', process.returncode, stderr)
 
     return parse_lvm_format(LVS_ATTR, stdout)
 
@@ -122,7 +120,8 @@ def blkid(*devices):
     stdout, stderr = process.communicate()
 
     if process.returncode != 0:
-        raise Exception('blkid', process.returncode, stderr)
+        cmd_str = list2cmdline(blkid_args)
+        raise LVMCommandError(cmd_str, process.returncode, stderr)
 
     return parse_blkid_format(stdout)
 
@@ -142,7 +141,7 @@ def parse_blkid_format(text):
 def mount(device, path, options=None, vfstype=None):
     """Mount a filesystem
 
-    :raises: Exception
+    :raises: LVMCommandError
     """
     mount_args = [
         'mount',
@@ -160,14 +159,15 @@ def mount(device, path, options=None, vfstype=None):
     stdout, stderr = process.communicate()
 
     if process.returncode != 0:
-        raise Exception('mount', process.returncode, stderr)
+        cmd_str = list2cmdline(mount_args)
+        raise LVMCommandError(cmd_str, process.returncode, stderr)
 
     return stdout
 
 def umount(*path):
     """Unmount a file system
 
-    :raises: Exception
+    :raises: LVMCommandError
     """
     process = Popen(['umount'] + list(path), 
                     stdout=PIPE, 
@@ -177,7 +177,8 @@ def umount(*path):
     stdout, stderr =  process.communicate()
 
     if process.returncode != 0:
-        raise Exception('umount', process.returncode, stderr)
+        cmd_str = list2cmdline(['umount'] + list(path))
+        raise LVMCommandError(cmd_str, process.returncode, stderr)
 
     return stdout
 
