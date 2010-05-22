@@ -1,7 +1,7 @@
 """High-level Object Oriented LVM API"""
 
 import os
-from holland.lib.lvm.raw import pvs, vgs, lvs, blkid
+from holland.lib.lvm.raw import pvs, vgs, lvs, blkid, lvsnapshot
 from holland.lib.lvm.util import getdevice
 
 class Volume(object):
@@ -179,6 +179,17 @@ class LogicalVolume(Volume):
     def reload(self):
         """Reload the data for this LogicalVolume"""
         self.attributes, = lvs(self.device_name())
+
+    def snapshot(self, name, size):
+        """Snapshot the current LogicalVolume instance and create a snapshot
+        volume with the requested volume name and size
+
+        :param name: name of the volume
+        :param size: size of the snapshot
+        :raises: LVMCommandError on error
+        :returns: LogicalVolume that is a snapshot of this one on success
+        """
+        return lvsnapshot(self.device_name(), name, size)
 
     def volume_group(self):
         """Lookup this LogicalVolume's volume_group
