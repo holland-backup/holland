@@ -1,26 +1,15 @@
-holland.lib.common
+holland.lib.lvm
 ==================
 
-This package provides common libraries used by various holland plugins and
-would not otherwise be used by the core holland framework, or depends on
-platform specific behavior.
+This package provides common libraries used by plugins implementing LVM 
+functionality.
 
-The current modules in holland.lib.common as of this writing are:
+The current modules in holland.lib.lvm as of this writing are:
 
-* holland.lib.archive - Generic support for archiving files using zip and tar
-* holland.lib.compression - file like object that wrap compression commands.
-                            These are used heavily by plugins that compress
-                            output as part of calling some other program using
-                            the python standard subprocess module.
-* holland.lib.safefilename - encode filenames in a portable, decodable way
-                             This module is primarily used by the mysqldump
-                             plugin in order to ensure that database names
-                             from MySQL will always map to safe filenames.
-                             Unicode or otherwise invalid database names are
-                             always encoded through safefilename.  Please see
-                             the holland-mysqldump plugin for more information.
-* holland.lib.which - Trent Mick's ``which`` module. A portable way to lookup
-                      commands on a system path. Similar to the command 
-                      'which', but also works on Windows and implemented in
-                      pure python.
-* holland.lib.multidict - A simple Multivalued dictionary implementation.
+* holland.lib.lvm.command  - Low-level API that accesses LVM commands directly
+* holland.lib.lvm.base     - Base object classes to access LVM volumes through
+                             an object-oriented API
+* holland.lib.lvm.snapshot - Snapshot support to walk through the lifecycle of
+                             a standard LVM snapshot and perform pluggable 
+                             callback actions at each step
+* holland.lib.lvm.util     - Utility methods used by holland.lib.lvm
