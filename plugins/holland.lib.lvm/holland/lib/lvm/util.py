@@ -1,11 +1,9 @@
 """LVM formatting and validation methods"""
 
-import re
-from math import log
-
-
 import os
-import math
+import re
+import signal
+from math import log
 
 __all__ = [
     'getmount',
@@ -145,7 +143,7 @@ def format_bytes(bytes, precision=2):
     """Format an integer number of bytes to a human readable string."""
 
     if bytes != 0:
-        exponent = int(math.log(abs(bytes), 1024))
+        exponent = int(log(abs(bytes), 1024))
     else:       
         exponent = 0
 
@@ -154,3 +152,37 @@ def format_bytes(bytes, precision=2):
         bytes / (1024 ** exponent),
         ['Bytes','KB','MB','GB','TB','PB','EB','ZB','YB'][int(exponent)]
     )
+
+
+class SignalManager(object):
+    """Manage signals around critical sections"""
+
+    def __init__(self):
+        self.pending = []
+        self._handlers = {}
+
+    def trap(self, *signals):
+        """Request the set of signals to be trapped """
+        for sig in signals:
+            prev = signal.signal(sig, self._trap_signal)
+            self._handlers[sig] = prev
+
+    def _trap_signal(self, signum, *args):
+        """Trap a signal and note it in this instance's pending list"""
+        args = args
+        self.pending.append(signum)
+
+    def clear(self):
+        """Clear pending signals and release trapped signals, restoring the
+        original handlers
+        """
+        del self.pending[:]
+        for sig in self._handlers:
+            signal.signal(sig, self._handlers[sig])
+
+
+def detach_process():
+    """A simple preexec_fn for subprocess to detach the subprocess from 
+    the parent's session to avoid signal propagation, etc.
+    """
+    os.setsid()
