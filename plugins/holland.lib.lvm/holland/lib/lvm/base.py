@@ -2,6 +2,7 @@
 
 import os
 from holland.lib.lvm.raw import pvs, vgs, lvs, blkid
+from holland.lib.lvm.util import getdevice
 
 class Volume(object):
     """Abstract Volume object for LVM Volume implementations
@@ -152,6 +153,15 @@ class LogicalVolume(Volume):
             #XX: Perhaps we should be more specific :)
             raise
     lookup = classmethod(lookup)
+
+    def lookup_from_fspath(cls, path):
+        """Lookup a logical volume for the filesystem path ``path``
+
+        :returns: LogicalVolumeInstance
+        """
+        device = getdevice(path)
+        return cls.lookup(device)
+    lookup_from_fspath = classmethod(lookup_from_fspath)
 
     def search(cls, pathspec=None):
         """Search for logical volumes matching ``pathspec``
