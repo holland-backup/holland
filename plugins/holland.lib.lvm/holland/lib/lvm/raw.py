@@ -7,6 +7,7 @@ from subprocess import Popen, PIPE, STDOUT, list2cmdline
 
 from holland.lib.lvm.constants import PVS_ATTR, VGS_ATTR, LVS_ATTR
 from holland.lib.lvm.errors import LVMCommandError
+from holland.lib.lvm.util import detach_process, SignalManager
 
 def pvs(*physical_volumes):
     """Report information about physical volumes
@@ -99,6 +100,48 @@ def parse_lvm_format(keys, values):
     kwargs = dict(delimiter=',', skipinitialspace=True)
     for row in csv.reader(stream, **kwargs):
         yield dict(zip(keys, row))
+
+import time
+def lvsnapshot(snapshot_lv_name, orig_lv_path, snapshot_extents, chunksize=None):
+    """Create a snapshot of an existing logical volume
+
+    :param snapshot_lv_name: name of the snapshot
+    :param orig_lv_path: path to the logical volume being snapshotted
+    :param snapshot_extents: size to allocate to snapshot volume in extents
+    :param chunksize: (optional) chunksize of the snapshot volume
+    """
+    lvcreate_args = [
+        'lvcreate',
+        '--snapshot',
+        '--name', snapshot_lv_name,
+        '--extents', str(snapshot_extents),
+        orig_lv_path,
+    ]
+
+    if chunksize:
+        lvcreate_args.insert(-1, '--chunksize')
+        lvcreate_args.insert(-1, chunksize)
+
+    sigmgr = SignalManager()
+    sigmgr.trap(signal.SIGINT, signal.SIGHUP)
+    try:
+        process = Popen(lvcreate_args,
+                        stdout=PIPE,
+                        stderr=PIPE,
+                        preexec_fn=detech_process,
+                        close_fds=True)
+        time.sleep(0.750)
+        stdout, stderr = process.communicate()
+        for line in stdout.splitlines():
+            if not line:
+                continue
+            LOG.debug("%s : %s", list2cmdline(lvcreate_args), line)
+    
+        if process.returncode != 0:
+            raise LVMCommandError(list2cmdline(lvcreate_args), process.returncode, stderr.strip())
+    finally:
+        sigmgr.restore()
+
 
 
 ## Filesystem utility functions
