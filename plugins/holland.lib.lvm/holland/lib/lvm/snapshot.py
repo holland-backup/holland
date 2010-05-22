@@ -5,8 +5,8 @@ import sys
 import shutil
 import logging
 import tempfile
-from callback import CallbackDelegate
-from util.path import getmount, relpath, format_bytes
+from holland.lib.lvm.base import LogicalVolume
+from holland.lib.lvm.util import getmount, relpath, format_bytes
 
 __all__ = [
     'SnapshotLifecycle'
@@ -14,7 +14,10 @@ __all__ = [
 
 LOG = logging.getLogger(__name__)
 
-class SnapshotLifecycle(CallbackDelegate):
+class LVMError(Exception):
+    """LVMError"""
+
+class SnapshotLifecycle(object):
     """A simple state machine to run through the LVM snapshot lifecycle"""
     tempdir = False
 
@@ -23,14 +26,8 @@ class SnapshotLifecycle(CallbackDelegate):
                  snapshot_mountpoint=None,
                  snapshot_name=None,
                  snapshot_size=None):
-        CallbackDelegate.__init__(self)
-
         # track the target directory
         self.target_directory = os.path.realpath(target_directory)
-        # Placeholders:
-        # relpath = path relative to the target_directory's mountpoint to 
-        #           what we want to backup (e.g. /mnt/mysql -> /mnt/mysql/data)
-        self.relpath = None
         # logical_volume = handle to logical volume we're snapshotting
         self.logical_volume = None
 
@@ -50,11 +47,11 @@ class SnapshotLifecycle(CallbackDelegate):
                      self.target_directory)
         mountpoint = getmount(self.target_directory)
         LOG.info("Mount point for directory: %s", mountpoint)
-        self.relpath = relpath(self.target_directory, mountpoint)
-        LOG.info("Path relative to snapshot mountpoint: %s", self.relpath)
         self.logical_volume = LogicalVolume.find_mounted(mountpoint)
         if not self.logical_volume:
-            raise LVMError("No logical volume found for mountpoint=%r target_path=%r" % (mountpoint, self.target_directory))
+            raise LVMError("No logical volume found for "
+                           "mountpoint=%r target_path=%r" % 
+                           (mountpoint, self.target_directory))
         LOG.info("%r is on logical volume %s/%s",
                         self.target_directory,
                         self.logical_volume.vg_name,
@@ -119,8 +116,10 @@ class SnapshotLifecycle(CallbackDelegate):
     def backup(self):
         """Backup the snapshotted LVM volume"""
         LOG.info("Running backup tasks")
+        rpath = relpath(getmount(self.target_directory),
+                        self.target_directory)
         source_directory = os.path.join(self.snapshot_mountpoint,
-                                        self.relpath)
+                                        rpath)
         self.run_callback('backup', os.path.realpath(source_directory))
         return self.unmount()
 
@@ -173,7 +172,7 @@ class SnapshotLifecycle(CallbackDelegate):
             LOG.info("Checking for outstanding snapshot: %s", snapshot_lv)
             try:
                 self.snapshot = LogicalVolume.find_one(snapshot_lv)
-            except:
+            except ValueError:
                 LOG.info("No outstanding snapshot found.")
 
     def cleanup(self):
@@ -193,20 +192,21 @@ class SnapshotLifecycle(CallbackDelegate):
                 # These errors should be handled, and balanced with
                 # cleanup
                 pass
-            except (LVMError, OSError), e:
-                logging.error("Failed to unmount snapshot on cleanup: %s", e)
+            except (LVMError, OSError), exc:
+                logging.error("Failed to unmount snapshot on cleanup: %s", exc)
 
         if self.snapshot and self.snapshot.exists():
             try:
                 self.snapshot.remove()
                 logging.info("[cleanup] Removed snapshot %s", self.snapshot)
-            except (LVMError, OSError), e:
-                logging.error("Failed to remove snapshot on cleanup: %s", e)
+            except (LVMError, OSError), exc:
+                logging.error("Failed to remove snapshot on cleanup: %s", exc)
 
         if self.tempdir and os.path.exists(self.snapshot_mountpoint):
             try:
                 shutil.rmtree(self.snapshot_mountpoint)
-                logging.info("[cleanup] removed temporary snapshot mountpoint %s",
+                logging.info("[cleanup] removed temporary snapshot "
+                             "mountpoint %s",
                              self.snapshot_mountpoint)
             except IOError, exc:
                 LOG.error("Failed to remove tempfile generated snapshot "
@@ -223,4 +223,4 @@ class SnapshotLifecycle(CallbackDelegate):
             self.start()
         except:
             self.cleanup()
-
+            raise
