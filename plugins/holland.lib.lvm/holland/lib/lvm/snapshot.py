@@ -71,6 +71,17 @@ class Snapshot(object):
         """Finish the snapshotting process"""
         pass
 
+    def error(self, snapshot):
+        if snapshot:
+            try:
+                snapshot.unmount()
+            except:
+                pass
+            try:
+                snapshot.remove()
+            except:
+                pass
+
     def register(self, event, callback, priority=100):
         """Register a callback for ``event`` with ``priority``
 
