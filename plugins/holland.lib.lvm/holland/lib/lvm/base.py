@@ -1,8 +1,9 @@
 """High-level Object Oriented LVM API"""
 
 import os
-from holland.lib.lvm.raw import pvs, vgs, lvs, blkid, lvsnapshot
-from holland.lib.lvm.util import getdevice
+import signal
+from holland.lib.lvm.raw import pvs, vgs, lvs, blkid, lvsnapshot, lvremove
+from holland.lib.lvm.util import getdevice, SignalManager
 
 class Volume(object):
     """Abstract Volume object for LVM Volume implementations
@@ -189,7 +190,40 @@ class LogicalVolume(Volume):
         :raises: LVMCommandError on error
         :returns: LogicalVolume that is a snapshot of this one on success
         """
-        return lvsnapshot(self.device_name(), name, size)
+
+        sigmgr = SignalManager()
+        sigmgr.trap(signal.SIGINT, signal.SIGHUP)
+        try:
+            lvsnapshot(self.device_name(), name, size)
+            snapshot = LogicalVolume.lookup(self.vg_name + '/' + name)
+
+            if sigmgr.pending:
+                # remove snapshot we just created, if necessary
+                snapshot.remove()
+                raise KeyboardInterrupt("Interrupt while creating snapshot")
+            else:
+                return snapshot
+        finally:
+            sigmgr.restore()
+
+    def remove(self):
+        """Remove this LogicalVolume
+        
+        The data on this object is not longer valid once this method
+        successfully returns
+
+        :raises: LVMCommandError on error
+        """
+
+        sigmgr = SignalManager()
+        sigmgr.trap(signal.SIGINT, signal.SIGHUP)
+        try:
+            lvremove(self.device_name())
+
+            if sigmgr.pending:
+                raise KeyboardInterrupt("Interrupted while removing volume")
+        finally:
+            sigmgr.restore()
 
     def volume_group(self):
         """Lookup this LogicalVolume's volume_group
