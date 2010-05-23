@@ -2,14 +2,13 @@
 
 import re
 import csv
-import signal
 import logging
 from cStringIO import StringIO
 from subprocess import Popen, PIPE, STDOUT, list2cmdline
 
 from holland.lib.lvm.constants import PVS_ATTR, VGS_ATTR, LVS_ATTR
 from holland.lib.lvm.errors import LVMCommandError
-from holland.lib.lvm.util import detach_process, SignalManager
+from holland.lib.lvm.util import detach_process
 
 LOG = logging.getLogger(__name__)
 
@@ -105,8 +104,7 @@ def parse_lvm_format(keys, values):
     for row in csv.reader(stream, **kwargs):
         yield dict(zip(keys, row))
 
-import time
-def lvsnapshot(snapshot_lv_name, orig_lv_path, snapshot_extents, chunksize=None):
+def lvsnapshot(snapshot_name, orig_lv_path, snapshot_extents, chunksize=None):
     """Create a snapshot of an existing logical volume
 
     :param snapshot_lv_name: name of the snapshot
@@ -117,7 +115,7 @@ def lvsnapshot(snapshot_lv_name, orig_lv_path, snapshot_extents, chunksize=None)
     lvcreate_args = [
         'lvcreate',
         '--snapshot',
-        '--name', snapshot_lv_name,
+        '--name', snapshot_name,
         '--extents', str(snapshot_extents),
         orig_lv_path,
     ]
@@ -134,7 +132,7 @@ def lvsnapshot(snapshot_lv_name, orig_lv_path, snapshot_extents, chunksize=None)
 
     stdout, stderr = process.communicate()
 
-    for line in stdout.splitlines():
+    for line in str(stdout).splitlines():
         if not line:
             continue
         LOG.debug("%s : %s", list2cmdline(lvcreate_args), line)
@@ -142,9 +140,14 @@ def lvsnapshot(snapshot_lv_name, orig_lv_path, snapshot_extents, chunksize=None)
     if process.returncode != 0:
         raise LVMCommandError(list2cmdline(lvcreate_args), 
                               process.returncode,
-                              stderr.strip())
+                              str(stderr).strip())
 
 def lvremove(lv_path):
+    """Remove a logical volume
+
+    :param lv_path: logical volume to remove
+    :raises: LVMCommandError if lvremove returns with non-zero status
+    """
     lvremove_args = [
         'lvremove',
         '--force',
@@ -158,7 +161,7 @@ def lvremove(lv_path):
 
     stdout, stderr = process.communicate()
 
-    for line in stdout.splitlines():
+    for line in str(stdout).splitlines():
         if not line:
             continue
         LOG.debug("%s : %s", list2cmdline(lvremove_args), line)
@@ -166,7 +169,7 @@ def lvremove(lv_path):
     if process.returncode != 0:
         raise LVMCommandError(list2cmdline(lvremove_args), 
                               process.returncode, 
-                              stderr.strip())
+                              str(stderr).strip())
 
 
 ## Filesystem utility functions
