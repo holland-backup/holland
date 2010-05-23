@@ -237,7 +237,7 @@ class LogicalVolume(Volume):
 
         :returns: device name string
         """
-        return os.path.realpath('/dev/' + self.vg_name + '/' + self.lv_name)
+        return '/dev/' + self.vg_name + '/' + self.lv_name
 
     def filesystem(self):
         """Lookup the filesystem type for the underyling logical volume
