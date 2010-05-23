@@ -31,6 +31,7 @@ def pvs(*physical_volumes):
     process = Popen(pvs_args,
                     stdout=PIPE,
                     stderr=PIPE,
+                    preexec_fn=detach_process,
                     close_fds=True)
     stdout, stderr = process.communicate()
 
@@ -58,6 +59,7 @@ def vgs(*volume_groups):
     process = Popen(vgs_args,
                     stdout=PIPE,
                     stderr=PIPE,
+                    preexec_fn=detach_process,
                     close_fds=True)
     stdout, stderr = process.communicate()
 
@@ -87,7 +89,8 @@ def lvs(*volume_groups):
     lvs_args.extend(list(volume_groups))
     process = Popen(lvs_args, 
                     stdout=PIPE, 
-                    stderr=PIPE, 
+                    stderr=PIPE,
+                    preexec_fn=detach_process,
                     close_fds=True)
     stdout, stderr = process.communicate()
 
@@ -104,7 +107,7 @@ def parse_lvm_format(keys, values):
     for row in csv.reader(stream, **kwargs):
         yield dict(zip(keys, row))
 
-def lvsnapshot(snapshot_name, orig_lv_path, snapshot_extents, chunksize=None):
+def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
     """Create a snapshot of an existing logical volume
 
     :param snapshot_lv_name: name of the snapshot
@@ -157,6 +160,7 @@ def lvremove(lv_path):
     process = Popen(lvremove_args,
                     stdout=PIPE,
                     stderr=PIPE,
+                    preexec_fn=detach_process,
                     close_fds=True)
 
     stdout, stderr = process.communicate()
