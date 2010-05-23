@@ -2,12 +2,16 @@
 
 import re
 import csv
+import signal
+import logging
 from cStringIO import StringIO
 from subprocess import Popen, PIPE, STDOUT, list2cmdline
 
 from holland.lib.lvm.constants import PVS_ATTR, VGS_ATTR, LVS_ATTR
 from holland.lib.lvm.errors import LVMCommandError
 from holland.lib.lvm.util import detach_process, SignalManager
+
+LOG = logging.getLogger(__name__)
 
 def pvs(*physical_volumes):
     """Report information about physical volumes
@@ -122,26 +126,47 @@ def lvsnapshot(snapshot_lv_name, orig_lv_path, snapshot_extents, chunksize=None)
         lvcreate_args.insert(-1, '--chunksize')
         lvcreate_args.insert(-1, chunksize)
 
-    sigmgr = SignalManager()
-    sigmgr.trap(signal.SIGINT, signal.SIGHUP)
-    try:
-        process = Popen(lvcreate_args,
-                        stdout=PIPE,
-                        stderr=PIPE,
-                        preexec_fn=detech_process,
-                        close_fds=True)
-        time.sleep(0.750)
-        stdout, stderr = process.communicate()
-        for line in stdout.splitlines():
-            if not line:
-                continue
-            LOG.debug("%s : %s", list2cmdline(lvcreate_args), line)
-    
-        if process.returncode != 0:
-            raise LVMCommandError(list2cmdline(lvcreate_args), process.returncode, stderr.strip())
-    finally:
-        sigmgr.restore()
+    process = Popen(lvcreate_args,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    preexec_fn=detach_process,
+                    close_fds=True)
 
+    stdout, stderr = process.communicate()
+
+    for line in stdout.splitlines():
+        if not line:
+            continue
+        LOG.debug("%s : %s", list2cmdline(lvcreate_args), line)
+
+    if process.returncode != 0:
+        raise LVMCommandError(list2cmdline(lvcreate_args), 
+                              process.returncode,
+                              stderr.strip())
+
+def lvremove(lv_path):
+    lvremove_args = [
+        'lvremove',
+        '--force',
+        lv_path,
+    ]
+
+    process = Popen(lvremove_args,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    close_fds=True)
+
+    stdout, stderr = process.communicate()
+
+    for line in stdout.splitlines():
+        if not line:
+            continue
+        LOG.debug("%s : %s", list2cmdline(lvremove_args), line)
+
+    if process.returncode != 0:
+        raise LVMCommandError(list2cmdline(lvremove_args), 
+                              process.returncode, 
+                              stderr.strip())
 
 
 ## Filesystem utility functions

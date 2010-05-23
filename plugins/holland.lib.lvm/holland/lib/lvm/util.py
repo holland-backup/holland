@@ -172,7 +172,7 @@ class SignalManager(object):
         args = args
         self.pending.append(signum)
 
-    def clear(self):
+    def restore(self):
         """Clear pending signals and release trapped signals, restoring the
         original handlers
         """
