@@ -51,17 +51,25 @@ class Backup(Command):
 
         runner.register_cb('pre-backup', purge_mgr)
         runner.register_cb('post-backup', purge_mgr)
-
+        runner.register_cb('backup-failure', purge_backup)
         for name in backupsets:
             config = hollandcfg.backupset(name)
             try:
                 runner.backup(name, config, opts.dry_run)
+            except BackupError, exc:
+                LOG.error("Backup failed: %s", exc)
             except ConfigError, exc:
                 break
         else:
             return 0
         return 1
 
+def purge_backup(event, entry):
+    if entry.config['holland:backup']['auto-purge-failures']:
+        entry.purge()
+        LOG.info("Purged failed backup: %s", entry.name)
+    else:
+        LOG.info("Failed backup not purged due to purge-failed-backups setting")
 
 class PurgeManager(object):
     def __call__(self, event, entry):
