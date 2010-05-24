@@ -3,8 +3,8 @@ import time
 import errno
 import fcntl
 import logging
-from holland.core.command import Command, option
-from holland.core.backup import backup
+from holland.core.command import Command, option, run
+from holland.core.backup import BackupRunner, BackupError
 from holland.core.exceptions import BackupError
 from holland.core.config import hollandcfg
 from holland.core.spool import spool
@@ -44,70 +44,15 @@ class Backup(Command):
             backupsets = hollandcfg.lookup('holland.backupsets')
 
         # strip empty items from backupsets list
-        backupsets = filter(lambda x: x, backupsets)
+        backupsets = [name for name in backupsets if name]
 
-        LOGGER.info("-----> Starting backup run <----")
-        if not backupsets:
-            LOGGER.info("No backupsets defined.  Please specify in %s or "
-                        "specify a name of a backupset in %s",
-                        hollandcfg.filename,
-                        os.path.join(os.path.dirname(hollandcfg.filename), 'backupsets'))
-            return 1
+        runner = BackupRunner(spool)
+        runner.register_cb('pre-backup', run_purge)
 
-        spool.base_path = hollandcfg.lookup('holland.backup-directory')
+        for name in backupsets:
+            config = hollandcfg.backupset(name)
+            runner.backup(name, config, opts.dry_run)
 
-        config_file = open(hollandcfg.filename, 'r')
-        try:
-            fcntl.flock(config_file, fcntl.LOCK_EX|fcntl.LOCK_NB)
-            LOGGER.info("Acquired backup lock.")
-        except IOError, exc:
-            LOGGER.info("Another holland backup appears already be running.")
-
-            if opts.no_lock:
-                LOGGER.info("Continuing due to --no-lock")
-            else:
-                LOGGER.info("Aborting")
-                return 1
-
-        error_found = 0
-        start_time = time.time()
-        try:
-            for jobname in backupsets:
-                error_found |= run_backup(jobname, opts.dry_run)
-                if error_found and opts.abort_immediately:
-                    LOGGER.info("Aborting as --abort-immediately is set")
-                    break
-        finally:
-            if not opts.no_lock:
-                try:
-                    fcntl.flock(config_file, fcntl.LOCK_UN)
-                except OSError, exc:
-                    LOGGER.debug("Error when releasing backup lock: %s", exc)
-                    pass
-
-        if not error_found:
-            LOGGER.info("All backupsets run successfully")
-        else:
-            LOGGER.info("One or more backupsets failed to run successfully")
-        LOGGER.info("This backup run of %d backupset%s took %s",
-                    len(backupsets), ('','s')[len(backupsets) > 1],
-                    format_interval(time.time() - start_time))
-        LOGGER.info("-----> Ending backup run <----")
-        return error_found
-
-
-def run_backup(jobname, dry_run=False):
-    try:
-        backup(jobname, dry_run)
-    except KeyboardInterrupt, e:
-        LOGGER.info("Interrupt")
-    except BackupError, exc:
-        LOGGER.error("Backup %r failed: %s", jobname, exc)
-    except Exception, exc:
-        LOGGER.error("Unexpected exception caught.  This is probably "
-                     "a bug.  Please report to the holland "
-                     "development team.", exc_info=True)
-    else:
-        return 0
-
-    return 1
+def run_purge(event, entry):
+    print "run_purge: entry.name => %r" % entry.backupset
+    run(["purge", "--backupset", entry.backupset])
