@@ -302,7 +302,6 @@ class SimpleTableIterator(MetadataTableIterator):
 
     def _lookup_engine(self, database, table):
         ddl = self.client.show_create_table(database, table)
-        LOG.debug("_lookup_engine(%s,%s) => %s", database, table, ddl)
         match = self.ENGINE_PCRE.search(ddl)
         if match:
             return match.group(1)
