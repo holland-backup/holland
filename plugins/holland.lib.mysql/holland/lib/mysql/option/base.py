@@ -122,7 +122,7 @@ def build_mysql_config(mysql_config):
     defaults_config = ConfigObj()
     defaults_config['client'] = {}
     for config in mysql_config['defaults-extra-file']:
-        LOG.info("Loading %s [%s]", config, os.path.expanduser(config))
+        LOG.debug("Loading %s [%s]", config, os.path.expanduser(config))
         _my_config = load_options(config)
         defaults_config.update(_my_config)
 
