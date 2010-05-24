@@ -1,5 +1,6 @@
 """Raw LVM command API"""
 
+import os
 import re
 import csv
 import logging
@@ -8,7 +9,6 @@ from subprocess import Popen, PIPE, STDOUT, list2cmdline
 
 from holland.lib.lvm.constants import PVS_ATTR, VGS_ATTR, LVS_ATTR
 from holland.lib.lvm.errors import LVMCommandError
-from holland.lib.lvm.util import detach_process
 
 LOG = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ def pvs(*physical_volumes):
     process = Popen(pvs_args,
                     stdout=PIPE,
                     stderr=PIPE,
-                    preexec_fn=detach_process,
+                    preexec_fn=os.setsid,
                     close_fds=True)
     stdout, stderr = process.communicate()
 
@@ -59,7 +59,7 @@ def vgs(*volume_groups):
     process = Popen(vgs_args,
                     stdout=PIPE,
                     stderr=PIPE,
-                    preexec_fn=detach_process,
+                    preexec_fn=os.setsid,
                     close_fds=True)
     stdout, stderr = process.communicate()
 
@@ -90,7 +90,7 @@ def lvs(*volume_groups):
     process = Popen(lvs_args, 
                     stdout=PIPE, 
                     stderr=PIPE,
-                    preexec_fn=detach_process,
+                    preexec_fn=os.setsid,
                     close_fds=True)
     stdout, stderr = process.communicate()
 
@@ -130,7 +130,7 @@ def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
     process = Popen(lvcreate_args,
                     stdout=PIPE,
                     stderr=PIPE,
-                    preexec_fn=detach_process,
+                    preexec_fn=os.setsid,
                     close_fds=True)
 
     stdout, stderr = process.communicate()
@@ -160,7 +160,7 @@ def lvremove(lv_path):
     process = Popen(lvremove_args,
                     stdout=PIPE,
                     stderr=PIPE,
-                    preexec_fn=detach_process,
+                    preexec_fn=os.setsid,
                     close_fds=True)
 
     stdout, stderr = process.communicate()
@@ -230,6 +230,7 @@ def mount(device, path, options=None, vfstype=None):
     process = Popen(mount_args,
                     stdout=PIPE,
                     stderr=STDOUT,
+                    preexec_fn=os.setsid,
                     close_fds=True)
     stdout, stderr = process.communicate()
 
@@ -247,6 +248,7 @@ def umount(*path):
     process = Popen(['umount'] + list(path), 
                     stdout=PIPE, 
                     stderr=STDOUT, 
+                    preexec_fn=os.setsid,
                     close_fds=True)
 
     stdout, stderr =  process.communicate()
@@ -257,5 +259,4 @@ def umount(*path):
 
     return stdout
 
-import os
 os.environ['PATH'] = '/sbin:/usr/sbin:' + os.environ['PATH']
