@@ -127,6 +127,7 @@ class MySQLDumpPlugin(object):
                 self.client.connect()
                 self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
             except MySQLError, exc:
+                LOG.debug("MySQLdb error [%d] %s", exc_info=True, *exc.args)
                 raise BackupError("MySQL Error [%d] %s" % exc.args)
         finally:
             self.client.disconnect()
