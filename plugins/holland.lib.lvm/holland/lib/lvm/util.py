@@ -180,9 +180,3 @@ class SignalManager(object):
         for sig in self._handlers:
             signal.signal(sig, self._handlers[sig])
 
-
-def detach_process():
-    """A simple preexec_fn for subprocess to detach the subprocess from 
-    the parent's session to avoid signal propagation, etc.
-    """
-    os.setsid()
