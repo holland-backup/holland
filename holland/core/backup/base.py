@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+from holland.core.plugin import PluginLoadError, load_backup_plugin
 
 class BackupError(Exception):
     """Error during a backup"""
@@ -25,7 +26,7 @@ class BackupPlugin(object):
         raise NotImplementedError()
 
 
-def load_plugin(name, config, dry_run):
+def load_plugin(name, config, path, dry_run):
         try:
             plugin_cls = load_backup_plugin(config['holland:backup']['plugin'])
         except PluginLoadError, exc:
@@ -33,10 +34,10 @@ def load_plugin(name, config, dry_run):
 
 
         try:
-            plugin = plugin_cls(name=name,
-                                config=config,
-                                target_directory=spool_entry.path,
-                                dry_run=dry_run)
+            return plugin_cls(name=name,
+                              config=config,
+                              target_directory=path,
+                              dry_run=dry_run)
         except (KeyboardInterrupt, SystemExit):
             raise
         except Exception, exc:
@@ -57,7 +58,7 @@ class BackupRunner(object):
     def apply_cb(self, event, *args, **kwargs):
         for callback in self._registry.get(event, []):
             try:
-                cb(event, *args, **kwargs)
+                callback(event, *args, **kwargs)
             except (KeyboardInterrupt, SystemExit):
                 raise
             except:
@@ -77,7 +78,7 @@ class BackupRunner(object):
         spool_entry.config.merge(config)
         spool_entry.validate_config()
 
-        plugin = load_plugin(name, config, dry_run)
+        plugin = load_plugin(name, config, spool_entry.path, dry_run)
 
         spool_entry.config['holland:backup']['start-time'] = time.time()
         self.apply_cb('pre-backup', spool_entry)
@@ -89,6 +90,8 @@ class BackupRunner(object):
             plugin.backup()
         except:
             spool_entry.config['holland:backup']['failed'] = True
+        else:
+            spool_entry.config['holland:backup']['failed'] = False
 
         spool_entry.config['holland:backup']['start-time'] = time.time()
 
@@ -97,5 +100,5 @@ class BackupRunner(object):
 
         self.apply_cb('post-backup', spool_entry)
 
-        if sys.exc_info():
+        if sys.exc_info() != (None, None, None):
             raise
