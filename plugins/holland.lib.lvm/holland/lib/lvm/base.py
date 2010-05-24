@@ -1,9 +1,10 @@
 """High-level Object Oriented LVM API"""
 
-import os
 import signal
-from holland.lib.lvm.raw import pvs, vgs, lvs, blkid, lvsnapshot, lvremove
+from holland.lib.lvm.raw import pvs, vgs, lvs, lvsnapshot, lvremove, \
+                                mount, umount, blkid
 from holland.lib.lvm.util import getdevice, SignalManager
+from holland.lib.lvm.errors import LVMCommandError
 
 class Volume(object):
     """Abstract Volume object for LVM Volume implementations
@@ -78,7 +79,9 @@ class PhysicalVolume(Volume):
             return cls(volume)
         except ValueError:
             #XX: Perhaps we should be more specific :)
-            raise
+            raise LookupError("No PhysicalVolume could be found for "
+                              "pathspec %r" %
+                              pathspec)
     lookup = classmethod(lookup)
 
     def search(cls, pathspec=None):
@@ -116,8 +119,8 @@ class VolumeGroup(Volume):
             volume, = vgs(pathspec)
             return cls(volume)
         except ValueError:
-            #XX: Perhaps we should be more specific :)
-            raise
+            raise LookupError("No VolumeGroup could be found for pathspec %r" %
+                              pathspec)
     lookup = classmethod(lookup)
 
     def search(cls, pathspec=None):
@@ -206,6 +209,19 @@ class LogicalVolume(Volume):
         finally:
             sigmgr.restore()
 
+    def mount(self, path, options=None):
+        """Mount this volume on the specified path
+        
+        :param path: path where this volume should be mounted
+        :param options: options to pass to mount
+        """
+
+        mount(self.device_name(), path, options)
+
+    def unmount(self):
+        """Unmount this volume, if mounted"""
+        umount(self.device_name())
+
     def remove(self):
         """Remove this LogicalVolume
         
@@ -224,6 +240,16 @@ class LogicalVolume(Volume):
                 raise KeyboardInterrupt("Interrupted while removing volume")
         finally:
             sigmgr.restore()
+
+    def exists(self):
+        """Check whether the volume currently exists
+
+        :returns: bool. True if the volume exists or false otherwise
+        """
+        try:
+            return self.lookup(self.device_name()) is not None
+        except (LookupError, LVMCommandError):
+            return False
 
     def volume_group(self):
         """Lookup this LogicalVolume's volume_group
