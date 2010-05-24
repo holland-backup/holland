@@ -1,7 +1,12 @@
 import os
 import sys
 import time
+import logging
 from holland.core.plugin import PluginLoadError, load_backup_plugin
+from holland.core.util.path import directory_size, disk_free
+from holland.core.util.fmt import format_bytes
+
+LOG = logging.getLogger(__name__)
 
 class BackupError(Exception):
     """Error during a backup"""
@@ -78,15 +83,19 @@ class BackupRunner(object):
         spool_entry.config.merge(config)
         spool_entry.validate_config()
 
-        plugin = load_plugin(name, config, spool_entry.path, dry_run)
+        plugin = load_plugin(name,
+                             spool_entry.config, 
+                             spool_entry.path, 
+                             dry_run)
 
         spool_entry.config['holland:backup']['start-time'] = time.time()
         self.apply_cb('pre-backup', spool_entry)
 
         if not dry_run:
             spool_entry.prepare()
-
+    
         try:
+            self.check_available_space(plugin)
             plugin.backup()
         except:
             spool_entry.config['holland:backup']['failed'] = True
@@ -94,11 +103,35 @@ class BackupRunner(object):
             spool_entry.config['holland:backup']['failed'] = False
 
         spool_entry.config['holland:backup']['start-time'] = time.time()
-
         if not dry_run:
+            spool_entry.config['holland:backup']['on-disk-size'] = directory_size(spool_entry.path)
             spool_entry.flush()
 
         self.apply_cb('post-backup', spool_entry)
 
         if sys.exc_info() != (None, None, None):
+            LOG.error("Backup failed.  Cleaning up.")
+            self.apply_cb('backup-failure', spool_entry)
             raise
+
+    def check_available_space(self, plugin):
+        estimated_bytes_required = plugin.estimate_backup_size()
+        LOG.info("Estimated Backup Size: %s",
+                 format_bytes(estimated_bytes_required))
+
+        config = plugin.config['holland:backup']
+        adjustment_factor = config['estimated-size-factor']
+        adjusted_bytes_required = (estimated_bytes_required*adjustment_factor)
+                                   
+        if adjusted_bytes_required != estimated_bytes_required:
+            LOG.info("Adjusting estimated size by %.2f to %s",
+                     adjustment_factor,
+                     format_bytes(adjusted_bytes_required))
+
+        available_bytes = disk_free(self.spool.path)
+        if available_bytes <= adjusted_bytes_required:
+            raise BackupError("Insufficient Disk Space. "
+                              "%s required, but only %s available on %s" %
+                              (format_bytes(adjusted_bytes_required),
+                               format_bytes(available_bytes),
+                               self.spool.path))
