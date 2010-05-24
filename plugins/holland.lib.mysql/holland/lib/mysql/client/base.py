@@ -240,11 +240,9 @@ class MySQLClient(object):
         database = database.replace('`', '``')
         table = table.replace('`', '``')
         cursor = self.cursor()
-        try:
-            if cursor.execute(sql % (database, table)):
-                return cursor.fetchone()[1]
-        finally:
-            cursor.close()
+        if cursor.execute(sql % (database, table)):
+            return cursor.fetchone()[1]
+        cursor.close()
 
     def show_slave_status(self):
         """Fetch MySQL slave status
