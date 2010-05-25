@@ -12,7 +12,9 @@ def test_getmount():
     assert_equals(getmount('/foobarbaz'), '/')
 
 def test_getdevice():
-    assert_equals(getdevice('/'), '/dev/root')
+    # XXX: bad hack
+    dev = open('/etc/mtab', 'r').readline().split()[0].strip()
+    assert_equals(getdevice('/'), dev)
     assert_equals(getdevice('/foobarbaz'), None)
 
 def test_relpath():

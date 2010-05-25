@@ -51,7 +51,7 @@ def getdevice(mountpoint):
 
     # For py23 support 'reversed' doesn't exist, so call list.reverse()
     # explicitly
-    proc_mounts_info = open('/proc/mounts', 'r').readlines()
+    proc_mounts_info = open('/etc/mtab', 'r').readlines()
     proc_mounts_info.reverse()
 
     for path in proc_mounts_info:
