@@ -23,86 +23,97 @@ class Snapshot(object):
         self.callbacks = {}
         self.sigmgr = SignalManager()
 
-    def start(self, path):
+    def start(self, volume):
         """Start the snapshot process to snapshot the logical volume
         that ``path`` exists on.
 
         """
         self.sigmgr.trap(signal.SIGINT)
         self._apply_callbacks('initialize', self)
-        try:
-            logical_volume = LogicalVolume.lookup_from_fspath(path)
-        except LVMCommandError, exc:
-            return self.error(None, exc)
-        return self.create_snapshot(logical_volume)
+        return self.create_snapshot(volume)
 
     def create_snapshot(self, logical_volume):
         """Create a snapshot for the given logical volume
 
         """
 
-        self._apply_callbacks('pre-snapshot', self)
         try:
+            self._apply_callbacks('pre-snapshot', self)
             snapshot = logical_volume.snapshot(self.name, self.size)
-        except LVMCommandError, exc:
+        except (LVMCommandError, CallbackFailuresError), exc:
             return self.error(None, exc)
-        self._apply_callbacks('post-snapshot', self, snapshot)
+
+        try:
+            self._apply_callbacks('post-snapshot', self, snapshot)
+        except CallbackFailuresError, exc:
+            return self.error(snapshot, exc)
 
         return self.mount_snapshot(snapshot)
 
     def mount_snapshot(self, snapshot):
         """Mount the snapshot"""
 
-        self._apply_callbacks('pre-mount', self, snapshot)
         try:
+            self._apply_callbacks('pre-mount', self, snapshot)
             options = None
             if snapshot.filesystem == 'xfs':
                 options = 'nouuid'
             snapshot.mount(self.mountpoint, options)
-        except LVMCommandError, exc:
+            self._apply_callbacks('post-mount', self, snapshot)
+        except (CallbackFailuresError, LVMCommandError), exc:
             return self.error(snapshot, exc)
-        self._apply_callbacks('post-mount', self, snapshot)
+
         return self.unmount_snapshot(snapshot)
 
     def unmount_snapshot(self, snapshot):
         """Unmount the snapshot"""
-        self._apply_callbacks('pre-unmount', snapshot)
         try:
+            self._apply_callbacks('pre-unmount', snapshot)
             snapshot.unmount()
-        except LVMCommandError, exc:
+        except (CallbackFailuresError, LVMCommandError), exc:
             return self.error(snapshot, exc)
-        self._apply_callbacks('post-unmount', snapshot)
+
+        try:
+            self._apply_callbacks('post-unmount', snapshot)
+        except CallbackFailuresError, exc:
+            return self.error(snapshot, exc)
 
         return self.remove_snapshot(snapshot)
 
     def remove_snapshot(self, snapshot):
         """Remove the snapshot"""
-        self._apply_callbacks('pre-remove', snapshot)
         try:
+            self._apply_callbacks('pre-remove', snapshot)
             snapshot.remove()
-        except LVMCommandError, exc:
+        except (CallbackFailuresError, LVMCommandError), exc:
             return self.error(snapshot, exc)
-        self._apply_callbacks('post-remove', snapshot)
+
+        try:
+            self._apply_callbacks('post-remove', snapshot)
+        except (CallbackFailuresError), exc:
+            return self.error(snapshot, exc)
 
         return self.finish()
 
     def finish(self):
         """Finish the snapshotting process"""
-        self._apply_callbacks('finish', self)
         self.sigmgr.restore()
+        self._apply_callbacks('finish', self)
 
     def error(self, snapshot, exc):
         """Handle an error during the snapshot process"""
         LOG.error("Error encountered during snapshot processing: %s", exc)
 
-        self._apply_callbacks('error', self)
         if snapshot and snapshot.exists():
             try:
-                snapshot.unmount()
-                snapshot.remove()
+                if snapshot.is_mounted():
+                    snapshot.unmount()
+                if snapshot.exists():
+                    snapshot.remove()
             except LVMCommandError, exc:
                 LOG.error("Failed to remove snapshot %s", exc)
 
+        self._apply_callbacks('error', self)
         return self.finish()
 
     def register(self, event, callback, priority=100):
