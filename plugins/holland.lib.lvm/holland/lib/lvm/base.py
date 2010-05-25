@@ -58,7 +58,7 @@ class Volume(object):
     search = classmethod(search)
 
     def __repr__(self):
-        return '%s(id=%s)' % (self.__class__.__name__, self.id)
+        return '%s()' % (self.__class__.__name__,) 
 
 class PhysicalVolume(Volume):
     """LVM Physical Volume representation"""
