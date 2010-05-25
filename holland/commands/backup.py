@@ -3,14 +3,14 @@ import time
 import errno
 import fcntl
 import logging
-from holland.core.command import Command, option
-from holland.core.backup import backup
+from holland.core.command import Command, option, run
+from holland.core.backup import BackupRunner, BackupError
 from holland.core.exceptions import BackupError
-from holland.core.config import hollandcfg
+from holland.core.config import hollandcfg, ConfigError
 from holland.core.spool import spool
 from holland.core.util.fmt import format_interval
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 class Backup(Command):
     """${cmd_usage}
@@ -44,70 +44,64 @@ class Backup(Command):
             backupsets = hollandcfg.lookup('holland.backupsets')
 
         # strip empty items from backupsets list
-        backupsets = filter(lambda x: x, backupsets)
+        backupsets = [name for name in backupsets if name]
 
-        LOGGER.info("-----> Starting backup run <----")
-        if not backupsets:
-            LOGGER.info("No backupsets defined.  Please specify in %s or "
-                        "specify a name of a backupset in %s",
-                        hollandcfg.filename,
-                        os.path.join(os.path.dirname(hollandcfg.filename), 'backupsets'))
-            return 1
+        runner = BackupRunner(spool)
+        purge_mgr = PurgeManager()
 
-        spool.base_path = hollandcfg.lookup('holland.backup-directory')
-
-        config_file = open(hollandcfg.filename, 'r')
-        try:
-            fcntl.flock(config_file, fcntl.LOCK_EX|fcntl.LOCK_NB)
-            LOGGER.info("Acquired backup lock.")
-        except IOError, exc:
-            LOGGER.info("Another holland backup appears already be running.")
-
-            if opts.no_lock:
-                LOGGER.info("Continuing due to --no-lock")
-            else:
-                LOGGER.info("Aborting")
-                return 1
-
-        error_found = 0
-        start_time = time.time()
-        try:
-            for jobname in backupsets:
-                error_found |= run_backup(jobname, opts.dry_run)
-                if error_found and opts.abort_immediately:
-                    LOGGER.info("Aborting as --abort-immediately is set")
-                    break
-        finally:
-            if not opts.no_lock:
-                try:
-                    fcntl.flock(config_file, fcntl.LOCK_UN)
-                except OSError, exc:
-                    LOGGER.debug("Error when releasing backup lock: %s", exc)
-                    pass
-
-        if not error_found:
-            LOGGER.info("All backupsets run successfully")
+        runner.register_cb('pre-backup', purge_mgr)
+        runner.register_cb('post-backup', purge_mgr)
+        runner.register_cb('backup-failure', purge_backup)
+        for name in backupsets:
+            config = hollandcfg.backupset(name)
+            try:
+                runner.backup(name, config, opts.dry_run)
+            except BackupError, exc:
+                LOG.error("Backup failed: %s", exc)
+            except ConfigError, exc:
+                break
         else:
-            LOGGER.info("One or more backupsets failed to run successfully")
-        LOGGER.info("This backup run of %d backupset%s took %s",
-                    len(backupsets), ('','s')[len(backupsets) > 1],
-                    format_interval(time.time() - start_time))
-        LOGGER.info("-----> Ending backup run <----")
-        return error_found
+            return 0
+        return 1
 
-
-def run_backup(jobname, dry_run=False):
-    try:
-        backup(jobname, dry_run)
-    except KeyboardInterrupt, e:
-        LOGGER.info("Interrupt")
-    except BackupError, exc:
-        LOGGER.error("Backup %r failed: %s", jobname, exc)
-    except Exception, exc:
-        LOGGER.error("Unexpected exception caught.  This is probably "
-                     "a bug.  Please report to the holland "
-                     "development team.", exc_info=True)
+def purge_backup(event, entry):
+    if entry.config['holland:backup']['auto-purge-failures']:
+        entry.purge()
+        LOG.info("Purged failed backup: %s", entry.name)
     else:
-        return 0
+        LOG.info("Failed backup not purged due to purge-failed-backups setting")
 
-    return 1
+class PurgeManager(object):
+    def __call__(self, event, entry):
+        purge_policy = entry.config['holland:backup']['purge-policy']
+
+        if event == 'pre-backup' and purge_policy != 'before-backup':
+            return
+        if event == 'post-backup' and purge_policy != 'after-backup':
+            return
+
+        backupset = spool.find_backupset(entry.backupset)
+        if not backupset:
+            LOG.info("Nothing to purge")
+
+        retention_count = entry.config['holland:backup']['backups-to-keep']
+        retention_count = int(retention_count)
+        if event == 'post-backup' and retention_count == 0:
+            # Always maintain latest backup
+            LOG.warning("!! backups-to-keep set to 0, but "
+                        "purge-policy = after-backup. This would immediately "
+                        "purge all backups which is probably not intended. "
+                        "Setting backups-to-keep to 1")
+            retention_count = 1
+        self.purge_backupset(backupset, retention_count)
+
+    def purge_backupset(self, backupset, retention_count):
+        purge_count = 0
+        for backup in backupset.purge(retention_count):
+            purge_count += 1
+            LOG.info("Purged %s", backup.name)
+        
+        if purge_count == 0:
+            LOG.info("No backups purged")
+        else:
+            LOG.info("%d backups purged", purge_count)

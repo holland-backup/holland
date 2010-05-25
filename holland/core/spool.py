@@ -7,6 +7,7 @@ import sys
 import time
 import shutil
 import logging
+import itertools
 from holland.core.config import BaseConfig
 
 LOGGER = logging.getLogger(__name__)
@@ -136,6 +137,13 @@ class Backupset(object):
         
         return Backup(backup_path, self.name, backup_name)
 
+    def purge(self, retention_count=0):
+        if retention_count < 0:
+            raise ValueError("Invalid retention count %s" % retention_count)
+        for backup in itertools.islice(self.list_backups(reverse=True), retention_count, None):
+            backup.purge()
+            yield backup
+
     def list_backups(self, name=None, reverse=False):
         """
         Return list of backups for this backupset in order of their
@@ -179,11 +187,13 @@ CONFIGSPEC = """
 plugin                  = string(default="")
 start-time              = float(default=0)
 stop-time               = float(default=0)
+failed-backup           = boolean(default=no)
 estimated-size          = float(default=0)
 on-disk-size            = float(default=0)
 estimated-size-factor   = float(default=1.0)
 backups-to-keep          = integer(min=0, default=1)
 auto-purge-failures     = boolean(default=yes)
+purge-policy            = option(manual, before-backup, after-backup, default='before-backup')
 """.splitlines()
 
 class Backup(object):

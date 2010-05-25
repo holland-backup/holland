@@ -2,11 +2,13 @@ import os
 import sys
 import logging
 import readline
+import itertools
 from holland.core.command import Command, option
 from holland.core.config import hollandcfg
 from holland.core.spool import spool
+from holland.core.util.fmt import format_bytes
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 class Purge(Command):
     """${cmd_usage}
@@ -24,71 +26,85 @@ class Purge(Command):
     ]
 
     options = [
-        option('--dry-run', '-n', action='store_true',
+        option('--dry-run', '-n', action='store_true', default=True,
                 help="Print what would be purged without actually purging"),
-        option('--full', action='store_true',
-                help="Purge every backup for the specified job run(s)"),
-        option('--force', action='store_true',
+        option('--all', '-a', action='store_true', default=False,
+                help="When purging a backupset purge everything rather than "
+                     "using the retention count from the active configuration"),
+        option('--force', '-f', action='store_true', default=False,
                help="Do not prompt for confirmation")
     ]
 
     description = 'Purge the requested job runs'
     
-    def _purge_all(self, opts):
-        for backupset in spool:
-            backup_list= backupset.list_backups()
-            for backup in backup_list:
-                # check if the run completed
-                # holland:backup.stop > 0?
-                # otherwise, partial - purge
-                if not os.path.exists(backup.config.filename):
-                    print >>sys.stderr, "Purging broken backup %s" % \
-                                         backup.name
-                    backup.purge()
-                else:
-                    print >>sys.stderr, "Skipping backup %s" % backup.name
-
-    # if job_run is given we purge everything but the latest backup
-    # for that job
-    # if not defined, we run through all jobs and purge everything
-    # but the latest backup on each
-    # Maybe have an option '--full' that purges *everything*
     def run(self, cmd, opts, *backups):
-        if not backups:
-            self._purge_all(opts)
-        else:
-            bks = []
-            for backup in backups:
-                bk = spool.find_backup(backup)
-                if bk is None:
-                    print >>sys.stderr, "Did not find backup called %s" % \
-                                         backup
-                else:
-                    print "Found backup: %s\n" % bk
-                    bks.append(bk)
-            
-            if not bks:
-                return 1
+        error = 0
 
-            if opts.dry_run:
-                for bk in bks:
-                    print "[Dry-run] Purging %s [%s]" % (bk, bk.path)
-                return 0
+        for name in backups:
+            if '/' not in name:
+                backupset = spool.find_backupset(name)
+                if not backupset:
+                    LOG.error("Failed to find backupset '%s'", name)
+                    error = 1
+                    continue
+                purge_backupset(backupset, opts.force)
             else:
-                if not opts.force:
-                    print "The following backups will be purged:\n"
-                    for bk in bks:
-                        print "%s\n" % bk
-                    print "This will completely destroy data locally " + \
-                          "on this server.\n"
-                    confirm = raw_input("Are you sure you want to do " + \
-                                        "this? [N/y] ")
-                    if confirm.lower() not in ['y', "yes", "ya", "yea",
-                                               "hell yea"]:
-                        return 1
+                backup = spool.find_backup(name)
+                if not backup:
+                    LOG.error("Failed to find single backup '%s'", name)
+                    error = 1
+                    continue
+                purge_backup(backup, opts.force)
+        return error
 
-                    print ""
+def purge_backupset(backupset, force=False, all_backups=False):
+    """Purge a whole backupset either entirely or per the configured
+    retention count
 
-                for bk in bks:
-                    print "Purging %s\n" % bk
-                    bk.purge()
+    :param backupset: Backupset object to purge
+    :param force: Force the purge - this is not a dry-run
+    :param all_backupsets: purge all backups regardless of configured
+                           retention count
+    """
+    if all_backups:
+        retention_count = 0
+    else:
+        config = hollandcfg.backupset(backupset.name)['holland:backup']
+        retention_count = int(config['backups-to-keep'])
+    LOG.info("Retaining %d backups", retention_count)
+    backups = []
+    bytes = 0
+    backup_list = backupset.list_backups(reverse=True)
+    for backup in itertools.islice(backup_list, retention_count, None):
+        backups.append(backup)
+        config = backup.config['holland:backup']
+        bytes += int(config['on-disk-size'])
+
+    if not force:
+        LOG.info("Would purge backupset %s (%d total backups, "
+                 "%d backups to retain, "
+                 "%d backups to purge, "
+                 "%s total space would be freed)", 
+                 backupset.name,
+                 len(backup_list),
+                 len(backup_list) - len(backups),
+                 len(backups),
+                 format_bytes(bytes))
+    else:
+        for backup in backupset.purge(retention_count):
+            LOG.info("Purged %s", backup.name)   
+
+def purge_backup(backup, force=False):
+    """Purge a single backup
+
+    :param backup: Backup object to purge
+    :param force: Force the purge - this is not a dry-run
+    """
+    if not force:
+        config = backup.config['holland:backup']
+        LOG.info("Would purge single backup '%s' %s",
+                 backup.name,
+                 format_bytes(int(config['on-disk-size'])))
+    else:
+        backup.purge()
+        LOG.info("Purged %s", backup.name)
