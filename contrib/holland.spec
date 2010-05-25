@@ -281,7 +281,7 @@ rm -rf %{buildroot}
 
 %changelog
 * Mon May 25 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-8
-- Adding holland.lib.lvm under -common
+- Adding holland.lib.lvm under -common subpackage
 
 * Wed May 19 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-7
 - BuildRequires: python-sphinx (to build docs)
