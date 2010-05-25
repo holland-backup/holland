@@ -81,15 +81,11 @@ def purge_backupset(backupset, force=False, all_backups=False):
         bytes += int(config['on-disk-size'])
 
     if not force:
-        LOG.info("Would purge backupset %s (%d total backups, "
-                 "%d backups to retain, "
-                 "%d backups to purge, "
-                 "%s total space would be freed)", 
-                 backupset.name,
-                 len(backup_list),
-                 len(backup_list) - len(backups),
-                 len(backups),
-                 format_bytes(bytes))
+        LOG.info("Would purge backupset %s", backupset.name)
+        LOG.info("    %d total backups", len(backup_list))
+        LOG.info("    %d backups would be retained", len(backup_list) - len(backups))
+        LOG.info("    %d backups would be purged", len(backups))
+        LOG.info("    %s total space would be freed", format_bytes(bytes))
     else:
         for backup in backupset.purge(retention_count):
             LOG.info("Purged %s", backup.name)   
