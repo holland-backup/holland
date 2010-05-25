@@ -1,5 +1,6 @@
 """High-level Object Oriented LVM API"""
 
+import os
 import signal
 from holland.lib.lvm.raw import pvs, vgs, lvs, lvsnapshot, lvremove, \
                                 mount, umount, blkid
@@ -208,6 +209,19 @@ class LogicalVolume(Volume):
                 return snapshot
         finally:
             sigmgr.restore()
+
+    def is_mounted(self):
+        """Check if this logical volume is mounted
+        
+        :returns: True if mounted and false otherwise
+        """
+        real_device_path = os.path.realpath(self.device_name())
+        for line in open('/proc/mounts', 'r'):
+            dev = line.split()[0]
+            if os.path.realpath(dev) == real_device_path:
+                return True
+        else:
+            return False
 
     def mount(self, path, options=None):
         """Mount this volume on the specified path
