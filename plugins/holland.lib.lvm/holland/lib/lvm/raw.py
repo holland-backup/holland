@@ -247,7 +247,7 @@ def umount(*path):
     """
     process = Popen(['umount'] + list(path), 
                     stdout=PIPE, 
-                    stderr=STDOUT, 
+                    stderr=PIPE, 
                     preexec_fn=os.setsid,
                     close_fds=True)
 
