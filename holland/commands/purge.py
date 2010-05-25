@@ -4,8 +4,8 @@ import logging
 import readline
 import itertools
 from holland.core.command import Command, option
-from holland.core.config import hollandcfg
-from holland.core.spool import spool
+from holland.core.config import hollandcfg, ConfigError
+from holland.core.spool import spool, CONFIGSPEC
 from holland.core.util.fmt import format_bytes
 
 LOG = logging.getLogger(__name__)
@@ -69,8 +69,17 @@ def purge_backupset(backupset, force=False, all_backups=False):
     if all_backups:
         retention_count = 0
     else:
-        config = hollandcfg.backupset(backupset.name)['holland:backup']
-        retention_count = int(config['backups-to-keep'])
+        try:
+            config = hollandcfg.backupset(backupset.name)
+            config.validate_config(CONFIGSPEC)
+        except (IOError, ConfigError), exc:
+            LOG.error("Failed to load backupset '%s': %s", backupset.name, exc)
+            LOG.error("Aborting, because I could not tell how many backups to "
+                      "preserve.")
+            LOG.error("You can still purge the backupset by using the --all "
+                      "option or specifying specific backups to purge")
+            return 1
+
     LOG.info("Retaining %d backups", retention_count)
     backups = []
     bytes = 0
