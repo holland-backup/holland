@@ -95,7 +95,7 @@ class PhysicalVolume(Volume):
         """
 
         for volume in pvs(pathspec):
-            yield volume
+            yield cls(volume)
     search = classmethod(search)
 
     def __repr__(self):
