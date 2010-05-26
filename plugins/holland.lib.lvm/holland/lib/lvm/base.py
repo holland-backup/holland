@@ -289,7 +289,6 @@ class LogicalVolume(Volume):
             return device_info['type']
         except ValueError:
             raise
-    filesystem = property(filesystem)
 
     def __repr__(self):
         return '%s(device=%r)' % (self.__class__.__name__, self.device_name())
