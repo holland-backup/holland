@@ -14,11 +14,11 @@ class Volume(object):
     of its subclasses such as PhysicalVolume, VolumeGroup or LogicalVolume
     """
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, attributes=()):
         if cls is Volume:
             raise NotImplementedError('Volume is an abstract base class and '
                                       'should not be directly instantiated')
-        return super(Volume, cls).__new__(cls, *args, **kwargs)
+        return super(Volume, cls).__new__(cls)
 
     def __init__(self, attributes=()):
         self.attributes = dict(attributes)
