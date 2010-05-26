@@ -6,7 +6,7 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD 
@@ -207,10 +207,13 @@ rm -rf %{buildroot}
 %{python_sitelib}/%{name}/lib/which.py*
 %{python_sitelib}/%{name}/lib/multidict.py*
 %{python_sitelib}/%{name}/lib/mysql/
+%{python_sitelib}/%{name}/lib/lvm/
 %{python_sitelib}/holland.lib.common-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.lib.common-%{version}-*.egg-info
 %{python_sitelib}/holland.lib.mysql-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.lib.mysql-%{version}-*.egg-info
+%{python_sitelib}/holland.lib.lvm-%{version}-*-nspkg.pth
+%{python_sitelib}/holland.lib.lvm-%{version}-*.egg-info
 
 %files example
 %defattr(-,root,root,-)
@@ -277,6 +280,9 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/holland/providers/sqlite.conf
 
 %changelog
+* Mon May 25 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-8
+- Adding holland.lib.lvm under -common subpackage
+
 * Wed May 19 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-7
 - BuildRequires: python-sphinx (to build docs)
 
