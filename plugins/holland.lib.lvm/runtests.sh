@@ -1,2 +1,2 @@
 #!/bin/bash
-nosetests ./tests/
+nosetests -v ./tests/
