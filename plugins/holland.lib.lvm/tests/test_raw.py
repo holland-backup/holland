@@ -1,4 +1,4 @@
-import sys
+import os, sys
 import shutil
 import tempfile
 import subprocess
@@ -14,6 +14,7 @@ MNT_DIR = tempfile.mkdtemp()
 
 def setup():
     """Setup a simple LVM device to use"""
+    os.environ['PATH'] = '/sbin:/usr/sbin:' + os.environ['PATH']
     size = IMG_SIZE / 512
     img_path = os.path.join(MNT_DIR, 'test.img')
     subprocess.call("dd if=/dev/zero of=%s count=%d" % 
