@@ -14,11 +14,11 @@ class Volume(object):
     of its subclasses such as PhysicalVolume, VolumeGroup or LogicalVolume
     """
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, attributes=()):
         if cls is Volume:
             raise NotImplementedError('Volume is an abstract base class and '
                                       'should not be directly instantiated')
-        return super(Volume, cls).__new__(cls, *args, **kwargs)
+        return super(Volume, cls).__new__(cls)
 
     def __init__(self, attributes=()):
         self.attributes = dict(attributes)
@@ -58,7 +58,7 @@ class Volume(object):
     search = classmethod(search)
 
     def __repr__(self):
-        return '%s(id=%s)' % (self.__class__.__name__, self.id)
+        return '%s()' % (self.__class__.__name__,) 
 
 class PhysicalVolume(Volume):
     """LVM Physical Volume representation"""
@@ -95,7 +95,7 @@ class PhysicalVolume(Volume):
         """
 
         for volume in pvs(pathspec):
-            yield volume
+            yield cls(volume)
     search = classmethod(search)
 
     def __repr__(self):
