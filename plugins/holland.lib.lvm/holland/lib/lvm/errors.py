@@ -12,7 +12,7 @@ class LVMCommandError(Exception):
     """
 
     def __init__(self, cmd, status, error):
-        error = error.strip()
+        error = error and error.strip() or ''
         Exception.__init__(self, cmd, status, error)
         self.cmd = cmd
         self.status = status

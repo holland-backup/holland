@@ -22,7 +22,7 @@ exclude_lines =
 
 ignore_errors = True
 
-omit=tests,holland/__init__.py,holland/lib/__init__.py,/usr/share/pyshared/
+omit=tests,holland/__init__.py,holland/lib/__init__.py,/usr/
 
 [html]
 directory = coverage_html_report

@@ -68,10 +68,35 @@ class TestPhysicalVolume(object):
         ok_(not isinstance(result, Volume))
         pv = result.next()
         ok_(isinstance(pv, PhysicalVolume), "not a physical volume? %r" % pv)
+        assert_raises(StopIteration, result.next)
 
     def test_repr(self):
         pv = PhysicalVolume.lookup('/dev/foo1')
         assert_equals(repr(pv), "PhysicalVolume(device='/dev/foo1')")
+
+
+class TestVolumeGroup(object):
+    mocker = Mocker()
+
+    def setup_class(cls):
+        """Setup mock environment"""
+        vgs = cls.mocker.replace('holland.lib.lvm.raw.vgs')
+        vgs(MATCH(lambda pathspec: pathspec.endswith('dba') or \
+                                    pathspec.endswith('mapper/dba')))
+        cls.mocker.result([{ 'vg_name' : 'dba', 'vg_extent_size' : 4*1024**2 }])
+        #cls.mocker.replay()
+    setup_class = classmethod(setup_class)
+
+    def teardown_class(cls):
+        """Restore normal environment"""
+        #cls.mocker.restore()
+    teardown_class = classmethod(teardown_class)
+
+
+    def test_create(self):
+        vg = VolumeGroup({ 'vg_name' : 'dba', 'vg_extent_size' : 4*1024**2 })
+        assert_equals(vg.vg_name, 'dba')
+        assert_equals(vg.vg_extent_size, 4194304)
 
 
 class TestLogicalVolume(object):
