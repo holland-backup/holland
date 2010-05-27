@@ -6,7 +6,7 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD 
@@ -104,6 +104,7 @@ SQLite Backup Provider Plugin for Holland
 %prep
 %setup -q
 find ./ -name setup.cfg -exec rm -f {} \;
+mv plugins/README README.plugins
 
 # cleanup, will be removed upstream at some point
 rm plugins/ACTIVE
@@ -175,7 +176,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc README INSTALL LICENSE config/backupsets/examples/ docs/build/html/
+%doc README README.plugins INSTALL LICENSE config/backupsets/examples/ docs/build/html/
 %{_sbindir}/holland
 %dir %{python_sitelib}/holland/
 %{python_sitelib}/holland/core/
@@ -280,6 +281,9 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/holland/providers/sqlite.conf
 
 %changelog
+* Thu May 27 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-9
+- Move plugins/README to README.plugins and install via %doc
+
 * Mon May 25 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-8
 - Adding holland.lib.lvm under -common subpackage
 
