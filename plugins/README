@@ -1,0 +1,48 @@
+Introduction
+============
+This plugin contains all the plugins distributed by the core holland 
+distribution. The backup plugins are all directly dependent on the
+main holland distribution (located one level up from this directory).
+The library plugins are typically self contained but usually
+provide functionality directly applicable to the holland project
+and are often dependencies of one or more backup plugins.
+
+Plugin descriptions
+===================
+
+Here are brief descriptions of each of the plugins.  Please see the README
+located under each plugin for more specific information or see documentation
+at http://hollandbackup.org
+
+holland.lib.common - General purpose functionality such as compression and 
+                     archiving.
+
+holland.lib.mysql  - Support for connections to a MySQL instance and generally
+                     interacting with a deployment.
+
+holland.lib.lvm    - A simple python API for interacting with LVM.  Primarily
+                     designed to support LVM snapshots for the LVM based backup
+                     plugins.
+
+
+holland.backup.example      - A trivial example plugin that does nothing at all
+                              but demonstrates the basic structure of a holland
+                              backup plugin
+holland.backup.mysqldump    - A mysqldump based backup plugin for MySQL
+                              Depends: [holland.lib.common, holland.lib.mysql]
+holland.backup.mysqlhotcopy - A raw file copy for MySQL, only loosely based on
+                              the 'mysqlhotcopy' command
+                              Depends: [holland.lib.common, holland.lib.mysql]
+holland.backup.maatkit      - A wrapper around mk-parallel-dump.  Not really 
+                              recommended for production quality backups. See
+                              http://www.maatkit.org for more information on
+                              the underlying mk-parallel-dump script.
+                              Depends: [holland.lib.mysql]
+holland.backup.mysql_lvm    - A LVM snapshot based backup plugin for MySQL
+                              Depends: [holland.lib.common, holland.lib.mysql,
+                                        holland.lib.lvm]
+holland.backup.random       - An example plugin that backups up bytes from 
+                              /dev/random
+holland.backup.sqlite       - A backup plugin that produces logical exports 
+                              from sqlite database files.
+                              Depends: [holland.lib.common]
