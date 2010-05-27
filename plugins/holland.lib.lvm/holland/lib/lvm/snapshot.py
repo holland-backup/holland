@@ -29,7 +29,10 @@ class Snapshot(object):
 
         """
         self.sigmgr.trap(signal.SIGINT)
-        self._apply_callbacks('initialize', self)
+        try:
+            self._apply_callbacks('initialize', self)
+        except CallbackFailuresError, exc:
+            return self.error(None, exc)
         return self.create_snapshot(volume)
 
     def create_snapshot(self, logical_volume):
@@ -98,6 +101,8 @@ class Snapshot(object):
     def finish(self):
         """Finish the snapshotting process"""
         self.sigmgr.restore()
+        if sys.exc_info()[1]:
+            raise
         self._apply_callbacks('finish', self)
 
     def error(self, snapshot, exc):
@@ -113,7 +118,6 @@ class Snapshot(object):
             except LVMCommandError, exc:
                 LOG.error("Failed to remove snapshot %s", exc)
 
-        self._apply_callbacks('error', self)
         return self.finish()
 
     def register(self, event, callback, priority=100):
@@ -121,6 +125,15 @@ class Snapshot(object):
 
         """
         self.callbacks.setdefault(event, []).append((priority, callback))
+
+    def unregister(self, event, callback):
+        pending = []
+        for info in self.callbacks.get(event, []):
+            if callback in info:
+                pending.append(info)
+
+        for item in pending:
+            self.callbacks[event].remove(item)
 
     def _apply_callbacks(self, event, *args, **kwargs):
         """Apply callbacks for event"""
