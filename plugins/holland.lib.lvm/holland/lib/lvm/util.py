@@ -1,7 +1,6 @@
 """LVM formatting and validation methods"""
 
 import os
-import re
 import signal
 from math import log
 

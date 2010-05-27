@@ -3,7 +3,6 @@
 import sys
 import signal
 import logging
-from holland.lib.lvm import LogicalVolume
 from holland.lib.lvm.errors import LVMCommandError
 from holland.lib.lvm.util import SignalManager
 
@@ -127,6 +126,7 @@ class Snapshot(object):
         self.callbacks.setdefault(event, []).append((priority, callback))
 
     def unregister(self, event, callback):
+        """Remove a previously registered callback"""
         pending = []
         for info in self.callbacks.get(event, []):
             if callback in info:

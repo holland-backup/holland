@@ -155,7 +155,8 @@ class LogicalVolume(Volume):
             return cls(volume)
         except (LVMCommandError, ValueError):
             #XX: Perhaps we should be more specific :)
-            raise LookupError("No LogicalVolume could be found for pathspec %r" % 
+            raise LookupError("No LogicalVolume could be found "
+                              "for pathspec %r" % 
                               pathspec)
     lookup = classmethod(lookup)
 
