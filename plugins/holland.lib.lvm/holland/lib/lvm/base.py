@@ -78,8 +78,7 @@ class PhysicalVolume(Volume):
         try:
             volume, = pvs(pathspec)
             return cls(volume)
-        except ValueError:
-            #XX: Perhaps we should be more specific :)
+        except (ValueError, LVMCommandError):
             raise LookupError("No PhysicalVolume could be found for "
                               "pathspec %r" %
                               pathspec)
@@ -119,7 +118,7 @@ class VolumeGroup(Volume):
         try:
             volume, = vgs(pathspec)
             return cls(volume)
-        except ValueError:
+        except (LVMCommandError, ValueError):
             raise LookupError("No VolumeGroup could be found for pathspec %r" %
                               pathspec)
     lookup = classmethod(lookup)
@@ -154,9 +153,10 @@ class LogicalVolume(Volume):
         try:
             volume, = lvs(pathspec)
             return cls(volume)
-        except ValueError:
+        except (LVMCommandError, ValueError):
             #XX: Perhaps we should be more specific :)
-            raise
+            raise LookupError("No LogicalVolume could be found for pathspec %r" % 
+                              pathspec)
     lookup = classmethod(lookup)
 
     def lookup_from_fspath(cls, path):
@@ -287,8 +287,8 @@ class LogicalVolume(Volume):
         try:
             device_info, = blkid(self.device_name())
             return device_info['type']
-        except ValueError:
-            raise
+        except (LVMCommandError, ValueError):
+            raise LookupError()
 
     def __repr__(self):
         return '%s(device=%r)' % (self.__class__.__name__, self.device_name())
