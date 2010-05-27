@@ -120,4 +120,4 @@ class SignalManager(object):
         del self.pending[:]
         for sig in self._handlers:
             signal.signal(sig, self._handlers[sig])
-
+        self._handlers.clear()
