@@ -29,12 +29,6 @@ def ensure_snapshot_unmount():
         pass
 
 def test_snapshot():
-    # def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
-    for info in vgs(TEST_VG):
-        print >>sys.stderr, info
-    for info in lvs(TEST_VG):
-        print >>sys.stderr, info
-
     lvsnapshot('%s/%s' % (TEST_VG, TEST_LV), '%s_snapshot' % TEST_LV , 4, '512K')
     assert_raises(LVMCommandError, lvsnapshot, '%s/%s' % (TEST_VG, TEST_LV), '%s_snapshot' % TEST_LV , 1)
     mount('/dev/%s/%s' % (TEST_VG, TEST_LV), '/mnt/tmp', options='noatime', vfstype='ext3')
