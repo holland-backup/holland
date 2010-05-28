@@ -83,6 +83,7 @@ class PurgeManager(object):
         backupset = spool.find_backupset(entry.backupset)
         if not backupset:
             LOG.info("Nothing to purge")
+            return
 
         retention_count = entry.config['holland:backup']['backups-to-keep']
         retention_count = int(retention_count)
