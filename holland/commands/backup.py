@@ -46,14 +46,24 @@ class Backup(Command):
         # strip empty items from backupsets list
         backupsets = [name for name in backupsets if name]
 
+        if not backupsets:
+            LOG.info("Nothing to backup")
+            return 1
+
         runner = BackupRunner(spool)
         purge_mgr = PurgeManager()
 
         runner.register_cb('pre-backup', purge_mgr)
         runner.register_cb('post-backup', purge_mgr)
         runner.register_cb('backup-failure', purge_backup)
+
+        LOG.info("---> Starting backup run <---")
         for name in backupsets:
-            config = hollandcfg.backupset(name)
+            try:
+                config = hollandcfg.backupset(name)
+            except IOError, exc:
+                LOG.error("Could not load backupset '%s': %s", name, exc)
+                break
             try:
                 runner.backup(name, config, opts.dry_run)
             except BackupError, exc:
@@ -62,6 +72,7 @@ class Backup(Command):
                 break
         else:
             return 0
+        LOG.info("---> Ending backup run <---")
         return 1
 
 def purge_backup(event, entry):

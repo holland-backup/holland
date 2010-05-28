@@ -4,7 +4,7 @@ import time
 import logging
 from holland.core.plugin import PluginLoadError, load_backup_plugin
 from holland.core.util.path import directory_size, disk_free
-from holland.core.util.fmt import format_bytes
+from holland.core.util.fmt import format_bytes, format_interval
 
 LOG = logging.getLogger(__name__)
 
@@ -95,17 +95,32 @@ class BackupRunner(object):
             spool_entry.prepare()
     
         try:
-            self.check_available_space(plugin)
+            estimated_size = self.check_available_space(plugin)
+            LOG.info("Starting backup[%s] via plugin %s",
+                     spool_entry.name,
+                     spool_entry.config['holland:backup']['plugin'])
             plugin.backup()
         except:
             spool_entry.config['holland:backup']['failed'] = True
         else:
             spool_entry.config['holland:backup']['failed'] = False
 
-        spool_entry.config['holland:backup']['start-time'] = time.time()
-        if not dry_run:
-            spool_entry.config['holland:backup']['on-disk-size'] = directory_size(spool_entry.path)
+        spool_entry.config['holland:backup']['stop-time'] = time.time()
+        if not dry_run and not spool_entry.config['holland:backup']['failed']:
+            final_size = directory_size(spool_entry.path)
+            LOG.info("Final on-disk backup size %s %.2f%% "
+                     "of estimated size %s",
+                     format_bytes(final_size),
+                     (float(final_size) / estimated_size)*100.0,
+                     format_bytes(estimated_size))
+                     
+            spool_entry.config['holland:backup']['on-disk-size'] = final_size
             spool_entry.flush()
+
+        start_time = spool_entry.config['holland:backup']['start-time']
+        stop_time = spool_entry.config['holland:backup']['stop-time']
+        LOG.info("Backup completed in %s", 
+                 format_interval(stop_time - start_time))
 
         self.apply_cb('post-backup', spool_entry)
 
@@ -135,3 +150,4 @@ class BackupRunner(object):
                               (format_bytes(adjusted_bytes_required),
                                format_bytes(available_bytes),
                                self.spool.path))
+        return estimated_bytes_required
