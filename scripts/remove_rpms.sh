@@ -7,4 +7,4 @@
 #
 rpm -e holland holland-common holland-example holland-maatkit \
 holland-mysqldump holland-mysqlhotcopy holland-mysqllvm \
-holland-sqlite holland-random
+holland-sqlite holland-random holland-xtrabackup
