@@ -61,7 +61,7 @@ class XtrabackupPlugin(object):
         defaults_file = os.path.join(self.target_directory, 'my.xtrabackup.cnf')
         args = [
             self.config['xtrabackup']['innobackupex'],
-            '--defaults-file=%s',
+            '--defaults-file=%s' % defaults_file,
             '--stream=tar4ibd',
             tempfile.gettempdir(),
         ]
