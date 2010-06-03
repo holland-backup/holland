@@ -16,7 +16,8 @@ CONFIGSPEC = """
 [xtrabackup]
 innobackupex    = string(default='innobackupex-1.5.1')
 stream          = boolean(default=yes)
-slave-info      = boolean(default=yes)
+slave-info      = boolean(default=no)
+no-lock         = boolean(default=no)
 
 [compression]
 method          = option('none', 'gzip', 'pigz', 'bzip2', 'lzma', 'lzop', default='gzip')
@@ -57,14 +58,18 @@ class XtrabackupPlugin(object):
 
     def backup(self):
         """Run a database backup with xtrabackup"""
+        defaults_file = os.path.join(self.target_directory, 'my.xtrabackup.cnf')
         args = [
             self.config['xtrabackup']['innobackupex'],
+            '--defaults-file=%s',
             '--stream=tar4ibd',
             tempfile.gettempdir(),
         ]
 
         if self.config['xtrabackup']['slave-info']:
-            args.insert(-1, '--slave-info')
+            args.insert(3, '--slave-info')
+        if self.config['xtrabackup']['no-lock']:
+            args.insert(2, '--no-lock')
 
         LOG.info("%s", list2cmdline(args))
 
@@ -72,7 +77,6 @@ class XtrabackupPlugin(object):
             return
 
         config = build_mysql_config(self.config['mysql:client'])
-        defaults_file = os.path.join(self.target_directory, 'my.xtrabackup.cnf')
         write_options(config, defaults_file)
         backup_path = os.path.join(self.target_directory, 'backup.tar')
         compression_stream = open_stream(backup_path, 'w', 
