@@ -6,7 +6,7 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD 
@@ -100,6 +100,16 @@ Requires: %{name}-common = %{version}-%{release}
 %description sqlite 
 SQLite Backup Provider Plugin for Holland
 
+%package xtrabackup
+Summary: Xtrabackup plugin for Holland
+License: GPLv2
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
+
+%description xtrabackup
+This package provides a Holland plugin for the Percona Xtrabackup 
+backup tool for InnoDB and XtraDB engines for MySQL
 
 %prep
 %setup -q
@@ -280,7 +290,20 @@ rm -rf %{buildroot}
 %{_sysconfdir}/holland/backupsets/examples/sqlite.conf
 %config(noreplace) %{_sysconfdir}/holland/providers/sqlite.conf
 
+%files xtrabackup
+%defattr(-,root,root,-)
+%doc plugins/holland.backup.xtrabackup/{README,LICENSE}
+%{python_sitelib}/holland/backup/xtrabackup/
+%{python_sitelib}/holland.backup.xtrabackup-%{version}-*-nspkg.pth
+%{python_sitelib}/holland.backup.xtrabackup-%{version}-*.egg-info
+%{_sysconfdir}/holland/backupsets/examples/xtrabackup.conf
+%config(noreplace) %{_sysconfdir}/holland/providers/xtrabackup.conf
+
+
 %changelog
+* Thu Jun 03 2010 Andrew Garner <andrew.garner@rackspace.com> - 0.9.9-10
+- Added xtrabackup plugin
+
 * Thu May 27 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-9
 - Move plugins/README to README.plugins and install via %doc
 
