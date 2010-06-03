@@ -1,6 +1,7 @@
 """holland backup plugin using xtrabackup"""
 
 import os, sys
+import shutil
 import logging
 import tempfile
 from subprocess import list2cmdline, check_call, CalledProcessError
@@ -14,6 +15,7 @@ LOG = logging.getLogger(__name__)
 
 CONFIGSPEC = """
 [xtrabackup]
+global-defaults = string(default='/etc/my.cnf')
 innobackupex    = string(default='innobackupex-1.5.1')
 stream          = boolean(default=yes)
 slave-info      = boolean(default=no)
@@ -78,6 +80,9 @@ class XtrabackupPlugin(object):
 
         config = build_mysql_config(self.config['mysql:client'])
         write_options(config, defaults_file)
+        shutil.copyfileobj(open(self.config['xtrabackup']['global-defaults'], 'r'),
+                           open(defaults_file, 'a'))
+                          
         backup_path = os.path.join(self.target_directory, 'backup.tar')
         compression_stream = open_stream(backup_path, 'w', 
                                          **self.config['compression'])
