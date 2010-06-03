@@ -5,3 +5,4 @@ holland.backup.maatkit
 holland.backup.mysqldump
 holland.backup.mysqlhotcopy
 holland.backup.mysql-lvm
+holland.backup.xtrabackup
