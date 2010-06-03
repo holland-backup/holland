@@ -46,3 +46,7 @@ holland.backup.random       - An example plugin that backups up bytes from
 holland.backup.sqlite       - A backup plugin that produces logical exports 
                               from sqlite database files.
                               Depends: [holland.lib.common]
+
+holland.backup.xtrabackup   - A backup plugin that uses Percona's xtrabackup
+                              utility to perform a raw file copy of MySQL datadir
+                              Depends: [holland.lib.mysql, holland.lib.common]
