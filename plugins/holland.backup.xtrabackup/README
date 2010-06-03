@@ -1,0 +1,1 @@
+This plugin will run the innobackupex script from Percona's xtrabackup utility to perform hot backups of InnoDB tables.
