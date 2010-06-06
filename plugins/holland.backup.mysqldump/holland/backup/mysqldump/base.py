@@ -1,5 +1,6 @@
 """Main driver"""
 
+import csv
 import logging
 from holland.core.exceptions import BackupError
 from holland.lib.safefilename import encode
@@ -38,6 +39,7 @@ def start(mysqldump,
         else:
             target_databases = [db for db in schema.databases
                                     if not db.excluded]
+            write_manifest(schema, open_stream)
 
     if file_per_database:
         flush_logs = '--flush-logs' in mysqldump.options
@@ -60,6 +62,16 @@ def start(mysqldump,
         if target_databases is not ALL_DATABASES:
             target_databases = [db.name for db in target_databases]
         mysqldump.run(target_databases, stream, more_options)
+
+def write_manifest(schema, open_stream):
+    """Write real database names => encoded names to MANIFEST.txt"""
+    manifest_fileobj = open_stream('MANIFEST.txt', 'w', method='none')
+    manifest = csv.writer(manifest_fileobj)
+    for database in schema.databases:
+        name = database.name
+        encoded_name = encode(name)[0]
+        manifest.writerow([name.encode('utf-8'), encoded_name + '.sql'])
+    manifest_fileobj.close()
 
 def mysqldump_lock_option(lock_method, databases):
     """Choose the mysqldump option to use for locking

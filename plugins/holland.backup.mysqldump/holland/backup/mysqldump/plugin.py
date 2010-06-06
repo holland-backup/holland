@@ -192,15 +192,15 @@ class MySQLDumpPlugin(object):
             if self.config['mysqldump']['stop-slave']:
                 _start_slave(self.client, self.config['mysql:replication'])
 
-    def _open_stream(self, path, mode):
+    def _open_stream(self, path, mode, method=None):
         """Open a stream through the holland compression api, relative to
         this instance's target directory
         """
         path = os.path.join(self.target_directory, 'backup_data', path)
-        compression_method = self.config['compression']['method']
+        compression_method = method or self.config['compression']['method']
         compression_level = self.config['compression']['level']
         if compression_method == 'none':
-            compresison_info = '(uncompressed)'
+            compression_info = '(uncompressed)'
         else:
             compression_info = '(%s compressed level %d)' % \
                                 (compression_method, compression_level)
