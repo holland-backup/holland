@@ -20,8 +20,12 @@ class Lock(object):
 
     def acquire(self):
         """Acquire a lock on the path associated with this lock object"""
+
+        if self.is_locked():
+            return
+
         try:
-            self.lock = open(self.path, 'a')
+            self.lock = open(self.path, 'a+')
             flock(self.lock, LOCK_EX|LOCK_NB)
             self.lock.truncate()
             self.lock.write(str(getpid()))
@@ -31,14 +35,17 @@ class Lock(object):
         else:
             return True
 
+    def is_locked(self):
+        return self.lock is not None
+
     def release(self):
         """Release a currently open lock"""
         if self.lock is None:
             raise LockError("No lock acquired to release")
         try:
             self.acquire()
-            self.lock.truncate()
             flock(self.lock, LOCK_UN)
+            self.lock = None
         except IOError, exc:
             raise LockError(str(exc), exc)
         else:
