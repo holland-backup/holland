@@ -9,6 +9,7 @@ from holland.core.exceptions import BackupError
 from holland.core.config import hollandcfg, ConfigError
 from holland.core.spool import spool
 from holland.core.util.fmt import format_interval
+from holland.core.util.lock import Lock, LockError
 
 LOG = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ class Backup(Command):
                 help="Abort on the first backupset that fails."),
         option('--dry-run', '-n', action='store_true',
                 help="Print backup commands without executing them."),
-        option('--no-lock', '-f', action='store_true',
+        option('--no-lock', '-f', action='store_true', default=False,
                 help="Run even if another copy of Holland is running.")
     ]
 
@@ -51,12 +52,20 @@ class Backup(Command):
             return 1
 
         runner = BackupRunner(spool)
-        purge_mgr = PurgeManager()
 
-        runner.register_cb('pre-backup', purge_mgr)
-        runner.register_cb('post-backup', purge_mgr)
-        runner.register_cb('backup-failure', purge_backup)
+        # dry-run implies no-lock
+        if opts.dry_run:
+            opts.no_lock = True
 
+        # don't purge if doing a dry-run, or when simultaneous backups may be running
+        if not opts.no_lock:
+            purge_mgr = PurgeManager()
+
+            runner.register_cb('pre-backup', purge_mgr)
+            runner.register_cb('post-backup', purge_mgr)
+            runner.register_cb('backup-failure', purge_backup)
+
+        error = 1
         LOG.info("---> Starting backup run <---")
         for name in backupsets:
             try:
@@ -64,16 +73,34 @@ class Backup(Command):
             except IOError, exc:
                 LOG.error("Could not load backupset '%s': %s", name, exc)
                 break
+
+            if not opts.no_lock and config['holland:backup'].get('lockfile'):
+                lock = Lock(config['holland:backup']['lockfile'])
+                try:
+                    lock.acquire()
+                    LOG.info("Acquired lock %s : %r", lock.path, lock.lock)
+                except LockError:
+                    LOG.error("Failed to acquire the specified lock %s",
+                                config['holland:backup']['lockfile'])
+                    break
+
             try:
-                runner.backup(name, config, opts.dry_run)
-            except BackupError, exc:
-                LOG.error("Backup failed: %s", exc)
-            except ConfigError, exc:
-                break
+                try:
+                    runner.backup(name, config, opts.dry_run)
+                except BackupError, exc:
+                    LOG.error("Backup failed: %s", exc)
+                    break
+                except ConfigError, exc:
+                    break
+            finally:
+                if not opts.no_lock and config['holland:backup']['lockfile']:
+                    if lock.is_locked():
+                        lock.release()
+                    LOG.info("Released lock %s", lock.path)
         else:
-            return 0
+            error = 0
         LOG.info("---> Ending backup run <---")
-        return 1
+        return error
 
 def purge_backup(event, entry):
     if entry.config['holland:backup']['auto-purge-failures']:
