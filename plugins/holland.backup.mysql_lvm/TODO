@@ -1,3 +1,0 @@
-When validating sizes, round up to extent size?
-    change api to accomodate validate_size(size, extent_size_of_target_vg)
-
