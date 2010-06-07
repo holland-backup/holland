@@ -1,6 +1,4 @@
-# sitelib for noarch packages, sitearch for others (remove the unneeded one)
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
-%{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 %{!?holland_version: %global holland_version 0.9.9}
 
 
