@@ -263,11 +263,10 @@ rm -rf %{buildroot}
 
 %files mysqllvm
 %defattr(-,root,root,-)
-%doc plugins/holland.backup.mysql-lvm/{README,LICENSE}
-%{python_sitelib}/holland/backup/lvm/
-%{python_sitelib}/holland/restore/lvm.py*
-%{python_sitelib}/holland.backup.mysql_lvm-%{version}-*-nspkg.pth
-%{python_sitelib}/holland.backup.mysql_lvm-%{version}-*.egg-info
+%doc plugins/holland.backup.mysql_lvm/{README,LICENSE}
+%{python_sitelib}/holland/backup/mysql*_lvm/
+%{python_sitelib}/holland.backup.mysql*_lvm-%{version}-*-nspkg.pth
+%{python_sitelib}/holland.backup.mysql*_lvm-%{version}-*.egg-info
 %{_sysconfdir}/holland/backupsets/examples/mysql-lvm.conf
 %config(noreplace) %{_sysconfdir}/holland/providers/mysql-lvm.conf
 
@@ -301,6 +300,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Sun Jun 06 2010 Andrew Garner <andrew.garner@rackspace.com> - 0.9.9-11
+- Updated for changes from LVM cleanup
+
 * Thu Jun 03 2010 Andrew Garner <andrew.garner@rackspace.com> - 0.9.9-10
 - Added xtrabackup plugin
 
