@@ -26,10 +26,9 @@ setup(name="holland.backup.mysql_lvm",
       test_suite='nose.collector',
       entry_points="""
       [holland.backup]
-      mysql-lvm = holland.backup.lvm.plugin:LVMBackup
+      mysql-lvm = holland.backup.mysql_lvm:MysqlLVMBackup
+      mysqldump-lvm = holland.backup.mysqldump_lvm:MysqlLVMBackup
       
-      [holland.restore]
-      mysql-lvm = holland.restore.lvm:LVMRestore
       """,
       namespace_packages=['holland', 'holland.backup', 'holland.restore'],
       )
