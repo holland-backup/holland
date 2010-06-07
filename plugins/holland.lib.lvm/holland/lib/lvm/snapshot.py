@@ -40,7 +40,7 @@ class Snapshot(object):
         """
 
         try:
-            self._apply_callbacks('pre-snapshot', self)
+            self._apply_callbacks('pre-snapshot', self, None)
             snapshot = logical_volume.snapshot(self.name, self.size)
         except (LVMCommandError, CallbackFailuresError), exc:
             return self.error(None, exc)
@@ -106,7 +106,7 @@ class Snapshot(object):
 
     def error(self, snapshot, exc):
         """Handle an error during the snapshot process"""
-        LOG.error("Error encountered during snapshot processing: %s", exc)
+        LOG.debug("Error encountered during snapshot processing: %s", exc)
 
         if snapshot and snapshot.exists():
             try:
@@ -140,16 +140,15 @@ class Snapshot(object):
         callback_list = list(self.callbacks.get(event, []))
         callback_list.sort(reverse=True)
         callback_list = [callback[1] for callback in callback_list]
-        errors = []
         for callback in callback_list:
             try:
+                LOG.debug("Calling %s", callback)
                 callback(event, *args, **kwargs)
             except:
+                LOG.debug("Callback %r failed for event %s", callback, event, exc_info=True)
                 exc = sys.exc_info()[1]
-                errors.append((callback, exc))
+                raise CallbackFailuresError([(callback, exc)])
 
-        if errors:
-            raise CallbackFailuresError(errors)
 
 class CallbackFailuresError(Exception):
     """Error running callbacks"""
