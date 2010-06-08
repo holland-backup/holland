@@ -9,6 +9,7 @@ __all__ = [
     'getdevice',
     'relpath',
     'format_bytes',
+    'parse_bytes',
     'SignalManager',
 ]
 
@@ -93,6 +94,28 @@ def format_bytes(bytes, precision=2):
         ['Bytes','KB','MB','GB','TB','PB','EB','ZB','YB'][int(exponent)]
     )
 
+
+def parse_bytes(units_string):
+    """Parse an LVM size string into bytes
+    
+    :returns: integer number of bytes
+    """
+
+    units_string = str(units_string)
+
+    units = "kKmMgGtTpPeE"
+
+    match = re.match(r'^(\d+(?:[.]\d+)?)([%s]|)$' % units, units_string)
+    if not match:
+        raise ValueError("Invalid LVM Unit syntax %r" % units_string)
+    number, unit = match.groups()
+    if not unit:
+        unit = 'M'
+    unit = unit.upper()
+
+    exponent = "KMGTPE".find(unit)
+
+    return int(float(number) * 1024 ** (exponent + 1))
 
 class SignalManager(object):
     """Manage signals around critical sections"""
