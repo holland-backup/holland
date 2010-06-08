@@ -45,7 +45,7 @@ def build_snapshot(config, logical_volume):
                ) 
     mountpoint = config['snapshot-mountpoint']
     tempdir = False
-    if mountpoint is None:
+    if not mountpoint:
         tempdir = True
         mountpoint = tempfile.mkdtemp()
     snapshot = Snapshot(name, size, mountpoint)
