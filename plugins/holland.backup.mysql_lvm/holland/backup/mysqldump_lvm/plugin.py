@@ -24,9 +24,6 @@ snapshot-size = string(default=None)
 # default: temporary directory
 snapshot-mountpoint = string(default=None)
 
-# default: no
-innodb-recovery = boolean(default=no)
-
 # default: flush tables with read lock by default
 lock-tables = boolean(default=yes)
 

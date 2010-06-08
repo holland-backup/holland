@@ -60,7 +60,6 @@ def setup_actions(snapshot, config, client):
 
     Optional actions:
         * MySQL locking
-        * InnoDB recovery
         * Recording MySQL replication
     """
     if config['mysql-lvm']['lock-tables']:
