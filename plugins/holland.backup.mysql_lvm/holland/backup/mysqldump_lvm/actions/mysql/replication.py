@@ -17,12 +17,15 @@ def record_master_status(client, config):
     try:
         LOG.info("Executing SHOW MASTER STATUS")
         master_status = client.show_master_status()
-        binlog = master_status['file']
-        position = master_status['position']
-        config['master_log_file'] = binlog
-        config['master_log_pos'] = position
-        LOG.info("Recorded binlog = %s position = %s",
-                 binlog, position)
+        if master_status:
+            binlog = master_status['file']
+            position = master_status['position']
+            config['master_log_file'] = binlog
+            config['master_log_pos'] = position
+            LOG.info("Recorded binlog = %s position = %s",
+                    binlog, position)
+        else:
+            LOG.info("This MySQL server does not have binary logs enabled.")
     except MySQLError, exc:
         raise BackupError("MySQL error while acquiring master replication "
                           "status [%d] %s" % exc.args)
@@ -31,12 +34,15 @@ def record_slave_status(client, config):
     try:
         LOG.info("Executing SHOW SLAVE STATUS")
         slave_status = client.show_slave_status()
-        binlog = slave_status['relay_master_log_file']
-        position = slave_status['exec_master_log_pos']
-        config['slave_master_log_file'] = binlog
-        config['slave_master_log_pos'] = position
-        LOG.info("Recorded master_binlog = %s master_position = %s",
-                 binlog, position)
+        if slave_status:
+            binlog = slave_status['relay_master_log_file']
+            position = slave_status['exec_master_log_pos']
+            config['slave_master_log_file'] = binlog
+            config['slave_master_log_pos'] = position
+            LOG.info("Recorded master_binlog = %s master_position = %s",
+                    binlog, position)
+        else:
+            LOG.info("This MySQL server is not a slave")
     except MySQLError, exc:
         raise BackupError("MySQL error while acquiring slave replication "
                           "status [%d] %s" % exc.args)
