@@ -185,6 +185,7 @@ class Backupset(object):
 CONFIGSPEC = """
 [holland:backup]
 plugin                  = string(default="")
+lockfile                = string(default=None)
 start-time              = float(default=0)
 stop-time               = float(default=0)
 failed-backup           = boolean(default=no)
