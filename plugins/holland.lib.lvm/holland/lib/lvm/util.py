@@ -1,6 +1,7 @@
 """LVM formatting and validation methods"""
 
 import os
+import re
 import signal
 from math import log
 
@@ -103,19 +104,23 @@ def parse_bytes(units_string):
 
     units_string = str(units_string)
 
-    units = "kKmMgGtTpPeE"
+    units = "bBkKmMgGtTpPeE"
 
     match = re.match(r'^(\d+(?:[.]\d+)?)([%s]|)$' % units, units_string)
     if not match:
         raise ValueError("Invalid LVM Unit syntax %r" % units_string)
     number, unit = match.groups()
     if not unit:
-        unit = 'M'
+        unit = 'B'
     unit = unit.upper()
 
-    exponent = "KMGTPE".find(unit)
+    try:
+        exponent = "BKMGTPE".index(unit)
+    except ValueError:
+        raise ValueError("Invalid unit %r. Must be B,K,M,G,T,P or E" % unit)
 
-    return int(float(number) * 1024 ** (exponent + 1))
+
+    return int(float(number) * 1024 ** (exponent))
 
 class SignalManager(object):
     """Manage signals around critical sections"""
