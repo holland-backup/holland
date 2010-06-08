@@ -8,8 +8,8 @@ from holland.core.backup import BackupRunner, BackupError
 from holland.core.exceptions import BackupError
 from holland.core.config import hollandcfg, ConfigError
 from holland.core.spool import spool
-from holland.core.util.fmt import format_interval
-from holland.core.util.path import disk_free, disk_capacity
+from holland.core.util.fmt import format_interval, format_bytes
+from holland.core.util.path import disk_free, disk_capacity, getmount
 from holland.core.util.lock import Lock, LockError
 
 LOG = logging.getLogger(__name__)
@@ -154,5 +154,10 @@ def report_low_space(event, entry):
     total_space = disk_capacity(entry.path)
     free_space = disk_free(entry.path)
     if free_space < 0.10*total_space:
-        LOG.warning("WARNING: Extremely low free space on %s: %s of %s remaining",
-                    entry.path, free_space, total_space)
+        LOG.warning("Extremely low free space on %s's filesystem (%s).",
+                    entry.path,
+                    getmount(entry.path))
+        LOG.warning("%s of %s [%.2f%%] remaining",
+                    format_bytes(free_space), 
+                    format_bytes(total_space),
+                    (float(free_space) / total_space)*100)
