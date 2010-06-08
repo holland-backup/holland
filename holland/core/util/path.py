@@ -109,6 +109,31 @@ def relpath(origin, dest):
         path = head
     return None
 
+def getmount(path):
+    """Return the mount point of a path
+    
+    :param path: path to find the mountpoint for
+
+    :returns: str mounpoint path
+    """
+
+    path = os.path.realpath(path)
+
+    while path != os.path.sep:
+        if os.path.ismount(path):
+            return path
+        path = os.path.abspath(os.path.join(path, os.pardir))
+    return path
+
+def disk_capacity(target_path):
+    """Find the total capacity of the filesystem that target_path is on
+
+    :returns: integer number of bytes
+    """
+    path = getmount(target_path)
+    info = os.statvfs(path)
+    return info.f_frsize*info.f_blocks
+
 def disk_free(target_path):
     """
     Find the amount of space free on a given path
@@ -118,7 +143,8 @@ def disk_free(target_path):
     returns the size in bytes potentially available 
     to a non privileged user
     """
-    info = os.statvfs(target_path)
+    path = getmount(target_path)
+    info = os.statvfs(path)
     return info.f_frsize*info.f_bavail
 
 def directory_size(path):

@@ -9,6 +9,7 @@ from holland.core.exceptions import BackupError
 from holland.core.config import hollandcfg, ConfigError
 from holland.core.spool import spool
 from holland.core.util.fmt import format_interval
+from holland.core.util.path import disk_free, disk_capacity
 from holland.core.util.lock import Lock, LockError
 
 LOG = logging.getLogger(__name__)
@@ -64,6 +65,8 @@ class Backup(Command):
             runner.register_cb('pre-backup', purge_mgr)
             runner.register_cb('post-backup', purge_mgr)
             runner.register_cb('backup-failure', purge_backup)
+
+        runner.register_cb('post-backup', report_low_space)
 
         error = 1
         LOG.info("---> Starting backup run <---")
@@ -146,3 +149,10 @@ class PurgeManager(object):
             LOG.info("No backups purged")
         else:
             LOG.info("%d backups purged", purge_count)
+
+def report_low_space(event, entry):
+    total_space = disk_capacity(entry.path)
+    free_space = disk_free(entry.path)
+    if free_space < 0.10*total_space:
+        LOG.warning("WARNING: Extremely low free space on %s: %s of %s remaining",
+                    entry.path, free_space, total_space)
