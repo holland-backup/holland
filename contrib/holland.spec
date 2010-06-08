@@ -4,7 +4,7 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        10%{?dist}
+Release:        12%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD 
@@ -194,13 +194,13 @@ rm -rf %{buildroot}
 %{_localstatedir}/log/holland/
 %{python_sitelib}/holland/commands/*.py*
 %{_sysconfdir}/holland/backupsets/examples
-%attr(0750,root,root) %dir %{_sysconfdir}/holland/
-%attr(0750,root,root) %dir %{_sysconfdir}/holland/backupsets
-%attr(0750,root,root) %dir %{_sysconfdir}/holland/providers
+%attr(0755,root,root) %dir %{_sysconfdir}/holland/
+%attr(0755,root,root) %dir %{_sysconfdir}/holland/backupsets
+%attr(0755,root,root) %dir %{_sysconfdir}/holland/providers
 %{_sysconfdir}/holland/providers/README
 %attr(0640,root,root) %config(noreplace) %{_sysconfdir}/holland/holland.conf
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/logrotate.d/holland
-%attr(0750,root,root) %{_localstatedir}/spool/holland
+%attr(0755,root,root) %{_localstatedir}/spool/holland
 # virtual namespaces
 %dir %{python_sitelib}/holland/backup/
 %dir %{python_sitelib}/holland/restore/
@@ -298,6 +298,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Tue Jun 08 2010 Andrew Garner <andrew.garner@rackspace.com> - 0.9.9-12
+- Revert directory permissions back to standard 0755
+
 * Sun Jun 06 2010 Andrew Garner <andrew.garner@rackspace.com> - 0.9.9-11
 - Updated for changes from LVM cleanup
 
