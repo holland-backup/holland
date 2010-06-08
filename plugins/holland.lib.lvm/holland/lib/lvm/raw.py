@@ -119,7 +119,7 @@ def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
         'lvcreate',
         '--snapshot',
         '--name', snapshot_name,
-        '--extents', str(snapshot_extents),
+        '--extents', "%d" % snapshot_extents,
         orig_lv_path,
     ]
 
