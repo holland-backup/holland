@@ -70,6 +70,8 @@ class Backup(Command):
         for name in backupsets:
             try:
                 config = hollandcfg.backupset(name)
+                # ensure we have at least an empty holland:backup section
+                config.setdefault('holland:backup', {})
             except IOError, exc:
                 LOG.error("Could not load backupset '%s': %s", name, exc)
                 break
@@ -93,7 +95,7 @@ class Backup(Command):
                 except ConfigError, exc:
                     break
             finally:
-                if not opts.no_lock and config['holland:backup']['lockfile']:
+                if not opts.no_lock and config['holland:backup'].get('lockfile'):
                     if lock.is_locked():
                         lock.release()
                     LOG.info("Released lock %s", lock.path)

@@ -34,6 +34,8 @@ class BackupPlugin(object):
 def load_plugin(name, config, path, dry_run):
         try:
             plugin_cls = load_backup_plugin(config['holland:backup']['plugin'])
+        except KeyError, exc:
+            raise BackupError("No plugin defined for backupset '%s'.", name) 
         except PluginLoadError, exc:
             raise BackupError(str(exc))
 
@@ -46,6 +48,8 @@ def load_plugin(name, config, path, dry_run):
         except (KeyboardInterrupt, SystemExit):
             raise
         except Exception, exc:
+            LOG.debug("Error while initializing %r : %s", 
+                      plugin_cls, exc, exc_info=True)
             raise BackupError("Error initializing %s plugin: %s" % 
                               (config['holland:backup']['plugin'],
                                str(exc))
