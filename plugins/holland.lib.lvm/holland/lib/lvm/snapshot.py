@@ -4,7 +4,7 @@ import sys
 import signal
 import logging
 from holland.lib.lvm.errors import LVMCommandError
-from holland.lib.lvm.util import SignalManager
+from holland.lib.lvm.util import SignalManager, format_bytes
 
 LOG = logging.getLogger(__name__)
 
@@ -109,6 +109,10 @@ class Snapshot(object):
         LOG.debug("Error encountered during snapshot processing: %s", exc)
 
         if snapshot and snapshot.exists():
+            snapshot.reload()
+            if 'S' in snapshot.lv_attr:
+                LOG.error("Snapshot space (%s) exceeded and snapshot is no longer valid",
+                          format_bytes(int(snapshot.lv_size)))
             try:
                 if snapshot.is_mounted():
                     snapshot.unmount()
