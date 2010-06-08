@@ -1,5 +1,6 @@
 holland.lib.common
 holland.lib.mysql
+holland.lib.lvm
 holland.backup.example
 holland.backup.maatkit
 holland.backup.mysqldump
