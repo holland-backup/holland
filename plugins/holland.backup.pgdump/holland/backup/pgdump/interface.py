@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Plugin for the Holland backup framework
 to backup Postgres databases using pg_dump
@@ -6,7 +7,7 @@ and pg_dumpall
 
 import os
 import logging
-from holland.backup.pgdump.base import backup_pgsql, PgError, pg_databases
+from holland.backup.pgdump.base import backup_pgsql, PgError, pg_databases, get_connection, get_db_size
 
 LOG = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ no-tablespaces          = boolean(default=False)
 verbose                 = boolean(default=None)
 
 [compression]
-method = option('gzip', 'none', default='gzip')
+method = option('gzip', 'bzip2', 'none', default='gzip')
 level = integer(min=0, default=1)
 
 [pgauth]
@@ -60,6 +61,7 @@ role = string(default=None)
 password = string(default=None)
 hostname = string(default=None)
 port = integer(default=5432)
+pgpass = string(default=None)
 """.splitlines()
 
 class PgDump(object):
@@ -81,6 +83,10 @@ class PgDump(object):
         self.target_directory = target_directory
         self.dry_run = dry_run
         self.config.validate_config(CONFIGSPEC)
+        
+        get_connection(self.config)
+        self.databases = pg_databases(self.config)
+        LOG.info("Got databases: %s" % repr(self.databases))
 
     def estimate_backup_size(self):
         """Estimate the size (in bytes) of the backup this plugin would
@@ -89,12 +95,12 @@ class PgDump(object):
 
         :returns: int. size in bytes
         """
-        # Here we might select the sum of pg_relation_size() (as an
-        # underestimate) or pg_total_relation_size() (as an overestimate)
-        # of each relation we expect tomatch with pg_dump
-
-        # but we currently return 0
-        return 0
+        
+        totalestimate = 0
+        for db in self.databases:
+	    totalestimate += get_db_size(db)
+	    
+	return totalestimate
 
     def backup(self):
         """
@@ -106,7 +112,7 @@ class PgDump(object):
             # enough to know that:
             # 1) We can connect to Postgres using pgpass data
             # 2) The exact databases we would dump
-            for name in pg_databases(self.config):
+            for name in self.databases:
                 LOG.info('pg_dump -Fc %s', name)
             return
 
@@ -121,7 +127,7 @@ class PgDump(object):
             raise PgError("Failed to create backup directory %s" % backup_dir)
 
         try:
-            backup_pgsql(backup_dir, self.config)
+            backup_pgsql(backup_dir, self.config, self.databases)
         except OSError, exc:
             LOG.error("Failed to backup Postgres. %s",
                           str(exc), exc_info=True)

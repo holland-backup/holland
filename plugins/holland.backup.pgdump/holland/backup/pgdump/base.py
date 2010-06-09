@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Backup functions for pg_dump"""
 
 # Python stdlib
@@ -15,17 +16,32 @@ LOG = logging.getLogger(__name__)
 class PgError(Exception):
     """Raised when any error associated with Postgres occurs"""
 
+def get_connection(config):
+    pgpass = config['pgauth']['pgpass']
+    with open(pgpass, "r") as f:
+        passline = f.readline()
+    hostname, port, database, username, password = passline.split(':', 4)
+    
+    global connection
+    connection = dbapi.connect(host=hostname, port=port, database=database, user=username, password=password)
+    
+def get_db_size(dbname):
+    cursor = connection.cursor()
+    cursor.execute("SELECT pg_database_size('%s')" % dbname)
+    size = int(cursor.fetchone()[0])
+    LOG.info("DB %s size %d" % (dbname, size))
+    return size
+
 def pg_databases(config):
     """Find the databases available in the Postgres cluster specified
     in config['pgpass']
     """
     # FIXME: use PGPASSFILE
-    connection = dbapi.connect(**config['pgpass'])
     cursor = connection.cursor()
-    cursor.execute('SELECT datname FROM pg_database')
-    databases = [db for db, in cursor if not db.startswith('template')]
+    cursor.execute("SELECT datname FROM pg_database WHERE datistemplate='f'")
+    databases = [db for db, in cursor]
     cursor.close()
-    connection.close()
+    #connection.close()
     logging.debug("pg_databases() -> %r", databases)
     return databases
 
@@ -78,7 +94,7 @@ def backup_globals(backup_directory, config):
         raise PgError("pg_dumpall exited with non-zero status[%d]" %
                       returncode)
 
-def backup_pgsql(backup_directory, config):
+def backup_pgsql(backup_directory, config, databases):
     """Backup databases in a Postgres instance
 
     :param backup_directory: directory to save pg_dump output to
@@ -87,11 +103,13 @@ def backup_pgsql(backup_directory, config):
     """
     backup_globals(backup_directory, config)
 
-    databases = pg_databases(config)
     for dbname in databases:
         # FIXME: potential problems with weird dataase names
         #        Consider: 'foo/bar' or unicode names
         # FIXME: compression usually doesn't make sense with --format=custom
-        stream = open_stream(dbname + '.dump', 'w', **config['compression'])
+        
+        filename = os.path.join(backup_directory, dbname + '.dump')
+        
+        stream = open_stream(filename, 'w', **config['compression'])
         run_pgdump(dbname, stream)
         stream.close()
