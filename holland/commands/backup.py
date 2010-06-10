@@ -79,8 +79,8 @@ class Backup(Command):
                 LOG.error("Could not load backupset '%s': %s", name, exc)
                 break
 
-            if not opts.no_lock and config['holland:backup'].get('lockfile'):
-                lock = Lock(config['holland:backup']['lockfile'])
+            if not opts.no_lock:
+                lock = Lock(config.path)
                 try:
                     lock.acquire()
                     LOG.info("Acquired lock %s : %r", lock.path, lock.lock)
@@ -98,7 +98,7 @@ class Backup(Command):
                 except ConfigError, exc:
                     break
             finally:
-                if not opts.no_lock and config['holland:backup'].get('lockfile'):
+                if not opts.no_lock:
                     if lock.is_locked():
                         lock.release()
                     LOG.info("Released lock %s", lock.path)
