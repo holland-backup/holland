@@ -507,7 +507,7 @@ rm -rf %{buildroot}
 - Added xtrabackup plugin
 
 * Thu May 27 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-9
-- Move plugins/README to README.plugins and install via %doc
+- Move plugins/README to README.plugins and install via %%doc
 
 * Mon May 25 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-8
 - Adding holland.lib.lvm under -common subpackage
