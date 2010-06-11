@@ -17,6 +17,7 @@
 %bcond_with     mysqlhotcopy
 %bcond_with     maatkit
 %bcond_with     pgdump
+%bcond_with     sqlite
 %bcond_with     xtrabackup
 
 Name:           holland
@@ -226,6 +227,11 @@ cd plugins/holland.backup.sqlite
 cd -
 %endif
 
+%if %{with xtrabackup}
+cd plugins/holland.backup.xtrabackup
+%{__python} setup.py build
+cd -
+%endif
 
 %install
 rm -rf %{buildroot}
@@ -331,6 +337,16 @@ cd plugins/holland.backup.sqlite
 cd -
 install -m 0640 config/providers/sqlite.conf %{buildroot}%{_sysconfdir}/holland/providers/
 install -m 0640 config/backupsets/examples/sqlite.conf \
+                %{buildroot}%{_sysconfdir}/holland/backupsets/examples/
+%endif
+
+%if %{with xtrabackup}
+# plugin : holland.backup.xtrabackup
+cd plugins/holland.backup.xtrabackup
+%{__python} setup.py install -O1 --skip-build --root %{buildroot}
+cd -
+install -m 0640 config/providers/xtrabackup.conf %{buildroot}%{_sysconfdir}/holland/providers/
+install -m 0640 config/backupsets/examples/xtrabackup.conf \
                 %{buildroot}%{_sysconfdir}/holland/backupsets/examples/
 %endif
 

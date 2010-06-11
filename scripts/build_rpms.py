@@ -27,6 +27,8 @@ def get_opts_args():
                       help="just build the source rpm")
     parser.add_option('--clean', action='store_true', dest='clean',
                       help="remove directory after building (for testing)")
+    parser.add_option('--with', action='append', default=[],
+                      help="Include additional plugins not built by default")
     (cli_opts, cli_args) = parser.parse_args()
     return (cli_opts, cli_args)
 
@@ -65,15 +67,16 @@ def build_srpm():
     retcode = os.system(cmd)
     return retcode
         
-def build_rpms():
+def build_rpms(with_extra):
     version, dev_tag = get_holland_version()
     if dev_tag:
         dev_option = "--define='src_dev_tag dev'"
     else:
         dev_option = ''
 
-    cmd = "rpmbuild -bb %s/SPECS/holland.spec --define='_topdir %s' %s" % \
-           (config['topdir'], config['topdir'], dev_option)
+    with_extra = ' '.join(['--with %s' % extra for extra in with_extra])
+    cmd = "rpmbuild -bb %s/SPECS/holland.spec --define='_topdir %s' %s %s" % \
+           (config['topdir'], config['topdir'], dev_option, with_extra)
     print cmd
     retcode = os.system(cmd)
     return retcode
@@ -123,7 +126,7 @@ def main():
         exit(1, cli_opts.clean)
 
     if not cli_opts.just_source:
-        retcode = build_rpms()
+        retcode = build_rpms(cli_opts.with)
 
     print
     print '-' * 77
