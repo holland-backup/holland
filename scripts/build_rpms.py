@@ -85,8 +85,12 @@ def get_holland_version():
     version = Popen(['python', 'setup.py', '--version'], stdout=PIPE, cwd=
                     os.path.join(config['srcdir']))\
                     .communicate()[0].strip('\n')
-    if int(version.split('.')[2])%2 != 0:
-        dev_tag = 'dev'
+    try:
+        if int(version.split('.')[-1])%2 != 0:
+            dev_tag = 'dev'
+    except ValueError:
+        dev_tag = None
+
     if not version:
         raise Exception, "unable to determine holland version"
     return version, dev_tag
