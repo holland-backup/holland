@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.9.9'
+version = '1.0rc1'
 
 setup(name='holland.backup.maatkit',
       version=version,
