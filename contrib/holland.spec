@@ -30,7 +30,10 @@ Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
-BuildRequires:  python-devel python-setuptools python-sphinx
+BuildRequires:  python-devel python-setuptools 
+%if %{with sphinxdocs}
+BuildRequires:  python-sphinx
+%endif
 Requires:       python-setuptools
 
 %description
