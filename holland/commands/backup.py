@@ -85,8 +85,9 @@ class Backup(Command):
                     lock.acquire()
                     LOG.info("Acquired lock %s : %r", lock.path, lock.lock)
                 except LockError:
-                    LOG.error("Failed to acquire the specified lock %s",
-                                config['holland:backup']['lockfile'])
+                    LOG.error("Failed to acquire lock on backupset %s (%s)",
+                                name, config.filename)
+                                
                     break
 
             try:
