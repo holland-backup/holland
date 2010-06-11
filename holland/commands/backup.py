@@ -80,7 +80,7 @@ class Backup(Command):
                 break
 
             if not opts.no_lock:
-                lock = Lock(config.path)
+                lock = Lock(config.filename)
                 try:
                     lock.acquire()
                     LOG.info("Acquired lock %s : %r", lock.path, lock.lock)
