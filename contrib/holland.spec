@@ -236,11 +236,11 @@ cd -
 %install
 rm -rf %{buildroot}
 
-%{__mkdir} -p 	%{buildroot}%{_sysconfdir}/holland/{backupsets,providers} \
-		%{buildroot}%{_sysconfdir}/holland/backupsets/examples \
-		%{buildroot}%{_localstatedir}/spool/holland \
-		%{buildroot}%{_localstatedir}/log/holland/ \
-		%{buildroot}%{_mandir}/man5
+%{__mkdir} -p   %{buildroot}%{_sysconfdir}/holland/{backupsets,providers} \
+                %{buildroot}%{_sysconfdir}/holland/backupsets/examples \
+                %{buildroot}%{_localstatedir}/spool/holland \
+                %{buildroot}%{_localstatedir}/log/holland/ \
+                %{buildroot}%{_mandir}/man5
 
 install -m 0644 config/providers/README %{buildroot}/%{_sysconfdir}/holland/providers/
 
