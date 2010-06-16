@@ -17,22 +17,18 @@ class PgError(Exception):
     """Raised when any error associated with Postgres occurs"""
 
 def get_connection(config):
-    pgpass = config['pgauth']['pgpass']
-    with open(pgpass, "r") as f:
-        passline = f.readline()
-    hostname, port, database, username, password = passline.split(':', 4)
+    connection = dbapi.connect(host=config["pgauth"]["hostname"], port=config["pgauth"]["port"], 
+        database="template1", user=config["pgauth"]["username"])
+    return connection
     
-    global connection
-    connection = dbapi.connect(host=hostname, port=port, database=database, user=username, password=password)
-    
-def get_db_size(dbname):
+def get_db_size(dbname, connection):
     cursor = connection.cursor()
     cursor.execute("SELECT pg_database_size('%s')" % dbname)
     size = int(cursor.fetchone()[0])
     LOG.info("DB %s size %d" % (dbname, size))
     return size
 
-def pg_databases(config):
+def pg_databases(config, connection):
     """Find the databases available in the Postgres cluster specified
     in config['pgpass']
     """

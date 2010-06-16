@@ -56,10 +56,10 @@ method = option('gzip', 'bzip2', 'none', default='gzip')
 level = integer(min=0, default=1)
 
 [pgauth]
-username = string(default=None)
+username = string(default="postgres")
 role = string(default=None)
 password = string(default=None)
-hostname = string(default=None)
+hostname = string(default="127.0.0.1")
 port = integer(default=5432)
 pgpass = string(default=None)
 """.splitlines()
@@ -84,9 +84,33 @@ class PgDump(object):
         self.dry_run = dry_run
         self.config.validate_config(CONFIGSPEC)
         
-        get_connection(self.config)
-        self.databases = pg_databases(self.config)
+        # We need either a pgpass or a password, at minimum
+        self.pgpass = self.config["pgauth"]["pgpass"]
+        if not (self.config["pgauth"]["password"] or self.pgpass):
+	    raise PgError("Must specify at least a password or a .pgpass file")
+
+        if not self.pgpass:
+	    # write one in the target directory
+	    # self.pgpass = os.path.join(target_directory, "pgpass")
+	    self.pgpass = "/tmp/.pgpass"
+	    LOG.info("Creating pgpass " + self.pgpass)
+	    try:
+	        f = open(self.pgpass, "w")
+	        f.write(":".join((self.config["pgauth"]["hostname"], str(self.config["pgauth"]["port"]), "*",
+	            self.config["pgauth"]["username"], self.config["pgauth"]["password"])))
+	        f.close()
+	        os.chmod(self.pgpass, 0600)
+	    except IOError as e:
+	        LOG.info("I/O Error creating pgpass: " + str(e))
+	    
+	os.environ["PGPASSFILE"] = self.pgpass
+
+        self.connection = get_connection(self.config)
+        self.databases = pg_databases(self.config, self.connection)
         LOG.info("Got databases: %s" % repr(self.databases))
+        
+        if self.pgpass == "/tmp/.pgpass":
+	    os.unlink("/tmp/.pgpass")
 
     def estimate_backup_size(self):
         """Estimate the size (in bytes) of the backup this plugin would
@@ -98,7 +122,7 @@ class PgDump(object):
         
         totalestimate = 0
         for db in self.databases:
-	    totalestimate += get_db_size(db)
+	    totalestimate += get_db_size(db, self.connection)
 	    
 	return totalestimate
 
