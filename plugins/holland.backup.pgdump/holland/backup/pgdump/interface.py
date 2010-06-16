@@ -109,9 +109,6 @@ class PgDump(object):
         self.databases = pg_databases(self.config, self.connection)
         LOG.info("Got databases: %s" % repr(self.databases))
         
-        if self.pgpass == "/tmp/.pgpass":
-	    os.unlink("/tmp/.pgpass")
-
     def estimate_backup_size(self):
         """Estimate the size (in bytes) of the backup this plugin would
         produce, if run.
@@ -171,3 +168,8 @@ class PgDump(object):
         """
 
         return ""
+
+    def __del__(self):
+        if self.pgpass == "/tmp/.pgpass":
+	    os.unlink("/tmp/.pgpass")
+
