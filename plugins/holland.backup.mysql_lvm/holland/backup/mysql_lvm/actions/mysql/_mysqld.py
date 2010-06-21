@@ -79,7 +79,7 @@ def generate_server_config(config, path):
     conf_data = StringIO() 
     valid_params = [ 
         'innodb-buffer-pool-size',  
-        'key-buffer',  
+        'key-buffer-size',  
         'tmpdir',  
         'user',  
         'datadir', 
