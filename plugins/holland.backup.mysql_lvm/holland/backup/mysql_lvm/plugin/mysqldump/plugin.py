@@ -37,6 +37,7 @@ extra-flush-tables = boolean(default=yes)
 mysqld-exe              = force_list(default=list('mysqld', '/usr/libexec/mysqld'))
 user                    = string(default='mysql')
 innodb-buffer-pool-size = string(default=128M)
+key-buffer-size         = string(default=16M)
 tmpdir                  = string(default=None)
 
 """.splitlines() + MySQLDumpPlugin.CONFIGSPEC
@@ -95,8 +96,9 @@ class MysqlDumpLVMBackup(object):
         setup_actions(snapshot=snapshot,
                       config=self.config,
                       client=self.client,
-		      datadir=snap_datadir,
-		      plugin=self.mysqldump_plugin)
+                      datadir=snap_datadir,
+                      spooldir=self.target_directory,
+                      plugin=self.mysqldump_plugin)
 
         try:
             snapshot.start(volume)

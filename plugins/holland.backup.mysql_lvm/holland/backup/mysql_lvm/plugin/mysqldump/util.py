@@ -70,7 +70,7 @@ def build_snapshot(config, logical_volume):
                           lambda *args, **kwargs: cleanup_tempdir(mountpoint))
     return snapshot
 
-def setup_actions(snapshot, config, client, datadir, plugin):
+def setup_actions(snapshot, config, client, datadir, spooldir, plugin):
     """Setup actions for a LVM snapshot based on the provided
     configuration.
 
@@ -94,3 +94,10 @@ def setup_actions(snapshot, config, client, datadir, plugin):
         mysqld_config['tmpdir'] = tempfile.gettempdir()
     act = MySQLDumpDispatchAction(plugin, mysqld_config)
     snapshot.register('post-mount', act, priority=100)
+
+    errlog_src = os.path.join(datadir, 'holland_lvm.log')
+    errlog_dst = os.path.join(spooldir, 'holland_lvm.log')
+    snapshot.register('pre-unmount',
+                      lambda *args, **kwargs: shutil.copyfile(errlog_src,
+                                                              errlog_dst)
+                     )
