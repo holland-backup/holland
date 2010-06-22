@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.0rc1'
+version = '1.0.0'
 
 setup(name='holland.lib.lvm',
       version=version,
