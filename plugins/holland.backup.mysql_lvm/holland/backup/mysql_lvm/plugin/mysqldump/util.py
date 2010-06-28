@@ -8,7 +8,7 @@ from holland.lib.mysql import PassiveMySQLClient, MySQLError, \
                               build_mysql_config, connect
 from holland.lib.compression import open_stream
 from holland.lib.lvm import Snapshot
-from holland.backup.mysqldump_lvm.actions import FlushAndLockMySQLAction, \
+from holland.backup.mysql_lvm.actions import FlushAndLockMySQLAction, \
                                              RecordMySQLReplicationAction, \
                                              MySQLDumpDispatchAction
 
@@ -54,7 +54,7 @@ def build_snapshot(config, logical_volume):
                           lambda *args, **kwargs: cleanup_tempdir(mountpoint))
     return snapshot
 
-def setup_actions(snapshot, config, client):
+def setup_actions(snapshot, config, client, datadir, plugin):
     """Setup actions for a LVM snapshot based on the provided
     configuration.
 
@@ -72,6 +72,9 @@ def setup_actions(snapshot, config, client):
         act = RecordMySQLReplicationAction(client, repl_cfg)
         snapshot.register('pre-snapshot', act, 0)
 
-def setup_mysqldump(snapshot, mysqldump_plugin, datadir):
-    act = MySQLDumpDispatchAction(mysqldump_plugin, datadir)
+    mysqld_config = dict(config['mysqld'])
+    mysqld_config['datadir'] = datadir
+    if not mysqld_config['tmpdir']:
+        mysqld_config['tmpdir'] = tempfile.gettempdir()
+    act = MySQLDumpDispatchAction(plugin, mysqld_config)
     snapshot.register('post-mount', act, priority=100)
