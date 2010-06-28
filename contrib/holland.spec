@@ -22,7 +22,7 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        1.rc1%{?dist}
+Release:        2.rc2%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD 
@@ -493,6 +493,9 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
+* Thu Jun 28 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-2.rc2
+- Source updated to rc2
+
 * Thu Jun 11 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-1.rc1
 - Repackaging for release candidate
 - Using conditional builds to exclude experimental plugins
