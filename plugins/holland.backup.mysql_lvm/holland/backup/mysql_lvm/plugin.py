@@ -114,14 +114,14 @@ class MysqlLVMBackup(object):
         LOG.info("Backing up %s via snapshot", datadir)
         # lookup the logical volume mysql's datadir sits on
 
-        if self.dry_run:
-            return self._dry_run(volume)
-
         try:
             volume = LogicalVolume.lookup_from_fspath(datadir)
         except LVMCommandError, exc:
             raise BackupError("Failed to lookup logical volume for %s: %s" %
                               (datadir, exc.error))
+
+        if self.dry_run:
+            return _dry_run(volume)
 
         # create a snapshot manager
         snapshot = build_snapshot(self.config['mysql-lvm'], volume)
@@ -149,8 +149,8 @@ class MysqlLVMBackup(object):
 def _dry_run(volume):
     """Implement dry-run for LVM snapshots.  Not much to do here at the moment
     """
-    LOGGER.info("[dry-run] Snapshotting %s/%s to %s/%s_snapshot",
-                volume.vg_name,
-                volume.volume_name,
-                volume.vg_name,
-                volume.volume_name)
+    LOG.info("[dry-run] Snapshotting %s/%s to %s/%s_snapshot",
+             volume.vg_name,
+             volume.lv_name,
+             volume.vg_name,
+             volume.lv_name)

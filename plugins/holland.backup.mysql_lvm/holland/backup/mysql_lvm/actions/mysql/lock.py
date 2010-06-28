@@ -10,10 +10,11 @@ class FlushAndLockMySQLAction(object):
     def __call__(self, event, snapshot_fsm, snapshot_vol):
         if event == 'pre-snapshot':
             if self.extra_flush:
-                LOG.info("Executing FLUSH TABLES")
+                LOG.debug("Executing FLUSH TABLES")
                 self.client.flush_tables()
-            LOG.info("Executing FLUSH TABLES WITH READ LOCK")
+            LOG.debug("Executing FLUSH TABLES WITH READ LOCK")
+            LOG.info("Acquiring read-lock and flushing tables")
             self.client.flush_tables_with_read_lock()
         elif event == 'post-snapshot':
-            LOG.info("Executing UNLOCK TABLES")
+            LOG.info("Releasing read-lock")
             self.client.unlock_tables()

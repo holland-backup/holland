@@ -18,7 +18,7 @@ class InnodbRecoveryAction(object):
             raise BackupError("datadir must be set for InnodbRecovery")
 
     def __call__(self, event, snapshot_fsm, snapshot):
-        LOG.info("INNODB RECOVERY")
+        LOG.info("Starting InnoDB recovery")
         my_conf = generate_server_config(self.mysqld_config,
                                          self.mysqld_config['datadir'])
         
