@@ -25,7 +25,7 @@ def record_master_status(client, config):
             LOG.info("Recorded binlog = %s position = %s",
                     binlog, position)
         else:
-            LOG.info("This MySQL server does not have binary logs enabled."
+            LOG.info("This MySQL server does not have binary logs enabled. "
                      "Nothing to record from SHOW MASTER STATUS.")
     except MySQLError, exc:
         raise BackupError("MySQL error while acquiring master replication "
