@@ -42,7 +42,7 @@ class InnodbRecoveryAction(object):
             LOG.info("%s ran successfully", mysqld_exe)
 
 def locate_mysqld_exe(config):
-    mysqld_candidates = config['mysqld_exe']
+    mysqld_candidates = config.pop('mysqld-exe')
     for candidate in mysqld_candidates:
         if os.path.isabs(candidate):
             path = [os.path.dirname(candidate)]
@@ -110,8 +110,6 @@ def generate_server_config(config, datadir):
     ]
     print >>conf_data, "[mysqld]"
     for key, value in config.iteritems():
-        if key == 'mysqld_exe':
-            continue
         if key.replace('_', '-') not in valid_params:
             LOG.warning("Ignoring mysqld config parameter %s", key)
             continue

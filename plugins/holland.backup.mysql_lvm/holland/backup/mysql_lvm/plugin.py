@@ -34,7 +34,7 @@ lock-tables = boolean(default=yes)
 extra-flush-tables = boolean(default=yes)
 
 [mysqld]
-mysqld_exe              = force_list(default=list('mysqld', '/usr/libexec/mysqld'))
+mysqld-exe              = force_list(default=list('mysqld', '/usr/libexec/mysqld'))
 user                    = string(default='mysql')
 innodb-buffer-pool-size = string(default=128M)
 tmpdir                  = string(default=None)
