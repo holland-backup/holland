@@ -101,9 +101,18 @@ class MySQLServer(object):
 
 def generate_server_config(config, datadir):
     conf_data = StringIO()
+    valid_params = [
+        'innodb-buffer-pool-size', 
+        'key-buffer', 
+        'tmpdir', 
+        'user', 
+        'datadir'
+    ]
     print >>conf_data, "[mysqld]"
     for key, value in config.iteritems():
-        if key.replace('_', '-') not in ['innodb-buffer-pool-size', 'key-buffer', 'tmpdir', 'user', 'datadir']:
+        if key == 'mysqld_exe':
+            continue
+        if key.replace('_', '-') not in valid_params:
             LOG.warning("Ignoring mysqld config parameter %s", key)
             continue
         print >>conf_data, "%s = %s" % (key, value)
