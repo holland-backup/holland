@@ -23,6 +23,7 @@ class InnodbRecoveryAction(object):
                                          self.mysqld_config['datadir'])
         
         mysqld_exe = locate_mysqld_exe(self.mysqld_config)
+        LOG.info("Bootstrapping with %s", mysqld_exe)
         mysqld = MySQLServer(mysqld_exe, my_conf)
         mysqld.start(bootstrap=True)
 
@@ -50,7 +51,8 @@ def locate_mysqld_exe(config):
         else:
             path = None # use environ[PATH]
         try:
-            LOG.info("Looking for %s on %s", candidate, path or os.environ['PATH'])
+            LOG.debug("Searching for %s on path %s", 
+                      candidate, path or os.environ['PATH'])
             return which(candidate, path)
         except WhichError:
             LOG.debug("mysqld path %s does not exist - skipping", candidate)
