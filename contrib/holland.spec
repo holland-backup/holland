@@ -22,7 +22,7 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        3.rc3%{?dist}
+Release:        1%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD 
