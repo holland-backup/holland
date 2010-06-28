@@ -98,7 +98,7 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
         mycnf_src = os.path.join(snap_datadir, 'my.innodb_recovery.cnf')
         mycnf_dst = os.path.join(spooldir, 'my.innodb_recovery.cnf')
         snapshot.register('pre-unmount',
-                          lambda *args, **kwargs: shutil.copyfile(mycnf_src,, 
+                          lambda *args, **kwargs: shutil.copyfile(mycnf_src, 
                                                                   mycnf_dst)
                          )
 
