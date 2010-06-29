@@ -37,6 +37,7 @@ extra-flush-tables = boolean(default=yes)
 mysqld-exe              = force_list(default=list('mysqld', '/usr/libexec/mysqld'))
 user                    = string(default='mysql')
 innodb-buffer-pool-size = string(default=128M)
+key-buffer-size         = string(default=16M)
 tmpdir                  = string(default=None)
 
 """.splitlines() + MySQLDumpPlugin.CONFIGSPEC
