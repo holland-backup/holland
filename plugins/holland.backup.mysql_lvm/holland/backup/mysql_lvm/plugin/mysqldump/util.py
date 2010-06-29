@@ -35,22 +35,37 @@ def build_snapshot(config, logical_volume):
     """Create a snapshot process for running through the various steps
     of creating, mounting, unmounting and removing a snapshot
     """
-    name = config['snapshot-name'] or \
-            logical_volume.lv_name + '_snapshot'
+    snapshot_name = config['snapshot-name'] or \
+                    logical_volume.lv_name + '_snapshot'
     extent_size = int(logical_volume.vg_extent_size)
-    size = config['snapshot-size'] or \
-            min(int(logical_volume.vg_free_count), # don't exceed vg_free_count
-                (int(logical_volume.lv_size)*0.2) / extent_size,
-                (15*1024**3) / extent_size # maximum 15G auto-sized snapshot space
-               ) 
+    snapshot_size = config['snapshot-size']
+    if not snapshot_size:
+        snapshot_size = min(int(logical_volume.vg_free_count),
+                            (int(logical_volume.lv_size)*0.2) / extent_size,
+                            (15*1024**3) / extent_size,
+                           )
+    else:
+        try:
+            snapshot_size = parse_bytes(snapshot_size) / extent_size
+            if snapshot_size > int(logical_volume.vg_free_count):
+                LOG.info("Snapshot size requested %s, but only %s available.",
+                         config['snapshot-size'],
+                         format_bytes(int(logical_volume.vg_free_count)*extent_size, precision=4))
+                LOG.info("Truncating snapshot-size to %d extents (%s)",
+                         int(logical_volume.vg_free_count),
+                         format_bytes(int(logical_volume.vg_free_count)*extent_size, precision=4))
+                snapshot_size = int(logical_volume.vg_free_count)
+        except ValueError, exc:
+            raise BackupError("Problem parsing snapshot-size %s" % exc)
+
     mountpoint = config['snapshot-mountpoint']
     tempdir = False
     if not mountpoint:
         tempdir = True
         mountpoint = tempfile.mkdtemp()
-    snapshot = Snapshot(name, size, mountpoint)
+    snapshot = Snapshot(snapshot_name, int(snapshot_size), mountpoint)
     if tempdir:
-        snapshot.register('post-unmount', 
+        snapshot.register('post-unmount',
                           lambda *args, **kwargs: cleanup_tempdir(mountpoint))
     return snapshot
 
