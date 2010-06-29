@@ -96,8 +96,9 @@ class MysqlDumpLVMBackup(object):
         setup_actions(snapshot=snapshot,
                       config=self.config,
                       client=self.client,
-		      datadir=snap_datadir,
-		      plugin=self.mysqldump_plugin)
+                      datadir=snap_datadir,
+                      spooldir=self.target_directory,
+                      plugin=self.mysqldump_plugin)
 
         try:
             snapshot.start(volume)

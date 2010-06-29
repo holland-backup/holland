@@ -70,7 +70,7 @@ def build_snapshot(config, logical_volume):
                           lambda *args, **kwargs: cleanup_tempdir(mountpoint))
     return snapshot
 
-def setup_actions(snapshot, config, client, datadir, plugin):
+def setup_actions(snapshot, config, client, datadir, spooldir, plugin):
     """Setup actions for a LVM snapshot based on the provided
     configuration.
 
