@@ -95,8 +95,7 @@ class BackupRunner(object):
         spool_entry.config['holland:backup']['start-time'] = time.time()
         self.apply_cb('pre-backup', spool_entry)
 
-        if not dry_run:
-            spool_entry.prepare()
+        spool_entry.prepare()
     
         try:
             estimated_size = self.check_available_space(plugin)
@@ -112,9 +111,9 @@ class BackupRunner(object):
         spool_entry.config['holland:backup']['stop-time'] = time.time()
         if not dry_run and not spool_entry.config['holland:backup']['failed']:
             final_size = directory_size(spool_entry.path)
-            LOG.info("Final on-disk backup size %s %.2f%% "
-                     "of estimated size %s",
-                     format_bytes(final_size),
+            LOG.info("Final on-disk backup size %s", format_bytes(final_size))
+            if estimated_size > 0:
+                LOG.info("%.2f%% of estimated size %s",
                      (float(final_size) / estimated_size)*100.0,
                      format_bytes(estimated_size))
                      

@@ -67,8 +67,42 @@ class ExcludeFilter(BaseFilter):
 
 def exclude_glob(*pattern):
     """Create an exclusion filter from a glob pattern"""
-    return ExcludeFilter([fnmatch.translate(pat) for pat in pattern])
+    result = []
+    for pat in pattern:
+        result.append(fnmatch.translate(pat))
+    return ExcludeFilter(result)
 
 def include_glob(*pattern):
     """Create an inclusion filter from glob patterns"""
-    return IncludeFilter([fnmatch.translate(pat) for pat in pattern])
+    result = []
+    for pat in pattern:
+        result.append(fnmatch.translate(pat))
+    return IncludeFilter(result)
+
+def include_glob_qualified(*pattern):
+    """Create an inclusion filter from glob patterns
+
+    Additionally ensure the pattern is for a qualified table name.
+    If not '.' is found in the name, this implies an implicit *. 
+    before the name
+    """
+    result = []
+    for pat in pattern:
+        if '.' not in pat:
+            pat = '*.' + pat
+        result.append(pat)
+    return include_glob(*result)
+
+def exclude_glob_qualified(*pattern):
+    """Create an exclusion filter from glob patterns
+
+    Additionally ensure the pattern is for a qualified table name.
+    If not '.' is found in the name, this implies an implicit *.
+    before the name
+    """
+    result = []
+    for pat in pattern:
+        if '.' not in pat:
+            pat = '*.' + pat
+        result.append(pat)
+    return exclude_glob(*result) 

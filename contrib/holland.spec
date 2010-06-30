@@ -22,7 +22,7 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        4%{?dist}
+Release:        4%{?dist}.5
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD 
@@ -493,6 +493,21 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
+* Thu Jul 08 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-4.5
+- Testing release
+
+* Thu Jul 08 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-4.4
+- Testing release
+
+* Thu Jul 08 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-4.3
+- Testing release
+
+* Thu Jul 08 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-4.2
+- Testing release
+
+* Thu Jul 08 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-4.1
+- Testing release
+
 * Tue Jul 06 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.0-4
 - Source update, 1.0.0 final
 - Add ChangeLog back in under %%doc
