@@ -25,10 +25,8 @@ class Lock(object):
             return
 
         try:
-            self.lock = open(self.path, 'a+')
+            self.lock = open(self.path, 'r')
             flock(self.lock, LOCK_EX|LOCK_NB)
-            self.lock.truncate()
-            self.lock.write(str(getpid()))
         except IOError, exc:
             self.lock = None
             raise LockError(str(exc), exc)

@@ -43,7 +43,6 @@ class BaseConfig(ConfigObj):
                             interpolation='Template',
                             write_empty_values=True,
                             configspec={})
-        self.walk(self._canonicalize, call_on_sections=True)
 
     def _canonicalize(self, section, key):
         """Rewrite all keys so that underscores are normalized to dashes"""
@@ -110,6 +109,7 @@ class BackupConfig(BaseConfig):
                                     (provider, ex))
         self.merge(basecfg)
         self.filename = basecfg.filename
+        self.walk(self._canonicalize, call_on_sections=True)
 
 
 class GlobalConfig(BaseConfig):

@@ -49,6 +49,14 @@ def build_snapshot(config, logical_volume):
     else:
         try:
             snapshot_size = parse_bytes(snapshot_size) / extent_size
+            if snapshot_size > int(logical_volume.vg_free_count):
+                LOG.info("Snapshot size requested %s, but only %s available.",
+                         config['snapshot-size'],
+                         format_bytes(int(logical_volume.vg_free_count)*extent_size, precision=4))
+                LOG.info("Truncating snapshot-size to %d extents (%s)",
+                         int(logical_volume.vg_free_count),
+                         format_bytes(int(logical_volume.vg_free_count)*extent_size, precision=4))
+                snapshot_size = int(logical_volume.vg_free_count)
         except ValueError, exc:
             raise BackupError("Problem parsing snapshot-size %s" % exc)
 
@@ -94,6 +102,14 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
                           lambda *args, **kwargs: shutil.copyfile(errlog_src, 
                                                                   errlog_dst)
                          )
+    
+        mycnf_src = os.path.join(snap_datadir, 'my.innodb_recovery.cnf')
+        mycnf_dst = os.path.join(spooldir, 'my.innodb_recovery.cnf')
+        snapshot.register('pre-unmount',
+                          lambda *args, **kwargs: shutil.copyfile(mycnf_src, 
+                                                                  mycnf_dst)
+                         )
+
 
     archive_stream = open_stream(os.path.join(spooldir, 'backup.tar'),
                                  'w',
