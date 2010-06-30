@@ -115,8 +115,8 @@ class MysqlDumpLVMBackup(object):
 def _dry_run(volume):
     """Implement dry-run for LVM snapshots.  Not much to do here at the moment
     """
-    LOGGER.info("[dry-run] Snapshotting %s/%s to %s/%s_snapshot",
-                volume.vg_name,
-                volume.volume_name,
-                volume.vg_name,
-                volume.volume_name)
+    LOG.info("[dry-run] Snapshotting %s/%s to %s/%s_snapshot",
+             volume.vg_name,
+             volume.lv_name,
+             volume.vg_name,
+             volume.lv_name)
