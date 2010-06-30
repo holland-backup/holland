@@ -81,13 +81,12 @@ class MysqlDumpLVMBackup(object):
         datadir = os.path.realpath(self.client.show_variable('datadir'))
         LOG.info("Backing up %s via snapshot", datadir)
         # lookup the logical volume mysql's datadir sits on
+        volume = LogicalVolume.lookup_from_fspath(datadir)
 
         if self.dry_run:
-            return _dry_run(volume)
+            _dry_run(volume)
             # do the normal mysqldump dry-run
             return self.mysqldump_plugin.backup()
-
-        volume = LogicalVolume.lookup_from_fspath(datadir)
 
         # create a snapshot manager
         snapshot = build_snapshot(self.config['mysql-lvm'], volume)
