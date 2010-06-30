@@ -83,7 +83,9 @@ class MysqlDumpLVMBackup(object):
         # lookup the logical volume mysql's datadir sits on
 
         if self.dry_run:
-            return self._dry_run(volume)
+            return _dry_run(volume)
+            # do the normal mysqldump dry-run
+            return self.mysqldump_plugin.backup()
 
         volume = LogicalVolume.lookup_from_fspath(datadir)
 
