@@ -6,7 +6,9 @@ and pg_dumpall
 """
 
 import os
+import sys
 import logging
+from tempfile import NamedTemporaryFile
 from holland.backup.pgdump.base import backup_pgsql, PgError, pg_databases, get_connection, get_db_size
 
 LOG = logging.getLogger(__name__)
@@ -87,23 +89,22 @@ class PgDump(object):
         # We need either a pgpass or a password, at minimum
         self.pgpass = self.config["pgauth"]["pgpass"]
         if not (self.config["pgauth"]["password"] or self.pgpass):
-	    raise PgError("Must specify at least a password or a .pgpass file")
+            raise PgError("Must specify at least a password or a .pgpass file")
 
         if not self.pgpass:
-	    # write one in the target directory
-	    # self.pgpass = os.path.join(target_directory, "pgpass")
-	    self.pgpass = "/tmp/.pgpass"
-	    LOG.info("Creating pgpass " + self.pgpass)
-	    try:
-	        f = open(self.pgpass, "w")
-	        f.write(":".join((self.config["pgauth"]["hostname"], str(self.config["pgauth"]["port"]), "*",
-	            self.config["pgauth"]["username"], self.config["pgauth"]["password"])))
-	        f.close()
-	        os.chmod(self.pgpass, 0600)
-	    except IOError as e:
-	        LOG.info("I/O Error creating pgpass: " + str(e))
-	    
-	os.environ["PGPASSFILE"] = self.pgpass
+            # write one in the target directory
+            # self.pgpass = os.path.join(target_directory, "pgpass")
+            self.f = NamedTemporaryFile()
+            self.pgpass = self.f.name
+            LOG.info("Creating pgpass " + self.pgpass)
+            try:
+                self.f.write(":".join((self.config["pgauth"]["hostname"], str(self.config["pgauth"]["port"]), "*",
+                self.config["pgauth"]["username"], self.config["pgauth"]["password"])))
+                self.f.flush()
+            except IOError as e:
+                LOG.info("I/O Error creating pgpass: " + str(e))
+
+        os.environ["PGPASSFILE"] = self.pgpass
 
         self.connection = get_connection(self.config)
         self.databases = pg_databases(self.config, self.connection)
@@ -169,7 +170,7 @@ class PgDump(object):
 
         return ""
 
-    def __del__(self):
-        if self.pgpass == "/tmp/.pgpass":
-	    os.unlink("/tmp/.pgpass")
+#    def __del__(self):
+#        if self.pgpass == "/tmp/.pgpass":
+#	    os.unlink("/tmp/.pgpass")
 
