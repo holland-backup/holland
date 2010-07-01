@@ -69,6 +69,7 @@ def write_manifest(schema, open_stream, ext):
     manifest_fileobj = open_stream('MANIFEST.txt', 'w', method='none')
     manifest = csv.writer(manifest_fileobj,
                           dialect=csv.excel_tab,
+                          lineterminator="\n",
                           quoting=csv.QUOTE_MINIMAL)
     for database in schema.databases:
         name = database.name
