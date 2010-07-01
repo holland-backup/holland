@@ -4,7 +4,7 @@ import os
 import re
 import logging
 from holland.core.exceptions import BackupError
-from holland.lib.compression import open_stream
+from holland.lib.compression import open_stream, lookup_compression
 from holland.lib.mysql import MySQLSchema, connect, MySQLError
 from holland.lib.mysql import include_glob, exclude_glob
 from holland.lib.mysql import DatabaseIterator, MetadataTableIterator, \
@@ -179,13 +179,24 @@ class MySQLDumpPlugin(object):
 
         os.mkdir(os.path.join(self.target_directory, 'backup_data'))
 
+        if self.config['compression']['method'] != 'none' and \
+            self.config['compression']['level'] > 0:
+            cmd, ext = lookup_compression(self.config['compression']['method'])
+            LOG.info("Using %s compression level %d",
+                     cmd, self.config['compression']['level'])
+        else:
+            LOG.info("Not compressing mysqldump output")
+            cmd = ''
+            ext = ''
+
         try:
             try:
                 start(mysqldump=mysqldump,
                       schema=self.schema,
                       lock_method=config['lock-method'],
                       file_per_database=config['file-per-database'],
-                      open_stream=self._open_stream)
+                      open_stream=self._open_stream,
+                      compression_ext=ext)
             except MySQLDumpError, exc:
                 raise BackupError(str(exc))
         finally:

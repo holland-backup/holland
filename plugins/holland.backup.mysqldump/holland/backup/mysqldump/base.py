@@ -24,7 +24,8 @@ def start(mysqldump,
           schema=None,
           lock_method='auto-detect',
           file_per_database=True,
-          open_stream=open):
+          open_stream=open,
+          compression_ext=''):
     """Run a mysqldump backup"""
 
     if not schema and file_per_database:
@@ -39,7 +40,7 @@ def start(mysqldump,
         else:
             target_databases = [db for db in schema.databases
                                     if not db.excluded]
-            write_manifest(schema, open_stream)
+            write_manifest(schema, open_stream, compression_ext)
 
     if file_per_database:
         flush_logs = '--flush-logs' in mysqldump.options
@@ -63,14 +64,16 @@ def start(mysqldump,
             target_databases = [db.name for db in target_databases]
         mysqldump.run(target_databases, stream, more_options)
 
-def write_manifest(schema, open_stream):
+def write_manifest(schema, open_stream, ext):
     """Write real database names => encoded names to MANIFEST.txt"""
     manifest_fileobj = open_stream('MANIFEST.txt', 'w', method='none')
-    manifest = csv.writer(manifest_fileobj)
+    manifest = csv.writer(manifest_fileobj,
+                          dialect=csv.excel_tab,
+                          quoting=csv.QUOTE_MINIMAL)
     for database in schema.databases:
         name = database.name
         encoded_name = encode(name)[0]
-        manifest.writerow([name.encode('utf-8'), encoded_name + '.sql'])
+        manifest.writerow([name.encode('utf-8'), encoded_name + '.sql' + ext])
     manifest_fileobj.close()
 
 def mysqldump_lock_option(lock_method, databases):
