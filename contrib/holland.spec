@@ -493,7 +493,10 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
-* Thu Jun 28 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-3.1.rc2
+* Thu Jul 01 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-3.rc3
+- Source updated to rc3
+
+* Tue Jun 28 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-2.rc2
 - Source updated to rc2
 
 * Thu Jun 11 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-1.rc1
