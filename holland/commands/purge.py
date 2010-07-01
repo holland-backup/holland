@@ -79,6 +79,7 @@ def purge_backupset(backupset, force=False, all_backups=False):
             LOG.error("You can still purge the backupset by using the --all "
                       "option or specifying specific backups to purge")
             return 1
+        retention_count = config['holland:backup']['backups-to-keep']
 
     LOG.info("Retaining %d backups", retention_count)
     backups = []
