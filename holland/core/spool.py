@@ -185,7 +185,6 @@ class Backupset(object):
 CONFIGSPEC = """
 [holland:backup]
 plugin                  = string(default="")
-lockfile                = string(default=None)
 start-time              = float(default=0)
 stop-time               = float(default=0)
 failed-backup           = boolean(default=no)
@@ -194,7 +193,7 @@ on-disk-size            = float(default=0)
 estimated-size-factor   = float(default=1.0)
 backups-to-keep          = integer(min=0, default=1)
 auto-purge-failures     = boolean(default=yes)
-purge-policy            = option(manual, before-backup, after-backup, default='before-backup')
+purge-policy            = option(manual, before-backup, after-backup, default='after-backup')
 """.splitlines()
 
 class Backup(object):
