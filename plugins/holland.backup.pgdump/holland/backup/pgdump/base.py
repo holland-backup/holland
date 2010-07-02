@@ -96,7 +96,10 @@ def backup_pgsql(backup_directory, config, databases):
     :param config: PgDumpPlugin config dictionary
     :raises: OSError, PgError on error
     """
-    connectionParams = ['-h', config['pgauth']['hostname'], '-p', str(config['pgauth']['port']), '-U', config['pgauth']['username'] ]
+    connectionParams = ['-h', config['pgauth']['hostname'], '-p', 
+        str(config['pgauth']['port']), '-U', config['pgauth']['username'] ]
+    if config['pgauth']['role']:
+        connectionParams.append('--role=%s' % config['pgauth']['role'])
     
     backup_globals(backup_directory, config, connectionParams)
 
