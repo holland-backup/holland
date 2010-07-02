@@ -19,6 +19,9 @@ class PgError(Exception):
 def get_connection(config):
     connection = dbapi.connect(host=config["pgauth"]["hostname"], port=config["pgauth"]["port"], 
         database="template1", user=config["pgauth"]["username"])
+    if config["pgauth"]["role"]:
+        cursor = connection.cursor()
+        cursor.execute("SET ROLE %s" % config["pgauth"]["role"])
     return connection
     
 def get_db_size(dbname, connection):
