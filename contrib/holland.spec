@@ -495,6 +495,7 @@ rm -rf %{buildroot}
 %changelog
 * Tue Jul 06 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.0-4
 - Source update, 1.0.0 final
+- Add ChangeLog back in under %%doc
 
 * Thu Jul 01 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-3.rc3
 - Source updated to rc3
