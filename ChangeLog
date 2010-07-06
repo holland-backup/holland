@@ -1,235 +1,375 @@
-2009-12-04  BJ Dierkes <wdierkes@rackspace.com>
-    * Added ./devtools/build_rpms.py to auto build rpms 
-      from trunk.
+# Holland Backup Change History (starting at/around version 0.9.9)
+#
+# Full diffs and commentary of changes are available online via our GitHub
+# page.  To view a commit visit the following URL (substituting XXXXXXX):
+#
+#   http://github.com/holland-backup/holland/commit/XXXXXXX
+#
 
-2009-12-01  Andrew Garner <andrew.garner@rackspace.com>
-    * Improved logging when plugins fail unexpectedly
-
-2009-11-24  Andrew Garner <andrew.garner@rackspace.com>
-    * holland backup --dry-run now checks available disk
-      space for whatever device /var/spool/hollland is on
-      compared to whatever the backup plugin reports
-      in plugin.estimate_backup_size()
-
-2009-11-13  Andrew Garner <andrew.garner@rackspace.com>
-    * holland log format is no longer hardcoded
-    * Use --base-dir rather than --basedir on new versions
-      of maatkit [#1554]
-
-2009-11-12  Andrew Garner <andrew.garner@rackspace.com>
-    * More cleanups for mysqldump restore plugin
-    * Add RHEL4 fixes for LVM plugin
-
-2009-11-08  Andrew Garner <andrew.garner@rackspace.com>
-    * LVM Backup plugin added [#1372]
-    * holland restore command added 
-    * implemented mysqldump restore plugin
-    * implemented lvm restore plugin
-
-2009-11-08  Jason Kölker <jkoelker@rackspace.com>
-    * holland purge now asks for permission unless
-      the --force flag is used [#1541]
-    * Added Google logo to tomsay [#1543]
-
-2009-11-07  Andrew Garner <andrew.garner@rackspace.com>
-    * The mysqldump backup plugin now logs the database 
-      and table filter patterns before starting backups
-      [#1539]
-    * holland list-plugins now lists holland.backup and 
-      holland.commands plugins rather than just the
-      distributions.
-    * Raised the idle timeout in the mysqldump plugin from
-      8 hours to 24 hours [#1537].
-
-2009-10-26  Andrew Garner <andrew.garner@rackspace.com>
-    * Cleaned up output and several bugfixes in mk-config
-      command [#1510]
-
-2009-10-26  Andrew Garner <andrew.garner@rackspace.com>
-    * Fixed table include/exclude patterns to support
-      both table and database.table matching [#1502]
-
-2009-10-09  Andrew Garner <andrew.garner@rackspace.com>
-    * Quoted values in my.cnf files are now parsed properly
-      [#1473]
-
-2009-09-15  Jason Kölker <jkoelker@rackspace.com>
-    * Improved commvault argument handling [#1466,#1471]
-    * Allow commvault to provide explicit backupsets
-
-2009-09-14  BJ Dierkes <wdierkes@rackspace.com> 
-    * Holland 0.9.4 released.
-
-2009-09-11  Andrew Garner <andrew.garner@rackspace.com>
-    * Updated maatkit backup plugin to support option name
-      changes in mk-parallel-dump. Resolves [#1390]
-
-2009-08-26  Andrew Garner <andrew.garner@rackspace.com>
-    * Improved error message for config file syntax errors. 
-      Resolves [#1443]
-    * Now Holland's backup module always logs the final
-      size estimated after applying the estimated-size-factor
-      adjustment.  Resolves [#1399]
-    * In the mysqldump backup plugin, if bin-log-position is
-      requested on a slave, but log-bin is not enabled a warning
-      is logged, but this is no longer treated as an error.
-      Resolves [#1394]
-
-2009-08-20  Andrew Garner <andrew.garner@rackspace.com>
-    * Improved error message when STOP SLAVE fails, but
-      stop-slave was requested in the mysqldump backup 
-      plugin.  Resolves [#1435]
-
-2009-07-28  Andrew Garner <andrew.garner@rackspace.com>
-    * Improved commvault option parsing.
-
-2009-07-24  Andrew Garner <andrew.garner@rackspace.com>
-    * stderr output from compression pipes is now captured
-      and logged. Resolves [#1395]
-
-2009-07-23  Andrew Garner <andrew.garner@rackspace.com>
-    * When running the mysqldump backup plugin in dry-run
-      mode the slave is no longer stopped. Resolves [#1396]
-    * MySQL information_schema based database/table filtering
-      will filter databases more efficiently now.
-      Resolves [#1397]
-    * Using binlog-pos on a slave no longer requires binary
-      logging to be enabled.
-
-2009-07-13  BJ Dierkes <wdierkes@rackspace.com> 
-    * Holland 0.9.3 released.
- 
-
-2009-07-08  Andrew Garner <andrew.garner@rackspace.com>
-    * Fixed a couple bugs in holland.commands.mysql where
-      mysql-extract would fail. Resolves [#1379]
-    * Made estimated backup size adjustments more 
-      consistent.  [holland:backup] now accepts
-      a 'estimated-size-factor' that is a decimal
-      multiplier (default 1.0).  This will apply
-      to any provider without any special support.
-      This also removes free-space-factor from the
-      mysqldump and mysqlhotcopy plugins and their
-      example configs.  Resolves [#1378]
-    * Added 'backups-to-keep=1' to holland mk-config 
-      generated configs. Resolves [#1374]
-    * Strip unknown opts when generating a my.cnf with
-      make_mycnf in holland.lib.mysql. Resolves [#1377]
-    * Fix defaults-extra-file typo in Maatkit plugin.
-      Resolves [#1377]
-    * Fix holland_cvmysqlsv to return correct exit code. 
-      Resolves [#1375]
-    * Fix dry-run when using file-per-database option
-      Resolves [#1373]
-
-2009-06-11  BJ Dierkes <wdierkes@rackspace.com> 
-    * Cleaned up --help output a bit.  Resolves [#1333]
-    * Holland 0.9.2 released.
-
-2009-06-03  BJ Dierkes <wdierkes@rackspace.com>
-    * Holland 0.9.1 released.
-
-2009-05-06  Andrew Garner  <andrew.garner@rackspace.com>
-    * Added holland.lib.mysql.client.connect method. This
-      rewrites my.cnf parameters to what MySQLdb.connect
-      expects.  This allows passing option files from
-      holland.lib.mysql.option to the client.connect method
-      and connecting without necessarily flushing the options
-      to disk and using read_default_file=<path>.
-
-2009-04-19  Andrew Garner  <andrew.garner@rackspace.com>
-    * Holland 0.3 released.
-
-2009-04-19  Andrew Garner  <andrew.garner@rackspace.com>
-    * Converted holland.lib.mysql.client testcases to use
-      mock objects instead of direct dbapi connections
-    * Added Ian Bicking's multidict implementation to 
-      holland.lib.common (used by holland.lib.mysql.option
-      but probably generally useful)
-    * mk-config now adds a [holland:backup] section to 
-      generated configs
-
-2009-04-17  Andrew Garner  <andrew.garner@rackspace.com>
-    * The mysqldump plugin now logs SHOW SLAVE STATUS
-      replication information to [mysql:replication] in
-      the backup.conf rather than to a separate replication.conf
-      file.
-    * Added "holland purge" command
-    * The holland.lib.mysql plugin distribution no longer lists
-      a setuptools dependency on MySQL-Python.  This was breaking
-      on OS X in some cases and overall slowing down test runs.
-    * Fixed a compatibility problem in validate.py that was preventing
-      holland from running on python-2.3 (RHEL4)
-    * Further improvements to [.]my.cnf option-file processing in
-      holland.lib.mysql
-    * mysqlhotcopy and maatkit plugins now use the new my.cnf interface
-      in holland.lib.mysql.option
-    * /etc/holland/holland.conf is the default config file location
-      if an explicit --config is not specified or HOLLAND_CONFIG is
-      not set.
-    * [COMPATIBILITY] backupsets are now required to specify a 
-      [holland:backup] section with a 'plugin' parameter to specify
-      the plugin to use (mysqldump,mysqlhotcopy,maatkit,...) rather
-      than a "root-level" provider option. This allows holland's config
-      files to be processed by non-ConfigObj standard ini-tools.
-      Further, [holland:backup] provides a bucket to record other
-      backup information about the backupset in the saved backup.conf
-      in the spool directory.
-    * Fixed a problem in "holland mk-config" that didn't generate optional
-      default=None parameters correctly.
-    * Fixed a minor rendering bug in Commmand.py's help formatting.
-    * Fixed a bug in holland help when referencing a command that does not
-      exist.
-    * Lots of bugfixes
-    * Coalesced holland.lib.archive and holland.lib.compression into
-      holland.lib.common distribution, along with a few other modules
-      that were previously in holland-core (but unused by holland-core)
-
-2009-04-16  Andrew Garner  <andrew.garner@rackspace.com>
-    * Upgraded to ConfigObj 4.6.0, validate.py 1.0.0
-    * Cleaned up holland-core structure
-    * Added several in-progress plugins
-    * Moved many of the development "helper" scripts in trunk/
-      to trunk/dev-util/
-
-2009-04-01  Andrew Garner  <andrew.garner@rackspace.com>
-    * Fixed maatkit plugin logging to capture stderr output
-      when running mk-parallel-dump
-
-2009-03-27  Andrew Garner  <andrew.garner@rackspace.com>
-    * Added "holland mk-config" command to generate a backupset
-      config file.
-    * The mysqldump plugin now saves replication information from
-      SHOW SLAVE STATUS to replication.conf when backing up a slave
-      if bin-log-position is also defined.
-
-2009-03-24  Andrew Garner  <andrew.garner@rackspace.com>
-    * Updated [.]my.cnf option-file processing in holland.lib.mysql
-    * Improved the performance of mysqlhotcopy backup (Issue #1191)
-    * Made stopping/starting slaves with mysqldump plugin more robust
-    * Added "defaults-extra-file" parameter to mysqldump plugin
-      This takes a list of my.cnf files which are used with the 
-      backupset's mysqlclient config to produce a my.cnf auth-file.
-    
-2009-03-11  Andrew Garner  <andrew.garner@rackspace.com>
-    * Added "holland list-backups" command to show available backups
-    * Fixed backup purging functionality (Issue #1190)
-     
-2009-03-10  Andrew Garner  <andrew.garner@rackspace.com>
-    
-    * Holland 0.2 release
-    * Bugfixes for Holland-Core
-    * Renamed holland.providers to holland.backup
-    * Refactored MySQLDump Backup Plugin; Now supports 
-      advanced database and table filtering and many
-      new features previously broken in the config file
-      are now enabled
-    * Better logging throughout framework and plugins
-    * Enable dry-run support; Supported in all backup plugins
-    * Added MySQLHotcopy backup plugin
-    * Added Archive library plugin (used by MySQLHotcopy)
-    * Added Maatkit backup plugin (uses mk-parallel-dump)
-
-2009-02-20  Andrew Garner  <andrew.garner@rackspace.com>
-
-    * Holland 0.1 released
+Jul 06 2010 - 1.0.0 final
+------------------------------------------------------------------------------
+    ea9275b Add --no-site-packages options to mkvirtenv.py
+    980c32d Added additional purge options to configs
+    b4ae43f suppress minor warning about mysqld-exe
+    15dd626 making default purge behavior match 0.9.8
+    2bf63d6 ensure MANIFEST.txt uses \n line terminators
+    6447990 fix bug in purging an entire backupset
+    0b6e588 Fix GH#37, "Starting backup run" line breaks GitHub markup
+    9d2707c Fixing regression with MANIFEST.txt
+    a780b77 another stupid bug fix
+    b7a5f82 more bugfixes for mysqldump-lvm --dry-run
+    903e549 fix --dry-run for mysqldump-lvm
+    250577a minor fix to correctly copy mysqldump-lvm error log
+    b155e69 copy the mysqldump/lvm error log to backup directory at the end
+    107f566 Added 'mysqld-exe' and some additional comments to 
+            mysqldump-lvm.conf
+    8550cba add missing format_bytes to util
+    e326433 add missing parse_bytes import to mysqldump-lvm
+    e7c513f mysqld bootstrapping key-buffer => key-buffer-size
+    ca6ccb5 merge build_snapshot implementation into mysqldump-lvm
+    f838e6d truncate snapshot-size if it exceeds free extents
+    2eb82b4 fix formatting bug in how holland.lib.lvm pretty prints bytes
+    6d15819 merge mysqldump_lvm and mysql_lvm plugin to improve code reuse
+    c3cbe0c cleanup logging of which mysqld binrary used for bootstrapping 
+            innodb recovery
+    d5d3606 tiny log message cleanup
+    8563998 handle mysqld_exe param in configspec a little more cleanly
+    eeef868 fix canonicalization of underscores to dashes
+    25c960a save generated my.cnf when using innodb-recovery
+    8005294 [GH #14] always set log-error when using innodb-recovery and save 
+            to backup directory
+    1165a23 Added a commented mysqldump-lvm.conf file
+    7ee6c87 remove stray tabs from holland.spec
+    619fceb clear rpmlint warning (single % in changelog)
+    a3c53a1 cleaned up lock log messages slightly
+    88d8275 clipping out old lockfile code
+    aa9d5cb fix wrong attribute for backupset filename
+    4dbb58f make python-sphinx dependency conditional
+    24f4b55 hack around broken build_rpms logic
+    681c351 updating holland.spec for 1.0rc1 and excluding several plugins by 
+            default
+    e541f63 bumping version to 1.0rc1
+    6d23301 [GH #29] make locking more configurable
+    a02554c report a few more details of the low disk space case
+    773c621 check for low disk space after a backup
+    adb90c2 report the case when an lvm snapshot is invalid
+    e1be5b6 add missing import
+    53e0669 always parse snapshot-size into bytes
+    ddc0868 clip unused innodb-recovery config param from mysqldump-lvm
+    b24216a ensure we create a temporary lvm mountpoint if no mountpoint is 
+            specified
+    a1113f0 ensure lvm extents are always requested as integers
+    ef6c706 fix dir perms in holland.spec
+    60c549b port mysql-lvm replication recording bugfixes to mysqldump-lvm
+    116c97a export holland.lib.mysql.options in the holland.lib.mysql package
+    e5952da add lockfile parameter to holland:backup section
+    8139fad handle missing values in holland:backup more gracefully
+    8cec080 removing sitearch from holland.spec
+    ac57cd9 updated holland.spec for mysql-lvm cleanup
+    b360a30 clipping old restore bitrot
+    5e1c697 applying minor lvm lib fixes
+    0e38ba8 updating entrypoints
+    814d062 merging mysql_lvm work
+    c76ad93 removing legacy lvm code
+    2d81c84 removing bitrot from mysql-lvm
+    e66ee5c maintaining ACTIVE
+    2cf45ed renaming mysql-lvm -> mysql_lvm
+    d707649 always write MANIFEST.txt when dumping file-per-database
+    6ac3e0d cleanup locking semantics
+    78253f6 always use the same file descriptor when locking
+    4ccf750 add simple flock wrapper to holland core
+    7240788 updating plugins/README
+    00bd295 adding holland.backup.xtrabackup to plugin/ACTIVE
+    928316f adding holland-xtrabackup to holland.spec
+    14de2b8 ensure we copy global my.cnf
+    3e913ae fix --defaults-file
+    1db6bfc add --no-lock to xtrabackup
+    d9cf420 adding xtrabackup config files
+    2635c95 adding xtrabackup plugin
+    458d63f Added another RPM to the list for remove_rpms.sh
+    a354c9d Added additional RPMs to remove_scripts.sh
+    fe198b9 readd some logging to holland backup process
+    49da12f don't try to purge anything if there is nothing to purge
+    3c960a4 Move plugins/README to README.plugins and install via %doc
+    2789b36 fix some pylint warnings
+    d5a43bf Add README describing the plugins directory at a high level
+    1fd6464 add snapshot state machine tests
+    10dc062 make sure old handlers are cleared when we restore signal handlers
+    6f7a3da cleanup error handling in snapshot fsm
+    22978db add missing tests/constants.py
+    c0f76e4 replace all mocks to use real lvm commands
+    9c92d65 move lvm boostrapping code to tests package fixture
+    b5381e3 catch correct exceptions from lvm commands
+    f726e15 adding skeleton file to test snapshot lifecycle
+    1999547 ensure lvm commands are in path
+    dfd40ef add lvm command api tests
+    851a691 add LogicalVolume tests
+    649f81c make filesystem a normal function to ease testing
+    434a84b small fix to .coveragerc omits
+    2ada874 include a coverage.py rcfile
+    47a501e use verbose mode
+    bcee7fd avoid deprecationwarning in 2.6
+    a1e4c60 erase coverage each time
+    559fa43 run nosetests in verbose mode
+    71a746a add mock tests for PhysicalVolumes
+    6b3e653 PhysicalVolume.search now yields PhysicalVolumes rather than dicts
+    653eac8 Fix of previous log: Add holland.lib.lvm under -common
+    216ff37 add mocker.py for test support
+    6f9fd16 Add holland.lib.common under -common subpackage
+    c8ef96f start basic tests for holland.lib.lvm.base
+    8f3268e cleanup Volume.__repr__
+    19bc322 make 'getdevice' use /etc/mtab rather than /proc/mounts
+    7f9713c adding runtests.sh
+    010eea5 add initial tests for holland.lib.lvm
+    8835c71 add useful nose options to setup.cfg
+    cb12c93 remove unused util methods
+    38e5322 Merge branch 'master' of git@github.com:holland-backup/holland
+    558df28 restructure snapshot to start from a volume not a path
+    e14a4fd capture umount stderr
+    9dc2bda readd is_mounted() method to LogicalVolume
+    f934b5c handle config errors more gracefully in purge command
+    7f6181a cleanup purge dry-run output slightly
+    45e3d77 Merge branch 'refactor_backups'
+    12bb22e make purge command more useful
+    8cf8890 be more careful when masking errors with mysqldump
+    213657b fix bug in MySQLClient where we read from an invalid cursor
+    8cfe780 refactor how estimate backup size and check against available 
+            space
+    27394d0 added failure purging to backup command
+    d3115a3 implement purge-policy for backups
+    aa0db64 more refactoring of holland.core.backup
+    1bb7787 export ConfigError in holland.core.config
+    7b6dc78 add purge method to Backupset in holland.core.spool
+    94be46e Merge branch 'master' of git@github.com:holland-backup/holland
+    0e6f117 make backup command use new backup runner
+    84281ee make .my.cnf loading messages debug-only
+    5d92995 fix horribly broken plugin.info() output
+    1614d19 remove stray debug message
+    d255649 pull in BackupError from holland.core.backup
+    69c4f95 refactor backup runner
+    8bdd6a5 make .my.cnf loading messages debug-only
+    f217403 fix horribly broken plugin.info() output
+    39fd70e remove stray debug message
+    de1eedc cleanup snapshot process somewhat
+    49aa48d drop detach_process() from util
+    cf075ff use os.setsid directly rather than using the abstraction 
+            function in util
+    1ec4f14 add mount, unmount and exists methods to LogicalVolume
+    9666f06 ensure lvm commands detach from the controlling terminal
+    1be1e0b don't canonicalize device names
+    7730a69 move signal trapping to holland.lib.base and add back 
+            LogicalVolume.remove() method
+    a9b5532 minor cleanups of the command api
+    33941ca moving SignalManager a little higher up in the api
+    eae2a16 add snasphot method to LogicalVolume class
+    ba38e74 add missing error state to snapshot
+    39b798f add lvsnapshot method
+    4d6b193 add signalhandler to trap unix signals
+    0b335d4 minor copyediting
+    20b6a9e update README for holland.lib.lvm
+    d7fd788 add missing errors.py
+    730c827 cleanup exception handling for lvm cmd api
+    0b5594e implement LogicalVolume.lookup_from_fspath
+    63d5d88 cleanup and simplify snapshot implementation
+    d73b58c use __getattribute__ to report proper AttributeError
+    3e51f47 add vg_extent attributes to lvs to save a lookup
+    1cf57e5 cleanup snapshot module somewhat
+    35af91d fix base imports and make them absolute
+    747179d make imports absolute
+    5ee4934 cleanup holland.lib.lvm imports
+    11e401f add doc strings to denote virtual namespaces
+    b5cc40d renaming files as the old code is cleaned up
+    0270b90 adding missing __init__.py
+    dd3da5f Merge branch 'master' of git@github.com:abg/holland into lib_lvm
+    ec49b19 splitting mysql-lvm into holland.lib.lvm
+    f2cb13a Refactor mysql-lvm into holland.lib.lvm
+    3ac2597 fix how log-error is set for innodb-recovery
+    5427275 use --log-error with mysql-lvm's innodb-recovery
+    21536ec enable faster TableIterator in mysqldump if using 
+            estimate-method != plugin
+    5412228 Add new TableIterator implementations to not use data/index_length
+    f981c7f log debug message if mysqldump --version fails
+    6e51d09 bug fix for SHOW FULL TABLES in MySQLClient
+    53d7786 ensure we don't stub out mysqldump --version when mocking
+    3aa1fe0 add show_create_table to MySQLClient base class
+    f6b1c67 implement 'estimate-method' for mysqldump plugin
+    d783ede ensure we always statvfs against a absolute path
+    d19a6ad Handle purging empty backupsets correctly
+    0465481 [GH#15] [feature] log tar stderr to backup directory rather than 
+            general holland.log
+    2e84322 Merge branch 'purging'
+    e6d12e9 [GH #23] [feature] failures are now auto puged according to 
+            [holland:backup] -> auto-purge-failures flag
+    2a54f2c [GH #31] [bug] --help now works without a valid config file
+    35983b2 all_databases test now runs Maatkit before backup
+    39334e4 Add backup functionality to test suite
+    fac9c4d BuildRequires: python-sphinx (to build docs)
+    cd88a08 Removing comment regarding dual license
+    5582b15 Revert 750 perms on /etc/holland and /var/spool/holland dirs
+    09845b7 Cleaned up spec (added for loops around plugins)
+    1aabbb9 Added note about what provider it requires
+    b754213 spec cleanup (currently broken)
+    4633b93 Add sqlite plugin to holland.spec
+    3be29e4 Merge branches 'HEAD' and 'sqlite'
+    816f3f2 SQLite check() calls .schema, not .exit
+    5b9ffd9 Adding nose tests for sqlite
+    4a626d0 Adding nose tests for sqlite
+    9b9f6e5 Resolve GitHub #32: --dry-run bombs if the backup job failed
+    31129af Moving sqlite.conf to examples
+    1101616 Refactor how subprocess is called to backup SQLite
+    04e0e9d cosmetic, change Syntaxt to text in summary
+    d7b129f Add SQLite Backup Plugin for Holland
+    70bb702 catch connection errors when running mysqldump size estimate
+    732f880 removing stray 'holland.log'
+    b2c263b removing stray __init__.py
+    05fc65f remove the bogus env directory
+    2234f5f Add the random plugin
+    f0cb023 [GH #30] [feature] allow reading mysql password from a password 
+            file
+    a923cbd cleanup how mysqldump plugin writes out table exclusions
+    4558a80 add "password = file:path" functionality to 
+            holland.lib.mysql.option:build_mysql_config
+    72ca135 Modified SPEC file (really) to build random provider
+    5a7cb96 Added LICENSE and README to random plugin
+    ed87427 Added random config files, updated SPEC
+    1c26f5d Attempted to get a holland backup working in test_suite
+    a2ea350 all-databases test now can install Holland
+    f60c410 Removed old test suite
+    5d6bbfc Merge branch 'master' of git@github.com:holland-backup/holland
+    96693cf update master with fixes for debian package
+    124d0be [GH #28] [feature] Enable pigz compression method in holland
+    18a411d handle mysqldump errors a little more elegantly
+    d8167c7 always check mysqldump version with --no-defaults
+    7ea7d33 only log warnings for options we don't officially support
+    6192c64 loosen restrictions on mysqldump options
+    f59f4e3 Merge branch 'master' of git@github.com:holland-backup/holland
+    aa9ce0e RHEL4/python2.3 fixes
+    4849522 add pigz to supported compression methods
+    b007650 adding debian postrm script
+    4244fb4 also cleaning up debian logrotate script
+    1cae635 add missingok to holland.spec logrotate script
+    ab7cb85 added missing holland.commands.*.py to debian package
+    2a17c03 change permissions for etc/holland/backupsets and var/log/holland
+    23728d4 also install logrotate script via debian/rules
+    22dcd54 add logrotate script to debian package
+    ff1c22d return missing example backup plugin to rpm spec
+    b60e453 update rpm %changelog with spec changes
+    04565dd adding readme to example plugin
+    ca92971 check for exit status of debuild
+    db1883c remove unused sphinx plugin intersphinx
+    28b93ad include commands from hollands.commands nspkg
+    927d080 removing old mysqldump restore code
+    0a10728 revert to using sbindir
+    236691c fixing release numbering in holland.spec
+    b7c6ba8 replace holland.spec
+    abc2e4d add maatkit package back and merge in old rpm spec changelog
+    17b5c10 adding readme to maatkit plugin
+    b0bfaa4 adding holland-new.spec
+    fe29341 adding README to holland.lib.common
+    23d5b6e adding README to mysqldump
+    958db23 adding readme to mysql-lvm
+    654558d updating holland manpage for modern times
+    9babe50 putting holland-mysqlhotcopy manpage in section5
+    ed63bad adding user documentation to holland-mysqlhotcopy
+    e1cd0b6 really clipping shebang from which.py this time
+    1b5ee3f remove shebangs from holland.lib.common modules
+    5a6579d bump up docs revision to 0.9.9
+    3fb1b37 cleanup documentation
+    6e1f980 clipping -dev tag
+    40cc198 clipping extra bit from amsterdam
+    18433b3 clipping old and busted sphinx docs
+    1839eab add new hotness debian/ (cherry picked from commit 
+            0ea9e94dc55e29e90f632051cbc7e6d86b79dc3f)
+    4ebfa15 remove old and busted debian (cherry picked from commit 
+            72a72ad31dd9e4f78e128057a68b532d254c544c)
+    0f16f52 Merge branch 'master' of git@github.com:holland-backup/holland 
+            into modify_purge
+    c3816c0 [GH #23] [feature] make auto-purge behavior more configurable
+    d223950 Merge branch 'master' of github.com:holland-backup/holland
+    2b541ef [GH #26] allow max-allowed-packet in additional-options
+    1fd42c6 fix typo in mysqldump plugin
+    41212ab Merge branch 'amsterdam'
+    dbfcf06 remove redundant mysql error message from logs
+    977612f report errors when running mysql metadata queries
+    c9ded5d Merge branch 'master' into amsterdam
+    dca5e96 handle errors more elegantly during estimate_backup_size
+    02c791e Merge branch 'amsterdam' of github.com:holland-backup/holland into 
+            amsterdam
+    d178cbd Merge branch 'master' of git://github.com/holland-backup/holland
+    c6b86b0 ensure mysqldump stderr output is logged
+    a642e9d cleanup logging slightly in mysqldump
+    82994a0 fix typo in mysqldump plugin
+    7e3878e remove stale cli interface to mysqldump plugin
+    897bcac [GH #17] Improve stop-slave and bin-log-position interaction
+    ee039c4 handle null data/index length from metadata
+    63efc63 handle views or other 'tables' with engine = null
+    a43886b [GH #11] [bug] Absolute import workaround for setuptools <= 0.6c5
+    ac18a94 Continued work on first test case for functional test suite
+    ab8cb24 Merge branch 'master' of git@github.com:holland-backup/holland
+    38c5740 Added a basic test skeleton to test_suite
+    3d5dc56 Made changes to Sphinx documentation
+    3de8d93 Modified documenation in mysql-lvm.conf
+    fa1b87c Changed documentation in mysql-lvm.conf
+    65b7866 fix author_email in holland.backup.mysqldump/setup.py
+    be9ff4a fix some typos in holland.backup.pgdump
+    e58a488 minor fixes for holland.backup.pgdump/setup.py
+    127fb9e fix a typo in example plugin
+    61588c5 adding missing find_packages()
+    b593dd1 Flesh out example plugin to follow 1.0 standards
+    69d2874 add a minor comment to pgdump plugin
+    ff1805e adding pgdump plugin back in with cleanups
+    fdfc4c4 [GH #16] [feature] Add holland-mysql-lvm subpackage to 
+            contrib/debian
+    35a2a93 Minor improvements to scripts/build_rpms.py
+    be4b593 [GH #13] [feature] scripts/mkvirtenv.py now preserves holland-test 
+            if possible
+    c7f35d0 Removed PDF, Keynote slides, and test DBs as they were taking up a 
+            significant amount of space. Will move the PDF and slides to the 
+            Wiki. The DBs could be downloaded on demand as part of the test 
+            suite or installed on test boxes. They should, however, not be in 
+            the repo.
+    3752ae9 Remove FAQ from reference documenation (this has been moved to the 
+            wiki). Version bumped the documentation version to 0.9.9
+    529e9f0 Merge branch 'master' of git@github.com:holland-backup/holland
+    9f786b4 [GH #10] [feature] By default, don't use --databases when only 
+            backing up a single database
+    a7467a0 cleanup build_debs.py script to use new tree layout and setup 
+            correctly
+    0c9170d cleanup contrib/debian/ to use new tree layout and not try to 
+            build addons
+    1e7e48d update scripts/mkvirtenv.py for new tree layout
+    be5db1d Merge features/abg/tree-cleanup into master
+    bee970c testing hudson
+    60f71a7 remove commvault references
+    8f100f1 [GH #8] [bug] use addons/ACTIVE and plugins/ACTIVE when 
+            building/installing
+    f3590a8 [GH #7] [bug] Add prereq checks for devscripts
+    9060222 don't use install_requires for MySQL-python
+    015e3a5 Merge commit 'HEAD'; branch 'mkvirtenv_el5'
+    dc216ba Fixing OSError from devtools/mkvirtenv.py on el5.  Resolves GitHub 
+            Issue #4
+    c416675 Merge branches 'HEAD' and 'no_eggs'
+    13b57df No more egg files for plugins.
+    0d63967 Removing dev from version
+    968caee fixing typo in build_rpms.py clean()
+    88c4d58 adding --tmpdir/--clean options to build_rpms.py
+    a9666b3 Merge branch 'master' of github.com:holland-backup/holland
+    e050976 Referent devtools/build_rpms.py in INSTALL
+    21a8f0b fixing contrib/holland.spec
+    b43f8a6 remove MySQL-python install_requires from holland.lib.mysql
+    46ad6c7 excluding tests from holland.backup.mysqldump install as well
+    ea368a7 really excluding tests from plugins/setup.py this time
+    80025bc don't package tests/ in plugins
+    7f7bd70 clipping obsolete or incomplete plugins
+    12d5e95 renamed distribution/ -> contrib/
+    5445483 renamed devtools/ -> scripts/
+    fc31c5a removing addons/
+    a6a8819 move holland-core files to tree root
+    6bf95ef Changing references from gforge to hollandbackup.org
+    58de7bd Adding GPL/LICENSE files for plugins
+    1c3cc20 Adding holland-core license
+    294d984 Merge branch 'master' of github.com:holland-backup/holland
+    1a25c13 Use tempfile.mkdtemp for topdir
+    08ca75f Removed -commvault subpackage - Removed mysql-lvm config file hack
+    5787ae8 Removing commvault manpages, oops
+    370ff3c Initial Import

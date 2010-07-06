@@ -22,7 +22,7 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        3.rc3%{?dist}
+Release:        4%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD 
@@ -369,7 +369,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc README README.plugins INSTALL LICENSE config/backupsets/examples/ 
+%doc ChangeLog README README.plugins INSTALL LICENSE config/backupsets/examples/ 
 %if %{with sphinxdocs}
 %doc docs/build/html/
 %endif
@@ -493,6 +493,10 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
+* Tue Jul 06 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.0-4
+- Source update, 1.0.0 final
+- Add ChangeLog back in under %%doc
+
 * Thu Jul 01 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-3.rc3
 - Source updated to rc3
 
