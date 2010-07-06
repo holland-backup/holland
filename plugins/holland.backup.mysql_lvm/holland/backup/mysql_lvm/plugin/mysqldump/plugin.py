@@ -81,7 +81,11 @@ class MysqlDumpLVMBackup(object):
         datadir = os.path.realpath(self.client.show_variable('datadir'))
         LOG.info("Backing up %s via snapshot", datadir)
         # lookup the logical volume mysql's datadir sits on
-        volume = LogicalVolume.lookup_from_fspath(datadir)
+        try:
+             volume = LogicalVolume.lookup_from_fspath(datadir)
+        except LookupError, exc:
+            raise BackupError("Failed to lookup logical volume for %s: %s" %
+                              (datadir, str(exc)))
 
         if self.dry_run:
             _dry_run(volume)

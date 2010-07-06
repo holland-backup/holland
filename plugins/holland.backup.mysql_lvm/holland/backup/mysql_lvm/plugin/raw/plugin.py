@@ -117,9 +117,9 @@ class MysqlLVMBackup(object):
 
         try:
             volume = LogicalVolume.lookup_from_fspath(datadir)
-        except LVMCommandError, exc:
+        except LookupError, exc:
             raise BackupError("Failed to lookup logical volume for %s: %s" %
-                              (datadir, exc.error))
+                              (datadir, str(exc)))
 
         if self.dry_run:
             return _dry_run(volume)
