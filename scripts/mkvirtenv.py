@@ -161,8 +161,17 @@ def main(args=None):
                        default=False,
                        help='Clear out the non-root install and start '
                             'from scratch')
+    oparser.add_option('--no-site-packages', action='store_true',
+                       default=False, dest='no_site_packages',
+                       help="Don't use the systems site_packages")
     oparser.add_option('--debug', action='store_true')
     opts, args = oparser.parse_args(args)
+
+    # this seems odd, but we want the oposite logic of no-site-packages
+    if opts.no_site_packages:
+        use_site_packages = False
+    else:
+        use_site_packages = True
 
     setup_logging(opts.debug)
     home_dir = os.environ.get('HOLLAND_HOME', expanduser('~/holland-test'))
@@ -170,7 +179,7 @@ def main(args=None):
         logging.error("Please exit your current virtual environment before trying to create another")
         return 1
 
-    create_environment(home_dir, site_packages=True, clear=opts.clear,
+    create_environment(home_dir, site_packages=use_site_packages, clear=opts.clear,
                        unzip_setuptools=False, use_distribute=opts.distribute)
     virtualenv = make_env(home_dir)
     egg_env = find_egg_env(os.path.join(home_dir, 'lib', 'python2.4', 'site-packages'))
