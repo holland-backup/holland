@@ -369,7 +369,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc README README.plugins INSTALL LICENSE config/backupsets/examples/ 
+%doc ChangeLog README README.plugins INSTALL LICENSE config/backupsets/examples/ 
 %if %{with sphinxdocs}
 %doc docs/build/html/
 %endif
