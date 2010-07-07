@@ -126,9 +126,20 @@ class MySQLClient(object):
             row['database'] = database
             row['data_size'] = (row.pop('data_length') or 0)
             row['index_size'] = (row.pop('index_length') or 0)
-            if row['engine'] is None and row['comment'] == 'VIEW':
-                row['engine'] = 'VIEW'
-            row['is_transactional'] = row.get('engine', '').lower() in ['innodb']
+            if row['engine'] is None:
+                if row['comment'] == 'VIEW':
+                    row['engine'] = 'VIEW'
+                else:
+                    row['engine'] = ''
+                    if 'references invalid table' in (row['comment'] or ''):
+                        LOG.warning("Invalid view %s.%s: %s", 
+                                    row['database'], row['name'],
+                                    row['comment'] or '')
+                    if 'Incorrect key file' in (row['comment'] or ''):
+                        LOG.warning("Invalid table %s.%s: %s",
+                                    row['database'], row['name'],
+                                    row['comment'] or '')
+            row['is_transactional'] = (row.get('engine') or '').lower() in ['innodb']
             for key in row.keys():
                 valid_keys = [
                     'database',
