@@ -27,7 +27,7 @@ setup(name="holland.backup.mysql_lvm",
       entry_points="""
       [holland.backup]
       mysql-lvm = holland.backup.mysql_lvm:MysqlLVMBackup
-      mysqldump-lvm = holland.backup.mysql_lvm:MysqlDumpLVMBackup
+      mysqldump-lvm = holland.backup.mysql_lvm.plugin.mysqldump:MysqlDumpLVMBackup
       
       """,
       namespace_packages=['holland', 'holland.backup', 'holland.restore'],
