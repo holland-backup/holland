@@ -72,6 +72,8 @@ def write_manifest(schema, open_stream, ext):
                           lineterminator="\n",
                           quoting=csv.QUOTE_MINIMAL)
     for database in schema.databases:
+        if database.excluded:
+            continue
         name = database.name
         encoded_name = encode(name)[0]
         manifest.writerow([name.encode('utf-8'), encoded_name + '.sql' + ext])
