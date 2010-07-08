@@ -1,10 +1,12 @@
 """Main driver"""
 
+import sys
 import csv
+import errno
 import logging
 from holland.core.exceptions import BackupError
 from holland.lib.safefilename import encode
-from holland.backup.mysqldump.command import ALL_DATABASES
+from holland.backup.mysqldump.command import ALL_DATABASES, MySQLDumpError
 from holland.backup.mysqldump.mock.env import MockEnvironment
 
 LOG = logging.getLogger(__name__)
@@ -63,7 +65,13 @@ def start(mysqldump,
             try:
                 mysqldump.run([db.name], stream, more_options)
             finally:
-                stream.close()
+                try:
+                    stream.close()
+                except (IOError, OSError), exc:
+                    if exc.errno != errno.EPIPE:
+                        LOG.error("%s", str(exc))
+                    if sys.exc_info() is (None, None, None):
+                        raise BackupError(str(exc))
     else:
         more_options = [mysqldump_lock_option(lock_method, target_databases)]
         stream = open_stream('all_databases.sql', 'w')
