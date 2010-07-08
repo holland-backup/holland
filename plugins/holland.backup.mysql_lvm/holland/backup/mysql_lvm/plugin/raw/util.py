@@ -49,20 +49,23 @@ def build_snapshot(config, logical_volume):
         LOG.info("Auto-sizing snapshot-size to %s (%d extents)",
                  format_bytes(snapshot_size*extent_size),
                  snapshot_size)
+        if snapshot_size < 1:
+            raise BackupError("Insufficient free extents on %s "
+                              "to create snapshot (free extents = %d)" %
+                              (logical_volume.device_name(),
+                              logical_volume.vg_free_count))
     else:
         try:
             _snapshot_size = snapshot_size
             snapshot_size = parse_bytes(snapshot_size) / extent_size
             LOG.info("Using requested snapshot-size %s "
-                     "rounded to extent-size %s. ",
+                     "rounded by extent-size %s to %s.",
                      _snapshot_size,
-                     format_bytes(extent_size))
-            LOG.info("Final size %s (%d) extents",
-                     format_bytes(snapshot_size*extent_size),
-                     snapshot_size)
+                     format_bytes(extent_size),
+                     format_bytes(snapshot_size*extent_size))
             if snapshot_size < 1:
-                LOG.warning("Requested snapshot-size is less than 1 extent (%s)",
-                            format_bytes(extent_size))
+                raise BackupError("Requested snapshot-size (%s) is "
+                                  "less than 1 extent" % _snapshot_size)
             if snapshot_size > int(logical_volume.vg_free_count):
                 LOG.info("Snapshot size requested %s, but only %s available.",
                          config['snapshot-size'],
