@@ -23,7 +23,7 @@ def get_opts_args():
 
     parser.add_option('--topdir', action='store', dest='topdir',
                       help="tmp directory to build in.")
-    parser.add_option('--just-source', action='store', dest='just_source',
+    parser.add_option('--just-source', action='store_true', dest='just_source',
                       help="just build the source rpm")
     parser.add_option('--clean', action='store_true', dest='clean',
                       help="remove directory after building (for testing)")
