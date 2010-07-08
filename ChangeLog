@@ -8,6 +8,7 @@
 
 Jul 08 2010 - 1.0.2 
 ------------------------------------------------------------------------------
+	b2c02ab Changed purge policy on default.conf
     0529ef8 Resolve GH#43 scripts/build_rpms.py option parsing broken
     d66f10d handle compression errors a bit more gracefully
     77551cf ensure errors in compression are caught and handled appropriately
