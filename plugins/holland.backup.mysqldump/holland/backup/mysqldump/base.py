@@ -55,7 +55,11 @@ def start(mysqldump,
             db_name = encode(db.name)[0]
             if db_name != db.name:
                 LOG.warning("Encoding file-name for database %s to %s", db.name, db_name)
-            stream = open_stream('%s.sql' % db_name, 'w')
+            try:
+                stream = open_stream('%s.sql' % db_name, 'w')
+            except (IOError, OSError), exc:
+                raise BackupError("Failed to open output stream %s: %s" %
+                                  ('%s.sql' + compression_ext, str(exc)))
             try:
                 mysqldump.run([db.name], stream, more_options)
             finally:
