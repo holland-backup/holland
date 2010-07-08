@@ -41,7 +41,9 @@ def load_options(path):
 def unquote(value):
     """Remove quotes from a string."""
     if len(value) > 1 and value[0] == '"' and value[-1] == '"':
-            value = value[1:-1]
+        value = value[1:-1]
+    elif len(value) > 1 and value[0] == "'" and value[-1] == "'":
+        value = value[1:-1]
 
     # substitute meta characters per:
     # http://dev.mysql.com/doc/refman/5.0/en/option-files.html
@@ -53,8 +55,9 @@ def unquote(value):
         '\\': "\\",
         's' : " ",
         '"' : '"',
+        "'" : "'",
     }
-    return re.sub(r'\\(["btnr\\s])',
+    return re.sub(r'''\\(['"btnr\\s])''',
                   lambda m: MYSQL_META[m.group(1)],
                   value)
 
