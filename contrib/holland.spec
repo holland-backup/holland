@@ -1,5 +1,5 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
-%{!?holland_version: %global holland_version 1.0.0}
+%{!?holland_version: %global holland_version 1.0.2}
 
 # default %rhel to make things easier to build
 %{!?rhel: %global rhel %%(%{__sed} 's/^[^0-9]*\\([0-9]\\+\\).*/\\1/' /etc/redhat-release)}
@@ -22,7 +22,7 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        4%{?dist}
+Release:        1%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD 
@@ -493,6 +493,9 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
+* Thu Jul 09 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.2-1
+- Source updated to 1.0.2
+
 * Tue Jul 06 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.0-4
 - Source update, 1.0.0 final
 - Add ChangeLog back in under %%doc
