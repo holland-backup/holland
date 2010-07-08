@@ -30,3 +30,13 @@ def test_signalmanager():
     assert_equals(sigmgr.pending[0], signal.SIGINT)
     sigmgr.restore()
     assert_raises(KeyboardInterrupt, os.kill, os.getpid(), signal.SIGINT)
+
+def test_parsebytes():
+    # bytes without units should be interpretted as MB
+    bytes = parse_bytes('1024')
+    assert_equals(bytes, 1024**3)
+    # this should not be bytes
+    ok_(bytes > 1024)
+   
+    bytes = parse_bytes('1024G')
+    assert_equals(bytes, 1024**4)
