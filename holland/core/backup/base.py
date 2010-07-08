@@ -95,8 +95,7 @@ class BackupRunner(object):
         spool_entry.config['holland:backup']['start-time'] = time.time()
         self.apply_cb('pre-backup', spool_entry)
 
-        if not dry_run:
-            spool_entry.prepare()
+        spool_entry.prepare()
     
         try:
             estimated_size = self.check_available_space(plugin)
