@@ -7,6 +7,7 @@ import re
 import codecs
 import logging
 from holland.core.config import ConfigObj, ConfigObjError, ParseError
+from ConfigParser import RawConfigParser
 
 LOG = logging.getLogger(__name__)
 
@@ -96,12 +97,12 @@ def client_keys(config):
     return clean_namespace
 
 def write_options(config, filename):
-    quoted_config = ConfigObj(list_values=False)
-    quoted_config.update(config)
-
     if isinstance(filename, basestring):
         filename = codecs.open(filename, 'w', 'utf8')
-    quoted_config.write(filename)
+    for section in config:
+        print >>filename, "[%s]" % section
+        for key in config[section]:
+            print >>filename, "%s = %s" % (key, quote(config[section][key]))
     filename.close()
 
 def build_mysql_config(mysql_config):
@@ -129,8 +130,10 @@ def build_mysql_config(mysql_config):
     if mysql_config['password'] is not None:
         password = mysql_config['password']
         if password.startswith('file:'):
-            password = process_password_file(password[5:])
+            password_file = password[5:]
+            password = process_password_file(password_file)
             mysql_config['password'] = password
+            LOG.info("Read password from file %r", password_file)
 
     for key in ('user', 'password', 'socket', 'host', 'port'):
         if key in mysql_config and mysql_config[key]:
