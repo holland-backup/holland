@@ -10,7 +10,7 @@ from holland.core.util.path import directory_size
 from holland.core.exceptions import BackupError
 from holland.backup.mysql_lvm.plugin.common import build_snapshot, \
                                                    connect_simple
-from holland.backup.mysql_lvm.plugin.raw.util import setup_actions
+from holland.backup.mysql_lvm.plugin.mysqldump.util import setup_actions
 from holland.backup.mysqldump import MySQLDumpPlugin
 
 LOG = logging.getLogger(__name__)
