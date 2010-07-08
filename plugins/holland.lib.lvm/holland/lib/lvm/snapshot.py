@@ -142,7 +142,8 @@ class Snapshot(object):
     def _apply_callbacks(self, event, *args, **kwargs):
         """Apply callbacks for event"""
         callback_list = list(self.callbacks.get(event, []))
-        callback_list.sort(reverse=True)
+        callback_list.sort()
+        callback_list.reverse()
         callback_list = [callback[1] for callback in callback_list]
         for callback in callback_list:
             try:
