@@ -56,7 +56,10 @@ def start(mysqldump,
             if db_name != db.name:
                 LOG.warning("Encoding file-name for database %s to %s", db.name, db_name)
             stream = open_stream('%s.sql' % db_name, 'w')
-            mysqldump.run([db.name], stream, more_options)
+            try:
+                mysqldump.run([db.name], stream, more_options)
+            finally:
+                stream.close()
     else:
         more_options = [mysqldump_lock_option(lock_method, target_databases)]
         stream = open_stream('all_databases.sql', 'w')
