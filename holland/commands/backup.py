@@ -113,7 +113,7 @@ def purge_backup(event, entry):
         entry.purge()
         LOG.info("Purged failed backup: %s", entry.name)
     else:
-        LOG.info("Failed backup not purged due to purge-failed-backups setting")
+        LOG.info("auto-purge-failures not enabled. Failed backup not purged.")
 
 class PurgeManager(object):
     def __call__(self, event, entry):
