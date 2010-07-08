@@ -252,6 +252,7 @@ class Backup(object):
         """
         if not self.exists():
             os.makedirs(self.path)
+            LOG.info("Creating backup path %s", self.path)
         
     def flush(self):
         """
