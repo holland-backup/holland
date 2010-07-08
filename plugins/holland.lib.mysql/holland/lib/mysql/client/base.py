@@ -126,6 +126,7 @@ class MySQLClient(object):
             row['database'] = database
             row['data_size'] = (row.pop('data_length') or 0)
             row['index_size'] = (row.pop('index_length') or 0)
+            # coerce null engine to 'view' as necessary
             if row['engine'] is None:
                 if row['comment'] == 'VIEW':
                     row['engine'] = 'VIEW'
@@ -139,7 +140,8 @@ class MySQLClient(object):
                         LOG.warning("Invalid table %s.%s: %s",
                                     row['database'], row['name'],
                                     row['comment'] or '')
-            row['is_transactional'] = (row.get('engine') or '').lower() in ['innodb']
+            row['is_transactional'] = row['engine'].lower() in ['view', 
+                                                                'innodb']
             for key in row.keys():
                 valid_keys = [
                     'database',
@@ -170,9 +172,9 @@ class MySQLClient(object):
                "          COALESCE(DATA_LENGTH, 0) AS `data_size`, "
                "          COALESCE(INDEX_LENGTH, 0) AS `index_size`, "
                "          COALESCE(ENGINE, 'view') AS `engine`, "
-               "          TRANSACTIONS = 'YES' AS `is_transactional` "
+               "          (TRANSACTIONS = 'YES' OR ENGINE IS NULL) AS `is_transactional` "
                "FROM INFORMATION_SCHEMA.TABLES "
-               "JOIN INFORMATION_SCHEMA.ENGINES USING (ENGINE) "
+               "LEFT JOIN INFORMATION_SCHEMA.ENGINES USING (ENGINE) "
                "WHERE TABLE_SCHEMA = %s")
         cursor = self.cursor()
         cursor.execute(sql, (database))
