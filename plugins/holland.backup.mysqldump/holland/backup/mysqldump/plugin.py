@@ -6,7 +6,9 @@ import logging
 from holland.core.exceptions import BackupError
 from holland.lib.compression import open_stream, lookup_compression
 from holland.lib.mysql import MySQLSchema, connect, MySQLError
-from holland.lib.mysql import include_glob, exclude_glob
+from holland.lib.mysql import include_glob, exclude_glob, \
+                              include_glob_qualified, \
+                              exclude_glob_qualified
 from holland.lib.mysql import DatabaseIterator, MetadataTableIterator, \
                               SimpleTableIterator
 from holland.backup.mysqldump.base import start
@@ -85,8 +87,9 @@ class MySQLDumpPlugin(object):
         self.schema.add_database_filter(
                 exclude_glob(*config['exclude-databases'])
         )
-        self.schema.add_table_filter(include_glob(*config['tables']))
-        self.schema.add_table_filter(exclude_glob(*config['exclude-tables']))
+        
+        self.schema.add_table_filter(include_glob_qualified(*config['tables']))
+        self.schema.add_table_filter(exclude_glob_qualified(*config['exclude-tables']))
         self.schema.add_engine_filter(include_glob(*config['engines']))
         self.schema.add_engine_filter(exclude_glob(*config['exclude-engines']))
 
