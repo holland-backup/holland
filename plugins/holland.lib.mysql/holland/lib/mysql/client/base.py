@@ -403,7 +403,7 @@ class AutoMySQLClient(PassiveMySQLClient):
             LOG.info("Reconnecting to MySQL after failed ping")
             self.connect()
 
-        return super(AutoMySQLClient, self).__getattr__(key)
+        return PassiveMySQLClient.__getattr__(self, key)
 
 def connect(config, client_class=AutoMySQLClient):
     """Create a MySQLClient object from a dict
