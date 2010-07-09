@@ -6,6 +6,40 @@
 #   http://github.com/holland-backup/holland/commit/XXXXXXX
 #
 
+Jul 08 2010 - 1.0.2 
+------------------------------------------------------------------------------
+	b2c02ab Changed purge policy on default.conf
+    0529ef8 Resolve GH#43 scripts/build_rpms.py option parsing broken
+    d66f10d handle compression errors a bit more gracefully
+    77551cf ensure errors in compression are caught and handled appropriately
+    577903e be more aggressive about recycling compression processes
+    1368ab2 only run purge operations if a backup was successful
+    256dac3 report mysql connect error slightly better
+    6044fde never purge current backup
+    7d79114 never interpolate config files that holland parses
+    0b18780 don't write excluded databases to manifest
+    1e94ff2 ensure a zero-byte estimated-size is handled gracefully
+    1d4dd83 ensure spool is always setup prior to running backup()
+    596bc9d ensure bare table names in filters are treated as '*.<name>'
+    4087120 [GH #42] Ensure single-quoted my.cnf values are handled correctly
+    312b3a5 fix incorrect import in mysqldump-lvm
+    f744b44 [GH #41] Ensure views are always treated as transactional when
+            deciding whether to use --single-transaction
+    7a74dca [GH #40] ensure passwords read from a password-file are always 
+            quoted
+    3bce689 make basic snapshot framework consistent between mysql-lvm and
+            mysqldump-lvm
+    4ba075b [GH #39] mysql-lvm now parses snapshot-size without units as 
+            megabytes
+    9bd1d6c [GH #38] Snapshot callbacks are now sorted in a python-2.3 
+            compatible way
+    22299ec parse snapshot-size without units as megabytes not bytes
+    9d481fd handle broken tables and views in MySQLClient more gracefully
+    fc8bc88 only import mysqldump plugin in mysql_lvm when specifically needed
+    69af0a5 catch the right exception when mysql-lvm fails to find a logical
+            volume
+    
+    
 Jul 06 2010 - 1.0.0 final
 ------------------------------------------------------------------------------
     ea9275b Add --no-site-packages options to mkvirtenv.py

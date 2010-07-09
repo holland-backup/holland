@@ -23,11 +23,12 @@ def get_opts_args():
 
     parser.add_option('--topdir', action='store', dest='topdir',
                       help="tmp directory to build in.")
-    parser.add_option('--just-source', action='store', dest='just_source',
+    parser.add_option('--just-source', action='store_true', dest='just_source',
                       help="just build the source rpm")
     parser.add_option('--clean', action='store_true', dest='clean',
                       help="remove directory after building (for testing)")
-    parser.add_option('--with', action='append', default=[],
+    parser.add_option('--with-plugin', action='append', dest='with_plugins', 
+                      default=[], metavar='PLUGIN',
                       help="Include additional plugins not built by default")
     (cli_opts, cli_args) = parser.parse_args()
     return (cli_opts, cli_args)
@@ -126,7 +127,7 @@ def main():
         exit(1, cli_opts.clean)
 
     if not cli_opts.just_source:
-        retcode = build_rpms(cli_opts.with)
+        retcode = build_rpms(cli_opts.with_plugins)
 
     print
     print '-' * 77
