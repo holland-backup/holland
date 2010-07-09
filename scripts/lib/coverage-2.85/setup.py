@@ -19,7 +19,7 @@ Topic :: Software Development :: Quality Assurance
 Topic :: Software Development :: Testing
 """
 
-version = '2.85'
+version = '1.0.3'
 
 from setuptools import setup, find_packages
 
