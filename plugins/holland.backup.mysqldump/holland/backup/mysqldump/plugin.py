@@ -158,6 +158,10 @@ class MySQLDumpPlugin(object):
     def _backup(self):
         """Real backup method.  May raise BackupError exceptions"""
         if self.config['mysqldump']['stop-slave']:
+            if not self.client.show_variable('Slave_Running') != 'ON':
+                raise BackupError("stop-slave enabled, but replication is "
+                                  "either not configured or the slave is not "
+                                  "running.")
             self.config.setdefault('mysql:replication', {})
             _stop_slave(self.client, self.config['mysql:replication'])
 
