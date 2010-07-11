@@ -158,7 +158,7 @@ class MySQLDumpPlugin(object):
     def _backup(self):
         """Real backup method.  May raise BackupError exceptions"""
         if self.config['mysqldump']['stop-slave']:
-            if not self.client.show_variable('Slave_Running') != 'ON':
+            if self.client.show_status('Slave_running') != 'ON':
                 raise BackupError("stop-slave enabled, but replication is "
                                   "either not configured or the slave is not "
                                   "running.")
@@ -219,14 +219,7 @@ class MySQLDumpPlugin(object):
         path = os.path.join(self.target_directory, 'backup_data', path)
         compression_method = method or self.config['compression']['method']
         compression_level = self.config['compression']['level']
-        if compression_method == 'none':
-            compression_info = '(uncompressed)'
-        else:
-            compression_info = '(%s compressed level %d)' % \
-                                (compression_method, compression_level)
         stream = open_stream(path, mode, compression_method, compression_level)
-        LOG.info("Saving mysqldump output to %s %s",
-                os.path.basename(stream.name), compression_info)
         return stream
 
     def info(self):

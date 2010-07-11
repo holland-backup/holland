@@ -70,7 +70,6 @@ def start(mysqldump,
                 except (IOError, OSError), exc:
                     if exc.errno != errno.EPIPE:
                         LOG.error("%s", str(exc))
-                    if sys.exc_info() is (None, None, None):
                         raise BackupError(str(exc))
     else:
         more_options = [mysqldump_lock_option(lock_method, target_databases)]
@@ -93,6 +92,7 @@ def write_manifest(schema, open_stream, ext):
         encoded_name = encode(name)[0]
         manifest.writerow([name.encode('utf-8'), encoded_name + '.sql' + ext])
     manifest_fileobj.close()
+    LOG.info("Wrote backup manifest %s", manifest_fileobj.name)
 
 def mysqldump_lock_option(lock_method, databases):
     """Choose the mysqldump option to use for locking
