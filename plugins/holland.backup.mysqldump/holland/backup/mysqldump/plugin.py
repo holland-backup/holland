@@ -318,9 +318,10 @@ def _stop_slave(client, config=None):
     if config is not None:
         try:
             slave_info = client.show_slave_status()
-            # update config with replication info
-            config['slave_master_log_pos'] = slave_info['exec_master_log_pos']
-            config['slave_master_log_file'] = slave_info['relay_master_log_file']
+            if slave_info:
+                # update config with replication info
+                config['slave_master_log_pos'] = slave_info['exec_master_log_pos']
+                config['slave_master_log_file'] = slave_info['relay_master_log_file']
         except MySQLError, exc:
             raise BackupError("Failed to acquire slave status[%d]: %s" % \
                                 exc.args)
