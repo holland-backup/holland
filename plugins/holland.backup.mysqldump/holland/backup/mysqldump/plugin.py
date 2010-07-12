@@ -149,23 +149,26 @@ class MySQLDumpPlugin(object):
             mock_env.replace_environment()
             LOG.info("Running in dry-run mode.")
 
+
         try:
+            if self.config['mysqldump']['stop-slave']:
+                self.client = connect(self.mysql_config['client'])
+                if self.client.show_status('Slave_running') != 'ON':
+                    raise BackupError("stop-slave enabled, but replication is "
+                                  "either not configured or the slave is not "
+                                  "running.")
+                self.config.setdefault('mysql:replication', {})
+                _stop_slave(self.client, self.config['mysql:replication'])
             self._backup()
         finally:
+            if self.config['mysqldump']['stop-slave'] and \
+                'mysql:replication' in self.config:
+                _start_slave(self.client, self.config['mysql:replication'])
             if mock_env:
                 mock_env.restore_environment()
 
     def _backup(self):
         """Real backup method.  May raise BackupError exceptions"""
-        if self.config['mysqldump']['stop-slave']:
-            self.client = connect(self.mysql_config['client'])
-            if self.client.show_status('Slave_running') != 'ON':
-                raise BackupError("stop-slave enabled, but replication is "
-                                  "either not configured or the slave is not "
-                                  "running.")
-            self.config.setdefault('mysql:replication', {})
-            _stop_slave(self.client, self.config['mysql:replication'])
-
         config = self.config['mysqldump']
 
         # setup defaults_file with ignore-table exclusions
@@ -179,9 +182,13 @@ class MySQLDumpPlugin(object):
 
         # setup the mysqldump environment
         extra_defaults = config['extra-defaults']
-        mysqldump = MySQLDump(defaults_file, 
-                              mysqldump_bin, 
-                              extra_defaults=extra_defaults)
+        try:
+            mysqldump = MySQLDump(defaults_file, 
+                                  mysqldump_bin, 
+                                  extra_defaults=extra_defaults)
+        except MySQLDumpError, exc:
+            raise BackupError(str(exc))
+
         LOG.info("mysqldump version %s", '.'.join([str(digit)
                 for digit in mysqldump.version]))
         options = collect_mysqldump_options(config, mysqldump, self.client)
@@ -200,18 +207,14 @@ class MySQLDumpPlugin(object):
             ext = ''
 
         try:
-            try:
-                start(mysqldump=mysqldump,
-                      schema=self.schema,
-                      lock_method=config['lock-method'],
-                      file_per_database=config['file-per-database'],
-                      open_stream=self._open_stream,
-                      compression_ext=ext)
-            except MySQLDumpError, exc:
-                raise BackupError(str(exc))
-        finally:
-            if self.config['mysqldump']['stop-slave']:
-                _start_slave(self.client, self.config['mysql:replication'])
+            start(mysqldump=mysqldump,
+                  schema=self.schema,
+                  lock_method=config['lock-method'],
+                  file_per_database=config['file-per-database'],
+                  open_stream=self._open_stream,
+                  compression_ext=ext)
+        except MySQLDumpError, exc:
+            raise BackupError(str(exc))
 
     def _open_stream(self, path, mode, method=None):
         """Open a stream through the holland compression api, relative to
