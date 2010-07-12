@@ -158,6 +158,7 @@ class MySQLDumpPlugin(object):
     def _backup(self):
         """Real backup method.  May raise BackupError exceptions"""
         if self.config['mysqldump']['stop-slave']:
+            self.client = connect(self.mysql_config['client'])
             if self.client.show_status('Slave_running') != 'ON':
                 raise BackupError("stop-slave enabled, but replication is "
                                   "either not configured or the slave is not "
@@ -258,6 +259,8 @@ def find_mysqldump(path=None):
     """Find a usable mysqldump binary in path or ENV[PATH]"""
     search_path = ':'.join(path) or os.environ.get('PATH', '')
     for _path in search_path.split(':'):
+        if os.path.isfile(_path):
+            return os.path.realpath(_path)
         if os.path.exists(os.path.join(_path, 'mysqldump')):
             return os.path.realpath(os.path.join(_path, 'mysqldump'))
     raise BackupError("Failed to find mysqldump in %s" % search_path)
