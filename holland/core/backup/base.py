@@ -105,7 +105,7 @@ class BackupRunner(object):
                      spool_entry.config['holland:backup']['plugin'])
             plugin.backup()
         except KeyboardInterrupt:
-            LOG.warning("Interrupted")
+            LOG.warning("Backup aborted by interrupt")
             spool_entry.config['holland:backup']['failed'] = True
         except:
             spool_entry.config['holland:backup']['failed'] = True
@@ -136,7 +136,6 @@ class BackupRunner(object):
 
 
         if sys.exc_info() != (None, None, None):
-            LOG.error("Backup failed.  Cleaning up.")
             self.apply_cb('backup-failure', spool_entry)
             raise
         else:
