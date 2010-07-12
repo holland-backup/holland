@@ -260,7 +260,7 @@ def find_mysqldump(path=None):
     for _path in search_path.split(':'):
         if os.path.exists(os.path.join(_path, 'mysqldump')):
             return os.path.realpath(os.path.join(_path, 'mysqldump'))
-    raise BackupError("Failed to find mysqldump in %s", search_path)
+    raise BackupError("Failed to find mysqldump in %s" % search_path)
 
 def collect_mysqldump_options(config, mysqldump, client):
     """Do intelligent collection of mysqldump options from the config
