@@ -306,7 +306,11 @@ class MySQLClient(object):
 
     def show_status(self, key, session=False):
         """Fetch MySQL server status"""
-        scope = self.SCOPE[session]
+        if session is not None:
+            scope = self.SCOPE[session]
+        else:
+            # 4.1 support - GLOBAL/SESSION STATUS is not implemented
+            scope = ''
         sql = 'SHOW %s STATUS LIKE ' % scope + '%s'
         cursor = self.cursor()
         cursor.execute(sql, (key,))
