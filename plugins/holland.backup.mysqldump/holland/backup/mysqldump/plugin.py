@@ -288,7 +288,10 @@ def collect_mysqldump_options(config, mysqldump, client):
             LOG.warning("--events only available for mysqldump 5.1.8+. skipping")
         else:
             options.append('--events')
-    if config['bin-log-position'] and client.show_variable('log_bin') == 'ON':
+    if config['bin-log-position']:
+        if client.show_variable('log_bin') != 'ON':
+            raise BackupError("bin-log-position requested but "
+                              "bin-log on server not active")
         options.append('--master-data=2')
     options.extend(config['additional-options'])
     return options
