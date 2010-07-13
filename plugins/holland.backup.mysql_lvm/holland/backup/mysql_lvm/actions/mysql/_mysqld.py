@@ -101,6 +101,7 @@ def generate_server_config(config, path):
     print >>conf_data, "skip-slave-start" 
     print >>conf_data, "skip-log-bin" 
     print >>conf_data, "skip-relay-log" 
+    print >>conf_data, "skip-relay-log-index"
     print >>conf_data, "skip-relay-log-info-file" 
     text = conf_data.getvalue() 
     LOG.debug("Generating config: %s", text)
