@@ -4,10 +4,10 @@ import sys, os
 import shutil
 import re
 import tarfile
-from subprocess import Popen, PIPE 
+from subprocess import Popen, PIPE
 from optparse import OptionParser, IndentedHelpFormatter
 
-VERSION='0.2'
+VERSION='0.3'
 
 config = {}
 config['srcdir'] = os.getcwd()
@@ -27,13 +27,16 @@ def get_opts_args():
                       help="just build the source rpm")
     parser.add_option('--clean', action='store_true', dest='clean',
                       help="remove directory after building (for testing)")
-    parser.add_option('--with-plugin', action='append', dest='with_plugins', 
+    parser.add_option('--with-plugin', action='append', dest='with_plugins',
                       default=[], metavar='PLUGIN',
                       help="Include additional plugins not built by default")
+    parser.add_option('--tarball', action='store_true',
+                      help='Use entire source tree rather than git archive.'
+                           'Default when now executed from a git repository')
     (cli_opts, cli_args) = parser.parse_args()
     return (cli_opts, cli_args)
 
-def prep_buildroot():
+def prep_buildroot(cli_opts):
     version, dev_tag = get_holland_version()
     dirs = ['RPMS', 'SRPMS', 'BUILD', 'SPECS', 'SOURCES']
     for d in dirs:
@@ -43,17 +46,27 @@ def prep_buildroot():
     f = open(config['spec'], 'r')
     data = f.read()
     f.close()
-    
+
     data = re.sub('@@@VERSION@@@', version, data)
 
     f = open(os.path.join(config['topdir'], 'SPECS', 'holland.spec'), 'w')
     f.write(data)
     f.close()
- 
-    cmd = "git archive --prefix=holland-%s/ HEAD > %s/SOURCES/holland-%s.tar.gz" % \
-                (version, config['topdir'], version)
-    print cmd
-    os.system(cmd)
+
+    if cli_opts.tarball or not os.path.exists('.git'):
+        print "creating source distribution %s/SOURCES/holland-%s.tar.gz" % \
+              (config['topdir'], version)
+        from tarfile import TarFile
+        archive = tarfile.open('%s/SOURCES/holland-%s.tar.gz' %
+                               (config['topdir'], version),
+                               'w:gz')
+        archive.add('.', arcname='holland-%s/' % version)
+        archive.close()
+    else:
+        cmd = "git archive --prefix=holland-%s/ HEAD > %s/SOURCES/holland-%s.tar.gz" % \
+              (version, config['topdir'], version)
+        print cmd
+        os.system(cmd)
 
 
 def build_srpm():
@@ -67,7 +80,7 @@ def build_srpm():
            (config['topdir'], config['topdir'], dev_option)
     retcode = os.system(cmd)
     return retcode
-        
+
 def build_rpms(with_extra):
     version, dev_tag = get_holland_version()
     if dev_tag:
@@ -98,25 +111,25 @@ def get_holland_version():
     if not version:
         raise Exception, "unable to determine holland version"
     return version, dev_tag
- 
-    
+
+
 def exit(code=0, clean=False):
     if clean:
         if os.path.exists(config['topdir']):
             print "cleaning %s" % config['topdir']
             shutil.rmtree(config['topdir'])
     sys.exit(code)
-    
+
 def main():
     (cli_opts, cli_args) = get_opts_args()
     (version, dev_tag) = get_holland_version()
-    
+
     if cli_opts.topdir:
         if not os.path.exists(os.path.abspath(cli_opts.topdir)):
             os.makedirs(os.path.abspath(cli_opts.topdir))
-        config['topdir'] = os.path.abspath(cli_opts.topdir) 
-        
-    prep_buildroot()
+        config['topdir'] = os.path.abspath(cli_opts.topdir)
+
+    prep_buildroot(cli_opts)
     retcode = build_srpm()
     if int(retcode) != 0:
         print
@@ -131,16 +144,16 @@ def main():
 
     print
     print '-' * 77
-    print 
+    print
 
     if int(retcode) == 0:
         print "Holland %s%s built in %s" % (version, dev_tag, config['topdir'])
         exit(0, cli_opts.clean)
-    else:     
-        print "Holland %s%s build FAILED!  Files in %s" % (version, dev_tag, 
+    else:
+        print "Holland %s%s build FAILED!  Files in %s" % (version, dev_tag,
                                                            config['topdir'])
         exit(1, cli_opts.clean)
     print
-    
+
 if __name__ == '__main__':
     main()
