@@ -42,6 +42,7 @@ class Snapshot(object):
         try:
             self._apply_callbacks('pre-snapshot', self, None)
             snapshot = logical_volume.snapshot(self.name, self.size)
+            LOG.info("Created snapshot volume %s", snapshot.device_name())
         except (LVMCommandError, CallbackFailuresError), exc:
             return self.error(None, exc)
 
@@ -61,6 +62,7 @@ class Snapshot(object):
             if snapshot.filesystem == 'xfs':
                 options = 'nouuid'
             snapshot.mount(self.mountpoint, options)
+            LOG.info("Mounted %s on %s", snapshot.device_name(), self.mountpoint)
             self._apply_callbacks('post-mount', self, snapshot)
         except (CallbackFailuresError, LVMCommandError), exc:
             return self.error(snapshot, exc)
@@ -72,6 +74,7 @@ class Snapshot(object):
         try:
             self._apply_callbacks('pre-unmount', snapshot)
             snapshot.unmount()
+            LOG.info("Unmounted %s", snapshot.device_name())
         except (CallbackFailuresError, LVMCommandError), exc:
             return self.error(snapshot, exc)
 
@@ -87,6 +90,7 @@ class Snapshot(object):
         try:
             self._apply_callbacks('pre-remove', snapshot)
             snapshot.remove()
+            LOG.info("Removed snapshot %s", snapshot.device_name())
         except (CallbackFailuresError, LVMCommandError), exc:
             return self.error(snapshot, exc)
 
@@ -116,8 +120,12 @@ class Snapshot(object):
             try:
                 if snapshot.is_mounted():
                     snapshot.unmount()
+                    LOG.info("Unmounting snapshot %s on cleanup",
+                             snapshot.device_name())
                 if snapshot.exists():
                     snapshot.remove()
+                    LOG.info("Removed snapshot %s on cleanup",
+                             snapshot.device_name())
             except LVMCommandError, exc:
                 LOG.error("Failed to remove snapshot %s", exc)
 
