@@ -100,9 +100,9 @@ class Snapshot(object):
     def finish(self):
         """Finish the snapshotting process"""
         self.sigmgr.restore()
+        self._apply_callbacks('finish', self)
         if sys.exc_info()[1]:
             raise
-        self._apply_callbacks('finish', self)
 
     def error(self, snapshot, exc):
         """Handle an error during the snapshot process"""
