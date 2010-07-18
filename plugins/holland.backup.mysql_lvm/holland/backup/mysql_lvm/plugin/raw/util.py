@@ -35,6 +35,8 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
         mysqld_config['datadir'] = snap_datadir
         if not mysqld_config['tmpdir']:
             mysqld_config['tmpdir'] = tempfile.gettempdir()
+        ib_log_size = client.show_variable('innodb_log_file_size')
+        mysqld_config['innodb-log-file-size'] = ib_log_size
         act = InnodbRecoveryAction(mysqld_config)
         snapshot.register('post-mount', act, priority=100)
         errlog_src = os.path.join(snap_datadir, 'innodb_recovery.log')

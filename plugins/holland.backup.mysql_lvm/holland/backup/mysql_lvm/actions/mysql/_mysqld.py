@@ -36,7 +36,7 @@ class MySQLServer(object):
     def start(self, bootstrap=False):
         args = [
             self.mysqld_exe,
-            '--defaults-extra-file=%s' % self.defaults_file,
+            '--defaults-file=%s' % self.defaults_file,
         ]
         if bootstrap:
             args += ['--bootstrap']
@@ -79,6 +79,8 @@ def generate_server_config(config, path):
     conf_data = StringIO() 
     valid_params = [ 
         'innodb-buffer-pool-size',  
+        'innodb-log-file-size',
+        'open-files-limit',
         'key-buffer-size',  
         'tmpdir',  
         'user',  
@@ -100,9 +102,6 @@ def generate_server_config(config, path):
     print >>conf_data, "skip-networking"
     print >>conf_data, "skip-slave-start" 
     print >>conf_data, "skip-log-bin" 
-    print >>conf_data, "skip-relay-log" 
-    print >>conf_data, "skip-relay-log-index"
-    print >>conf_data, "skip-relay-log-info-file" 
     text = conf_data.getvalue() 
     LOG.debug("Generating config: %s", text)
     open(path, 'w').write(text) 
