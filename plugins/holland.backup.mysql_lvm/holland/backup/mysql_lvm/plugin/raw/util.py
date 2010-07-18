@@ -39,19 +39,6 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
         mysqld_config['innodb-log-file-size'] = ib_log_size
         act = InnodbRecoveryAction(mysqld_config)
         snapshot.register('post-mount', act, priority=100)
-        errlog_src = os.path.join(snap_datadir, 'innodb_recovery.log')
-        errlog_dst = os.path.join(spooldir, 'innodb_recovery.log')
-        snapshot.register('pre-unmount',
-                          lambda *args, **kwargs: shutil.copyfile(errlog_src, 
-                                                                  errlog_dst)
-                         )
-    
-        mycnf_src = os.path.join(snap_datadir, 'my.innodb_recovery.cnf')
-        mycnf_dst = os.path.join(spooldir, 'my.innodb_recovery.cnf')
-        snapshot.register('pre-unmount',
-                          lambda *args, **kwargs: shutil.copyfile(mycnf_src, 
-                                                                  mycnf_dst)
-                         )
 
 
     archive_stream = open_stream(os.path.join(spooldir, 'backup.tar'),
