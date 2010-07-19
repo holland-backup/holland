@@ -105,7 +105,8 @@ def write_options(config, filename):
     for section in config:
         print >>filename, "[%s]" % section
         for key in config[section]:
-            print >>filename, "%s = %s" % (key, quote(config[section][key]))
+            value = str(config[section][key])
+            print >>filename, "%s = %s" % (key, quote(value))
     filename.close()
 
 def build_mysql_config(mysql_config):

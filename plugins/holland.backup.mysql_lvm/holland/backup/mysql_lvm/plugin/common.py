@@ -81,7 +81,7 @@ def build_snapshot(config, logical_volume):
         mountpoint = tempfile.mkdtemp()
     snapshot = Snapshot(snapshot_name, int(snapshot_size), mountpoint)
     if tempdir:
-        snapshot.register('post-unmount', 
+        snapshot.register('finish',
                           lambda *args, **kwargs: cleanup_tempdir(mountpoint))
     return snapshot
 

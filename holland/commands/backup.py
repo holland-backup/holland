@@ -75,7 +75,7 @@ class Backup(Command):
                 config = hollandcfg.backupset(name)
                 # ensure we have at least an empty holland:backup section
                 config.setdefault('holland:backup', {})
-            except IOError, exc:
+            except (SyntaxError, IOError), exc:
                 LOG.error("Could not load backupset '%s': %s", name, exc)
                 break
 

@@ -95,7 +95,8 @@ class BackupRunner(object):
         spool_entry.config['holland:backup']['start-time'] = time.time()
         self.apply_cb('pre-backup', spool_entry)
 
-        spool_entry.prepare()
+        if not dry_run:
+            spool_entry.prepare()
     
         try:
             estimated_size = self.check_available_space(plugin)
@@ -103,6 +104,9 @@ class BackupRunner(object):
                      spool_entry.name,
                      spool_entry.config['holland:backup']['plugin'])
             plugin.backup()
+        except KeyboardInterrupt:
+            LOG.warning("Backup aborted by interrupt")
+            spool_entry.config['holland:backup']['failed'] = True
         except:
             spool_entry.config['holland:backup']['failed'] = True
         else:
@@ -122,12 +126,16 @@ class BackupRunner(object):
 
         start_time = spool_entry.config['holland:backup']['start-time']
         stop_time = spool_entry.config['holland:backup']['stop-time']
-        LOG.info("Backup completed in %s", 
-                 format_interval(stop_time - start_time))
+
+        if spool_entry.config['holland:backup']['failed']:
+            LOG.error("Backup failed after %s",
+                      format_interval(stop_time - start_time))
+        else:
+            LOG.info("Backup completed in %s", 
+                     format_interval(stop_time - start_time))
 
 
         if sys.exc_info() != (None, None, None):
-            LOG.error("Backup failed.  Cleaning up.")
             self.apply_cb('backup-failure', spool_entry)
             raise
         else:

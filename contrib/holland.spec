@@ -1,5 +1,9 @@
-%{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
-%{!?holland_version: %global holland_version 1.0.2}
+%if ! (0%{?fedora} > 12 || 0%{?rhel} > 5)
+%{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
+%{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
+%endif
+
+%{!?holland_version: %global holland_version 1.0.3}
 
 # default %rhel to make things easier to build
 %{!?rhel: %global rhel %%(%{__sed} 's/^[^0-9]*\\([0-9]\\+\\).*/\\1/' /etc/redhat-release)}
@@ -22,16 +26,16 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD 
 URL:            http://hollandbackup.org
-Source0:        %{name}-%{version}.tar.gz
+Source0:        http://hollandbackup.org/releases/stable/1.0/%{name}-%{version}.tar.gz 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
-BuildRequires:  python-devel python-setuptools 
+BuildRequires:  python2-devel python-setuptools 
 %if %{with sphinxdocs}
 BuildRequires:  python-sphinx
 %endif
@@ -493,7 +497,15 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
-* Thu Jul 09 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.2-1
+* Thu Jul 08 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.3-1
+- Source updated to 1.0.3 (dev)
+
+* Thu Jul 08 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.2-2
+- Updated Source0 URL
+- Updated python_sitelib/python_sitearch (per FPG)
+- BuildRequires: python2-devel (per FPG)
+
+* Thu Jul 08 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.2-1
 - Source updated to 1.0.2
 
 * Tue Jul 06 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.0-4
