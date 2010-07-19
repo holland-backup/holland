@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 if [ -z "$1" ]; then
     echo "Must pass a version number in form of 'x.y.z'"
     exit 1
