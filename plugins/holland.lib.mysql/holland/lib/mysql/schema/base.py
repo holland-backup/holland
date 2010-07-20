@@ -2,6 +2,7 @@
 
 import time
 import logging
+from holland.lib.mysql.client import MySQLError
 
 LOG = logging.getLogger(__name__)
 
