@@ -111,7 +111,7 @@ def parse_bytes(units_string):
         raise ValueError("Invalid LVM Unit syntax %r" % units_string)
     number, unit = match.groups()
     if not unit:
-        unit = 'B'
+        unit = 'M'
     unit = unit.upper()
 
     try:

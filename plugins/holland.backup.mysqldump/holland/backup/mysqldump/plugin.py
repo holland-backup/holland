@@ -4,9 +4,11 @@ import os
 import re
 import logging
 from holland.core.exceptions import BackupError
-from holland.lib.compression import open_stream
+from holland.lib.compression import open_stream, lookup_compression
 from holland.lib.mysql import MySQLSchema, connect, MySQLError
-from holland.lib.mysql import include_glob, exclude_glob
+from holland.lib.mysql import include_glob, exclude_glob, \
+                              include_glob_qualified, \
+                              exclude_glob_qualified
 from holland.lib.mysql import DatabaseIterator, MetadataTableIterator, \
                               SimpleTableIterator
 from holland.backup.mysqldump.base import start
@@ -85,8 +87,9 @@ class MySQLDumpPlugin(object):
         self.schema.add_database_filter(
                 exclude_glob(*config['exclude-databases'])
         )
-        self.schema.add_table_filter(include_glob(*config['tables']))
-        self.schema.add_table_filter(exclude_glob(*config['exclude-tables']))
+        
+        self.schema.add_table_filter(include_glob_qualified(*config['tables']))
+        self.schema.add_table_filter(exclude_glob_qualified(*config['exclude-tables']))
         self.schema.add_engine_filter(include_glob(*config['engines']))
         self.schema.add_engine_filter(exclude_glob(*config['exclude-engines']))
 
@@ -114,6 +117,8 @@ class MySQLDumpPlugin(object):
                 self.client.connect()
                 self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
             except MySQLError, exc:
+                LOG.error("Failed to estimate backup size")
+                LOG.error("[%d] %s", *exc.args)
                 raise BackupError("MySQL Error [%d] %s" % exc.args)
             return sum([db.size for db in self.schema.databases])
         finally:
@@ -144,18 +149,26 @@ class MySQLDumpPlugin(object):
             mock_env.replace_environment()
             LOG.info("Running in dry-run mode.")
 
+
         try:
+            if self.config['mysqldump']['stop-slave']:
+                self.client = connect(self.mysql_config['client'])
+                if self.client.show_status('Slave_running', session=None) != 'ON':
+                    raise BackupError("stop-slave enabled, but replication is "
+                                  "either not configured or the slave is not "
+                                  "running.")
+                self.config.setdefault('mysql:replication', {})
+                _stop_slave(self.client, self.config['mysql:replication'])
             self._backup()
         finally:
+            if self.config['mysqldump']['stop-slave'] and \
+                'mysql:replication' in self.config:
+                _start_slave(self.client, self.config['mysql:replication'])
             if mock_env:
                 mock_env.restore_environment()
 
     def _backup(self):
         """Real backup method.  May raise BackupError exceptions"""
-        if self.config['mysqldump']['stop-slave']:
-            self.config.setdefault('mysql:replication', {})
-            _stop_slave(self.client, self.config['mysql:replication'])
-
         config = self.config['mysqldump']
 
         # setup defaults_file with ignore-table exclusions
@@ -169,9 +182,13 @@ class MySQLDumpPlugin(object):
 
         # setup the mysqldump environment
         extra_defaults = config['extra-defaults']
-        mysqldump = MySQLDump(defaults_file, 
-                              mysqldump_bin, 
-                              extra_defaults=extra_defaults)
+        try:
+            mysqldump = MySQLDump(defaults_file, 
+                                  mysqldump_bin, 
+                                  extra_defaults=extra_defaults)
+        except MySQLDumpError, exc:
+            raise BackupError(str(exc))
+
         LOG.info("mysqldump version %s", '.'.join([str(digit)
                 for digit in mysqldump.version]))
         options = collect_mysqldump_options(config, mysqldump, self.client)
@@ -179,18 +196,25 @@ class MySQLDumpPlugin(object):
 
         os.mkdir(os.path.join(self.target_directory, 'backup_data'))
 
+        if self.config['compression']['method'] != 'none' and \
+            self.config['compression']['level'] > 0:
+            cmd, ext = lookup_compression(self.config['compression']['method'])
+            LOG.info("Using %s compression level %d",
+                     cmd, self.config['compression']['level'])
+        else:
+            LOG.info("Not compressing mysqldump output")
+            cmd = ''
+            ext = ''
+
         try:
-            try:
-                start(mysqldump=mysqldump,
-                      schema=self.schema,
-                      lock_method=config['lock-method'],
-                      file_per_database=config['file-per-database'],
-                      open_stream=self._open_stream)
-            except MySQLDumpError, exc:
-                raise BackupError(str(exc))
-        finally:
-            if self.config['mysqldump']['stop-slave']:
-                _start_slave(self.client, self.config['mysql:replication'])
+            start(mysqldump=mysqldump,
+                  schema=self.schema,
+                  lock_method=config['lock-method'],
+                  file_per_database=config['file-per-database'],
+                  open_stream=self._open_stream,
+                  compression_ext=ext)
+        except MySQLDumpError, exc:
+            raise BackupError(str(exc))
 
     def _open_stream(self, path, mode, method=None):
         """Open a stream through the holland compression api, relative to
@@ -199,14 +223,7 @@ class MySQLDumpPlugin(object):
         path = os.path.join(self.target_directory, 'backup_data', path)
         compression_method = method or self.config['compression']['method']
         compression_level = self.config['compression']['level']
-        if compression_method == 'none':
-            compression_info = '(uncompressed)'
-        else:
-            compression_info = '(%s compressed level %d)' % \
-                                (compression_method, compression_level)
         stream = open_stream(path, mode, compression_method, compression_level)
-        LOG.info("Saving mysqldump output to %s %s",
-                os.path.basename(stream.name), compression_info)
         return stream
 
     def info(self):
@@ -245,9 +262,11 @@ def find_mysqldump(path=None):
     """Find a usable mysqldump binary in path or ENV[PATH]"""
     search_path = ':'.join(path) or os.environ.get('PATH', '')
     for _path in search_path.split(':'):
+        if os.path.isfile(_path):
+            return os.path.realpath(_path)
         if os.path.exists(os.path.join(_path, 'mysqldump')):
             return os.path.realpath(os.path.join(_path, 'mysqldump'))
-    raise BackupError("Failed to find mysqldump in %s", search_path)
+    raise BackupError("Failed to find mysqldump in %s" % search_path)
 
 def collect_mysqldump_options(config, mysqldump, client):
     """Do intelligent collection of mysqldump options from the config
@@ -275,7 +294,10 @@ def collect_mysqldump_options(config, mysqldump, client):
             LOG.warning("--events only available for mysqldump 5.1.8+. skipping")
         else:
             options.append('--events')
-    if config['bin-log-position'] and client.show_variable('log_bin') == 'ON':
+    if config['bin-log-position']:
+        if client.show_variable('log_bin') != 'ON':
+            raise BackupError("bin-log-position requested but "
+                              "bin-log on server not active")
         options.append('--master-data=2')
     options.extend(config['additional-options'])
     return options
@@ -302,9 +324,10 @@ def _stop_slave(client, config=None):
     if config is not None:
         try:
             slave_info = client.show_slave_status()
-            # update config with replication info
-            config['slave_master_log_pos'] = slave_info['exec_master_log_pos']
-            config['slave_master_log_file'] = slave_info['relay_master_log_file']
+            if slave_info:
+                # update config with replication info
+                config['slave_master_log_pos'] = slave_info['exec_master_log_pos']
+                config['slave_master_log_file'] = slave_info['relay_master_log_file']
         except MySQLError, exc:
             raise BackupError("Failed to acquire slave status[%d]: %s" % \
                                 exc.args)

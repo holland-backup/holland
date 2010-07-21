@@ -7,9 +7,9 @@ from holland.core.exceptions import BackupError
 from holland.lib.lvm import LogicalVolume, CallbackFailuresError, \
                             LVMCommandError, relpath, getmount
 from holland.lib.mysql.client import MySQLError
-from holland.backup.mysql_lvm.plugin.raw.util import connect_simple,\
-                                                     build_snapshot, \
-                                                     setup_actions
+from holland.backup.mysql_lvm.plugin.common import build_snapshot, \
+                                                   connect_simple
+from holland.backup.mysql_lvm.plugin.raw.util import setup_actions
 
 LOG = logging.getLogger(__name__)
 
@@ -117,9 +117,9 @@ class MysqlLVMBackup(object):
 
         try:
             volume = LogicalVolume.lookup_from_fspath(datadir)
-        except LVMCommandError, exc:
+        except LookupError, exc:
             raise BackupError("Failed to lookup logical volume for %s: %s" %
-                              (datadir, exc.error))
+                              (datadir, str(exc)))
 
         if self.dry_run:
             return _dry_run(volume)

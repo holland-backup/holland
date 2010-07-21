@@ -5,6 +5,5 @@
 # work flawlessly :) In fact, this shoudl be replaced by 
 # a sane way of doing this.
 #
-rpm -e holland holland-common holland-example holland-maatkit \
-holland-mysqldump holland-mysqlhotcopy holland-mysqllvm \
-holland-sqlite holland-random holland-xtrabackup
+rpm -e holland holland-common holland-example \
+holland-mysqldump holland-mysqllvm holland-random

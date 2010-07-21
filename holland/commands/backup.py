@@ -69,13 +69,13 @@ class Backup(Command):
         runner.register_cb('post-backup', report_low_space)
 
         error = 1
-        LOG.info("---> Starting backup run <---")
+        LOG.info("--- Starting backup run ---")
         for name in backupsets:
             try:
                 config = hollandcfg.backupset(name)
                 # ensure we have at least an empty holland:backup section
                 config.setdefault('holland:backup', {})
-            except IOError, exc:
+            except (SyntaxError, IOError), exc:
                 LOG.error("Could not load backupset '%s': %s", name, exc)
                 break
 
@@ -105,7 +105,7 @@ class Backup(Command):
                     LOG.info("Released lock %s", lock.path)
         else:
             error = 0
-        LOG.info("---> Ending backup run <---")
+        LOG.info("--- Ending backup run ---")
         return error
 
 def purge_backup(event, entry):
@@ -113,7 +113,7 @@ def purge_backup(event, entry):
         entry.purge()
         LOG.info("Purged failed backup: %s", entry.name)
     else:
-        LOG.info("Failed backup not purged due to purge-failed-backups setting")
+        LOG.info("auto-purge-failures not enabled. Failed backup not purged.")
 
 class PurgeManager(object):
     def __call__(self, event, entry):

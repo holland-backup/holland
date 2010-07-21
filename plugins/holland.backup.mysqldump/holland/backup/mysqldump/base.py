@@ -1,10 +1,12 @@
 """Main driver"""
 
+import sys
 import csv
+import errno
 import logging
 from holland.core.exceptions import BackupError
 from holland.lib.safefilename import encode
-from holland.backup.mysqldump.command import ALL_DATABASES
+from holland.backup.mysqldump.command import ALL_DATABASES, MySQLDumpError
 from holland.backup.mysqldump.mock.env import MockEnvironment
 
 LOG = logging.getLogger(__name__)
@@ -24,7 +26,8 @@ def start(mysqldump,
           schema=None,
           lock_method='auto-detect',
           file_per_database=True,
-          open_stream=open):
+          open_stream=open,
+          compression_ext=''):
     """Run a mysqldump backup"""
 
     if not schema and file_per_database:
@@ -39,7 +42,7 @@ def start(mysqldump,
         else:
             target_databases = [db for db in schema.databases
                                     if not db.excluded]
-            write_manifest(schema, open_stream)
+            write_manifest(schema, open_stream, compression_ext)
 
     if file_per_database:
         flush_logs = '--flush-logs' in mysqldump.options
@@ -54,8 +57,20 @@ def start(mysqldump,
             db_name = encode(db.name)[0]
             if db_name != db.name:
                 LOG.warning("Encoding file-name for database %s to %s", db.name, db_name)
-            stream = open_stream('%s.sql' % db_name, 'w')
-            mysqldump.run([db.name], stream, more_options)
+            try:
+                stream = open_stream('%s.sql' % db_name, 'w')
+            except (IOError, OSError), exc:
+                raise BackupError("Failed to open output stream %s: %s" %
+                                  ('%s.sql' + compression_ext, str(exc)))
+            try:
+                mysqldump.run([db.name], stream, more_options)
+            finally:
+                try:
+                    stream.close()
+                except (IOError, OSError), exc:
+                    if exc.errno != errno.EPIPE:
+                        LOG.error("%s", str(exc))
+                        raise BackupError(str(exc))
     else:
         more_options = [mysqldump_lock_option(lock_method, target_databases)]
         stream = open_stream('all_databases.sql', 'w')
@@ -63,15 +78,21 @@ def start(mysqldump,
             target_databases = [db.name for db in target_databases]
         mysqldump.run(target_databases, stream, more_options)
 
-def write_manifest(schema, open_stream):
+def write_manifest(schema, open_stream, ext):
     """Write real database names => encoded names to MANIFEST.txt"""
     manifest_fileobj = open_stream('MANIFEST.txt', 'w', method='none')
-    manifest = csv.writer(manifest_fileobj)
+    manifest = csv.writer(manifest_fileobj,
+                          dialect=csv.excel_tab,
+                          lineterminator="\n",
+                          quoting=csv.QUOTE_MINIMAL)
     for database in schema.databases:
+        if database.excluded:
+            continue
         name = database.name
         encoded_name = encode(name)[0]
-        manifest.writerow([name.encode('utf-8'), encoded_name + '.sql'])
+        manifest.writerow([name.encode('utf-8'), encoded_name + '.sql' + ext])
     manifest_fileobj.close()
+    LOG.info("Wrote backup manifest %s", manifest_fileobj.name)
 
 def mysqldump_lock_option(lock_method, databases):
     """Choose the mysqldump option to use for locking

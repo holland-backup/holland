@@ -126,9 +126,22 @@ class MySQLClient(object):
             row['database'] = database
             row['data_size'] = (row.pop('data_length') or 0)
             row['index_size'] = (row.pop('index_length') or 0)
-            if row['engine'] is None and row['comment'] == 'VIEW':
-                row['engine'] = 'VIEW'
-            row['is_transactional'] = row.get('engine', '').lower() in ['innodb']
+            # coerce null engine to 'view' as necessary
+            if row['engine'] is None:
+                if row['comment'] == 'VIEW':
+                    row['engine'] = 'VIEW'
+                else:
+                    row['engine'] = ''
+                    if 'references invalid table' in (row['comment'] or ''):
+                        LOG.warning("Invalid view %s.%s: %s", 
+                                    row['database'], row['name'],
+                                    row['comment'] or '')
+                    if 'Incorrect key file' in (row['comment'] or ''):
+                        LOG.warning("Invalid table %s.%s: %s",
+                                    row['database'], row['name'],
+                                    row['comment'] or '')
+            row['is_transactional'] = row['engine'].lower() in ['view', 
+                                                                'innodb']
             for key in row.keys():
                 valid_keys = [
                     'database',
@@ -159,9 +172,9 @@ class MySQLClient(object):
                "          COALESCE(DATA_LENGTH, 0) AS `data_size`, "
                "          COALESCE(INDEX_LENGTH, 0) AS `index_size`, "
                "          COALESCE(ENGINE, 'view') AS `engine`, "
-               "          TRANSACTIONS = 'YES' AS `is_transactional` "
+               "          (TRANSACTIONS = 'YES' OR ENGINE IS NULL) AS `is_transactional` "
                "FROM INFORMATION_SCHEMA.TABLES "
-               "JOIN INFORMATION_SCHEMA.ENGINES USING (ENGINE) "
+               "LEFT JOIN INFORMATION_SCHEMA.ENGINES USING (ENGINE) "
                "WHERE TABLE_SCHEMA = %s")
         cursor = self.cursor()
         cursor.execute(sql, (database))
@@ -293,7 +306,11 @@ class MySQLClient(object):
 
     def show_status(self, key, session=False):
         """Fetch MySQL server status"""
-        scope = self.SCOPE[session]
+        if session is not None:
+            scope = self.SCOPE[session]
+        else:
+            # 4.1 support - GLOBAL/SESSION STATUS is not implemented
+            scope = ''
         sql = 'SHOW %s STATUS LIKE ' % scope + '%s'
         cursor = self.cursor()
         cursor.execute(sql, (key,))
@@ -390,7 +407,7 @@ class AutoMySQLClient(PassiveMySQLClient):
             LOG.info("Reconnecting to MySQL after failed ping")
             self.connect()
 
-        return super(AutoMySQLClient, self).__getattr__(key)
+        return PassiveMySQLClient.__getattr__(self, key)
 
 def connect(config, client_class=AutoMySQLClient):
     """Create a MySQLClient object from a dict

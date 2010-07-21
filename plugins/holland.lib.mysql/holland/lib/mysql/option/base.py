@@ -7,6 +7,7 @@ import re
 import codecs
 import logging
 from holland.core.config import ConfigObj, ConfigObjError, ParseError
+from ConfigParser import RawConfigParser
 
 LOG = logging.getLogger(__name__)
 
@@ -40,7 +41,9 @@ def load_options(path):
 def unquote(value):
     """Remove quotes from a string."""
     if len(value) > 1 and value[0] == '"' and value[-1] == '"':
-            value = value[1:-1]
+        value = value[1:-1]
+    elif len(value) > 1 and value[0] == "'" and value[-1] == "'":
+        value = value[1:-1]
 
     # substitute meta characters per:
     # http://dev.mysql.com/doc/refman/5.0/en/option-files.html
@@ -52,8 +55,9 @@ def unquote(value):
         '\\': "\\",
         's' : " ",
         '"' : '"',
+        "'" : "'",
     }
-    return re.sub(r'\\(["btnr\\s])',
+    return re.sub(r'''\\(['"btnr\\s])''',
                   lambda m: MYSQL_META[m.group(1)],
                   value)
 
@@ -96,12 +100,13 @@ def client_keys(config):
     return clean_namespace
 
 def write_options(config, filename):
-    quoted_config = ConfigObj(list_values=False)
-    quoted_config.update(config)
-
     if isinstance(filename, basestring):
         filename = codecs.open(filename, 'w', 'utf8')
-    quoted_config.write(filename)
+    for section in config:
+        print >>filename, "[%s]" % section
+        for key in config[section]:
+            value = str(config[section][key])
+            print >>filename, "%s = %s" % (key, quote(value))
     filename.close()
 
 def build_mysql_config(mysql_config):
@@ -129,8 +134,10 @@ def build_mysql_config(mysql_config):
     if mysql_config['password'] is not None:
         password = mysql_config['password']
         if password.startswith('file:'):
-            password = process_password_file(password[5:])
+            password_file = password[5:]
+            password = process_password_file(password_file)
             mysql_config['password'] = password
+            LOG.info("Read password from file %r", password_file)
 
     for key in ('user', 'password', 'socket', 'host', 'port'):
         if key in mysql_config and mysql_config[key]:

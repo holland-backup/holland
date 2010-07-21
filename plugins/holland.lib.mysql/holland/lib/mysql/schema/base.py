@@ -2,6 +2,7 @@
 
 import time
 import logging
+from holland.lib.mysql.client import MySQLError
 
 LOG = logging.getLogger(__name__)
 
@@ -112,12 +113,19 @@ class MySQLSchema(object):
             if self.is_db_filtered(database.name):
                 database.excluded = True
                 continue
-            for table in tbl_iter(database.name):
-                if self.is_table_filtered(table.database + '.' + table.name):
-                    table.excluded = True
-                if self.is_engine_filtered(table.engine):
-                    table.excluded = True
-                database.add_table(table)
+            try:
+                for table in tbl_iter(database.name):
+                    if self.is_table_filtered(table.database + '.' + table.name):
+                        table.excluded = True
+                    if self.is_engine_filtered(table.engine):
+                        table.excluded = True
+                    database.add_table(table)
+            except MySQLError, exc:
+                # mimic mysqldump behavior here and skip any databases that 
+                # are not readable
+                if exc.args[0] == 1018:
+                    continue
+                raise
         self.timestamp = time.time()
 
 
@@ -230,7 +238,7 @@ class DatabaseIterator(object):
 
     def __call__(self):
         for name in self.client.show_databases():
-            if name != 'information_schema':
+            if name not in ('information_schema', 'lost+found'):
                 yield Database(name)
 
 

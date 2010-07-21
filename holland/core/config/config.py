@@ -40,7 +40,7 @@ class BaseConfig(ConfigObj):
         ConfigObj.__init__(self, 
                             path, 
                             file_error=file_error, 
-                            interpolation='Template',
+                            interpolation=False,
                             write_empty_values=True,
                             configspec={})
 

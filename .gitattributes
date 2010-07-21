@@ -1,0 +1,8 @@
+.gitattributes export-ignore
+.gitignore export-ignore
+contrib/ubuntu export-ignore
+docs/devdocs export-ignore
+docs/test_cases.txt export-ignore
+scripts export-ignore
+test_suite export-ignore
+test_config export-ignore

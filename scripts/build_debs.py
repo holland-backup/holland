@@ -55,7 +55,6 @@ def check_prereq():
     args = ['dpkg-checkbuilddeps', control_file]
     logging.info("Checking prereqs. Running %s", subprocess.list2cmdline(args))
     ret = subprocess.call(args)
-    print `ret`
     return ret
 
 def prep_tree():

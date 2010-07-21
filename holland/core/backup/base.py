@@ -104,6 +104,9 @@ class BackupRunner(object):
                      spool_entry.name,
                      spool_entry.config['holland:backup']['plugin'])
             plugin.backup()
+        except KeyboardInterrupt:
+            LOG.warning("Backup aborted by interrupt")
+            spool_entry.config['holland:backup']['failed'] = True
         except:
             spool_entry.config['holland:backup']['failed'] = True
         else:
@@ -112,9 +115,9 @@ class BackupRunner(object):
         spool_entry.config['holland:backup']['stop-time'] = time.time()
         if not dry_run and not spool_entry.config['holland:backup']['failed']:
             final_size = directory_size(spool_entry.path)
-            LOG.info("Final on-disk backup size %s %.2f%% "
-                     "of estimated size %s",
-                     format_bytes(final_size),
+            LOG.info("Final on-disk backup size %s", format_bytes(final_size))
+            if estimated_size > 0:
+                LOG.info("%.2f%% of estimated size %s",
                      (float(final_size) / estimated_size)*100.0,
                      format_bytes(estimated_size))
                      
@@ -123,15 +126,20 @@ class BackupRunner(object):
 
         start_time = spool_entry.config['holland:backup']['start-time']
         stop_time = spool_entry.config['holland:backup']['stop-time']
-        LOG.info("Backup completed in %s", 
-                 format_interval(stop_time - start_time))
 
-        self.apply_cb('post-backup', spool_entry)
+        if spool_entry.config['holland:backup']['failed']:
+            LOG.error("Backup failed after %s",
+                      format_interval(stop_time - start_time))
+        else:
+            LOG.info("Backup completed in %s", 
+                     format_interval(stop_time - start_time))
+
 
         if sys.exc_info() != (None, None, None):
-            LOG.error("Backup failed.  Cleaning up.")
             self.apply_cb('backup-failure', spool_entry)
             raise
+        else:
+            self.apply_cb('post-backup', spool_entry)
 
     def check_available_space(self, plugin):
         estimated_bytes_required = plugin.estimate_backup_size()

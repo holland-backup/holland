@@ -8,9 +8,9 @@ from holland.lib.lvm import LogicalVolume, CallbackFailuresError, \
 from holland.lib.mysql.client import MySQLError
 from holland.core.util.path import directory_size
 from holland.core.exceptions import BackupError
-from holland.backup.mysql_lvm.plugin.mysqldump.util import connect_simple, \
-                                                           build_snapshot, \
-                                                           setup_actions
+from holland.backup.mysql_lvm.plugin.common import build_snapshot, \
+                                                   connect_simple
+from holland.backup.mysql_lvm.plugin.mysqldump.util import setup_actions
 from holland.backup.mysqldump import MySQLDumpPlugin
 
 LOG = logging.getLogger(__name__)
@@ -81,11 +81,16 @@ class MysqlDumpLVMBackup(object):
         datadir = os.path.realpath(self.client.show_variable('datadir'))
         LOG.info("Backing up %s via snapshot", datadir)
         # lookup the logical volume mysql's datadir sits on
+        try:
+             volume = LogicalVolume.lookup_from_fspath(datadir)
+        except LookupError, exc:
+            raise BackupError("Failed to lookup logical volume for %s: %s" %
+                              (datadir, str(exc)))
 
         if self.dry_run:
-            return self._dry_run(volume)
-
-        volume = LogicalVolume.lookup_from_fspath(datadir)
+            _dry_run(volume)
+            # do the normal mysqldump dry-run
+            return self.mysqldump_plugin.backup()
 
         # create a snapshot manager
         snapshot = build_snapshot(self.config['mysql-lvm'], volume)
@@ -114,8 +119,8 @@ class MysqlDumpLVMBackup(object):
 def _dry_run(volume):
     """Implement dry-run for LVM snapshots.  Not much to do here at the moment
     """
-    LOGGER.info("[dry-run] Snapshotting %s/%s to %s/%s_snapshot",
-                volume.vg_name,
-                volume.volume_name,
-                volume.vg_name,
-                volume.volume_name)
+    LOG.info("[dry-run] Snapshotting %s/%s to %s/%s_snapshot",
+             volume.vg_name,
+             volume.lv_name,
+             volume.vg_name,
+             volume.lv_name)

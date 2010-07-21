@@ -9,8 +9,8 @@ class PopenMock(object):
     def __init__(self, *args, **kwargs):
         self.pid = -1
         self.stdin = open("/dev/null", "r")
-        self.stdout = open("/dev/null", "w")
-        self.stderr = open("/dev/null", "w")
+        self.stdout = open("/dev/null", "r+")
+        self.stderr = open("/dev/null", "r+")
         self.returncode = None
         self.universal_newlines = False
 
