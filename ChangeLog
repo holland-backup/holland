@@ -1,3 +1,4 @@
+#
 # Holland Backup Change History (starting at/around version 0.9.9)
 #
 # Full diffs and commentary of changes are available online via our GitHub
@@ -5,6 +6,51 @@
 #
 #   http://github.com/holland-backup/holland/commit/XXXXXXX
 #
+
+Jul 19 2010 - 1.0.4
+------------------------------------------------------------------------------
+
+    8899e78 Bumping versions for 1.0.4 (stable)
+    
+
+Jul 08 2010 - 1.0.3
+------------------------------------------------------------------------------
+
+    0166341 always quote my.cnf values when generating an options file
+    de444b6 make sure syntax errors in config files are handled cleanly
+    f72d4c7 don't explicitly copy my.cnf or error log to backup directory, as 
+            they are included in the tar archive.
+    0b7d469 add more logging at each stage of the snapshot lifecycle
+    99b8828 ensure snapshot-mountpoint is always cleaned up if it was a 
+            tempdir
+    01da389 use --defaults-file rather than --defaults-extra-file when setting 
+            up bootstrap mysqld
+    9d65155 [GH #34] Added scripts/make_release.py to generate a source 
+            distribution
+    f5182f4 [GH #50] build_rpms.py now works with a normal source distribution
+    2d236e3 [GH #51] Update debs to latest holland release
+    94e9089 adding holland-xtrabackup subpackage to debian/
+    b26809e [GH #49] Include skip-relay-log-index during mysql-lvm mysqld 
+            bootstrapping
+    94ad2de don't use scope when checking status for mysql 4.1
+    f8fb990 log keyboard interrupts a little more cleanly
+    dbe8ebf cleanup logging messages to be more clear when a backup fails
+    c6d6d64 handle stop-slave with an invalid mysqldump cmd more gracefully
+    571e67e allow mysql-binpath to accept both a directory and a path
+    280f3c8 skip stop/start slave when running in dry-run mode
+    6d1c62d always error early if bin-log-position is requested, but binary 
+            logging is not enabled on server
+    6e829e2 exit early if stop-slave is requested, but the slave is not 
+            running
+    5c3d258 record 'show slave status' when stop-slave is enabled
+    2d4bb3a fix quoting of my.cnf port values
+    fd611f5 ensure dry-run doesn't generate empty savesets
+    ae0d409 [GH #45] Handle unreadable databases gracefully
+    6286cb1 [GH #44] Resolve spurious 'Bad file descriptor' message when 
+            running mysqldump provider in --dry-run mode
+    97d8e31 Adding scripts/version_bump.sh for quick version changes
+    5f95022 [dev] Version bumped to 1.0.3 (dev)
+
 
 Jul 08 2010 - 1.0.2 
 ------------------------------------------------------------------------------
@@ -40,7 +86,7 @@ Jul 08 2010 - 1.0.2
             volume
     
     
-Jul 06 2010 - 1.0.0 final
+Jul 06 2010 - 1.0.0
 ------------------------------------------------------------------------------
     ea9275b Add --no-site-packages options to mkvirtenv.py
     980c32d Added additional purge options to configs

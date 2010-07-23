@@ -26,19 +26,32 @@ class Purge(Command):
     ]
 
     options = [
-        option('--dry-run', '-n', action='store_true', default=True,
+        option('--dry-run', '-n', action='store_true', dest='force',
+                default=False,
                 help="Print what would be purged without actually purging"),
         option('--all', '-a', action='store_true', default=False,
                 help="When purging a backupset purge everything rather than "
                      "using the retention count from the active configuration"),
         option('--force', '-f', action='store_true', default=False,
-               help="Do not prompt for confirmation")
+               help="Execute the purge (disable dry-run). Alias for --execute"),
+        option('--execute', action='store_true', dest='force',
+               help="Execute the purge (disable dry-run)")
     ]
 
     description = 'Purge the requested job runs'
     
     def run(self, cmd, opts, *backups):
         error = 0
+
+        if not backups:
+            backups = hollandcfg.lookup('holland.backupsets')
+
+        if not backups:
+            LOG.warn("Nothing to purge")
+            return 0
+
+        if not opts.force:
+            LOG.warn("Running in dry-run mode.  Use --execute to do a real purge.")
 
         for name in backups:
             if '/' not in name:
@@ -47,7 +60,7 @@ class Purge(Command):
                     LOG.error("Failed to find backupset '%s'", name)
                     error = 1
                     continue
-                purge_backupset(backupset, opts.force)
+                purge_backupset(backupset, opts.force, opts.all)
             else:
                 backup = spool.find_backup(name)
                 if not backup:
@@ -81,7 +94,9 @@ def purge_backupset(backupset, force=False, all_backups=False):
             return 1
         retention_count = config['holland:backup']['backups-to-keep']
 
-    LOG.info("Retaining %d backups", retention_count)
+    LOG.info("Evaluating purge for backupset %s", backupset.name)
+    LOG.info("Retaining up to %d backup%s", 
+             retention_count, 's'[0:bool(retention_count)])
     backups = []
     bytes = 0
     backup_list = backupset.list_backups(reverse=True)
@@ -90,15 +105,28 @@ def purge_backupset(backupset, force=False, all_backups=False):
         config = backup.config['holland:backup']
         bytes += int(config['on-disk-size'])
 
-    if not force:
-        LOG.info("Would purge backupset %s", backupset.name)
-        LOG.info("    %d total backups", len(backup_list))
-        LOG.info("    %d backups would be retained", len(backup_list) - len(backups))
-        LOG.info("    %d backups would be purged", len(backups))
-        LOG.info("    %s total space would be freed", format_bytes(bytes))
-    else:
+    LOG.info("    %d total backups", len(backup_list))
+    for backup in backup_list:
+        LOG.info("        * %s", backup.path)
+    LOG.info("    %d backups to keep", len(backup_list) - len(backups))
+    for backup in backup_list[len(backups):]:
+        LOG.info("        + %s", backup.path)
+    LOG.info("    %d backups to purge", len(backups))
+    for backup in backups:
+        LOG.info("        - %s", backup.path)
+    LOG.info("    %s total to purge", format_bytes(bytes))
+
+    if force:
+        count = 0
         for backup in backupset.purge(retention_count):
+            count += 1
             LOG.info("Purged %s", backup.name)   
+        if count == 0:
+            LOG.info("No backups purged.")
+        else:
+            LOG.info("Purged %d backup%s", count, 's'[0:bool(count)])
+    else:
+        LOG.info("Skipping purge in dry-run mode.")
 
 def purge_backup(backup, force=False):
     """Purge a single backup
