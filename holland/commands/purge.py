@@ -40,6 +40,16 @@ class Purge(Command):
     def run(self, cmd, opts, *backups):
         error = 0
 
+        if not backups:
+            backups = hollandcfg.lookup('holland.backupsets')
+
+        if not backups:
+            LOG.warn("Nothing to purge")
+            return 0
+
+        if not opts.force:
+            LOG.warn("Running in dry-run mode.  Use --force to do a real purge.")
+
         for name in backups:
             if '/' not in name:
                 backupset = spool.find_backupset(name)
@@ -93,8 +103,14 @@ def purge_backupset(backupset, force=False, all_backups=False):
     if not force:
         LOG.info("Would purge backupset %s", backupset.name)
         LOG.info("    %d total backups", len(backup_list))
+        for backup in backup_list:
+            LOG.info("        * %s", backup.path)
         LOG.info("    %d backups would be retained", len(backup_list) - len(backups))
+        for backup in backup_list[len(backups):]:
+            LOG.info("        + %s", backup.path)
         LOG.info("    %d backups would be purged", len(backups))
+        for backup in backups:
+            LOG.info("        - %s", backup.path)
         LOG.info("    %s total space would be freed", format_bytes(bytes))
     else:
         for backup in backupset.purge(retention_count):
