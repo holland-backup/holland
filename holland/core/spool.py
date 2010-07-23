@@ -12,11 +12,13 @@ from holland.core.config import BaseConfig
 
 LOGGER = logging.getLogger(__name__)
 
-def timestamp_dir(when=time.time()):
+def timestamp_dir(when=None):
     """
     Returns a directory named after the specified time or
     the current time, if no specific time is given
     """
+    if when is None:
+        when = time.time()
     return time.strftime("%Y%m%d_%H%M%S", time.localtime(when))
  
 class Spool(object):
