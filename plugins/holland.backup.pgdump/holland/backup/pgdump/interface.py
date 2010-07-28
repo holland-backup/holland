@@ -24,34 +24,7 @@ LOG = logging.getLogger(__name__)
 # as it makes sense
 CONFIGSPEC = """
 [pgdump]
-data-only               = boolean(default=no)
-schema-only             = boolean(default=no)
-blobs                   = boolean(default=no)
-
-clean                   = boolean(default=no)
-create                  = boolean(default=no)
-inserts                 = boolean(default=no)
-attribute-inserts       = boolean(default=no)
-oids                    = boolean(default=no)
-
-no-owner                = boolean(default=no)
-
-schemas                 = force_list(default=None)
-exclude-schemas         = force_list(default=None)
-tables                  = force_list(default=None)
-exclude-tables          = force_list(default=None)
-
-format                  = option('plain','tar','custom', default='custom')
-compress                = integer(min=0,max=9,default=None)
-
-encoding                = string(default=None)
-disable-dollar-quoting  = boolean(default=no)
-
-# Deprecated in 8.4(?)
-ignore-version          = boolean(default=None)
-lock-wait-timeout       = string(default=None)
-no-tablespaces          = boolean(default=False)
-verbose                 = boolean(default=None)
+format = option('plain','tar','custom', default='custom')
 
 [compression]
 method = option('gzip', 'bzip2', 'none', default='gzip')
