@@ -53,7 +53,7 @@ def pg_databases(config, connection):
     logging.debug("pg_databases() -> %r", databases)
     return databases
 
-def run_pgdump(dbname, output_stream, connection_params, env=None):
+def run_pgdump(dbname, output_stream, connection_params, format='custom', env=None):
     """Run pg_dump for the given database and write to the specified output
     stream.
 
@@ -64,7 +64,7 @@ def run_pgdump(dbname, output_stream, connection_params, env=None):
     """
     # FIXME: use PGPASSFILE
     args = [ 'pg_dump' ] + connection_params + [
-        '-Fc',
+        '--format', format,
         dbname
     ]
 
@@ -158,5 +158,9 @@ def backup_pgsql(backup_directory, config, databases):
         filename = os.path.join(backup_directory, dbname + '.dump')
         
         stream = open_stream(filename, 'w', **config['compression'])
-        run_pgdump(dbname, stream, connection_params, env=pgenv)
+        run_pgdump(dbname=dbname, 
+                   output_stream=stream, 
+                   connection_params=connection_params + extra_args,
+                   format=config['pgdump']['format'], 
+                   env=pgenv)
         stream.close()
