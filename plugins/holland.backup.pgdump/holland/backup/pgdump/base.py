@@ -75,7 +75,8 @@ def run_pgdump(dbname, output_stream, connection_params, format='custom', env=No
         dbname
     ]
 
-    LOG.info('%s', subprocess.list2cmdline(args))
+    LOG.info('%s > %s', subprocess.list2cmdline(args),
+                        output_stream.name)
 
     stderr = tempfile.TemporaryFile()
     returncode = subprocess.call(args,
@@ -112,7 +113,8 @@ def backup_globals(backup_directory, config, connection_params, env=None):
         '-g',
     ] + connection_params
 
-    LOG.info('%s', subprocess.list2cmdline(args))
+    LOG.info('%s > %s', subprocess.list2cmdline(args),
+                        output_stream.name)
     stderr = tempfile.TemporaryFile()
     returncode = subprocess.call(args,
                                  stdout=output_stream,
