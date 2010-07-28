@@ -9,6 +9,8 @@ import subprocess
 
 # 3rd party Postgres db connector
 import psycopg2 as dbapi
+# holland-core has a few nice utilities such as format_bytes
+from holland.core.util.fmt import format_bytes
 # Holland general compression functions
 from holland.lib.compression import open_stream
 # holland-common safefilename encoding
@@ -39,7 +41,7 @@ def get_db_size(dbname, connection):
     cursor = connection.cursor()
     cursor.execute("SELECT pg_database_size('%s')" % dbname)
     size = int(cursor.fetchone()[0])
-    LOG.info("DB %s size %d" % (dbname, size))
+    LOG.info("DB %s size %s" % (dbname, format_bytes(size)))
     return size
 
 def pg_databases(config, connection):
