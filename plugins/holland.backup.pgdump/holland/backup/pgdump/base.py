@@ -147,6 +147,8 @@ def pgauth2args(config):
         key = remap.get(param, param)
         if value is not None:
             args.extend(['--%s' % key, str(value)])
+
+    # FIXME: --role only works on 8.4+
     if config['pgdump']['role']:
         args.extend(['--role', config['pgdump']['role']])
 
