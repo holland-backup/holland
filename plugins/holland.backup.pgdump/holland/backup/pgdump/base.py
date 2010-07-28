@@ -142,7 +142,6 @@ def pgauth2args(config):
         args.extend(['--role', config['pgdump']['role']])
     return args
 
-
 def generate_pgpassfile(backup_directory, password):
     fileobj = open(os.path.join(backup_directory, 'pgpass'), 'w')
     # pgpass should always be 0600
@@ -173,15 +172,24 @@ def backup_pgsql(backup_directory, config, databases):
 
     backup_globals(backup_directory, config, connection_params, env=pgenv)
 
+    ext_map = {
+        'custom' : '.dump',
+        'plain' : '.sql',
+        'tar' : '.tar',
+    }
+
     for dbname in databases:
         # FIXME: potential problems with weird dataase names
         #        Consider: 'foo/bar' or unicode names
         # FIXME: compression usually doesn't make sense with --format=custom
  
+        format = config['pgdump']['format']
+
         dump_name, _ = safefilename.encode(dbname)
         if dump_name != dbname:
             LOG.warn("Encoded database %s as filename %s", dbname, dump_name)
-        filename = os.path.join(backup_directory, dump_name + '.dump')
+
+        filename = os.path.join(backup_directory, dump_name + ext_map[format])
         
         # normal compression doesn't make sense with --format=custom
         # use pg_dump's builtin --compress option instead
@@ -195,6 +203,6 @@ def backup_pgsql(backup_directory, config, databases):
         run_pgdump(dbname=dbname, 
                    output_stream=stream, 
                    connection_params=connection_params + extra_args,
-                   format=config['pgdump']['format'], 
+                   format=format,
                    env=pgenv)
         stream.close()
