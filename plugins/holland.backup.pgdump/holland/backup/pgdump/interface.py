@@ -9,7 +9,10 @@ import os
 import sys
 import logging
 from tempfile import NamedTemporaryFile
-from holland.backup.pgdump.base import backup_pgsql, PgError, pg_databases, get_connection, get_db_size
+from holland.backup.pgdump.base import backup_pgsql, dry_run, \
+                                       PgError, \
+                                       pg_databases, \
+                                       get_connection, get_db_size
 
 LOG = logging.getLogger(__name__)
 
@@ -86,8 +89,7 @@ class PgDump(object):
             # enough to know that:
             # 1) We can connect to Postgres using pgpass data
             # 2) The exact databases we would dump
-            for name in self.databases:
-                LOG.info('pg_dump -Fc %s', name)
+            dry_run(self.databases, self.config)
             return
 
         # First run a pg_dumpall -g and save the globals

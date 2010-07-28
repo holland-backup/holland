@@ -221,3 +221,13 @@ def backup_pgsql(backup_directory, config, databases):
         stream.close()
 
     generate_manifest(backups, backup_directory)
+
+def dry_run(databases, config):
+    args = pgauth2args(config)
+
+    LOG.info("pg_dumpall -g")
+    for db in databases:
+        LOG.info("pg_dump %s --format %s %s",
+                 subprocess.list2cmdline(args),
+                 config['pgdump']['format'],
+                 db)
