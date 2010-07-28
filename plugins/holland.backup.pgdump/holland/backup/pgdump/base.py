@@ -3,6 +3,7 @@
 
 # Python stdlib
 import os
+import tempfile
 import logging
 import subprocess
 
@@ -67,14 +68,20 @@ def run_pgdump(dbname, output_stream, connection_params, env=None):
         dbname
     ]
 
+    stderr = tempfile.TemporaryFile()
     returncode = subprocess.call(args,
                                  stdout=output_stream,
-                                 stderr=open('pgdump.err', 'a'),
+                                 stderr=stderr,
                                  env=env,
                                  close_fds=True)
-    # FIXME: write error output to LOG.error()
+    stderr.flush()
+    stderr.seek(0)
+    for line in stderr:
+        LOG.error('%s', line.rstrip())
+    stderr.close()
+
     if returncode != 0:
-        raise OSError("%s failed.  Please check pgdump.err log" %
+        raise OSError("%s failed." % 
                       subprocess.list2cmdline(args))
 
 def backup_globals(backup_directory, config, connection_params, env=None):
@@ -91,13 +98,19 @@ def backup_globals(backup_directory, config, connection_params, env=None):
     path = os.path.join(backup_directory, 'global.sql')
     output_stream = open_stream(path, 'w', **config['compression'])
 
-    # FIXME: use PGPASSFILE
+    stderr = tempfile.TemporaryFile()
     returncode = subprocess.call(['pg_dumpall', '-g'] + connection_params,
                                  stdout=output_stream,
-                                 stderr=open('pgdump.err', 'a'),
+                                 stderr=stderr,
                                  env=env,
                                  close_fds=True)
     output_stream.close()
+    stderr.flush()
+    stderr.seek(0)
+    for line in stderr:
+        LOG.error('%s', line.rstrip())
+    stderr.close()
+
     if returncode != 0:
         raise PgError("pg_dumpall exited with non-zero status[%d]" %
                       returncode)
