@@ -155,10 +155,16 @@ def backup_pgsql(backup_directory, config, databases):
     """
     connection_params = pgauth2args(config)
  
-    pgpass_file = generate_pgpassfile(backup_directory,
-                                      config['pgauth']['password'])
     pgenv = dict(os.environ)
-    pgenv['PGPASSFILE'] = pgpass_file
+
+    if config['pgauth']['password'] is not None:
+        pgpass_file = generate_pgpassfile(backup_directory,
+                                          config['pgauth']['password'])
+        if 'PGPASSFILE' in pgenv:
+            LOG.warn("Overriding PGPASSFILE in environment with %s because "
+                     "a password is specified.",
+                      pgpass_file)
+        pgenv['PGPASSFILE'] = pgpass_file
 
     backup_globals(backup_directory, config, connection_params, env=pgenv)
 
