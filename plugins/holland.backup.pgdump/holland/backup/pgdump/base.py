@@ -51,7 +51,6 @@ def pg_databases(config, connection):
     """Find the databases available in the Postgres cluster specified
     in config['pgpass']
     """
-    # FIXME: use PGPASSFILE
     cursor = connection.cursor()
     cursor.execute("SELECT datname FROM pg_database WHERE datistemplate='f'")
     databases = [db for db, in cursor]
@@ -69,7 +68,6 @@ def run_pgdump(dbname, output_stream, connection_params, format='custom', env=No
     :param output_stream: a file-like object - must have a fileno attribute
                           that is a real, open file descriptor
     """
-    # FIXME: use PGPASSFILE
     args = [ 'pg_dump' ] + connection_params + [
         '--format', format,
         dbname
@@ -192,10 +190,6 @@ def backup_pgsql(backup_directory, config, databases):
 
     backups = []
     for dbname in databases:
-        # FIXME: potential problems with weird dataase names
-        #        Consider: 'foo/bar' or unicode names
-        # FIXME: compression usually doesn't make sense with --format=custom
- 
         format = config['pgdump']['format']
 
         dump_name, _ = safefilename.encode(dbname)
