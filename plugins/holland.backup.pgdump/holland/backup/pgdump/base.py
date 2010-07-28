@@ -52,7 +52,7 @@ def pg_databases(config, connection):
     logging.debug("pg_databases() -> %r", databases)
     return databases
 
-def run_pgdump(dbname, output_stream, connectionParams, env=None):
+def run_pgdump(dbname, output_stream, connection_params, env=None):
     """Run pg_dump for the given database and write to the specified output
     stream.
 
@@ -62,7 +62,7 @@ def run_pgdump(dbname, output_stream, connectionParams, env=None):
                           that is a real, open file descriptor
     """
     # FIXME: use PGPASSFILE
-    args = [ 'pg_dump' ] + connectionParams + [
+    args = [ 'pg_dump' ] + connection_params + [
         '-Fc',
         dbname
     ]
@@ -77,7 +77,7 @@ def run_pgdump(dbname, output_stream, connectionParams, env=None):
         raise OSError("%s failed.  Please check pgdump.err log" %
                       subprocess.list2cmdline(args))
 
-def backup_globals(backup_directory, config, connectionParams, env=None):
+def backup_globals(backup_directory, config, connection_params, env=None):
     """Backup global Postgres data that wouldn't otherwise
     be captured by pg_dump.
 
@@ -92,7 +92,7 @@ def backup_globals(backup_directory, config, connectionParams, env=None):
     output_stream = open_stream(path, 'w', **config['compression'])
 
     # FIXME: use PGPASSFILE
-    returncode = subprocess.call(['pg_dumpall', '-g'] + connectionParams,
+    returncode = subprocess.call(['pg_dumpall', '-g'] + connection_params,
                                  stdout=output_stream,
                                  stderr=open('pgdump.err', 'a'),
                                  env=env,
@@ -128,14 +128,14 @@ def backup_pgsql(backup_directory, config, databases):
     :param config: PgDumpPlugin config dictionary
     :raises: OSError, PgError on error
     """
-    connectionParams = pgauth2args(config['pgauth'])
+    connection_params = pgauth2args(config['pgauth'])
  
     pgpass_file = generate_pgpassfile(backup_directory,
                                       config['pgauth']['password'])
     pgenv = dict(os.environ)
     pgenv['PGPASSFILE'] = pgpass_file
 
-    backup_globals(backup_directory, config, connectionParams, env=pgenv)
+    backup_globals(backup_directory, config, connection_params, env=pgenv)
 
     for dbname in databases:
         # FIXME: potential problems with weird dataase names
@@ -145,5 +145,5 @@ def backup_pgsql(backup_directory, config, databases):
         filename = os.path.join(backup_directory, dbname + '.dump')
         
         stream = open_stream(filename, 'w', **config['compression'])
-        run_pgdump(dbname, stream, connectionParams, env=pgenv)
+        run_pgdump(dbname, stream, connection_params, env=pgenv)
         stream.close()
