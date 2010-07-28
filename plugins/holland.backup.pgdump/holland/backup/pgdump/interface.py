@@ -36,7 +36,6 @@ username = string(default=None)
 password = string(default=None)
 hostname = string(default=None)
 port = integer(default=None)
-pgpass = string(default=None)
 """.splitlines()
 
 class PgDump(object):
@@ -59,26 +58,6 @@ class PgDump(object):
         self.dry_run = dry_run
         self.config.validate_config(CONFIGSPEC)
         
-        # We need either a pgpass or a password, at minimum
-        self.pgpass = self.config["pgauth"]["pgpass"]
-        if not (self.config["pgauth"]["password"] or self.pgpass):
-            raise PgError("Must specify at least a password or a .pgpass file")
-
-        if not self.pgpass:
-            # write one in the target directory
-            # self.pgpass = os.path.join(target_directory, "pgpass")
-            self.f = NamedTemporaryFile()
-            self.pgpass = self.f.name
-            LOG.info("Creating pgpass " + self.pgpass)
-            try:
-                self.f.write(":".join((self.config["pgauth"]["hostname"], str(self.config["pgauth"]["port"]), "*",
-                self.config["pgauth"]["username"], self.config["pgauth"]["password"])))
-                self.f.flush()
-            except IOError as e:
-                LOG.info("I/O Error creating pgpass: " + str(e))
-
-        os.environ["PGPASSFILE"] = self.pgpass
-
         self.connection = get_connection(self.config)
         self.databases = pg_databases(self.config, self.connection)
         LOG.info("Got databases: %s" % repr(self.databases))
@@ -142,8 +121,3 @@ class PgDump(object):
         """
 
         return ""
-
-#    def __del__(self):
-#        if self.pgpass == "/tmp/.pgpass":
-#	    os.unlink("/tmp/.pgpass")
-
