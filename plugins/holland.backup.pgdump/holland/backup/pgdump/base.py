@@ -102,6 +102,17 @@ def backup_globals(backup_directory, config, connectionParams, env=None):
         raise PgError("pg_dumpall exited with non-zero status[%d]" %
                       returncode)
 
+def pgauth2args(config):
+    args = []
+    remap = { 'hostname' : 'host' }
+    for param in ('hostname', 'port', 'username', 'role'):
+        value = config.get(param)
+        key = remap.get(param, param)
+        if value is not None:
+            args.extend(['--%s' % key, str(value)])
+    return args
+
+
 def generate_pgpassfile(backup_directory, password):
     fileobj = open(os.path.join(backup_directory, 'pgpass'), 'w')
     # pgpass should always be 0600
@@ -117,10 +128,7 @@ def backup_pgsql(backup_directory, config, databases):
     :param config: PgDumpPlugin config dictionary
     :raises: OSError, PgError on error
     """
-    connectionParams = ['-h', config['pgauth']['hostname'], '-p', 
-        str(config['pgauth']['port']), '-U', config['pgauth']['username'] ]
-    if config['pgauth']['role']:
-        connectionParams.append('--role=%s' % config['pgauth']['role'])
+    connectionParams = pgauth2args(config['pgauth'])
  
     pgpass_file = generate_pgpassfile(backup_directory,
                                       config['pgauth']['password'])
