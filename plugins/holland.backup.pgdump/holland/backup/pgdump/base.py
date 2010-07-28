@@ -149,6 +149,14 @@ def pgauth2args(config):
             args.extend(['--%s' % key, str(value)])
     if config['pgdump']['role']:
         args.extend(['--role', config['pgdump']['role']])
+
+    # normal compression doesn't make sense with --format=custom
+    # use pg_dump's builtin --compress option instead
+    if config['pgdump']['format'] == 'custom':
+        LOG.info("Ignore compression method, since custom format is in use.")
+        config['compression']['method'] = 'none'
+        args += ['--compress', 
+                 str(config['compression']['level'])]
     return args
 
 def generate_pgpassfile(backup_directory, password):
@@ -187,6 +195,7 @@ def backup_pgsql(backup_directory, config, databases):
         'tar' : '.tar',
     }
 
+
     backups = []
     for dbname in databases:
         format = config['pgdump']['format']
@@ -197,21 +206,16 @@ def backup_pgsql(backup_directory, config, databases):
 
         filename = os.path.join(backup_directory, dump_name + ext_map[format])
         
-        # normal compression doesn't make sense with --format=custom
-        # use pg_dump's builtin --compress option instead
-        extra_args = []
-        if config['pgdump']['format'] == 'custom':
-            config['compression']['method'] = 'none'
-            extra_args += ['--compress', 
-                           str(config['compression']['level'])]
-
         stream = open_stream(filename, 'w', **config['compression'])
+
         backups.append((dbname, stream.name))
+
         run_pgdump(dbname=dbname, 
                    output_stream=stream, 
-                   connection_params=connection_params + extra_args,
+                   connection_params=connection_params,
                    format=format,
                    env=pgenv)
+
         stream.close()
 
     generate_manifest(backups, backup_directory)
