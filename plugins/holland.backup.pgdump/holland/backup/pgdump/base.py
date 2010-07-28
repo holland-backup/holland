@@ -52,10 +52,9 @@ def pg_databases(config, connection):
     in config['pgpass']
     """
     cursor = connection.cursor()
-    cursor.execute("SELECT datname FROM pg_database WHERE datistemplate='f'")
+    cursor.execute("SELECT datname FROM pg_database WHERE not datistemplate and datallowconn")
     databases = [db for db, in cursor]
     cursor.close()
-    #connection.close()
     logging.debug("pg_databases() -> %r", databases)
     return databases
 
