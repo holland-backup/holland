@@ -27,7 +27,7 @@ CONFIGSPEC = """
 format = option('plain','tar','custom', default='custom')
 
 [compression]
-method = option('gzip', 'bzip2', 'none', default='gzip')
+method = option('gzip', 'bzip2', 'lzop', 'lzma', 'pigz', 'none', default='gzip')
 level = integer(min=0, default=1)
 
 [pgauth]
