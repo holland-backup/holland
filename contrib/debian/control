@@ -73,7 +73,7 @@ Description: Holland MySQL Hot Copy Backup Provider Plugin
 
 Package: holland-pgdump
 Architecture: all
-Depends: holland (>= ${source:Version}), holland-common (>= ${source:Version})
+Depends: holland (>= ${source:Version}), holland-common (>= ${source:Version}), python-psycopg2
 Description: Holland Postgres logical backup plugin
  This package provides the holland pgdump plugin.
 
