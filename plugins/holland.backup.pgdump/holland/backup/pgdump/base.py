@@ -11,6 +11,8 @@ import subprocess
 import psycopg2 as dbapi
 # Holland general compression functions
 from holland.lib.compression import open_stream
+# holland-common safefilename encoding
+import holland.lib.safefilename as safefilename
 
 LOG = logging.getLogger(__name__)
 
@@ -162,8 +164,11 @@ def backup_pgsql(backup_directory, config, databases):
         # FIXME: potential problems with weird dataase names
         #        Consider: 'foo/bar' or unicode names
         # FIXME: compression usually doesn't make sense with --format=custom
-        
-        filename = os.path.join(backup_directory, dbname + '.dump')
+ 
+        dump_name, _ = safefilename.encode(dbname)
+        if dump_name != dbname:
+            LOG.warn("Encoded database %s as filename %s", dbname, dump_name)
+        filename = os.path.join(backup_directory, dump_name + '.dump')
         
         stream = open_stream(filename, 'w', **config['compression'])
         run_pgdump(dbname=dbname, 
