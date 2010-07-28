@@ -130,6 +130,16 @@ def backup_globals(backup_directory, config, connection_params, env=None):
         raise PgError("pg_dumpall exited with non-zero status[%d]" %
                       returncode)
 
+def generate_manifest(backups, path):
+    manifest = open(os.path.join(path, 'MANIFEST'), 'w')
+    for dbname, dumpfile in backups:
+        try:
+            print >>manifest, "%s\t%s" % (dbname.encode('utf8'),
+                                          os.path.basename(dumpfile))
+        except UnicodeError, exc:
+            LOG.error("Failed to encode dbname %s: %s", dbname, exc)
+    manifest.close()
+
 def pgauth2args(config):
     args = []
     remap = { 'hostname' : 'host' }
@@ -178,6 +188,7 @@ def backup_pgsql(backup_directory, config, databases):
         'tar' : '.tar',
     }
 
+    backups = []
     for dbname in databases:
         # FIXME: potential problems with weird dataase names
         #        Consider: 'foo/bar' or unicode names
@@ -200,9 +211,12 @@ def backup_pgsql(backup_directory, config, databases):
                            str(config['compression']['level'])]
 
         stream = open_stream(filename, 'w', **config['compression'])
+        backups.append((dbname, stream.name))
         run_pgdump(dbname=dbname, 
                    output_stream=stream, 
                    connection_params=connection_params + extra_args,
                    format=format,
                    env=pgenv)
         stream.close()
+
+    generate_manifest(backups, backup_directory)
