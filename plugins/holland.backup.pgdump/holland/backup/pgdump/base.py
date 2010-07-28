@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Backup functions for pg_dump"""
 
 # Python stdlib
@@ -15,21 +16,35 @@ LOG = logging.getLogger(__name__)
 class PgError(Exception):
     """Raised when any error associated with Postgres occurs"""
 
-def pg_databases(config):
+def get_connection(config):
+    connection = dbapi.connect(host=config["pgauth"]["hostname"], port=config["pgauth"]["port"], 
+        database="template1", user=config["pgauth"]["username"])
+    if config["pgauth"]["role"]:
+        cursor = connection.cursor()
+        cursor.execute("SET ROLE %s" % config["pgauth"]["role"])
+    return connection
+    
+def get_db_size(dbname, connection):
+    cursor = connection.cursor()
+    cursor.execute("SELECT pg_database_size('%s')" % dbname)
+    size = int(cursor.fetchone()[0])
+    LOG.info("DB %s size %d" % (dbname, size))
+    return size
+
+def pg_databases(config, connection):
     """Find the databases available in the Postgres cluster specified
     in config['pgpass']
     """
     # FIXME: use PGPASSFILE
-    connection = dbapi.connect(**config['pgpass'])
     cursor = connection.cursor()
-    cursor.execute('SELECT datname FROM pg_database')
-    databases = [db for db, in cursor if not db.startswith('template')]
+    cursor.execute("SELECT datname FROM pg_database WHERE datistemplate='f'")
+    databases = [db for db, in cursor]
     cursor.close()
-    connection.close()
+    #connection.close()
     logging.debug("pg_databases() -> %r", databases)
     return databases
 
-def run_pgdump(dbname, output_stream):
+def run_pgdump(dbname, output_stream, connectionParams):
     """Run pg_dump for the given database and write to the specified output
     stream.
 
@@ -39,8 +54,7 @@ def run_pgdump(dbname, output_stream):
                           that is a real, open file descriptor
     """
     # FIXME: use PGPASSFILE
-    args = [
-        'pg_dump',
+    args = [ 'pg_dump' ] + connectionParams + [
         '-Fc',
         dbname
     ]
@@ -54,7 +68,7 @@ def run_pgdump(dbname, output_stream):
         raise OSError("%s failed.  Please check pgdump.err log" %
                       subprocess.list2cmdline(args))
 
-def backup_globals(backup_directory, config):
+def backup_globals(backup_directory, config, connectionParams):
     """Backup global Postgres data that wouldn't otherwise
     be captured by pg_dump.
 
@@ -69,7 +83,7 @@ def backup_globals(backup_directory, config):
     output_stream = open_stream(path, 'w', **config['compression'])
 
     # FIXME: use PGPASSFILE
-    returncode = subprocess.call(['pg_dumpall', '-g'],
+    returncode = subprocess.call(['pg_dumpall', '-g'] + connectionParams,
                                  stdout=output_stream,
                                  stderr=open('pgdump.err', 'a'),
                                  close_fds=True)
@@ -78,20 +92,27 @@ def backup_globals(backup_directory, config):
         raise PgError("pg_dumpall exited with non-zero status[%d]" %
                       returncode)
 
-def backup_pgsql(backup_directory, config):
+def backup_pgsql(backup_directory, config, databases):
     """Backup databases in a Postgres instance
 
     :param backup_directory: directory to save pg_dump output to
     :param config: PgDumpPlugin config dictionary
     :raises: OSError, PgError on error
     """
-    backup_globals(backup_directory, config)
+    connectionParams = ['-h', config['pgauth']['hostname'], '-p', 
+        str(config['pgauth']['port']), '-U', config['pgauth']['username'] ]
+    if config['pgauth']['role']:
+        connectionParams.append('--role=%s' % config['pgauth']['role'])
+    
+    backup_globals(backup_directory, config, connectionParams)
 
-    databases = pg_databases(config)
     for dbname in databases:
         # FIXME: potential problems with weird dataase names
         #        Consider: 'foo/bar' or unicode names
         # FIXME: compression usually doesn't make sense with --format=custom
-        stream = open_stream(dbname + '.dump', 'w', **config['compression'])
-        run_pgdump(dbname, stream)
+        
+        filename = os.path.join(backup_directory, dbname + '.dump')
+        
+        stream = open_stream(filename, 'w', **config['compression'])
+        run_pgdump(dbname, stream, connectionParams)
         stream.close()
