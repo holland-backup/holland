@@ -30,9 +30,9 @@ def get_connection(config):
             args[key] = value
     connection = dbapi.connect(database='template1', **args)
 
-    if config["pgauth"]["role"]:
+    if config["pgdump"]["role"]:
         cursor = connection.cursor()
-        cursor.execute("SET ROLE %s" % config["pgauth"]["role"])
+        cursor.execute("SET ROLE %s" % config["pgdump"]["role"])
     return connection
     
 def get_db_size(dbname, connection):
@@ -128,11 +128,13 @@ def backup_globals(backup_directory, config, connection_params, env=None):
 def pgauth2args(config):
     args = []
     remap = { 'hostname' : 'host' }
-    for param in ('hostname', 'port', 'username', 'role'):
-        value = config.get(param)
+    for param in ('hostname', 'port', 'username'):
+        value = config['pgauth'].get(param)
         key = remap.get(param, param)
         if value is not None:
             args.extend(['--%s' % key, str(value)])
+    if config['pgdump']['role']:
+        args.extend(['--role', config['pgdump']['role']])
     return args
 
 
@@ -151,7 +153,7 @@ def backup_pgsql(backup_directory, config, databases):
     :param config: PgDumpPlugin config dictionary
     :raises: OSError, PgError on error
     """
-    connection_params = pgauth2args(config['pgauth'])
+    connection_params = pgauth2args(config)
  
     pgpass_file = generate_pgpassfile(backup_directory,
                                       config['pgauth']['password'])

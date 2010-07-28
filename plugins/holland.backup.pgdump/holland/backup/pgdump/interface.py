@@ -25,6 +25,7 @@ LOG = logging.getLogger(__name__)
 CONFIGSPEC = """
 [pgdump]
 format = option('plain','tar','custom', default='custom')
+role = string(default=None)
 
 [compression]
 method = option('gzip', 'bzip2', 'lzop', 'lzma', 'pigz', 'none', default='gzip')
@@ -32,7 +33,6 @@ level = integer(min=0, default=1)
 
 [pgauth]
 username = string(default="postgres")
-role = string(default=None)
 password = string(default=None)
 hostname = string(default="127.0.0.1")
 port = integer(default=5432)
