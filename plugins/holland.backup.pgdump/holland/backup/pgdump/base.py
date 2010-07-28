@@ -170,6 +170,14 @@ def backup_pgsql(backup_directory, config, databases):
             LOG.warn("Encoded database %s as filename %s", dbname, dump_name)
         filename = os.path.join(backup_directory, dump_name + '.dump')
         
+        # normal compression doesn't make sense with --format=custom
+        # use pg_dump's builtin --compress option instead
+        extra_args = []
+        if config['pgdump']['format'] == 'custom':
+            config['compression']['method'] = 'none'
+            extra_args += ['--compress', 
+                           str(config['compression']['level'])]
+
         stream = open_stream(filename, 'w', **config['compression'])
         run_pgdump(dbname=dbname, 
                    output_stream=stream, 
