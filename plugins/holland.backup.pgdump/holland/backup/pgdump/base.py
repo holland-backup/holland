@@ -9,6 +9,8 @@ import subprocess
 
 # 3rd party Postgres db connector
 import psycopg2 as dbapi
+import psycopg2.extensions
+
 # holland-core has a few nice utilities such as format_bytes
 from holland.core.util.fmt import format_bytes
 # Holland general compression functions
@@ -22,6 +24,7 @@ class PgError(Exception):
     """Raised when any error associated with Postgres occurs"""
 
 def get_connection(config):
+    psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     args = {}
     # remap pgauth parameters to what psycopg2.connect accepts
     remap = { 'hostname' : 'host', 'username' : 'user' }
