@@ -17,8 +17,16 @@ class PgError(Exception):
     """Raised when any error associated with Postgres occurs"""
 
 def get_connection(config):
-    connection = dbapi.connect(host=config["pgauth"]["hostname"], port=config["pgauth"]["port"], 
-        database="template1", user=config["pgauth"]["username"])
+    args = {}
+    # remap pgauth parameters to what psycopg2.connect accepts
+    remap = { 'hostname' : 'host', 'username' : 'user' }
+    for key in ('hostname', 'port', 'username', 'password'):
+        value = config['pgauth'].get(key)
+        key = remap.get(key, key)
+        if value is not None:
+            args[key] = value
+    connection = dbapi.connect(database='template1', **args)
+
     if config["pgauth"]["role"]:
         cursor = connection.cursor()
         cursor.execute("SET ROLE %s" % config["pgauth"]["role"])
