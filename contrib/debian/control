@@ -71,6 +71,12 @@ Replaces: holland-mysql-lvm
 Description: Holland MySQL Hot Copy Backup Provider Plugin 
  This package provides the Holland mysql-lvm plugin. 
 
+Package: holland-pgdump
+Architecture: all
+Depends: holland (>= ${source:Version}), holland-common (>= ${source:Version})
+Description: Holland Postgres logical backup plugin
+ This package provides the holland pgdump plugin.
+
 Package: holland-xtrabackup
 Architecture: all
 Depends: holland (>= ${source:Version}), holland-common (>= ${source:Version}), mysql-client (>= 4.1)
