@@ -68,6 +68,8 @@ def run_pgdump(dbname, output_stream, connection_params, format='custom', env=No
         dbname
     ]
 
+    LOG.info('%s', subprocess.list2cmdline(args))
+
     stderr = tempfile.TemporaryFile()
     returncode = subprocess.call(args,
                                  stdout=output_stream,
@@ -98,8 +100,14 @@ def backup_globals(backup_directory, config, connection_params, env=None):
     path = os.path.join(backup_directory, 'global.sql')
     output_stream = open_stream(path, 'w', **config['compression'])
 
+    args = [
+        'pg_dumpall',
+        '-g',
+    ] + connection_params
+
+    LOG.info('%s', subprocess.list2cmdline(args))
     stderr = tempfile.TemporaryFile()
-    returncode = subprocess.call(['pg_dumpall', '-g'] + connection_params,
+    returncode = subprocess.call(args,
                                  stdout=output_stream,
                                  stderr=stderr,
                                  env=env,
