@@ -32,10 +32,10 @@ method = option('gzip', 'bzip2', 'lzop', 'lzma', 'pigz', 'none', default='gzip')
 level = integer(min=0, default=1)
 
 [pgauth]
-username = string(default="postgres")
+username = string(default=None)
 password = string(default=None)
-hostname = string(default="127.0.0.1")
-port = integer(default=5432)
+hostname = string(default=None)
+port = integer(default=None)
 pgpass = string(default=None)
 """.splitlines()
 
