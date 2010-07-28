@@ -100,6 +100,14 @@ def backup_globals(backup_directory, config, connectionParams):
         raise PgError("pg_dumpall exited with non-zero status[%d]" %
                       returncode)
 
+def generate_pgpassfile(backup_directory, password):
+    fileobj = open(os.path.join(backup_directory, 'pgpass'), 'w')
+    # pgpass should always be 0600
+    os.chmod(fileobj.name, 0600)
+    fileobj.write('*:*:*:*:%s' % password)
+    fileobj.close()
+    return fileobj.name
+
 def backup_pgsql(backup_directory, config, databases):
     """Backup databases in a Postgres instance
 
@@ -111,7 +119,12 @@ def backup_pgsql(backup_directory, config, databases):
         str(config['pgauth']['port']), '-U', config['pgauth']['username'] ]
     if config['pgauth']['role']:
         connectionParams.append('--role=%s' % config['pgauth']['role'])
-    
+ 
+    pgpass_file = generate_pgpassfile(backup_directory,
+                                      config['pgauth']['password'])
+    pgenv = dict(os.environ)
+    pgenv['PGPASSFILE'] = pgpass_file
+
     backup_globals(backup_directory, config, connectionParams)
 
     for dbname in databases:
