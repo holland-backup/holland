@@ -105,6 +105,11 @@ def backup_globals(backup_directory, config, connection_params, env=None):
     path = os.path.join(backup_directory, 'global.sql')
     output_stream = open_stream(path, 'w', **config['compression'])
 
+    # --compress not supported in pg_dumpall!
+    if '--compress' in connection_params:
+        idx = connection_params.index('--compress')
+        connection_params[idx:idx+2] = []
+
     args = [
         'pg_dumpall',
         '-g',
