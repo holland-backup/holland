@@ -61,7 +61,7 @@ level = integer(min=0, default=1)
 username = string(default="postgres")
 role = string(default=None)
 password = string(default=None)
-hostname = string(default="127.0.0.1")
+hostname = string(default=None)
 port = integer(default=5432)
 pgpass = string(default=None)
 """.splitlines()
@@ -101,7 +101,7 @@ class PgDump(object):
                 self.f.write(":".join((self.config["pgauth"]["hostname"], str(self.config["pgauth"]["port"]), "*",
                 self.config["pgauth"]["username"], self.config["pgauth"]["password"])))
                 self.f.flush()
-            except IOError as e:
+            except IOError, e:
                 LOG.info("I/O Error creating pgpass: " + str(e))
 
         os.environ["PGPASSFILE"] = self.pgpass
