@@ -29,6 +29,7 @@ CONFIGSPEC = """
 [pgdump]
 format = option('plain','tar','custom', default='custom')
 role = string(default=None)
+additional-options = string(default=None)
 
 [compression]
 method = option('gzip', 'bzip2', 'lzop', 'lzma', 'pigz', 'none', default='gzip')

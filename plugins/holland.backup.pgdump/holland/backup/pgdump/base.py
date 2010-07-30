@@ -3,6 +3,7 @@
 
 # Python stdlib
 import os
+import shlex
 import tempfile
 import logging
 import subprocess
@@ -163,6 +164,9 @@ def pg_extra_options(config):
         config['compression']['method'] = 'none'
         args += ['--compress', 
                  str(config['compression']['level'])]
+    if config['pgdump']['additional-options']:
+        # XXX: we may want to check these options more carefully and warn as appropriate.
+        args += shlex.split(config['pgdump']['additional-options'])
     return args
 
 def generate_pgpassfile(backup_directory, password):
