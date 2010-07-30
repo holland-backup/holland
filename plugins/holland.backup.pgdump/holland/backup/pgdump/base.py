@@ -105,11 +105,6 @@ def backup_globals(backup_directory, config, connection_params, env=None):
     path = os.path.join(backup_directory, 'global.sql')
     output_stream = open_stream(path, 'w', **config['compression'])
 
-    # --compress not supported in pg_dumpall!
-    if '--compress' in connection_params:
-        idx = connection_params.index('--compress')
-        connection_params[idx:idx+2] = []
-
     args = [
         'pg_dumpall',
         '-g',
@@ -157,6 +152,10 @@ def pgauth2args(config):
     if config['pgdump']['role']:
         args.extend(['--role', config['pgdump']['role']])
 
+    return args
+
+def pg_extra_options(config):
+    args = []
     # normal compression doesn't make sense with --format=custom
     # use pg_dump's builtin --compress option instead
     if config['pgdump']['format'] == 'custom':
@@ -182,7 +181,8 @@ def backup_pgsql(backup_directory, config, databases):
     :raises: OSError, PgError on error
     """
     connection_params = pgauth2args(config)
- 
+    extra_options = pg_extra_options(config)
+
     pgenv = dict(os.environ)
 
     if config['pgauth']['password'] is not None:
@@ -219,7 +219,7 @@ def backup_pgsql(backup_directory, config, databases):
 
         run_pgdump(dbname=dbname, 
                    output_stream=stream, 
-                   connection_params=connection_params,
+                   connection_params=connection_params + extra_options,
                    format=format,
                    env=pgenv)
 
