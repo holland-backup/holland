@@ -123,7 +123,11 @@ and to generate a tar archive of the raw data directory.
 Summary:    Postgres Backup plugin for Holland
 Group:      Applications/Archiving
 Requires:   %{name} = %{version}-%{release}
-Requires:   python-psycopg2 pg_dump
+Requires:   python-psycopg2
+
+%description pgdump
+This plugin allows holland to perform pg_dump backups of a Postgres cluster.
+plain, tar and custom pg_dump formats are supported.
 %endif
 
 %if %{with sqlite}
@@ -321,9 +325,9 @@ install -m 0640 config/backupsets/examples/mysql-lvm.conf \
 cd plugins/holland.backup.pgdump
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 cd -
-install -m 0640 config/providers/pgdump.conf %{buildroot}%{_sysconfdir}/holland/providers/
-install -m 0640 config/backupsets/examples/pgdump.conf \
-                %{buildroot}%{_sysconfdir}/holland/backupsets/examples/
+#install -m 0640 config/providers/pgdump.conf %{buildroot}%{_sysconfdir}/holland/providers/
+#install -m 0640 config/backupsets/examples/pgdump.conf \
+#                %{buildroot}%{_sysconfdir}/holland/backupsets/examples/
 %endif
 
 # plugin : holland.backup.random
@@ -473,6 +477,17 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/holland/providers/mysqlhotcopy.conf
 %{_mandir}/man5/holland-mysqlhotcopy.5*
 %endif
+
+%if %{with pgdump}
+%files pgdump
+%defattr(-,root,root,-)
+%doc
+%{python_sitelib}/holland/backup/pgdump/
+%{python_sitelib}/holland.backup.pgdump-%{version}-*-nspkg.pth
+%{python_sitelib}/holland.backup.pgdump-%{version}-*.egg-info
+%endif
+
+
 
 %if %{with sqlite}
 %files sqlite 

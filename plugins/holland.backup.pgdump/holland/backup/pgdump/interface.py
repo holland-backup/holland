@@ -9,7 +9,10 @@ import os
 import sys
 import logging
 from tempfile import NamedTemporaryFile
-from holland.backup.pgdump.base import backup_pgsql, PgError, pg_databases, get_connection, get_db_size
+from holland.backup.pgdump.base import backup_pgsql, dry_run, \
+                                       PgError, \
+                                       pg_databases, \
+                                       get_connection, get_db_size
 
 LOG = logging.getLogger(__name__)
 
@@ -24,46 +27,18 @@ LOG = logging.getLogger(__name__)
 # as it makes sense
 CONFIGSPEC = """
 [pgdump]
-data-only               = boolean(default=no)
-schema-only             = boolean(default=no)
-blobs                   = boolean(default=no)
-
-clean                   = boolean(default=no)
-create                  = boolean(default=no)
-inserts                 = boolean(default=no)
-attribute-inserts       = boolean(default=no)
-oids                    = boolean(default=no)
-
-no-owner                = boolean(default=no)
-
-schemas                 = force_list(default=None)
-exclude-schemas         = force_list(default=None)
-tables                  = force_list(default=None)
-exclude-tables          = force_list(default=None)
-
-format                  = option('plain','tar','custom', default='custom')
-compress                = integer(min=0,max=9,default=None)
-
-encoding                = string(default=None)
-disable-dollar-quoting  = boolean(default=no)
-
-# Deprecated in 8.4(?)
-ignore-version          = boolean(default=None)
-lock-wait-timeout       = string(default=None)
-no-tablespaces          = boolean(default=False)
-verbose                 = boolean(default=None)
+format = option('plain','tar','custom', default='custom')
+role = string(default=None)
 
 [compression]
-method = option('gzip', 'bzip2', 'none', default='gzip')
+method = option('gzip', 'bzip2', 'lzop', 'lzma', 'pigz', 'none', default='gzip')
 level = integer(min=0, default=1)
 
 [pgauth]
-username = string(default="postgres")
-role = string(default=None)
+username = string(default=None)
 password = string(default=None)
 hostname = string(default=None)
-port = integer(default=5432)
-pgpass = string(default=None)
+port = integer(default=None)
 """.splitlines()
 
 class PgDump(object):
@@ -86,6 +61,7 @@ class PgDump(object):
         self.dry_run = dry_run
         self.config.validate_config(CONFIGSPEC)
         
+<<<<<<< HEAD
         # We need either a pgpass or a password, at minimum
         self.pgpass = self.config["pgauth"]["pgpass"]
         if not (self.config["pgauth"]["password"] or self.pgpass):
@@ -106,6 +82,8 @@ class PgDump(object):
 
         os.environ["PGPASSFILE"] = self.pgpass
 
+=======
+>>>>>>> agarner/pgdump
         self.connection = get_connection(self.config)
         self.databases = pg_databases(self.config, self.connection)
         LOG.info("Got databases: %s" % repr(self.databases))
@@ -134,8 +112,7 @@ class PgDump(object):
             # enough to know that:
             # 1) We can connect to Postgres using pgpass data
             # 2) The exact databases we would dump
-            for name in self.databases:
-                LOG.info('pg_dump -Fc %s', name)
+            dry_run(self.databases, self.config)
             return
 
         # First run a pg_dumpall -g and save the globals
@@ -169,8 +146,3 @@ class PgDump(object):
         """
 
         return ""
-
-#    def __del__(self):
-#        if self.pgpass == "/tmp/.pgpass":
-#	    os.unlink("/tmp/.pgpass")
-

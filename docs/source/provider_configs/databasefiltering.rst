@@ -9,7 +9,7 @@ Database and Table filtering
 
 **exclude-tables** = <glob>
 
-The above options accepts GLOBs and command separated lists. Multiple 
+The above options accepts GLOBs in comma-separated lists. Multiple 
 filtering options can be specified. When filtering on tables, be sure to 
 include both the database and table name. 
 
