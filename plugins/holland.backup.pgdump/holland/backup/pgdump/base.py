@@ -135,7 +135,7 @@ def backup_globals(backup_directory, config, connection_params, env=None):
     stderr.close()
 
     if returncode != 0:
-        raise PgError("pg_dumpall exited with non-zero status[%d]" %
+        raise PgError("pg_dumpall command exited with failure code %d." %
                       returncode)
 
 def generate_manifest(backups, path):
