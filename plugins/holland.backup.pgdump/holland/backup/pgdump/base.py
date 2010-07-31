@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 class PgError(Exception):
     """Raised when any error associated with Postgres occurs"""
 
-def get_connection(config):
+def get_connection(config, db='template1'):
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     args = {}
     # remap pgauth parameters to what psycopg2.connect accepts
@@ -34,7 +34,7 @@ def get_connection(config):
         key = remap.get(key, key)
         if value is not None:
             args[key] = value
-    connection = dbapi.connect(database='template1', **args)
+    connection = dbapi.connect(database=db, **args)
 
     if config["pgdump"]["role"]:
         cursor = connection.cursor()
@@ -45,7 +45,15 @@ def get_db_size(dbname, connection):
     cursor = connection.cursor()
     cursor.execute("SELECT pg_database_size('%s')" % dbname)
     size = int(cursor.fetchone()[0])
-    LOG.info("DB %s size %s" % (dbname, format_bytes(size)))
+    LOG.info("DB %s size %s", dbname, format_bytes(size))
+    return size
+
+def legacy_get_db_size(dbname, connection):
+    cursor = connection.cursor()
+    cursor.execute('SELECT SUM(relpages*8192) FROM pg_class')
+    size = int(cursor.fetchone()[0])
+    LOG.info("DB %s size %s", dbname, format_bytes(size))
+    cursor.close()
     return size
 
 def pg_databases(config, connection):

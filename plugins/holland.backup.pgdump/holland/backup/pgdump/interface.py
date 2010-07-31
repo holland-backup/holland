@@ -76,9 +76,25 @@ class PgDump(object):
         
         totalestimate = 0
         for db in self.databases:
-	    totalestimate += get_db_size(db, self.connection)
+            try:
+                totalestimate += get_db_size(db, self.connection)
+            except dbapi.DatabaseError, exc:
+                if exc.pgcode != '42883': # 'missing function'
+                    raise BackupError("Failed to estimate database size for "
+                                      "%s: %s" % (db, exc))
+                totalestimate += self._estimate_legacy_size(db)
 	    
-	return totalestimate
+        return totalestimate
+
+    def _estimate_legacy_size(self, db):
+        try:
+            connection = get_connection(self.config, db)
+            size = legacy_get_db_size(db, connection)
+            connection.close()
+            return size
+        except dbapi.DatabaseError, exc:
+            raise BackupError("Failed to estimate database size for %s: %s" %
+                              (db, exc))
 
     def backup(self):
         """
