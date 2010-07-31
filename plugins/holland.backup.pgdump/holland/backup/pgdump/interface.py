@@ -9,6 +9,7 @@ import os
 import sys
 import logging
 from tempfile import NamedTemporaryFile
+from holland.core.exceptions import BackupError
 from holland.backup.pgdump.base import backup_pgsql, dry_run, \
                                        PgError, \
                                        pg_databases, \
@@ -117,14 +118,14 @@ class PgDump(object):
         try:
             os.mkdir(backup_dir)
         except OSError, exc:
-            raise PgError("Failed to create backup directory %s" % backup_dir)
+            raise BackupError("Failed to create backup directory %s" % backup_dir)
 
         try:
             backup_pgsql(backup_dir, self.config, self.databases)
-        except OSError, exc:
-            LOG.error("Failed to backup Postgres. %s",
+        except (OSError, PgError), exc:
+            LOG.debug("Failed to backup Postgres. %s",
                           str(exc), exc_info=True)
-            return 1
+            raise BackupError(str(exc))
 
     def configspec(cls):
         """Provide a specification for the configuration dictionary this
