@@ -35,10 +35,15 @@ def get_connection(config, db='template1'):
         if value is not None:
             args[key] = value
     connection = dbapi.connect(database=db, **args)
+    if not connection:
+        raise PgError("Failed to connect to the Postgres database.")
 
     if config["pgdump"]["role"]:
-        cursor = connection.cursor()
-        cursor.execute("SET ROLE %s" % config["pgdump"]["role"])
+        try:
+            cursor = connection.cursor()
+            cursor.execute("SET ROLE %s" % config["pgdump"]["role"])
+        except:
+	    raise PgError("Failed to set role to " + config["pgdump"]["role"])
     
     global ver
     ver = connection.get_parameter_status('server_version')
@@ -47,11 +52,14 @@ def get_connection(config, db='template1'):
     return connection
     
 def get_db_size(dbname, connection):
-    cursor = connection.cursor()
-    cursor.execute("SELECT pg_database_size('%s')" % dbname)
-    size = int(cursor.fetchone()[0])
-    LOG.info("DB %s size %s", dbname, format_bytes(size))
-    return size
+    try:
+        cursor = connection.cursor()
+        cursor.execute("SELECT pg_database_size('%s')" % dbname)
+        size = int(cursor.fetchone()[0])
+        LOG.info("DB %s size %s", dbname, format_bytes(size))
+        return size
+    except:
+        raise PgError("Could not detmine database size.")
 
 def legacy_get_db_size(dbname, connection):
     cursor = connection.cursor()
@@ -163,8 +171,11 @@ def pgauth2args(config):
             args.extend(['--%s' % key, str(value)])
 
     # FIXME: --role only works on 8.4+
-    if config['pgdump']['role'] and ver >= '8.4':
-        args.extend(['--role', config['pgdump']['role']])
+    if config['pgdump']['role']:
+        if ver >= '8.4':
+            args.extend(['--role', config['pgdump']['role']])
+        else:
+	    raise PgError("The --role option is available only in Postgres versions 8.4 and higher.")
 
     return args
 
