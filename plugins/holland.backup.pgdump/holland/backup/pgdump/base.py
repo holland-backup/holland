@@ -39,6 +39,11 @@ def get_connection(config, db='template1'):
     if config["pgdump"]["role"]:
         cursor = connection.cursor()
         cursor.execute("SET ROLE %s" % config["pgdump"]["role"])
+    
+    global ver
+    ver = connection.get_parameter_status('server_version')
+    LOG.info("Server version " + ver)
+    
     return connection
     
 def get_db_size(dbname, connection):
@@ -158,7 +163,7 @@ def pgauth2args(config):
             args.extend(['--%s' % key, str(value)])
 
     # FIXME: --role only works on 8.4+
-    if config['pgdump']['role']:
+    if config['pgdump']['role'] and ver >= '8.4':
         args.extend(['--role', config['pgdump']['role']])
 
     return args
