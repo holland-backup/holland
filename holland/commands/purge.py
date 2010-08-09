@@ -44,6 +44,8 @@ class Purge(Command):
         error = 0
 
         if not backups:
+            LOG.info("No backupsets specified - using backupsets from %s",
+                     hollandcfg.filename)
             backups = hollandcfg.lookup('holland.backupsets')
 
         if not backups:
