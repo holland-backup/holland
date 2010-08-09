@@ -45,6 +45,9 @@ class BaseFilter(object):
         """
         raise NotImplementedError()
 
+    def __repr__(self):
+        return self.__class__.__name__ + '(patterns=%r)' % self.patterns
+
 class IncludeFilter(BaseFilter):
     """Include only objects that match *all* assigned filters"""
 

@@ -95,7 +95,7 @@ class MySQLSchema(object):
             if _filter(name):
                 return True
 
-    def refresh(self, db_iter, tbl_iter):
+    def refresh(self, db_iter, tbl_iter, fast_iterate=False):
         """Summarize the schema by walking over the given database and table
         iterators
 
@@ -107,12 +107,30 @@ class MySQLSchema(object):
                          provide an iterator instance when called with a
                          database name. This iterator must yield `Table`
                          instances from the requested database.
+
+        :param fast_iterate: Optional. Skips table iteration when there are no 
+                             useful filters - include pattern = *, 
+                             exclude pattern = ''
         """
         for database in db_iter():
             self.databases.append(database)
             if self.is_db_filtered(database.name):
                 database.excluded = True
                 continue
+
+            # skip iterating over tables when:
+            # 1) we are matching all tables (using default pattern)
+            # 2) we are matching all engines (using default pattern)
+            # 3) caller does not require table iteration
+            if fast_iterate and (len(self._table_filters) == 2 and
+                self._table_filters[0].patterns == ['.*\\..*$'] and
+                self._table_filters[1].patterns == []) and \
+                (len(self._engine_filters) == 2 and
+                self._engine_filters[0].patterns == ['.*$'] and
+                self._engine_filters[1].patterns == []):
+                    # optimize case where we have no table level filters
+                    continue
+
             try:
                 for table in tbl_iter(database.name):
                     if self.is_table_filtered(table.database + '.' + table.name):

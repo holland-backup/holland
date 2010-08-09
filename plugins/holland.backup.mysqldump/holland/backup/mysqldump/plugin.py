@@ -130,7 +130,9 @@ class MySQLDumpPlugin(object):
             tbl_iter = SimpleTableIterator(self.client, record_engines=True)
             try:
                 self.client.connect()
-                self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
+                self.schema.refresh(db_iter=db_iter,
+                                    tbl_iter=tbl_iter,
+                                    fast_iterate=True)
             except MySQLError, exc:
                 LOG.debug("MySQLdb error [%d] %s", exc_info=True, *exc.args)
                 raise BackupError("MySQL Error [%d] %s" % exc.args)
