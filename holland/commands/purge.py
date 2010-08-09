@@ -111,7 +111,7 @@ def purge_backupset(backupset, force=False, all_backups=False):
     for backup in backup_list:
         LOG.info("        * %s", backup.path)
     LOG.info("    %d backups to keep", len(backup_list) - len(backups))
-    for backup in backup_list[len(backups):]:
+    for backup in backup_list[0:-len(backups)]:
         LOG.info("        + %s", backup.path)
     LOG.info("    %d backups to purge", len(backups))
     for backup in backups:
