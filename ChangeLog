@@ -7,10 +7,15 @@
 #   http://github.com/holland-backup/holland/commit/XXXXXXX
 #
 
-Jul 19 2010 - 1.0.4
+Aug 12 2010 - 1.0.4
 ------------------------------------------------------------------------------
 
     8899e78 Bumping versions for 1.0.4 (stable)
+    4dfcaa4 fix bug when displaying retained backups in purge cmd
+    ca31eac fix subtle bug in spool:timestamp_dir()
+    806c4d3 [GH #36] cleanup purge command --help and logging output
+    c2f9879 [GH #36] make 'holland purge' more orthogonal to 'holland backup'
+    cba113d [GH #54] Fixed missing import when skipping unreadable databases
     
 
 Jul 08 2010 - 1.0.3
