@@ -42,6 +42,7 @@ class BaseConfig(ConfigObj):
                             file_error=file_error, 
                             interpolation=False,
                             write_empty_values=True,
+                            encoding='utf8',
                             configspec={})
 
     def _canonicalize(self, section, key):
