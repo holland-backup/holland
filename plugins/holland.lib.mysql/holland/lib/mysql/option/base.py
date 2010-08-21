@@ -4,6 +4,7 @@ http://dev.mysql.com/doc/refman/5.1/en/option-files.html
 """
 import os, sys
 import re
+import errno
 import codecs
 import logging
 import subprocess
@@ -23,7 +24,14 @@ def merge_options(*defaults_files):
                 dst_dict[key] = val
 
     for config in defaults_files:
-        _my_config = load_options(config)
+        try:
+            _my_config = load_options(config)
+        except IOError:
+            if not os.path.exists(config):
+                raise IOError(2, "No such file or directory: %r" % config)
+            else:
+                raise
+
         merge(defaults_config, _my_config)
 
     return defaults_config
@@ -48,7 +56,7 @@ def canonicalize_option(option):
                          (option, ','.join(candidates)))
 
     if not candidates:
-        raise ValueError("unknown option '%s'" % (option))
+        return None
 
     return candidates[0]
 
@@ -59,21 +67,31 @@ def load_options(path, my_print_defaults='my_print_defaults'):
         '--defaults-file=%s' % path,
         'client',
     ]
-    process = subprocess.Popen(args,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE,
-                               close_fds=True)
-    data, errors = process.communicate()
+    try:
+        process = subprocess.Popen(args,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE,
+                                   close_fds=True)
+        data, errors = process.communicate()
+    except OSError, exc:
+        if exc.errno == errno.ENOENT:
+            raise IOError(errno.ENOENT, "Failed to find my_print_defaults")
+        else:
+            raise IOError(*exc.args)
 
     if process.returncode != 0:
-        raise ValueError(errors)
+        raise IOError(errors)
 
     cfg = {}
     for line in data.splitlines():
         opt, value = line.split('=', 1)
         # skip -- in opt and canonicalize it
-        opt = canonicalize_option(opt[2:]) 
-        cfg[opt] = value
+        _opt = opt[2:]
+        opt = canonicalize_option(_opt)
+        if opt is not None:
+            cfg[opt] = value
+        else:
+            LOG.info("skipping unknown option %s", _opt)
 
     return { 'client' : cfg }
 
