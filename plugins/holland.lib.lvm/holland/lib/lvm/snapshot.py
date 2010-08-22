@@ -59,7 +59,10 @@ class Snapshot(object):
         try:
             self._apply_callbacks('pre-mount', self, snapshot)
             options = None
-            if snapshot.filesystem == 'xfs':
+            if snapshot.filesystem() == 'xfs':
+                LOG.info("xfs filesystem detected on %s. "
+                         "Using mount -o nouuid",
+                         snapshot.device_name())
                 options = 'nouuid'
             snapshot.mount(self.mountpoint, options)
             LOG.info("Mounted %s on %s", snapshot.device_name(), self.mountpoint)
