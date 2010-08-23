@@ -84,7 +84,7 @@ def relpath(path, start=os.curdir):
 def format_bytes(nbytes, precision=2):
     """Format an integer number of bytes to a human readable string."""
 
-    if bytes != 0:
+    if nbytes != 0:
         exponent = int(log(abs(bytes), 1024))
     else:       
         exponent = 0
