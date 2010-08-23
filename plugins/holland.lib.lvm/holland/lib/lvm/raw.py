@@ -185,7 +185,8 @@ def blkid(*devices):
     blkid_args = [
         'blkid',
     ]
-    blkid_args.extend(list(devices))
+
+    blkid_args.extend([os.path.realpath(dev) for dev in devices])
     
     process = Popen(blkid_args,
                     stdout=PIPE,
