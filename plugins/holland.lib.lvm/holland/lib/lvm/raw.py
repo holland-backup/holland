@@ -184,6 +184,7 @@ def blkid(*devices):
     """
     blkid_args = [
         'blkid',
+        '-c', '/dev/null',
     ]
 
     blkid_args.extend([os.path.realpath(dev) for dev in devices])
