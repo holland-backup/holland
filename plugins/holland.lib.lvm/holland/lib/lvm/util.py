@@ -81,7 +81,7 @@ def relpath(path, start=os.curdir):
         return os.curdir
     return os.path.join(*rel_list)
 
-def format_bytes(bytes, precision=2):
+def format_bytes(nbytes, precision=2):
     """Format an integer number of bytes to a human readable string."""
 
     if bytes != 0:
