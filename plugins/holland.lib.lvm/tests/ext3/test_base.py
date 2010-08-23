@@ -1,4 +1,5 @@
 import sys
+import logging
 from nose.tools import *
 from holland.lib.lvm.base import *
 from holland.lib.lvm.util import getdevice
@@ -148,6 +149,8 @@ class TestLogicalVolume(object):
     def test_filesystem(self):
         """Test looking up filesystem of lv"""
         lv = LogicalVolume.lookup('holland/test_lv')
+        logging.warn("Loaded logical volume lv => %r", lv)
+        ok_(lv.exists())
         assert_equals(lv.filesystem(), 'ext3')
 
     def test_bad_filesystem(self):

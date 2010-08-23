@@ -287,8 +287,11 @@ class LogicalVolume(Volume):
         """
         try:
             device_info, = blkid(self.device_name())
+            LOG.debug("Looked up device_info => %r", device_info)
             return device_info['type']
-        except (LVMCommandError, ValueError):
+        except (LVMCommandError, ValueError), exc:
+            LOG.debug("Failed looking up filesystem for %s => %r", 
+                      self.device_name(), exc, exc_info=True)
             raise LookupError()
 
     def __repr__(self):
