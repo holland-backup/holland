@@ -164,7 +164,8 @@ class Backupset(object):
                         if os.path.exists(path)]
         
         dirs = [backup for backup in os.listdir(self.path)
-                   if os.path.isdir(os.path.join(self.path, backup))]
+                   if os.path.isdir(os.path.join(self.path, backup))
+                   and not os.path.islink(os.path.join(self.path, backup)) ]
 
         backup_list = [Backup(os.path.join(self.path, dir),
                               self.name,
