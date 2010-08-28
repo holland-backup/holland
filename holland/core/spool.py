@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Utilities to manage spool directory
 """
@@ -174,6 +175,20 @@ class Backupset(object):
             backup_list.reverse()
 
         return backup_list
+
+    def update_symlinks(self):
+        "Update symlinks for newest and oldest backup in the set"
+        backups = self.list_backups()
+        oldest_path = backups[0].path
+        newest_path = backups[-1].path
+        oldest_link = os.path.join(self.path, 'oldest')
+        newest_link = os.path.join(self.path, 'newest')
+        if os.path.lexists(oldest_link):
+            os.remove(oldest_link)
+        if os.path.lexists(newest_link):
+            os.remove(newest_link)
+        os.symlink(oldest_path, oldest_link)
+        os.symlink(newest_path, newest_link) 
 
     def __iter__(self):
         return iter(self.list_backups())

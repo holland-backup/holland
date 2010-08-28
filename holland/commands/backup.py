@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os, sys
 import time
 import errno
@@ -67,6 +68,7 @@ class Backup(Command):
             runner.register_cb('backup-failure', purge_backup)
 
         runner.register_cb('post-backup', report_low_space)
+        runner.register_cb('post-backup', update_symlinks)
 
         error = 1
         LOG.info("--- Starting backup run ---")
@@ -162,3 +164,9 @@ def report_low_space(event, entry):
                     format_bytes(free_space), 
                     format_bytes(total_space),
                     (float(free_space) / total_space)*100)
+
+def update_symlinks(event, entry):
+    backupset = spool.find_backupset(entry.backupset)
+    backupset.update_symlinks()
+    LOG.info("Symlinks updated")
+    
