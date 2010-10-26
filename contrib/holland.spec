@@ -3,7 +3,7 @@
 %{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
 %endif
 
-%{!?holland_version: %global holland_version 1.0.4}
+%{!?holland_version: %global holland_version 1.0.5}
 
 # default %%rhel to make things easier to build
 %{!?rhel: %global rhel %%(%{__sed} 's/^[^0-9]*\\([0-9]\\+\\).*/\\1/' /etc/redhat-release)}
@@ -470,6 +470,9 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
+* Tue Oct 26 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.5-1
+- Development version
+
 * Tue Oct 26 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.4-1
 - Latest sources from upstream.
 - No longer install /etc/holland/backupsets/examples, only keep it
