@@ -17,6 +17,7 @@
 %endif
 
 %bcond_with     tests
+%bcond_with     example 
 %bcond_with     sphinxdocs
 %bcond_with     mysqlhotcopy
 %bcond_with     maatkit
@@ -54,6 +55,7 @@ Requires:       %{name} = %{version}-%{release} MySQL-python
 %description common
 Library for common functionality used by holland plugins
 
+%if %{with example}
 %package example
 Summary: Example Backup Provider Plugin for Holland
 Group: Development/Libraries
@@ -61,6 +63,7 @@ Requires: %{name} = %{version}-%{release}
 
 %description example
 Example Backup Plugin for Holland
+%endif
 
 %package random
 Summary: Random Backup Provider Plugin for Holland
@@ -185,10 +188,12 @@ cd plugins/holland.lib.lvm
 %{__python} setup.py build
 cd -
 
+%if %{with example}
 # plugin : holland.backup.example
 cd plugins/holland.backup.example
 %{__python} setup.py build
 cd -
+%endif
 
 %if %{with maatkit}
 # plugin : holland.backup.maatkit
@@ -269,11 +274,13 @@ cd plugins/holland.lib.lvm
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 cd -
 
+%if %{with example}
 # plugin : holland.backup.example
 cd plugins/holland.backup.example
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 cd -
 install -m 0640 config/providers/example.conf %{buildroot}%{_sysconfdir}/holland/providers/
+%endif
 
 %if %{with maatkit}
 # plugin : holland.backup.maatkit
@@ -393,6 +400,7 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland.lib.mysql-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.lib.mysql-%{version}-*.egg-info
 
+%if %{with example}
 %files example
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.example/{README,LICENSE}
@@ -400,6 +408,7 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland.backup.example-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.example-%{version}-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/example.conf
+%endif
 
 %files random
 %defattr(-,root,root,-)
@@ -470,8 +479,11 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
-* Tue Oct 26 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.5-1
+* Tue Nov 02 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.5-1
 - Development version
+
+* Tue Nov 02 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.4-2
+- Make the example plugin optional (do not include by default)
 
 * Tue Oct 26 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.4-1
 - Latest sources from upstream.
