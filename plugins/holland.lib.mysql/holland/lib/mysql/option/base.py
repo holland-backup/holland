@@ -26,13 +26,12 @@ def merge_options(*defaults_files):
     for config in defaults_files:
         try:
             _my_config = load_options(config)
+            merge(defaults_config, _my_config)
         except IOError:
             if not os.path.exists(config):
-                raise IOError(2, "No such file or directory: '%s'" % config)
+                LOG.warn("No such file or directory: '%s'", config)
             else:
                 raise
-
-        merge(defaults_config, _my_config)
 
     return defaults_config
 
