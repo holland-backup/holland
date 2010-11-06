@@ -28,7 +28,7 @@ def merge_options(*defaults_files):
             _my_config = load_options(config)
         except IOError:
             if not os.path.exists(config):
-                raise IOError(2, "No such file or directory: %r" % config)
+                raise IOError(2, "No such file or directory: '%s'" % config)
             else:
                 raise
 
@@ -133,7 +133,7 @@ def build_mysql_config(mysql_config):
             password_file = password[len('file:'):]
             password = process_password_file(password_file)
             mysql_config['password'] = password
-            LOG.info("Read password from file %r", password_file)
+            LOG.info("Read password from file '%s'", password_file)
 
     for key in ('user', 'password', 'socket', 'host', 'port'):
         if key in mysql_config and mysql_config[key]:

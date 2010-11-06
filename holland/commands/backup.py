@@ -83,7 +83,7 @@ class Backup(Command):
                 lock = Lock(config.filename)
                 try:
                     lock.acquire()
-                    LOG.info("Acquired lock %s : %r", lock.path, lock.lock.name)
+                    LOG.info("Acquired lock %s : '%s'", lock.path, lock.lock.name)
                 except LockError:
                     LOG.error("Failed to acquire lock on backupset %s (%s)",
                                 name, config.filename)
