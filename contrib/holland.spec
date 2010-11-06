@@ -23,7 +23,7 @@
 %bcond_with     maatkit
 %bcond_with     pgdump
 %bcond_with     sqlite
-%bcond_with     xtrabackup
+%bcond_without  xtrabackup
 
 Name:           holland
 Version:        %{holland_version}
@@ -147,6 +147,7 @@ License: GPLv2
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 Requires: %{name}-common = %{version}-%{release}
+Requires: xtrabackup >= 1.2
 
 %description xtrabackup
 This package provides a Holland plugin for the Percona Xtrabackup 
