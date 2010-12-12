@@ -300,9 +300,11 @@ class MySQLClient(object):
         cursor.close()
         return result
 
-    def stop_slave(self):
+    def stop_slave(self, sql_thread_only=False):
         """Run STOP SLAVE on the connected MySQL instance"""
         sql = "STOP SLAVE"
+        if sql_thread_only:
+            sql += " SQL_THREAD"
         cursor = self.cursor()
         result = cursor.execute(sql)
         cursor.close()

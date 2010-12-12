@@ -322,7 +322,7 @@ def validate_mysqldump_options(mysqldump, options):
 def _stop_slave(client, config=None):
     """Stop MySQL replication"""
     try:
-        client.stop_slave()
+        client.stop_slave(sql_thread_only=True)
         LOG.info("Stopped slave")
     except MySQLError, exc:
         raise BackupError("Failed to stop slave[%d]: %s" % exc.args)
