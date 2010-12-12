@@ -48,7 +48,7 @@ class BaseConfig(ConfigObj):
 
     def _canonicalize(self, section, key):
         """Rewrite all keys so that underscores are normalized to dashes"""
-        section.rename(key, key.replace('_', '-'))
+        section.rename(key, str(key.replace('_', '-')))
 
     def reload(self):
         ConfigObj.reload(self)
