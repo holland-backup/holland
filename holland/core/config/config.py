@@ -14,15 +14,16 @@ CONFIG_SUFFIX = '.conf'
 # Main Holland configspec
 CONFIGSPEC = """
 [holland]
-plugin-dirs = coerced_list(default=list('/usr/share/holland/plugins'))
-backup-directory = string(default=/var/spool/holland)
-backupsets = coerced_list(default=list())
-umask = octal(default='007')
-path = string(default=None)
+tmpdir              = string(default=None)
+plugin-dirs         = coerced_list(default=list('/usr/share/holland/plugins'))
+backup-directory    = string(default=/var/spool/holland)
+backupsets          = coerced_list(default=list())
+umask               = octal(default='007')
+path                = string(default=None)
 
 [logging]
-level = logging_level(default='info')
-filename = string(default=None)
+level               = logging_level(default='info')
+filename            = string(default=None)
 """.splitlines()
 
 class ConfigError(Exception):
