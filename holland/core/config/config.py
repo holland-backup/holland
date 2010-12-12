@@ -4,7 +4,7 @@ Configuration API support
 
 import os
 import logging
-from configobj import ConfigObj, Section, flatten_errors
+from configobj import ConfigObj, Section, flatten_errors, get_extra_values
 from checks import validator
 
 LOGGER = logging.getLogger(__name__)
@@ -32,14 +32,14 @@ class BaseConfig(ConfigObj):
 
     """
     Provides basic configuration support.  This
-    is a subclass of ConfigObj but adds a few 
+    is a subclass of ConfigObj but adds a few
     extra convenient method.
     """
-    
+
     def __init__(self, path, configspec=None, file_error=True):
-        ConfigObj.__init__(self, 
-                            path, 
-                            file_error=file_error, 
+        ConfigObj.__init__(self,
+                            path,
+                            file_error=file_error,
                             interpolation=False,
                             write_empty_values=True,
                             encoding='utf8',
@@ -53,7 +53,7 @@ class BaseConfig(ConfigObj):
         ConfigObj.reload(self)
         self.walk(self._canonicalize, call_on_sections=True)
 
-    def validate_config(self, configspec):
+    def validate_config(self, configspec, suppress_warnings=False):
         """
         Validate this config with the given configspec
         """
@@ -65,10 +65,18 @@ class BaseConfig(ConfigObj):
                 LOGGER.error("Missing parameter %s", '.'.join(section_list + [key]))
             else:
                 LOGGER.error("Configuration error %s: %s", '.'.join(section_list + [key]), error)
+
+        # warn about any unknown parameters before we potentially abort on
+        # validation errors
+        if not suppress_warnings:
+            for sections, name in get_extra_values(self):
+                LOGGER.warn("Unknown parameter '%s' in section '%s'",
+                            name, ".".join(sections))
+
         if errors is not True:
             raise ConfigError("Configuration errors were encountered while validating %r" % self.filename)
         return errors
-    
+
     def lookup(self, key, safe=True):
         """
         Lookup a configuration item based on the

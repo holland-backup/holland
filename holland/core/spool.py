@@ -217,7 +217,7 @@ class Backup(object):
             self.validate_config()
 
     def validate_config(self):
-        self.config.validate_config(CONFIGSPEC)
+        self.config.validate_config(CONFIGSPEC, suppress_warnings=True)
 
     def load_config(self):
         """
