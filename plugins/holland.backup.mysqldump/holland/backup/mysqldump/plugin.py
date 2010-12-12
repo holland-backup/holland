@@ -41,10 +41,11 @@ engines             = force_list(default=list("*"))
 exclude-engines     = force_list(default=list())
 
 flush-logs           = boolean(default=no)
-flush-privileges    = boolean(default=no)
+flush-privileges    = boolean(default=yes)
 dump-routines       = boolean(default=no)
 dump-events         = boolean(default=no)
 stop-slave          = boolean(default=no)
+max-allowed-packet  = string(defaut=128M)
 bin-log-position    = boolean(default=no)
 
 file-per-database   = boolean(default=yes)
@@ -296,6 +297,8 @@ def collect_mysqldump_options(config, mysqldump, client):
             LOG.warning("--events only available for mysqldump 5.1.8+. skipping")
         else:
             options.append('--events')
+    if config['max-allowed-packet']:
+        options.append('--max-allowed-packet=' + config['max-allowed-packet'])
     if config['bin-log-position']:
         if client.show_variable('log_bin') != 'ON':
             raise BackupError("bin-log-position requested but "
@@ -401,7 +404,7 @@ def add_exclusions(schema, config):
 
 def parse_size(units_string):
     """Parse a MySQL-like size string into bytes
-    
+
     >> parse_size('4G')
     4294967296
     """
