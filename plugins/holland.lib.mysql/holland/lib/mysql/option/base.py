@@ -8,6 +8,7 @@ import errno
 import codecs
 import logging
 import subprocess
+from holland.lib.mysql.option.parser import OptionFile
 
 LOG = logging.getLogger(__name__)
 
@@ -33,66 +34,13 @@ def merge_options(*defaults_files):
             else:
                 raise
 
-    return defaults_config
+    return { 'client' : defaults_config['client'] }
 
-def canonicalize_option(option):
-    known = [
-        'host',
-        'password',
-        'port',
-        'socket',
-        'user',
-    ]
-
-    candidates = []
-
-    for key in known:
-        if key.startswith(option):
-            candidates.append(key)
-
-    if len(candidates) > 1:
-        raise ValueError("ambiguous option '%s' (%s)" %
-                         (option, ','.join(candidates)))
-
-    if not candidates:
-        return None
-
-    return candidates[0]
-
-def load_options(path, my_print_defaults='my_print_defaults'):
+def load_options(path):
     """Load mysql option file from path"""
-    args = [
-        my_print_defaults,
-        '--defaults-file=%s' % path,
-        'client',
-    ]
-    try:
-        process = subprocess.Popen(args,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE,
-                                   close_fds=True)
-        data, errors = process.communicate()
-    except OSError, exc:
-        if exc.errno == errno.ENOENT:
-            raise IOError(errno.ENOENT, "Failed to find my_print_defaults")
-        else:
-            raise IOError(*exc.args)
-
-    if process.returncode != 0:
-        raise IOError(errors)
-
-    cfg = {}
-    for line in data.splitlines():
-        opt, value = line.split('=', 1)
-        # skip -- in opt and canonicalize it
-        _opt = opt[2:]
-        opt = canonicalize_option(_opt)
-        if opt is not None:
-            cfg[opt] = value
-        else:
-            LOG.info("skipping unknown option %s", _opt)
-
-    return { 'client' : cfg }
+    options = OptionFile()
+    options.read([path])
+    return options
 
 def quote(value):
     """Added quotes around a value"""

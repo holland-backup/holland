@@ -45,7 +45,7 @@ flush-privileges    = boolean(default=yes)
 dump-routines       = boolean(default=no)
 dump-events         = boolean(default=no)
 stop-slave          = boolean(default=no)
-max-allowed-packet  = string(defaut=128M)
+max-allowed-packet  = string(default=128M)
 bin-log-position    = boolean(default=no)
 
 file-per-database   = boolean(default=yes)
@@ -88,7 +88,7 @@ class MySQLDumpPlugin(object):
         self.schema.add_database_filter(
                 exclude_glob(*config['exclude-databases'])
         )
-        
+
         self.schema.add_table_filter(include_glob_qualified(*config['tables']))
         self.schema.add_table_filter(exclude_glob_qualified(*config['exclude-tables']))
         self.schema.add_engine_filter(include_glob(*config['engines']))
