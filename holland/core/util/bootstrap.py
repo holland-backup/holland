@@ -49,8 +49,11 @@ def setup_logging(opts):
         setup_console_logging(level=log_level)
 
     if hollandcfg.lookup('logging.filename'):
-        setup_file_logging(filename=hollandcfg.lookup('logging.filename'),
-                           level=log_level)
+        try:
+            setup_file_logging(filename=str(hollandcfg.lookup('logging.filename')),
+                               level=log_level)
+        except IOError, exc:
+            LOGGER.warn("Skipping file logging: %s", exc)
 
     # Monkey patch in routing warnings through logging
     old_showwarning = warnings.showwarning
