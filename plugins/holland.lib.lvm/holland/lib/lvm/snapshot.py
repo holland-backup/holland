@@ -27,7 +27,7 @@ class Snapshot(object):
         that ``path`` exists on.
 
         """
-        self.sigmgr.trap(signal.SIGINT)
+        self.sigmgr.trap(signal.SIGINT, signal.SIGTERM, signal.SIGHUP)
         try:
             self._apply_callbacks('initialize', self)
         except CallbackFailuresError, exc:
@@ -112,7 +112,11 @@ class Snapshot(object):
 
     def finish(self):
         """Finish the snapshotting process"""
+        pending = self.sigmgr.pending[:]
         self.sigmgr.restore()
+        if signal.SIGINT in pending:
+            raise KeyboardInterrupt()
+
         self._apply_callbacks('finish', self)
         if sys.exc_info()[1]:
             raise
