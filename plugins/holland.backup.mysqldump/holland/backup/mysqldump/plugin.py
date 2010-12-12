@@ -2,6 +2,7 @@
 
 import os
 import re
+import codecs
 import logging
 from holland.core.exceptions import BackupError
 from holland.lib.compression import open_stream, lookup_compression
@@ -392,7 +393,7 @@ def add_exclusions(schema, config):
         return
 
     try:
-        my_cnf = open(config, 'a')
+        my_cnf = codecs.open(config, 'a', 'utf8')
         print >>my_cnf
         print >>my_cnf, "[mysqldump]"
         for excl in exclusions:
