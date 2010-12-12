@@ -17,3 +17,6 @@ class LVMCommandError(Exception):
         self.cmd = cmd
         self.status = status
         self.error = error
+
+    def __str__(self):
+        return "Command '%s' exited with status %d" % (self.cmd, self.status)
