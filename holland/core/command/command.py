@@ -61,7 +61,11 @@ class Command(object):
 
     def __init__(self):
         help_fmt = optparse.IndentedHelpFormatter()
-        self.optparser = _OptionParserEx(prog=self.name, formatter=help_fmt)
+        self.optparser = _OptionParserEx(prog=self.name,
+                                         add_help_option=False,
+                                         formatter=help_fmt)
+        self.optparser.add_option('--help', '-h', action='store_true',
+                                  help='show this help message and exit')
         self.optparser.add_options(self.options)
 
     def format_cmd_options(self):
@@ -184,6 +188,10 @@ class Command(object):
             print
             print >>sys.stderr, "%s: error: %s" % (self.name, e)
             return 1
+
+        if opts.help:
+            print self.help()
+            return os.EX_USAGE
 
         cmd_name = self.optparser.prog
 
