@@ -94,7 +94,7 @@ class Backup(Command):
                 try:
                     runner.backup(name, config, opts.dry_run)
                 except BackupError, exc:
-                    LOG.error("Backup failed: %s", exc)
+                    LOG.error("Backup failed: %s", exc.args[0])
                     break
                 except ConfigError, exc:
                     break

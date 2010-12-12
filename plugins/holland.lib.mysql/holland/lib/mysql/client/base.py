@@ -190,10 +190,14 @@ class MySQLClient(object):
         :param database: database to extract metadata from
         :returns: list of dicts, one dict per table
         """
-        if self.server_version() < (5,1):
-            return self._show_table_metadata50(database)
-        else:
-            return self._show_table_metadata51(database)
+        try:
+            if self.server_version() < (5,1):
+                return self._show_table_metadata50(database)
+            else:
+                return self._show_table_metadata51(database)
+        except MySQLError, exc:
+            exc.args = (exc.args[0], exc.args[1].decode('utf8'))
+            raise
 
     def show_tables(self, database, full=False):
         """List tables in the given database
