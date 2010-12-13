@@ -5,6 +5,7 @@ Utilities to manage spool directory
 import os
 import sys
 import time
+import errno
 import shutil
 import logging
 import itertools
@@ -20,14 +21,14 @@ def timestamp_dir(when=None):
     if when is None:
         when = time.time()
     return time.strftime("%Y%m%d_%H%M%S", time.localtime(when))
- 
+
 class Spool(object):
     """
     A directory spool where backups are saved
     """
     def __init__(self, path=None):
         self.path = path or '/var/spool/holland'
- 
+
     def find_backup(self, name):
         """
         Find a the specified backup, if it exists. If the backup does
@@ -79,7 +80,7 @@ class Spool(object):
         if os.path.exists(path):
             raise IOError("Backupset %s already exists" % backupset_name)
         return Backupset(backupset_name, path)
-    
+
     def list_backupsets(self, name=None, reverse=False):
         """
         Return a list of backupsets under this spool in lexicographical order.
@@ -97,7 +98,7 @@ class Spool(object):
                 return []
             dirs = [name]
         else:
-            dirs = [backupset for backupset in os.listdir(self.path) 
+            dirs = [backupset for backupset in os.listdir(self.path)
                     if os.path.isdir(os.path.join(self.path, backupset))]
 
         backupsets = [Backupset(dir, os.path.join(self.path, dir)) \
@@ -109,7 +110,7 @@ class Spool(object):
             backupsets.reverse()
 
         return backupsets
-    
+
     def list_backups(self, backupset_name=None):
         for backupset in self.list_backupsets(backupset_name):
             for backup in backupset.list_backups():
@@ -129,14 +130,14 @@ class Backupset(object):
         if not backups:
             return None
         return backups[0]
-    
+
     def add_backup(self):
         """
         Create a new instance for this job
         """
         backup_name = timestamp_dir()
         backup_path = os.path.join(self.path, backup_name)
-        
+
         return Backup(backup_path, self.name, backup_name)
 
     def purge(self, retention_count=0):
@@ -161,9 +162,10 @@ class Backupset(object):
             path = os.path.join(self.path, name)
             return [Backup(path, self.name, name) for x in range(1)
                         if os.path.exists(path)]
-        
+
         dirs = [backup for backup in os.listdir(self.path)
-                   if os.path.isdir(os.path.join(self.path, backup))]
+                   if os.path.isdir(os.path.join(self.path, backup))
+		      and backup not in ('oldest', 'newest')]
 
         backup_list = [Backup(os.path.join(self.path, dir),
                               self.name,
@@ -174,6 +176,29 @@ class Backupset(object):
             backup_list.reverse()
 
         return backup_list
+
+    def update_symlinks(self):
+        "Update symlinks for newest and oldest backup in the set"
+        backups = self.list_backups()
+
+        oldest_link = os.path.join(self.path, 'oldest')
+        newest_link = os.path.join(self.path, 'newest')
+        try:
+            os.remove(oldest_link)
+        except OSError, exc:
+            if exc.errno != errno.ENOENT:
+                raise
+        try:
+            os.remove(newest_link)
+        except OSError, exc:
+            if exc.errno != errno.ENOENT:
+                raise
+        if not backups:
+            return
+        oldest_path = backups[0].path
+        newest_path = backups[-1].path
+        os.symlink(oldest_path, oldest_link)
+        os.symlink(newest_path, newest_link)
 
     def __iter__(self):
         return iter(self.list_backups())
@@ -204,7 +229,7 @@ class Backup(object):
     """
     def __init__(self, path, backupset, name):
         self.path = path
-        self.backupset = backupset 
+        self.backupset = backupset
         self.name = '/'.join((backupset, name))
         # Initialize an empty config
         # This will not be loaded until load_config is called
@@ -240,7 +265,7 @@ class Backup(object):
             # purge the entire backup directory
             if os.path.exists(self.path):
                 shutil.rmtree(self.path)
-    
+
     def exists(self):
         """
         Check if this backup exists on disk
@@ -255,7 +280,7 @@ class Backup(object):
         if not self.exists():
             os.makedirs(self.path)
             LOGGER.info("Creating backup path %s", self.path)
-        
+
     def flush(self):
         """
         Flush this backup to disk.  Ensure the path to this backup is created
@@ -288,7 +313,7 @@ class Backup(object):
         str = "\t" + dedent(str).lstrip()
         str = "\n\t\t".join(str.splitlines())
         return str
-        
+
     def __str__(self):
         from textwrap import dedent
         from holland.core.util.fmt import format_bytes, format_datetime
@@ -305,10 +330,10 @@ class Backup(object):
             format_datetime(self.config.lookup('holland:backup.stop-time')),
             format_bytes(self.config.lookup('holland:backup.estimated-size')),
             format_bytes(self.config.lookup('holland:backup.on-disk-size'))
-        ) 
-        
+        )
+
     def __cmp__(self, other):
-        return (self.config['holland:backup']['start-time'] 
+        return (self.config['holland:backup']['start-time']
                 - other.config['holland:backup']['start-time'])
- 
+
 spool = Spool()

@@ -87,7 +87,7 @@ class Backup(Command):
                 except LockError:
                     LOG.error("Failed to acquire lock on backupset %s (%s)",
                                 name, config.filename)
-                                
+
                     break
 
             try:
@@ -139,13 +139,14 @@ class PurgeManager(object):
                         "Setting backups-to-keep to 1")
             retention_count = 1
         self.purge_backupset(backupset, retention_count)
+        backupset.update_symlinks()
 
     def purge_backupset(self, backupset, retention_count):
         purge_count = 0
         for backup in backupset.purge(retention_count):
             purge_count += 1
             LOG.info("Purged %s", backup.name)
-        
+
         if purge_count == 0:
             LOG.info("No backups purged")
         else:
@@ -159,6 +160,6 @@ def report_low_space(event, entry):
                     entry.path,
                     getmount(entry.path))
         LOG.warning("%s of %s [%.2f%%] remaining",
-                    format_bytes(free_space), 
+                    format_bytes(free_space),
                     format_bytes(total_space),
                     (float(free_space) / total_space)*100)
