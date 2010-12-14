@@ -433,7 +433,8 @@ def connect(config, client_class=AutoMySQLClient):
     # map standard my.cnf parameters to
     # what MySQLdb.connect expects
     # http://mysql-python.sourceforge.net/MySQLdb.html#mysqldb
-    CNF_TO_MYSQLDB = {
+    #FIXME: SSL is more complicated than just a single param string
+    cnf_to_mysqldb = {
         'user' : 'user', # same
         'password' : 'passwd', # weird
         'host' : 'host', # same
@@ -443,15 +444,21 @@ def connect(config, client_class=AutoMySQLClient):
         'compress' : 'compress'
     }
 
+    value_conv = {
+        'port' : int
+    }
+
     args = {}
     for key in config:
         # skip undefined values
-        if config[key] is None:
+        if config.get(key) is None:
             continue
-        # convert my.cnf parameters to what MySQLdb expects
-        if key in CNF_TO_MYSQLDB:
-            args[CNF_TO_MYSQLDB[key]] = config[key]
-        else:
+        try:
+            # normalize the value. port => int
+            value = value_conv.get(key, str)(config[key])
+            # convert my.cnf parameters to what MySQLdb expects
+            args[cnf_to_mysqldb[key]] = value
+        except KeyError:
             LOG.warn("Skipping unknown parameter %s", key)
     # also, always use utf8
     return client_class(charset='utf8', **args)
