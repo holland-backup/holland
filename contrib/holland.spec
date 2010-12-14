@@ -1,7 +1,7 @@
-%if ! (0%{?fedora} > 12 || 0%{?rhel} > 5)
+
+# we don't do the condition check as per FPG because we are targeting
+# el4 also... which doesn't support it
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
-%{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
-%endif
 
 %{!?holland_version: %global holland_version 1.0.5}
 
@@ -482,6 +482,11 @@ rm -rf %{buildroot}
 %changelog
 * Tue Nov 02 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.5-1
 - Development version
+
+* Tue Dec 14 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.4-3
+- Remove condition check around setting python_site{lib,arch} as
+  it is not supported in el4.
+- No longer set python_sitearch as we aren't using it
 
 * Tue Nov 02 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.4-2
 - Make the example plugin optional (do not include by default)
