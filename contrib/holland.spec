@@ -480,7 +480,7 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
-* Tue Nov 02 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.5-1
+* Tue Dec 14 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.5-1
 - Development version
 
 * Tue Dec 14 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.4-3
