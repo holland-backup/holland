@@ -152,6 +152,9 @@ class BackupRunner(object):
                      format_interval(stop_time - start_time))
 
 
+        if dry_run:
+            spool_entry.purge()
+
         if sys.exc_info() != (None, None, None):
             self.apply_cb('backup-failure', spool_entry)
             raise
