@@ -257,15 +257,12 @@ class Backup(object):
         Purge this backup.
         """
         assert(os.path.realpath(self.path) != '/')
-        if data_only:
-            # only purge data - preserve metadata
-            # FIXME: this would be a more sensical scheme
-            if os.path.exists(os.path.join(self.path, 'data')):
-                shutil.rmtree(os.path.join(self.path, 'data'))
-        else:
-            # purge the entire backup directory
-            if os.path.exists(self.path):
-                shutil.rmtree(self.path)
+        # purge the entire backup directory
+        try:
+            shutil.rmtree(self.path)
+        except OSError, exc:
+            if exc.errno != errno.ENOENT:
+                raise
 
     def exists(self):
         """
