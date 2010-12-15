@@ -1,10 +1,13 @@
 import os
 import sys
 import time
+import errno
 import logging
 from holland.core.plugin import PluginLoadError, load_backup_plugin
 from holland.core.util.path import directory_size, disk_free
 from holland.core.util.fmt import format_bytes, format_interval
+
+MAX_SPOOL_RETRIES = 5
 
 LOG = logging.getLogger(__name__)
 
@@ -83,9 +86,26 @@ class BackupRunner(object):
         :raises: BackupError if a backup fails
         """
 
-        spool_entry = self.spool.add_backup(name)
+        for i in xrange(MAX_SPOOL_RETRIES):
+            try:
+                spool_entry = self.spool.add_backup(name)
+                break
+            except OSError, exc:
+                if exc.errno != errno.EEXIST:
+                    raise BackupError("Failed to create spool: %s" % exc)
+                sys.exc_clear()
+                LOG.debug("Failed to create spool.  Retrying in %d seconds.", i+1)
+                time.sleep(i+1)
+        else:
+            raise BackupError("Failed to create a new backup directory for %s" % name)
+
         spool_entry.config.merge(config)
         spool_entry.validate_config()
+
+        if dry_run:
+            # always purge the spool
+            self.register_cb('post-backup',
+                             lambda *args, **kwargs: spool_entry.purge())
 
         plugin = load_plugin(name,
                              spool_entry.config,
@@ -94,9 +114,6 @@ class BackupRunner(object):
 
         spool_entry.config['holland:backup']['start-time'] = time.time()
         self.apply_cb('pre-backup', spool_entry)
-
-        if not dry_run:
-            spool_entry.prepare()
 
         try:
             estimated_size = self.check_available_space(plugin)

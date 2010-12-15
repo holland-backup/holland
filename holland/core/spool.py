@@ -137,8 +137,9 @@ class Backupset(object):
         """
         backup_name = timestamp_dir()
         backup_path = os.path.join(self.path, backup_name)
-
-        return Backup(backup_path, self.name, backup_name)
+        backup = Backup(backup_path, self.name, backup_name)
+        backup.prepare()
+        return backup
 
     def purge(self, retention_count=0):
         if retention_count < 0:
@@ -165,7 +166,7 @@ class Backupset(object):
 
         dirs = [backup for backup in os.listdir(self.path)
                    if os.path.isdir(os.path.join(self.path, backup))
-		      and backup not in ('oldest', 'newest')]
+                    and backup not in ('oldest', 'newest')]
 
         backup_list = [Backup(os.path.join(self.path, dir),
                               self.name,
@@ -277,16 +278,14 @@ class Backup(object):
         Prepare this backup on disk.  Ensures the path to this backup is created,
         but does not flush any other backup metadata.
         """
-        if not self.exists():
-            os.makedirs(self.path)
-            LOGGER.info("Creating backup path %s", self.path)
+        os.makedirs(self.path)
+        LOGGER.info("Creating backup path %s", self.path)
 
     def flush(self):
         """
         Flush this backup to disk.  Ensure the path to this backup is created
         and write the backup.conf to the backup directory.
         """
-        self.prepare()
         LOGGER.debug("Writing out config to %s", self.config.filename)
         self.config.write()
 
@@ -333,7 +332,9 @@ class Backup(object):
         )
 
     def __cmp__(self, other):
-        return (self.config['holland:backup']['start-time']
-                - other.config['holland:backup']['start-time'])
+        return cmp(self.config['holland:backup']['start-time'],
+                   other.config['holland:backup']['start-time'])
+
+    __repr__ = __str__
 
 spool = Spool()
