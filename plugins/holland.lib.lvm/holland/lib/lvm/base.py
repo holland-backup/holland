@@ -199,7 +199,12 @@ class LogicalVolume(Volume):
         :returns: LogicalVolume that is a snapshot of this one on success
         """
 
-        lvsnapshot(self.device_name(), name, size)
+        try:
+            lvsnapshot(self.device_name(), name, size)
+        except LVMCommandError, exc:
+            for line in exc.error.splitlines():
+                LOG.error("%s", line)
+            raise
         return LogicalVolume.lookup(self.vg_name + '/' + name)
 
     def is_mounted(self):
@@ -221,12 +226,21 @@ class LogicalVolume(Volume):
         :param path: path where this volume should be mounted
         :param options: options to pass to mount
         """
-
-        mount(self.device_name(), path, options)
+        try:
+            mount(self.device_name(), path, options)
+        except LVMCommandError, exc:
+            for line in exc.error.splitlines():
+                LOG.error("%s", line)
+            raise
 
     def unmount(self):
         """Unmount this volume, if mounted"""
-        umount(self.device_name())
+        try:
+            umount(self.device_name())
+        except LVMCommandError, exc:
+            for line in exc.error.splitlines():
+                LOG.error("%s", line)
+            raise
 
     def remove(self):
         """Remove this LogicalVolume
@@ -236,7 +250,12 @@ class LogicalVolume(Volume):
 
         :raises: LVMCommandError on error
         """
-        lvremove(self.device_name())
+        try:
+            lvremove(self.device_name())
+        except LVMCommandError, exc:
+            for line in exc.error.splitlines():
+                LOG.error("%s", line)
+            raise
 
     def exists(self):
         """Check whether the volume currently exists

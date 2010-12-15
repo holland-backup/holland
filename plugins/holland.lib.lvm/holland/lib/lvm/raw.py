@@ -126,6 +126,7 @@ def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
         lvcreate_args.insert(-1, '--chunksize')
         lvcreate_args.insert(-1, chunksize)
 
+    LOG.debug("%s", list2cmdline(lvcreate_args))
     process = Popen(lvcreate_args,
                     stdout=PIPE,
                     stderr=PIPE,
@@ -134,10 +135,10 @@ def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
 
     stdout, stderr = process.communicate()
 
-    for line in str(stdout).splitlines():
+    for line in stdout.splitlines():
         if not line:
             continue
-        LOG.debug("%s : %s", list2cmdline(lvcreate_args), line)
+        LOG.debug("lvcreate: %s", line)
 
     if process.returncode != 0:
         raise LVMCommandError(list2cmdline(lvcreate_args),

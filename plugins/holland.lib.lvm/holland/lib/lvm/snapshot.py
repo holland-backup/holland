@@ -68,12 +68,7 @@ class Snapshot(object):
             LOG.info("Mounted %s on %s",
                      snapshot.device_name(), self.mountpoint)
             self._apply_callbacks('post-mount', self, snapshot)
-        except LVMCommandError, exc:
-            LOG.error("%s", exc)
-            for line in exc.error.splitlines():
-                LOG.error("%s", line)
-            return self.error(snapshot, exc)
-        except CallbackFailuresError, exc:
+        except (CallbackFailuresError, LVMCommandError), exc:
             return self.error(snapshot, exc)
 
         return self.unmount_snapshot(snapshot)
