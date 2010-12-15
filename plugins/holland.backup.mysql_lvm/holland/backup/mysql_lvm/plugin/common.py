@@ -1,6 +1,7 @@
 
 """Utility functions to help out the mysql-lvm plugin"""
 import os
+import errno
 import shutil
 import tempfile
 import logging
