@@ -69,7 +69,7 @@ class Backup(Command):
         runner.register_cb('post-backup', report_low_space)
 
         error = 1
-        LOG.info("--- Starting backup run ---")
+        LOG.info("--- Starting %s run ---", opts.dry_run and 'dry' or 'backup')
         for name in backupsets:
             try:
                 config = hollandcfg.backupset(name)
@@ -105,7 +105,7 @@ class Backup(Command):
                     LOG.info("Released lock %s", lock.path)
         else:
             error = 0
-        LOG.info("--- Ending backup run ---")
+        LOG.info("--- Ending %s run ---", opts.dry_run and 'dry' or 'backup')
         return error
 
 def purge_backup(event, entry):
