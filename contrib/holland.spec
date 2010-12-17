@@ -8,12 +8,17 @@
 # default %%rhel to make things easier to build
 %{!?rhel: %global rhel %%(%{__sed} 's/^[^0-9]*\\([0-9]\\+\\).*/\\1/' /etc/redhat-release)}
 
-%if 0%{?rhel} == 4
-# macros used in rpm 4.4, not available in previous versions
-%global bcond_with()           %{expand:%%{?_with_%{1}:%%global with_%{1} 1}}
-%global bcond_without()        %{expand:%%{!?_without_%{1}:%%global without_%{1} 1}}
-%global with()         %{expand:%%{?with_%{1}:1}%%{!?with_%{1}:0}}
-%global without()      %{expand:%%{?without_%{1}:0}%%{!?without_%{1}:1}}
+%if %{!?with:1}0
+%global with() %{expand:%%{?with_%{1}:1}%%{!?with_%{1}:0}}
+%endif
+%if %{!?without:1}0
+%global without() %{expand:%%{?with_%{1}:0}%%{!?with_%{1}:1}}
+%endif
+%if %{!?bcond_with:1}0
+%global bcond_with() %{expand:%%{?_with_%{1}:%%global with_%{1} 1}}
+%endif
+%if %{!?bcond_without:1}0
+%global bcond_without() %{expand:%%{!?_without_%{1}:%%global with_%{1} 1}}
 %endif
 
 %bcond_with     tests
