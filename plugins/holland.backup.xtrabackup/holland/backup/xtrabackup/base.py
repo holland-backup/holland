@@ -96,7 +96,12 @@ class XtrabackupPlugin(object):
                            close_fds=True)
             except CalledProcessError, exc:
                 LOG.info("%s failed", list2cmdline(exc.cmd))
-                log_xtrackup_errors(error_log)
+                error_log.flush()
+                error_log.seek(0)
+                for line in error_log:
+                    if not line.startswith('>>'):
+                        continue
+                    LOG.info("%s", line.rstrip())
                 raise BackupError("%s failed", exc.cmd[0])
         finally:
             error_log.close()
