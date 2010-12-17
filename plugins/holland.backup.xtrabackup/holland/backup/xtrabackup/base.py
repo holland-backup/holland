@@ -84,10 +84,10 @@ class XtrabackupPlugin(object):
                            open(defaults_file, 'a'))
 
         backup_path = os.path.join(self.target_directory, 'backup.tar')
-        compression_stream = open_stream(backup_path, 'w', 
+        compression_stream = open_stream(backup_path, 'w',
                                          **self.config['compression'])
         error_log_path = os.path.join(self.target_directory, 'xtrabackup.log')
-        error_log = open(error_log_path, 'w')
+        error_log = open(error_log_path, 'wb')
         try:
             try:
                 check_call(args,
@@ -96,13 +96,11 @@ class XtrabackupPlugin(object):
                            close_fds=True)
             except CalledProcessError, exc:
                 LOG.info("%s failed", list2cmdline(exc.cmd))
-                error_log.flush()
-                error_log.seek(0)
-                for line in error_log:
-                    if not line.startswith('>>'):
+                for line in open(error_log_path, 'r'):
+                    if line.startswith('>>'):
                         continue
                     LOG.info("%s", line.rstrip())
-                raise BackupError("%s failed", exc.cmd[0])
+                raise BackupError("%s failed" % exc.cmd[0])
         finally:
             error_log.close()
             compression_stream.close()
