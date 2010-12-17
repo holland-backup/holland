@@ -21,8 +21,8 @@
 %bcond_with     sphinxdocs
 %bcond_with     mysqlhotcopy
 %bcond_with     maatkit
-%bcond_with     pgdump
-%bcond_with     sqlite
+%bcond_without  pgdump
+%bcond_without  sqlite
 %bcond_without  xtrabackup
 
 Name:           holland
@@ -123,10 +123,15 @@ and to generate a tar archive of the raw data directory.
 
 %if %{with pgdump}
 %package    pgdump
-Summary:    Postgres Backup plugin for Holland
-Group:      Applications/Archiving
+Summary: Holland LVM snapshot backup plugin for MySQL 
+License: GPLv2
+Group: Development/Libraries
+Provides: %{name}-pgdump = %{version}-%{release}
 Requires:   %{name} = %{version}-%{release}
 Requires:   python-psycopg2 pg_dump
+
+%description pgdump
+This plugin allows holland to backup Postgres databases via the pg_dump command.
 %endif
 
 %if %{with sqlite}
@@ -457,6 +462,16 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland.backup.mysqlhotcopy-%{version}-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/mysqlhotcopy.conf
 %{_mandir}/man5/holland-mysqlhotcopy.5*
+%endif
+
+%if %{with pgdump}
+%files pgdump
+%defattr(-,root,root,-)
+%doc plugins/holland.backup.pgdump/{README,LICENSE}
+%{python_sitelib}/holland.backup.pgdump-%{version}-*-nspkg.pth
+%{python_sitelib}/holland.backup.pgdump-%{version}-*.egg-info
+%{python_sitelib}/holland/backup/pgdump/
+%config(noreplace) %{_sysconfdir}/holland/providers/pgdump.conf
 %endif
 
 %if %{with sqlite}
