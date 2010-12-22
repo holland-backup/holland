@@ -17,7 +17,7 @@ from holland.core.util.fmt import format_bytes
 # Holland general compression functions
 from holland.lib.compression import open_stream
 # holland-common safefilename encoding
-import holland.lib.safefilename as safefilename
+from holland.lib.safefilename import encode_safe
 
 LOG = logging.getLogger(__name__)
 
@@ -235,7 +235,7 @@ def backup_pgsql(backup_directory, config, databases):
     for dbname in databases:
         format = config['pgdump']['format']
 
-        dump_name, _ = safefilename.encode(dbname)
+        dump_name, _ = encode_safe(dbname)
         if dump_name != dbname:
             LOG.warn("Encoded database %s as filename %s", dbname, dump_name)
 
