@@ -12,6 +12,7 @@ from tempfile import NamedTemporaryFile
 from holland.core.exceptions import BackupError
 from holland.backup.pgdump.base import backup_pgsql, dry_run, \
                                        PgError, \
+                                       dbapi, \
                                        pg_databases, \
                                        get_connection, get_db_size
 
