@@ -43,7 +43,7 @@ def get_connection(config, db='template1'):
             cursor = connection.cursor()
             cursor.execute("SET ROLE %s" % config["pgdump"]["role"])
         except:
-	    raise PgError("Failed to set role to " + config["pgdump"]["role"])
+            raise PgError("Failed to set role to " + config["pgdump"]["role"])
 
     global ver
     ver = connection.get_parameter_status('server_version')
@@ -175,7 +175,7 @@ def pgauth2args(config):
         if ver >= '8.4':
             args.extend(['--role', config['pgdump']['role']])
         else:
-	    raise PgError("The --role option is available only in Postgres versions 8.4 and higher.")
+            raise PgError("The --role option is available only in Postgres versions 8.4 and higher.")
 
     return args
 
