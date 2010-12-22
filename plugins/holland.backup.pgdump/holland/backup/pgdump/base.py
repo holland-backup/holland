@@ -44,13 +44,13 @@ def get_connection(config, db='template1'):
             cursor.execute("SET ROLE %s" % config["pgdump"]["role"])
         except:
 	    raise PgError("Failed to set role to " + config["pgdump"]["role"])
-    
+
     global ver
     ver = connection.get_parameter_status('server_version')
     LOG.info("Server version " + ver)
-    
+
     return connection
-    
+
 def get_db_size(dbname, connection):
     try:
         cursor = connection.cursor()
@@ -110,7 +110,7 @@ def run_pgdump(dbname, output_stream, connection_params, format='custom', env=No
     stderr.close()
 
     if returncode != 0:
-        raise OSError("%s failed." % 
+        raise OSError("%s failed." %
                       subprocess.list2cmdline(args))
 
 def backup_globals(backup_directory, config, connection_params, env=None):
@@ -186,7 +186,7 @@ def pg_extra_options(config):
     if config['pgdump']['format'] == 'custom':
         LOG.info("Ignore compression method, since custom format is in use.")
         config['compression']['method'] = 'none'
-        args += ['--compress', 
+        args += ['--compress',
                  str(config['compression']['level'])]
     if config['pgdump']['additional-options']:
         # XXX: we may want to check these options more carefully and warn as appropriate.
@@ -240,13 +240,13 @@ def backup_pgsql(backup_directory, config, databases):
             LOG.warn("Encoded database %s as filename %s", dbname, dump_name)
 
         filename = os.path.join(backup_directory, dump_name + ext_map[format])
-        
+
         stream = open_stream(filename, 'w', **config['compression'])
 
         backups.append((dbname, stream.name))
 
-        run_pgdump(dbname=dbname, 
-                   output_stream=stream, 
+        run_pgdump(dbname=dbname,
+                   output_stream=stream,
                    connection_params=connection_params + extra_options,
                    format=format,
                    env=pgenv)

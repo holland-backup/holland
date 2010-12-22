@@ -62,11 +62,11 @@ class PgDump(object):
         self.target_directory = target_directory
         self.dry_run = dry_run
         self.config.validate_config(CONFIGSPEC)
-        
+
         self.connection = get_connection(self.config)
         self.databases = pg_databases(self.config, self.connection)
         LOG.info("Got databases: %s" % repr(self.databases))
-        
+
     def estimate_backup_size(self):
         """Estimate the size (in bytes) of the backup this plugin would
         produce, if run.
@@ -74,7 +74,7 @@ class PgDump(object):
 
         :returns: int. size in bytes
         """
-        
+
         totalestimate = 0
         for db in self.databases:
             try:
@@ -84,7 +84,7 @@ class PgDump(object):
                     raise BackupError("Failed to estimate database size for "
                                       "%s: %s" % (db, exc))
                 totalestimate += self._estimate_legacy_size(db)
-	    
+
         return totalestimate
 
     def _estimate_legacy_size(self, db):
