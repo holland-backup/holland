@@ -66,7 +66,7 @@ class PgDump(object):
 
         self.connection = get_connection(self.config)
         self.databases = pg_databases(self.config, self.connection)
-        LOG.info("Got databases: %s" % repr(self.databases))
+        LOG.info("Found databases: %s", ','.join(self.databases))
 
     def estimate_backup_size(self):
         """Estimate the size (in bytes) of the backup this plugin would
