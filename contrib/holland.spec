@@ -133,7 +133,7 @@ License: GPLv2
 Group: Development/Libraries
 Provides: %{name}-pgdump = %{version}-%{release}
 Requires:   %{name} = %{version}-%{release}
-Requires:   python-psycopg2 pg_dump
+Requires:   python-psycopg2
 
 %description pgdump
 This plugin allows holland to backup Postgres databases via the pg_dump command.
