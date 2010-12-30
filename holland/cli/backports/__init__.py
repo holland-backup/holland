@@ -1,15 +1,24 @@
 import sys
-import holland.core.backports.logging
-import holland.core.backports.logging.config
-import holland.core.backports.logging.handlers
-import holland.core.backports.optparse
-import holland.core.backports.subprocess
-import holland.core.backports.zipfile
 
-# TODO: Should these be conditionally loaded?
-sys.modules['logging'] = logging
-sys.modules['logging.config'] = logging.config
-sys.modules['logging.handlers'] = logging.handlers
-sys.modules['optparse'] = optparse
-sys.modules['subprocess'] = subprocess
-sys.modules['zipfile'] = zipfile
+if sys.version_info < (3, 0):
+    import argparse
+    import subprocess
+    import logging
+    import logging.handlers
+    import logging.config
+    import configobj
+    import validate
+
+def setup_backports():
+    if sys.version_info < (3, 0):
+        module_list = [
+            'argparse',
+            'subprocess',
+            'logging',
+            'configobj',
+            'validate',
+        ]
+        for module in module_list:
+            sys.modules[module] = globals()[module]
+        sys.modules['logging.handlers'] = logging.handlers
+        sys.modules['logging.config'] = logging.config
