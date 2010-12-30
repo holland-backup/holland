@@ -1,42 +1,51 @@
-import os
-import sys
+import os, sys
 import logging
 
-__all__ = [
-    'clear_root_handlers',
-    'setup_console_logging',
-    'setup_file_logging'
-]
-
-DEFAULT_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S'
 DEFAULT_LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
 DEFAULT_LOG_LEVEL = logging.INFO
 
-class NullHandler(logging.Handler):
-    def emit(self, record):
-            pass
-
-def clear_root_handlers():
+def _clear_root_handlers():
+    """Remove all pre-existing handlers on the root logger"""
     root = logging.getLogger()
-    map(root.removeHandler, root.handlers)
+    for handler in root.handlers:
+        root.removeHandler(handler)
 
-def setup_console_logging(level=DEFAULT_LOG_LEVEL, 
-                          format='%(message)s', 
-                          datefmt=DEFAULT_DATE_FORMAT):
+def configure_basic_logger():
+    """Configure a simple console logger"""
     root = logging.getLogger()
-    root.setLevel(level)
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter(format, datefmt)
-    handler.setFormatter(formatter)
-    logging.getLogger().addHandler(handler)
 
-def setup_file_logging(filename, 
-                       level=DEFAULT_LOG_LEVEL, 
-                       format=DEFAULT_LOG_FORMAT, 
-                       datefmt=DEFAULT_DATE_FORMAT):
-    root = logging.getLogger()
-    root.setLevel(level)
-    handler = logging.FileHandler(filename, 'a', encoding='utf8')
+    if os.isatty(sys.stderr.fileno()):
+        from holland import NullHandler
+        handler = NullHandler()
+    else:
+        handler = logging.StreamHandler()
+
+    configure_logger(logger=root,
+                     handler=handler,
+                     format=DEFAULT_LOG_FORMAT,
+                     level=logging.INFO)
+
+def configure_logger(logger, handler, format, level):
+    """Configure a new logger"""
     formatter = logging.Formatter(format)
     handler.setFormatter(formatter)
-    logging.getLogger().addHandler(handler)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+def configure_logging(config):
+    _clear_root_handlers()
+
+    if os.isatty(sys.stderr.fileno()):
+        configure_logger(logger=logging.getLogger(),
+                         handler=logging.StreamHandler(),
+                         format=config['format'],
+                         level=config['level'])
+
+    try:
+        configure_logger(logger=logging.getLogger(),
+                         handler=logging.FileHandler(config['file']),
+                         format=config['format'],
+                         level=config['level'])
+    except IOError, exc:
+        logging.info("Failed to open log file: %s", exc)
+        logging.info("Skipping file logging.")
