@@ -1,3 +1,3 @@
 """Holland CLI"""
-from holland.cli.backports import setup as setup_backports
+from holland.cli.backports import setup_backports
 setup_backports()
