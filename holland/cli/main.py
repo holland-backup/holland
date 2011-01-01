@@ -1,10 +1,9 @@
 import os, sys
-import optparse
 import logging
-from holland.core.plugin import iter_entry_points, get_distribution
-from holland.core.util.bootstrap import bootstrap
-from holland.core.command import run
-from holland.core.config.checks import is_logging_level
+from holland.cli.config import load_global_config, ValidateError
+from holland.cli.log import configure_logging, configure_basic_logger
+from holland.cli.commands import ArgparseCommand, argument, load_command, \
+                                 CommandNotFoundError
 
 HOLLAND_VERSION = get_distribution('holland').version
 HOLLAND_BANNER = """
@@ -19,52 +18,62 @@ More info available at http://hollandbackup.org
 
 """ % HOLLAND_VERSION
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
-## global parser
-parser = optparse.OptionParser(add_help_option=False,version=HOLLAND_BANNER)
-parser.add_option('-h', '--help', action='store_true',
-                  help="Show help")
-parser.add_option('-v', '--verbose', action='store_const', const='info',
-                    dest='log_level',
-                    help="Log verbose output")
-parser.add_option('-d', '--debug', action='store_const', const='debug',
-                    dest='log_level',
-                    help="Log debug output")
-parser.add_option('-c', '--config-file', metavar="<file>",
-                  help="Read configuration from the given file")
-parser.add_option('-q', '--quiet',  action='store_true',
-                  help="Don't log to console")
-parser.add_option('-l', '--log-level', type='choice', metavar='<log-level>',
-                  choices=['critical', 'error','warning','info', 'debug'],
-                  help="Specify the log level. "
-                       "One of: critical,error,warning,info,debug")
-parser.set_defaults(log_level='info',
-                    quiet=False,
-                    config_file=os.getenv('HOLLAND_CONFIG', 
-                                          '/etc/holland/holland.conf')
-                   )
-parser.disable_interspersed_args()
+configure_basic_logger()
 
-# main entrypoint for holland's cmdshell 'hl'
-def main():
-    opts, args = parser.parse_args(sys.argv[1:])
+class HollandCli(ArgparseCommand):
+    name = 'holland'
+    summary = 'Holland command line'
+    description = "Holland command line"
+    arguments = [
+        argument('--config', '-c'),
+        argument('--log-level', '-l'),
+        argument('subcommand', nargs='?'),
+        argument('args', nargs='...'),
+    ]
 
-    logging.raiseExceptions = bool(opts.log_level == 'debug')
+    def execute(self, opts):
 
-    if opts.log_level:
-        opts.log_level = is_logging_level(opts.log_level)
+        try:
+            config = load_global_config(opts.config)
+        except IOError, exc:
+            self.stderr("Failed to load config file: %s", exc)
+            return 1
+        except SyntaxError, exc:
+            self.stderr("Error while reading config file: %s", exc, exc_info=True)
+            return 1
+        except ValidateError, exc:
+            self.stderr("Error while validating config file: %s", exc)
+            return 1
 
-    if not args:
-        args = ['help']
+        if opts.log_level:
+            config['logging']['level'] = \
+            logging._levelNames[opts.log_level.upper()]
+        if config['holland']['umask'] is not None:
+            os.umask(config['holland']['umask'])
+        if config['holland']['tmpdir']:
+            os.environ['TMPDIR'] = config['holland']['tmpdir']
+        if config['holland']['path']:
+            os.environ['PATH'] = config['holland']['path']
+        configure_logging(config['logging'])
 
-    if opts.help or args[0] == 'help':
-        if args[0] == 'help':
-            args = args[1:]
-        return run(['help'] + args)
+        if not opts.subcommand:
+            self.parser.print_help()
+            opts.subcommand = 'list-commands'
 
-    # Bootstrap the environment
-    bootstrap(opts)
+        try:
+            cmd = load_command('holland.commands', opts.subcommand, self.parser)
+            return cmd(opts.args, context=opts)
+        except CommandNotFoundError, exc:
+            self.stderr('Failed to load command "%s"', opts.subcommand)
+            return 1
+        except: # unexpected command failure
+            self.stderr('Unexpected exception while running command "%s"',
+                        opts.subcommand)
+            import traceback
+            traceback.print_exc()
+            return 1
+        return 1
 
-    LOGGER.info("Holland %s started with pid %d", HOLLAND_VERSION, os.getpid())
-    return run(args)
+holland = HollandCli()
