@@ -42,7 +42,7 @@ setup(
     listcommands  = holland.cli.commands:ListCommands
     listbackups   = holland.cli.commands:ListBackups
     backup        = holland.cli.commands:Backup
-    mk-config     = holland.cli.commands:MkConfig
+    mk-config     = holland.cli.commands:MakeConfig
     purge         = holland.cli.commands:Purge
     """,
     namespace_packages=['holland', 'holland.backup', 'holland.lib'],
