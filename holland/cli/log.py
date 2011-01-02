@@ -15,7 +15,9 @@ def configure_basic_logger():
     root = logging.getLogger()
 
     if os.isatty(sys.stderr.fileno()):
-        from holland import NullHandler
+        class NullHandler(logging.Handler):
+            def emit(self, something):
+                pass
         handler = NullHandler()
     else:
         handler = logging.StreamHandler()
