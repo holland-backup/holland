@@ -1,5 +1,6 @@
 import os, sys
 import logging
+from pkg_resources import get_distribution
 from holland.cli.config import load_global_config, ValidateError
 from holland.cli.log import configure_logging, configure_basic_logger
 from holland.cli.commands import ArgparseCommand, argument, load_command, \
@@ -25,7 +26,7 @@ configure_basic_logger()
 class HollandCli(ArgparseCommand):
     name = 'holland'
     summary = 'Holland command line'
-    description = "Holland command line"
+    description = HOLLAND_BANNER
     arguments = [
         argument('--config', '-c'),
         argument('--log-level', '-l'),
