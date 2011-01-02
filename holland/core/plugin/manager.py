@@ -30,8 +30,7 @@ class EntrypointPluginManager(AbstractPluginManager):
                                   (group, name))
 
     def iterate(self, name):
-        group, name = name.rsplit('.', 1)
-        for plugin in iter_entry_points(group, name):
+        for plugin in iter_entry_points(name):
             try:
                 yield plugin.load()
             except Exception, exc:
