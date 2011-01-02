@@ -11,7 +11,7 @@ import logging
 import itertools
 from holland.core.config import BaseConfig
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 def timestamp_dir(when=None):
     """
