@@ -10,8 +10,9 @@ LOG = logging.getLogger(__name__)
 
 class BaseCommand(object):
     """Basic command support"""
-    def __init__(self, parent_parser=None):
+    def __init__(self, parent_parser=None, config=None):
         self.parent_parser = parent_parser
+        self.config = config
         self.stderr = StreamWriter(sys.stderr)
         self.stdout = StreamWriter(sys.stdout)
 
@@ -80,7 +81,7 @@ class ArgparseCommand(BaseCommand):
         for _args, _kwargs in self.arguments:
             self.parser.add_argument(*_args, **_kwargs)
 
-    def __call__(self, args=None, context=None):
+    def __call__(self, args=None):
         try:
             optns = self.parser.parse_args(args)
         except ArgparseError, exc:
