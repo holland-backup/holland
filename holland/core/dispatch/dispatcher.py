@@ -7,7 +7,7 @@ try:
 except NameError:
     from sets import Set as set
 
-import holland.core.dispatch.saferef as saferef
+import saferef
 
 DEBUG = False
 

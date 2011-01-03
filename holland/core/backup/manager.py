@@ -16,7 +16,7 @@ class AbstractBackupManager(object):
         """Test a backup job"""
         raise NotImplementedError()
 
-class DefaultBackupManager(AbstractBackupManager):
+class BackupManager(AbstractBackupManager):
     """BackupManager that manages a spool"""
     def __init__(self):
         AbstractBackupManager.__init__(self)
