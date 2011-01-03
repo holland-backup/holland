@@ -49,6 +49,9 @@ class BaseCommand(object):
     def __cmp__(self, other):
         return cmp(self.name, other.name)
 
+    def __lt__(self, other):
+        return self.name < other.name
+
     #@classmethod
     def matches(cls, name):
         """Check whether this command should match a given name"""
