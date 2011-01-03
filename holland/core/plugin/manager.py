@@ -1,10 +1,14 @@
+"""Plugin manager API"""
+
 import logging
 from pkg_resources import iter_entry_points
-from error import PluginError, PluginNotFoundError
+from holland.core.plugin.error import PluginError, PluginNotFoundError
 
 LOG = logging.getLogger(__name__)
 
 class AbstractPluginManager(object):
+    """Interface that PluginManager implementations should follow"""
+
     def load(self, name):
         """Load a plugin for the given name"""
         raise NotImplementedError()
@@ -14,6 +18,8 @@ class AbstractPluginManager(object):
         raise NotImplementedError()
 
 class EntrypointPluginManager(AbstractPluginManager):
+    """Plugin manager that uses setuptools entrypoints"""
+
     def load(self, name):
         """Load a plugin via a setuptools entrypoint for the given name
 
@@ -30,10 +36,14 @@ class EntrypointPluginManager(AbstractPluginManager):
                                   (group, name))
 
     def iterate(self, name):
+        """Iterate over an entrypoint group and yield the loaded entrypoint
+        object
+        """
         for plugin in iter_entry_points(name):
             try:
                 yield plugin.load()
-            except Exception, exc:
+            except (SystemExit, KeyboardInterrupt):
+                raise
+            except:
                 LOG.error("Failed to load plugin %r", plugin, exc_info=True)
-                #raise PluginError(exc)
 

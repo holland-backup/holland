@@ -1,6 +1,11 @@
 """Base plugin classes"""
 
 class PluginInfo(object):
+    """Information about a plugin
+
+    An instance of this class should be returned
+    by a Plugin object's plugin_info() method
+    """
     #@property
     def name(self):
         """Canonical name of this plugin"""
@@ -21,6 +26,7 @@ class PluginInfo(object):
 
     #@property
     def author(self):
+        """Author of this plugin"""
         raise NotImplementedError()
     author = property(author)
 
@@ -32,12 +38,27 @@ class PluginInfo(object):
 
 
 class BasePlugin(object):
-    def plugin_info(self):
-        return PluginInfo()
+    """Base class from which all Holland plugins should derive"""
+    def setup(self):
+        """Called by a manager to allow this plugin to perform any necessary
+        setup"""
+        raise NotImplementedError()
 
-class ConfigurablePlugin(object):
+    def teardown(self):
+        """Called by a manager when it is done with this plugin"""
+        raise NotImplementedError()
+
+    def plugin_info(self):
+        """Provide information about this plugin"""
+        raise NotImplementedError()
+
+class ConfigurablePlugin(BasePlugin):
+    """A plugin that accepts a configuration dictionary"""
+
     def configspec(self):
+        """Provide a configspec that this plugin expects"""
         raise NotImplementedError()
 
     def configure(self, config):
+        """Configure this plugin with the given dict-like object"""
         raise NotImplementedError()
