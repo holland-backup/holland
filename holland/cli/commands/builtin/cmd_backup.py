@@ -11,13 +11,13 @@ class Backup(ArgparseCommand):
     aliases = ('bk',)
     arguments = [
         argument('--dry-run', '-n'),
-        argument('backupsets', nargs='*'),
+        argument('backupset', nargs='*'),
     ]
 
     def execute(self, namespace):
         spool = SpoolManager(self.config['holland']['backup-directory'])
         backup_mgr = BackupManager(spool)
-        base_path = os.path.dirname(self.global_config.filename)
+        base_path = os.path.dirname(self.config.filename)
 
         if namespace.dry_run:
             run_backup = backup_mgr.run
