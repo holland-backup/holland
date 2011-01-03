@@ -12,6 +12,8 @@ class Help(ArgparseCommand):
         argument('command', nargs='?')
     ]
 
+    _add_help = False
+
     #@property
     def epilog(self):
         result = []
