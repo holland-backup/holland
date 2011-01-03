@@ -10,7 +10,7 @@ class Backup(ArgparseCommand):
     """
     aliases = ('bk',)
     arguments = [
-        argument('--dry-run', '-n'),
+        argument('--dry-run', '-n', action='store_true'),
         argument('backupset', nargs='*'),
     ]
 
