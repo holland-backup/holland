@@ -5,7 +5,7 @@ extra = {}
 if sys.version_info >= (3, 0):
     extra.update(
         use_2to3=True,
-        use_2to3_fixers=['custom_fixers']
+        use_2to3_fixers=[]
     )
 
 version = '1.1.0'
