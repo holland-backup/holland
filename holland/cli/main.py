@@ -24,9 +24,14 @@ LOG = logging.getLogger(__name__)
 configure_basic_logger()
 
 class HollandCli(ArgparseCommand):
+    """Main holland command interface"""
+
     name = 'holland'
+
     summary = 'Holland command line'
+
     description = HOLLAND_BANNER
+
     arguments = [
         argument('--config', '-c'),
         argument('--log-level', '-l'),
@@ -42,7 +47,8 @@ class HollandCli(ArgparseCommand):
             self.stderr("Failed to load config file: %s", exc)
             return 1
         except SyntaxError, exc:
-            self.stderr("Error while reading config file: %s", exc, exc_info=True)
+            self.stderr("Error while reading config file: %s",
+                        exc, exc_info=True)
             return 1
         except ValidateError, exc:
             self.stderr("Error while validating config file: %s", exc)
@@ -64,8 +70,11 @@ class HollandCli(ArgparseCommand):
             opts.subcommand = 'list-commands'
 
         try:
-            cmd = load_command('holland.commands', opts.subcommand, self.parser)
-            return cmd(opts.args, context=opts)
+            cmd = load_command(group='holland.commands',
+                               name=opts.subcommand,
+                               config=config,
+                               parent_parser=self.parser)
+            return cmd(opts.args)
         except CommandNotFoundError, exc:
             self.stderr('Failed to load command "%s"', opts.subcommand)
             return 1
