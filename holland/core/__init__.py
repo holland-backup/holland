@@ -1,3 +1,1 @@
-#
-from spool import SpoolManager
-class BackupManager(object): pass
+"Holland core API"
