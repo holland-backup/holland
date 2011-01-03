@@ -69,6 +69,8 @@ class ArgparseCommand(BaseCommand):
     # optional epilog - passed to ArgumentParser() constructor
     epilog = None
 
+    _add_help = True
+
     def __init__(self, *args, **kwargs):
         super(ArgparseCommand, self).__init__(*args, **kwargs)
         formatter_class = RawDescriptionHelpFormatter
@@ -77,7 +79,8 @@ class ArgparseCommand(BaseCommand):
                                          epilog=dedent(self.epilog or ''),
                                          formatter_class=formatter_class,
                                          add_help=False)
-        self.parser.add_argument('--help', '-h', action='store_true')
+        if self._add_help:
+            self.parser.add_argument('--help', '-h', action='store_true')
         for _args, _kwargs in self.arguments:
             self.parser.add_argument(*_args, **_kwargs)
 
@@ -89,7 +92,7 @@ class ArgparseCommand(BaseCommand):
                 self.stderr("%s", exc.message)
                 self.stderr("%s", self.parser.format_help())
             return 1
-        if optns.help:
+        if getattr(optns, 'help', False):
             self.stderr("%s", self.help())
             return 1
         return self.execute(optns)
