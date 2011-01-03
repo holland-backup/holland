@@ -27,3 +27,11 @@ class StreamWriter(object):
 
     def __call__(self, format, *args):
         print >>self.stream, format % args
+
+class LogWriter(object):
+    def __init__(self, logger, level):
+        self.logger = logger
+        self.level = level
+
+    def __call__(self, *args, **kwargs):
+        self.logger.log(self.level, *args, **kwargs)
