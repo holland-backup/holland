@@ -4,8 +4,8 @@ if sys.version_info < (3, 0):
     import argparse
     import subprocess
     import logging
-    import logging.handlers
-    import logging.config
+    from logging import handlers as logging_handlers
+    from logging import config as logging_config
     import configobj
     import validate
 
@@ -20,5 +20,5 @@ def setup_backports():
         ]
         for module in module_list:
             sys.modules[module] = globals()[module]
-        sys.modules['logging.handlers'] = logging.handlers
-        sys.modules['logging.config'] = logging.config
+        sys.modules['logging.handlers'] = logging_handlers
+        sys.modules['logging.config'] = logging_config
