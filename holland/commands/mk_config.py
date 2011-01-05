@@ -72,17 +72,17 @@ def confirm(prompt=None, resp=False):
     user simply types ENTER.
 
     >>> confirm(prompt='Create Directory?', resp=True)
-    Create Directory? [y]|n: 
+    Create Directory? [y]|n:
     True
     >>> confirm(prompt='Create Directory?', resp=False)
-    Create Directory? [n]|y: 
+    Create Directory? [n]|y:
     False
     >>> confirm(prompt='Create Directory?', resp=False)
     Create Directory? [n]|y: y
     True
 
     """
-    
+
     if prompt is None:
         prompt = 'Confirm'
 
@@ -90,7 +90,7 @@ def confirm(prompt=None, resp=False):
         prompt = '%s ([%s] or %s): ' % (prompt, 'y', 'n')
     else:
         prompt = '%s ([%s] or %s): ' % (prompt, 'n', 'y')
-        
+
     while True:
         ans = raw_input(prompt)
         if not ans:
@@ -106,11 +106,11 @@ def confirm(prompt=None, resp=False):
 class MkConfig(Command):
     """${cmd_usage}
 
-    Generate a config file for a backup 
+    Generate a config file for a backup
     plugin.
 
     ${cmd_option_list}
-        
+
     """
 
     name = 'mk-config'
@@ -120,7 +120,7 @@ class MkConfig(Command):
     ]
 
     options = [
-        option('--name', 
+        option('--name',
                 help='Name of the backupset'),
         option('--edit', action='store_true',
                 help='Edit the generated config'),
@@ -128,39 +128,18 @@ class MkConfig(Command):
                 help='Generate a provider config'),
         option('--file', '-f',
                 help='Save the final config to the specified file'),
+        option('--minimal', '-m', action='store_true', default=False,
+               help="Do not include comment from a backup "
+                    "plugin's configspec"),
     ]
 
     description = 'Generate a config file for a backup plugin'
-    
-    def _next_section_comments(self, section):
-        main = section.parent
-        if not main:
-            # just in case we have any 'root level' items
-            main = section.main
 
-        idx = main.keys().index(section.name) + 1
-        if idx >= len(main.keys()):
-            return main.final_comment
-        else:
-            return main.comments[main.keys()[idx]]
-
-    def _next_key_comments(self, section, key):
-        idx = section.keys().index(key) + 1
-        if idx >= len(section.keys()):
-            return self._next_section_comments(section)
-        else:
-            return section.comments[section.keys()[idx]]
-
-    def _filter_none(self, section, key, filter_list):
-        if section[key] is None:
-            comment_list = self._next_key_comments(section, key)
-            comment_list.insert(0, '# %s = "" # no default' % key)
-            filter_list.append((section, key))
 
     # After initial validation:
     #   run through and flag required parameters with a 'REQUIRED' comment
     #   run through and comment out default=None parameters
-    def _cleanup_config(self, config):
+    def _cleanup_config(self, config, skip_comments=False):
         errors = config.validate(validator, preserve_errors=True,copy=True)
         # First flag any required parameters
         for entry in flatten_errors(config, errors):
@@ -171,14 +150,50 @@ class MkConfig(Command):
                 config[section_name].comments[key].append('REQUIRED')
             elif error:
                 print >>sys.stderr, "Bad configspec generated error", error
-        
-        none_keys = []
-        config.walk(self._filter_none, raise_errors=True, filter_list=none_keys)
-        for sect, key in none_keys:
-            if sect.comments.get(key):
-                comment_list = self._next_key_comments(sect, key)
-                map(lambda x: comment_list.insert(0, x), sect.comments[key])
-            del sect[key]
+
+        pending_comments = []
+        for section in list(config):
+            if pending_comments:
+                if skip_comments:
+                    comments = []
+                else:
+                    comments = config.comments.get(section, [])
+                comments = pending_comments + comments
+                config.comments[section] = comments
+                del pending_comments[:]
+            for idx, (key, value) in enumerate(config[section].items()):
+                if value is None:
+                    if not skip_comments:
+                        pending_comments.extend(config[section].comments.get(key, []))
+                    pending_comments.append('%s = "" # no default' % key)
+                    del config[section][key]
+                else:
+                    if skip_comments:
+                        del config[section].comments[key][:]
+                    if pending_comments:
+                        if skip_comments:
+                            comments = []
+                        else:
+                            comments = config[section].comments.get(key, [])
+                        comments = pending_comments + comments
+                        config[section].comments[key] = comments
+                        del pending_comments[:]
+                    if value is True or value is False:
+                        config[section][key] = ['no','yes'][value]
+
+        if pending_comments:
+            if skip_comments:
+                config.final_comment = pending_comments
+            else:
+                config.final_comment = pending_comments + config.final_comment
+
+        # drop initial whitespace
+        config.initial_comment = []
+        # insert a blank between [holland:backup] and first section
+        try:
+            config.comments[config.sections[1]].insert(0, '')
+        except IndexError:
+            pass
 
     def run(self, cmd, opts, plugin_type):
         if opts.name and opts.provider:
@@ -191,23 +206,23 @@ class MkConfig(Command):
             logging.info("Failed to load backup plugin %r: %s",
                          plugin_type, exc)
             return 1
-        
+
         try:
             cfgspec = sys.modules[plugin_cls.__module__].CONFIGSPEC
         except:
             print >>sys.stderr, "Could not load config-spec from plugin %r" % plugin_type
             return 1
 
-        cfg = ConfigObj(configspec=cfgspec, list_values=True,stringify=True)
-        if not opts.provider:
-            # Add whitespace between [holland:backup] and the next section
-            cfg['holland:backup'] = { 'plugin' : plugin_type, 
-                                      'backups-to-keep' : 1,    # default keep 1 backup
-                                      'estimated-size-factor' : 1.0  # default no size adjustment
-                                    }
-        self._cleanup_config(cfg)
-        cfg.comments[cfg.keys()[0]].insert(0, '')
-        cfg.initial_comment = []
+        base_config = """
+        [holland:backup]
+        plugin                  = ""
+        backups-to-keep         = 1
+        auto-purge-failures     = yes
+        purge-policy            = after-backup
+        """.lstrip().splitlines()
+        cfg = ConfigObj(base_config, configspec=cfgspec, list_values=True,stringify=True)
+        cfg['holland:backup']['plugin'] = plugin_type
+        self._cleanup_config(cfg, skip_comments=opts.minimal)
 
         if opts.edit:
             done = False

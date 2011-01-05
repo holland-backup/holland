@@ -50,6 +50,8 @@ parser.disable_interspersed_args()
 def main():
     opts, args = parser.parse_args(sys.argv[1:])
 
+    logging.raiseExceptions = bool(opts.log_level == 'debug')
+
     if opts.log_level:
         opts.log_level = is_logging_level(opts.log_level)
 

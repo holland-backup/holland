@@ -1,6 +1,7 @@
 
 """Utility functions to help out the mysql-lvm plugin"""
 import os
+import errno
 import shutil
 import tempfile
 import logging
@@ -79,6 +80,15 @@ def build_snapshot(config, logical_volume):
     if not mountpoint:
         tempdir = True
         mountpoint = tempfile.mkdtemp()
+    else:
+        try:
+            os.makedirs(mountpoint)
+            LOG.info("Created mountpoint %s", mountpoint)
+        except OSError, exc:
+            # silently ignore if the mountpoint already exists
+            if exc.errno != errno.EEXIST:
+                raise BackupError("Failure creating snapshot mountpoint: %s" %
+                                  str(exc))
     snapshot = Snapshot(snapshot_name, int(snapshot_size), mountpoint)
     if tempdir:
         snapshot.register('finish',
@@ -90,5 +100,5 @@ def log_final_snapshot_size(event, snapshot):
     snapshot.reload()
     snap_percent = float(snapshot.snap_percent)/100
     snap_size = float(snapshot.lv_size)
-    LOG.info("Final LVM snapshot size for %s is %s", 
+    LOG.info("Final LVM snapshot size for %s is %s",
         snapshot.device_name(), format_bytes(snap_size*snap_percent))

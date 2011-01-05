@@ -27,12 +27,17 @@ def _setup_fileio(mocker):
     Allow read access normally, but all writes go
     through the storage mock layer.
     """
+    def is_writemode(param):
+        """Check whether a open() mode will allow a write operation"""
+        return 'a' in param or 'w' in param
+
+    # this doesn't handle r+ properly, but we don't use it in mysqldump
     _open = mocker.replace('__builtin__.open')
-    fileobj = _open(ANY, CONTAINS('w'), ANY)
+    fileobj = _open(ANY, MATCH(is_writemode), ANY)
     mocker.count(min=0,max=None)
     mocker.call(storage.open)
 
-    fileobj = _open(ANY, CONTAINS('w'))
+    fileobj = _open(ANY, MATCH(is_writemode))
     mocker.count(min=0,max=None)
     mocker.call(storage.open)
 

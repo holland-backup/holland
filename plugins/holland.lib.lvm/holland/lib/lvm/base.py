@@ -2,10 +2,13 @@
 
 import os
 import signal
+import logging
 from holland.lib.lvm.raw import pvs, vgs, lvs, lvsnapshot, lvremove, \
                                 mount, umount, blkid
 from holland.lib.lvm.util import getdevice, SignalManager
 from holland.lib.lvm.errors import LVMCommandError
+
+LOG = logging.getLogger(__name__)
 
 class Volume(object):
     """Abstract Volume object for LVM Volume implementations
@@ -29,7 +32,7 @@ class Volume(object):
             return self.attributes[key]
         except KeyError:
             return super(Volume, self).__getattribute__(key)
- 
+
     def reload(self):
         """Reload a Volume with underlying data, which may have changed"""
 
@@ -58,7 +61,7 @@ class Volume(object):
     search = classmethod(search)
 
     def __repr__(self):
-        return '%s()' % (self.__class__.__name__,) 
+        return '%s()' % (self.__class__.__name__,)
 
 class PhysicalVolume(Volume):
     """LVM Physical Volume representation"""
@@ -156,7 +159,7 @@ class LogicalVolume(Volume):
         except (LVMCommandError, ValueError):
             #XX: Perhaps we should be more specific :)
             raise LookupError("No LogicalVolume could be found "
-                              "for pathspec %r" % 
+                              "for pathspec %r" %
                               pathspec)
     lookup = classmethod(lookup)
 
@@ -196,24 +199,17 @@ class LogicalVolume(Volume):
         :returns: LogicalVolume that is a snapshot of this one on success
         """
 
-        sigmgr = SignalManager()
-        sigmgr.trap(signal.SIGINT, signal.SIGHUP)
         try:
             lvsnapshot(self.device_name(), name, size)
-            snapshot = LogicalVolume.lookup(self.vg_name + '/' + name)
-
-            if sigmgr.pending:
-                # remove snapshot we just created, if necessary
-                snapshot.remove()
-                raise KeyboardInterrupt("Interrupt while creating snapshot")
-            else:
-                return snapshot
-        finally:
-            sigmgr.restore()
+        except LVMCommandError, exc:
+            for line in exc.error.splitlines():
+                LOG.error("%s", line)
+            raise
+        return LogicalVolume.lookup(self.vg_name + '/' + name)
 
     def is_mounted(self):
         """Check if this logical volume is mounted
-        
+
         :returns: True if mounted and false otherwise
         """
         real_device_path = os.path.realpath(self.device_name())
@@ -226,35 +222,40 @@ class LogicalVolume(Volume):
 
     def mount(self, path, options=None):
         """Mount this volume on the specified path
-        
+
         :param path: path where this volume should be mounted
         :param options: options to pass to mount
         """
-
-        mount(self.device_name(), path, options)
+        try:
+            mount(self.device_name(), path, options)
+        except LVMCommandError, exc:
+            for line in exc.error.splitlines():
+                LOG.error("%s", line)
+            raise
 
     def unmount(self):
         """Unmount this volume, if mounted"""
-        umount(self.device_name())
+        try:
+            umount(self.device_name())
+        except LVMCommandError, exc:
+            for line in exc.error.splitlines():
+                LOG.error("%s", line)
+            raise
 
     def remove(self):
         """Remove this LogicalVolume
-        
+
         The data on this object is not longer valid once this method
         successfully returns
 
         :raises: LVMCommandError on error
         """
-
-        sigmgr = SignalManager()
-        sigmgr.trap(signal.SIGINT, signal.SIGHUP)
         try:
             lvremove(self.device_name())
-
-            if sigmgr.pending:
-                raise KeyboardInterrupt("Interrupted while removing volume")
-        finally:
-            sigmgr.restore()
+        except LVMCommandError, exc:
+            for line in exc.error.splitlines():
+                LOG.error("%s", line)
+            raise
 
     def exists(self):
         """Check whether the volume currently exists
@@ -268,7 +269,7 @@ class LogicalVolume(Volume):
 
     def volume_group(self):
         """Lookup this LogicalVolume's volume_group
-        
+
         :returns: VolumeGroup
         """
         return VolumeGroup.lookup(self.vg_name)
@@ -287,8 +288,11 @@ class LogicalVolume(Volume):
         """
         try:
             device_info, = blkid(self.device_name())
+            LOG.debug("Looked up device_info => %r", device_info)
             return device_info['type']
-        except (LVMCommandError, ValueError):
+        except (LVMCommandError, ValueError), exc:
+            LOG.debug("Failed looking up filesystem for %s => %r",
+                      self.device_name(), exc, exc_info=True)
             raise LookupError()
 
     def __repr__(self):

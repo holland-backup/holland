@@ -27,7 +27,7 @@ class Snapshot(object):
         that ``path`` exists on.
 
         """
-        self.sigmgr.trap(signal.SIGINT)
+        self.sigmgr.trap(signal.SIGINT, signal.SIGTERM, signal.SIGHUP)
         try:
             self._apply_callbacks('initialize', self)
         except CallbackFailuresError, exc:
@@ -59,10 +59,14 @@ class Snapshot(object):
         try:
             self._apply_callbacks('pre-mount', self, snapshot)
             options = None
-            if snapshot.filesystem == 'xfs':
+            if snapshot.filesystem() == 'xfs':
+                LOG.info("xfs filesystem detected on %s. "
+                         "Using mount -o nouuid",
+                         snapshot.device_name())
                 options = 'nouuid'
             snapshot.mount(self.mountpoint, options)
-            LOG.info("Mounted %s on %s", snapshot.device_name(), self.mountpoint)
+            LOG.info("Mounted %s on %s",
+                     snapshot.device_name(), self.mountpoint)
             self._apply_callbacks('post-mount', self, snapshot)
         except (CallbackFailuresError, LVMCommandError), exc:
             return self.error(snapshot, exc)
@@ -103,7 +107,11 @@ class Snapshot(object):
 
     def finish(self):
         """Finish the snapshotting process"""
+        pending = self.sigmgr.pending[:]
         self.sigmgr.restore()
+        if signal.SIGINT in pending:
+            raise KeyboardInterrupt()
+
         self._apply_callbacks('finish', self)
         if sys.exc_info()[1]:
             raise
@@ -115,7 +123,9 @@ class Snapshot(object):
         if snapshot and snapshot.exists():
             snapshot.reload()
             if 'S' in snapshot.lv_attr:
-                LOG.error("Snapshot space (%s) exceeded and snapshot is no longer valid",
+                LOG.error("Snapshot space (%s) exceeded. "
+                          "Snapshot %s is no longer valid",
+                          snapshot.device_name(),
                           format_bytes(int(snapshot.lv_size)))
             try:
                 if snapshot.is_mounted():
@@ -158,7 +168,8 @@ class Snapshot(object):
                 LOG.debug("Calling %s", callback)
                 callback(event, *args, **kwargs)
             except:
-                LOG.debug("Callback %r failed for event %s", callback, event, exc_info=True)
+                LOG.debug("Callback %r failed for event %s",
+                          callback, event, exc_info=True)
                 exc = sys.exc_info()[1]
                 raise CallbackFailuresError([(callback, exc)])
 

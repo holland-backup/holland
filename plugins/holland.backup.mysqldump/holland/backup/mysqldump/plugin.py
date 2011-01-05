@@ -2,6 +2,7 @@
 
 import os
 import re
+import codecs
 import logging
 from holland.core.exceptions import BackupError
 from holland.lib.compression import open_stream, lookup_compression
@@ -41,10 +42,11 @@ engines             = force_list(default=list("*"))
 exclude-engines     = force_list(default=list())
 
 flush-logs           = boolean(default=no)
-flush-privileges    = boolean(default=no)
+flush-privileges    = boolean(default=yes)
 dump-routines       = boolean(default=no)
 dump-events         = boolean(default=no)
 stop-slave          = boolean(default=no)
+max-allowed-packet  = string(default=128M)
 bin-log-position    = boolean(default=no)
 
 file-per-database   = boolean(default=yes)
@@ -87,7 +89,7 @@ class MySQLDumpPlugin(object):
         self.schema.add_database_filter(
                 exclude_glob(*config['exclude-databases'])
         )
-        
+
         self.schema.add_table_filter(include_glob_qualified(*config['tables']))
         self.schema.add_table_filter(exclude_glob_qualified(*config['exclude-tables']))
         self.schema.add_engine_filter(include_glob(*config['engines']))
@@ -296,6 +298,8 @@ def collect_mysqldump_options(config, mysqldump, client):
             LOG.warning("--events only available for mysqldump 5.1.8+. skipping")
         else:
             options.append('--events')
+    if config['max-allowed-packet']:
+        options.append('--max-allowed-packet=' + config['max-allowed-packet'])
     if config['bin-log-position']:
         if client.show_variable('log_bin') != 'ON':
             raise BackupError("bin-log-position requested but "
@@ -319,7 +323,7 @@ def validate_mysqldump_options(mysqldump, options):
 def _stop_slave(client, config=None):
     """Stop MySQL replication"""
     try:
-        client.stop_slave()
+        client.stop_slave(sql_thread_only=True)
         LOG.info("Stopped slave")
     except MySQLError, exc:
         raise BackupError("Failed to stop slave[%d]: %s" % exc.args)
@@ -389,7 +393,7 @@ def add_exclusions(schema, config):
         return
 
     try:
-        my_cnf = open(config, 'a')
+        my_cnf = codecs.open(config, 'a', 'utf8')
         print >>my_cnf
         print >>my_cnf, "[mysqldump]"
         for excl in exclusions:
@@ -401,7 +405,7 @@ def add_exclusions(schema, config):
 
 def parse_size(units_string):
     """Parse a MySQL-like size string into bytes
-    
+
     >> parse_size('4G')
     4294967296
     """

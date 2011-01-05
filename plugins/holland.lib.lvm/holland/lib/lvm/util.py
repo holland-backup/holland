@@ -81,17 +81,17 @@ def relpath(path, start=os.curdir):
         return os.curdir
     return os.path.join(*rel_list)
 
-def format_bytes(bytes, precision=2):
+def format_bytes(nbytes, precision=2):
     """Format an integer number of bytes to a human readable string."""
 
-    if bytes != 0:
-        exponent = int(log(abs(bytes), 1024))
+    if nbytes != 0:
+        exponent = int(log(abs(nbytes), 1024))
     else:       
         exponent = 0
 
     return "%.*f%s" % (
         precision,
-        float(bytes) / (1024 ** exponent),
+        float(nbytes) / (1024 ** exponent),
         ['Bytes','KB','MB','GB','TB','PB','EB','ZB','YB'][int(exponent)]
     )
 

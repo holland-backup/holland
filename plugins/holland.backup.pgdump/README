@@ -1,0 +1,5 @@
+This plugin performs logical backups of a Postgres database by using the
+pg_dump command.  
+
+For more information please consult the holland manual or visit the holland
+wiki at http://hollandbackup.org.

@@ -245,6 +245,11 @@ class DatabaseIterator(object):
 
     client must have a show_databases() method
     """
+    STD_EXCLUSIONS = (
+        'information_schema',
+        'performance_schema',
+        'lost+found',
+    )
     def __init__(self, client):
         """Construct a new iterator to produce `Database` instances for the
         database requested by the __call__ method.
@@ -256,7 +261,7 @@ class DatabaseIterator(object):
 
     def __call__(self):
         for name in self.client.show_databases():
-            if name not in ('information_schema', 'lost+found'):
+            if name not in self.STD_EXCLUSIONS:
                 yield Database(name)
 
 

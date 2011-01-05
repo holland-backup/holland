@@ -4,19 +4,19 @@ Utility functions
 """
 
 # Functions added here should really be as portable as possible
-# and generally useful. 
+# and generally useful.
 
 import os
 import sys
 import logging
- 
+
 LOGGER = logging.getLogger(__name__)
 
 def ensure_dir(dir_path):
     """
     Ensure a directory path exists (by creating it if it doesn't).
     """
-    
+
     if not os.path.exists(dir_path):
         try:
             os.makedirs(dir_path)
@@ -31,15 +31,15 @@ def ensure_dir(dir_path):
 
 def protected_path(path):
     """
-    Take a path, and if the file/dir exist pass back a protected path 
+    Take a path, and if the file/dir exist pass back a protected path
     (suffixed).
-    
+
     Returns:
-    
+
         string = new file path
-    
+
     Example:
-    
+
         >>> mypath = '/tmp'
         >>> new_path = helpers.protected_path(mypath)
         >>> new_path
@@ -111,7 +111,7 @@ def relpath(origin, dest):
 
 def getmount(path):
     """Return the mount point of a path
-    
+
     :param path: path to find the mountpoint for
 
     :returns: str mounpoint path
@@ -140,7 +140,7 @@ def disk_free(target_path):
     Path must exist.
     This method does not take into account quotas
 
-    returns the size in bytes potentially available 
+    returns the size in bytes potentially available
     to a non privileged user
     """
     path = getmount(target_path)
@@ -150,13 +150,16 @@ def disk_free(target_path):
 def directory_size(path):
     """
     Find the size of all files in a directory, recursively
-    
+
     Returns the size in bytes on success
     """
     from os.path import join, getsize
     result = 0
     for root, dirs, files in os.walk(path):
         for name in files:
-            sz = getsize(join(root,name))
-            result = result + sz
+            try:
+                sz = getsize(join(root,name))
+                result = result + sz
+            except OSError, exc:
+                pass
     return result

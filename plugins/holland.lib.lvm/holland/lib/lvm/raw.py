@@ -87,8 +87,8 @@ def lvs(*volume_groups):
         '--options=%s' % ','.join(LVS_ATTR),
     ]
     lvs_args.extend(list(volume_groups))
-    process = Popen(lvs_args, 
-                    stdout=PIPE, 
+    process = Popen(lvs_args,
+                    stdout=PIPE,
                     stderr=PIPE,
                     preexec_fn=os.setsid,
                     close_fds=True)
@@ -103,8 +103,7 @@ def lvs(*volume_groups):
 def parse_lvm_format(keys, values):
     """Convert LVM tool output into a dictionary"""
     stream = StringIO(values)
-    kwargs = dict(delimiter=',', skipinitialspace=True)
-    for row in csv.reader(stream, **kwargs):
+    for row in csv.reader(stream, delimiter=',', skipinitialspace=True):
         yield dict(zip(keys, row))
 
 def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
@@ -127,6 +126,7 @@ def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
         lvcreate_args.insert(-1, '--chunksize')
         lvcreate_args.insert(-1, chunksize)
 
+    LOG.debug("%s", list2cmdline(lvcreate_args))
     process = Popen(lvcreate_args,
                     stdout=PIPE,
                     stderr=PIPE,
@@ -135,13 +135,13 @@ def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
 
     stdout, stderr = process.communicate()
 
-    for line in str(stdout).splitlines():
+    for line in stdout.splitlines():
         if not line:
             continue
-        LOG.debug("%s : %s", list2cmdline(lvcreate_args), line)
+        LOG.debug("lvcreate: %s", line)
 
     if process.returncode != 0:
-        raise LVMCommandError(list2cmdline(lvcreate_args), 
+        raise LVMCommandError(list2cmdline(lvcreate_args),
                               process.returncode,
                               str(stderr).strip())
 
@@ -171,8 +171,8 @@ def lvremove(lv_path):
         LOG.debug("%s : %s", list2cmdline(lvremove_args), line)
 
     if process.returncode != 0:
-        raise LVMCommandError(list2cmdline(lvremove_args), 
-                              process.returncode, 
+        raise LVMCommandError(list2cmdline(lvremove_args),
+                              process.returncode,
                               str(stderr).strip())
 
 
@@ -185,9 +185,11 @@ def blkid(*devices):
     """
     blkid_args = [
         'blkid',
+        '-c', '/dev/null',
     ]
-    blkid_args.extend(list(devices))
-    
+
+    blkid_args.extend([os.path.realpath(dev) for dev in devices])
+
     process = Popen(blkid_args,
                     stdout=PIPE,
                     stderr=PIPE,
@@ -209,7 +211,7 @@ def parse_blkid_format(text):
     values_cre = re.compile(r'(?P<LABEL>[A-Z_]+)[=]"(?P<VALUE>[^"]+)')
     for line in text.splitlines():
         device, values = blkid_cre.match(line).group('device', 'values')
-        key_values = [(key.lower(), value) for key, value 
+        key_values = [(key.lower(), value) for key, value
                                             in values_cre.findall(values)]
         yield dict(key_values, device=device)
 
@@ -229,7 +231,7 @@ def mount(device, path, options=None, vfstype=None):
 
     process = Popen(mount_args,
                     stdout=PIPE,
-                    stderr=STDOUT,
+                    stderr=PIPE,
                     preexec_fn=os.setsid,
                     close_fds=True)
     stdout, stderr = process.communicate()
@@ -245,9 +247,9 @@ def umount(*path):
 
     :raises: LVMCommandError
     """
-    process = Popen(['umount'] + list(path), 
-                    stdout=PIPE, 
-                    stderr=PIPE, 
+    process = Popen(['umount'] + list(path),
+                    stdout=PIPE,
+                    stderr=PIPE,
                     preexec_fn=os.setsid,
                     close_fds=True)
 

@@ -69,7 +69,7 @@ class Backup(Command):
         runner.register_cb('post-backup', report_low_space)
 
         error = 1
-        LOG.info("--- Starting backup run ---")
+        LOG.info("--- Starting %s run ---", opts.dry_run and 'dry' or 'backup')
         for name in backupsets:
             try:
                 config = hollandcfg.backupset(name)
@@ -83,18 +83,18 @@ class Backup(Command):
                 lock = Lock(config.filename)
                 try:
                     lock.acquire()
-                    LOG.info("Acquired lock %s : %r", lock.path, lock.lock.name)
+                    LOG.info("Acquired lock %s : '%s'", lock.path, lock.lock.name)
                 except LockError:
                     LOG.error("Failed to acquire lock on backupset %s (%s)",
                                 name, config.filename)
-                                
+
                     break
 
             try:
                 try:
                     runner.backup(name, config, opts.dry_run)
                 except BackupError, exc:
-                    LOG.error("Backup failed: %s", exc)
+                    LOG.error("Backup failed: %s", exc.args[0])
                     break
                 except ConfigError, exc:
                     break
@@ -105,7 +105,7 @@ class Backup(Command):
                     LOG.info("Released lock %s", lock.path)
         else:
             error = 0
-        LOG.info("--- Ending backup run ---")
+        LOG.info("--- Ending %s run ---", opts.dry_run and 'dry' or 'backup')
         return error
 
 def purge_backup(event, entry):
@@ -139,13 +139,14 @@ class PurgeManager(object):
                         "Setting backups-to-keep to 1")
             retention_count = 1
         self.purge_backupset(backupset, retention_count)
+        backupset.update_symlinks()
 
     def purge_backupset(self, backupset, retention_count):
         purge_count = 0
         for backup in backupset.purge(retention_count):
             purge_count += 1
             LOG.info("Purged %s", backup.name)
-        
+
         if purge_count == 0:
             LOG.info("No backups purged")
         else:
@@ -159,6 +160,6 @@ def report_low_space(event, entry):
                     entry.path,
                     getmount(entry.path))
         LOG.warning("%s of %s [%.2f%%] remaining",
-                    format_bytes(free_space), 
+                    format_bytes(free_space),
                     format_bytes(total_space),
                     (float(free_space) / total_space)*100)

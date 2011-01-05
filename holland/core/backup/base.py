@@ -1,10 +1,13 @@
 import os
 import sys
 import time
+import errno
 import logging
 from holland.core.plugin import PluginLoadError, load_backup_plugin
 from holland.core.util.path import directory_size, disk_free
 from holland.core.util.fmt import format_bytes, format_interval
+
+MAX_SPOOL_RETRIES = 5
 
 LOG = logging.getLogger(__name__)
 
@@ -35,7 +38,7 @@ def load_plugin(name, config, path, dry_run):
         try:
             plugin_cls = load_backup_plugin(config['holland:backup']['plugin'])
         except KeyError, exc:
-            raise BackupError("No plugin defined for backupset '%s'.", name) 
+            raise BackupError("No plugin defined for backupset '%s'.", name)
         except PluginLoadError, exc:
             raise BackupError(str(exc))
 
@@ -48,9 +51,9 @@ def load_plugin(name, config, path, dry_run):
         except (KeyboardInterrupt, SystemExit):
             raise
         except Exception, exc:
-            LOG.debug("Error while initializing %r : %s", 
+            LOG.debug("Error while initializing %r : %s",
                       plugin_cls, exc, exc_info=True)
-            raise BackupError("Error initializing %s plugin: %s" % 
+            raise BackupError("Error initializing %s plugin: %s" %
                               (config['holland:backup']['plugin'],
                                str(exc))
                              )
@@ -74,30 +77,44 @@ class BackupRunner(object):
                 raise BackupError(str(sys.exc_info()[1]))
 
     def backup(self, name, config, dry_run=False):
-        """Run a backup for the named backupset using the provided 
+        """Run a backup for the named backupset using the provided
         configuration
 
         :param name: name of the backupset
         :param config: dict-like object providing the backupset configuration
-        
+
         :raises: BackupError if a backup fails
         """
-        
-        spool_entry = self.spool.add_backup(name)
+
+        for i in xrange(MAX_SPOOL_RETRIES):
+            try:
+                spool_entry = self.spool.add_backup(name)
+                break
+            except OSError, exc:
+                if exc.errno != errno.EEXIST:
+                    raise BackupError("Failed to create spool: %s" % exc)
+                sys.exc_clear()
+                LOG.debug("Failed to create spool.  Retrying in %d seconds.", i+1)
+                time.sleep(i+1)
+        else:
+            raise BackupError("Failed to create a new backup directory for %s" % name)
+
         spool_entry.config.merge(config)
         spool_entry.validate_config()
 
+        if dry_run:
+            # always purge the spool
+            self.register_cb('post-backup',
+                             lambda *args, **kwargs: spool_entry.purge())
+
         plugin = load_plugin(name,
-                             spool_entry.config, 
-                             spool_entry.path, 
+                             spool_entry.config,
+                             spool_entry.path,
                              dry_run)
 
         spool_entry.config['holland:backup']['start-time'] = time.time()
         self.apply_cb('pre-backup', spool_entry)
 
-        if not dry_run:
-            spool_entry.prepare()
-    
         try:
             estimated_size = self.check_available_space(plugin)
             LOG.info("Starting backup[%s] via plugin %s",
@@ -120,7 +137,7 @@ class BackupRunner(object):
                 LOG.info("%.2f%% of estimated size %s",
                      (float(final_size) / estimated_size)*100.0,
                      format_bytes(estimated_size))
-                     
+
             spool_entry.config['holland:backup']['on-disk-size'] = final_size
             spool_entry.flush()
 
@@ -131,9 +148,12 @@ class BackupRunner(object):
             LOG.error("Backup failed after %s",
                       format_interval(stop_time - start_time))
         else:
-            LOG.info("Backup completed in %s", 
+            LOG.info("Backup completed in %s",
                      format_interval(stop_time - start_time))
 
+
+        if dry_run:
+            spool_entry.purge()
 
         if sys.exc_info() != (None, None, None):
             self.apply_cb('backup-failure', spool_entry)
@@ -149,7 +169,7 @@ class BackupRunner(object):
         config = plugin.config['holland:backup']
         adjustment_factor = config['estimated-size-factor']
         adjusted_bytes_required = (estimated_bytes_required*adjustment_factor)
-                                   
+
         if adjusted_bytes_required != estimated_bytes_required:
             LOG.info("Adjusting estimated size by %.2f to %s",
                      adjustment_factor,

@@ -129,6 +129,7 @@ def purge_backupset(backupset, force=False, all_backups=False):
             LOG.info("Purged %d backup%s", count, 's'[0:bool(count)])
     else:
         LOG.info("Skipping purge in dry-run mode.")
+    backupset.update_symlinks()
 
 def purge_backup(backup, force=False):
     """Purge a single backup
@@ -144,3 +145,4 @@ def purge_backup(backup, force=False):
     else:
         backup.purge()
         LOG.info("Purged %s", backup.name)
+	backup.backupset.update_symlinks()

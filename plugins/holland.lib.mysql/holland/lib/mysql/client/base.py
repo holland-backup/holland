@@ -190,10 +190,14 @@ class MySQLClient(object):
         :param database: database to extract metadata from
         :returns: list of dicts, one dict per table
         """
-        if self.server_version() < (5,1):
-            return self._show_table_metadata50(database)
-        else:
-            return self._show_table_metadata51(database)
+        try:
+            if self.server_version() < (5,1):
+                return self._show_table_metadata50(database)
+            else:
+                return self._show_table_metadata51(database)
+        except MySQLError, exc:
+            exc.args = (exc.args[0], exc.args[1].decode('utf8'))
+            raise
 
     def show_tables(self, database, full=False):
         """List tables in the given database
@@ -296,9 +300,11 @@ class MySQLClient(object):
         cursor.close()
         return result
 
-    def stop_slave(self):
+    def stop_slave(self, sql_thread_only=False):
         """Run STOP SLAVE on the connected MySQL instance"""
         sql = "STOP SLAVE"
+        if sql_thread_only:
+            sql += " SQL_THREAD"
         cursor = self.cursor()
         result = cursor.execute(sql)
         cursor.close()
@@ -427,7 +433,8 @@ def connect(config, client_class=AutoMySQLClient):
     # map standard my.cnf parameters to
     # what MySQLdb.connect expects
     # http://mysql-python.sourceforge.net/MySQLdb.html#mysqldb
-    CNF_TO_MYSQLDB = {
+    #FIXME: SSL is more complicated than just a single param string
+    cnf_to_mysqldb = {
         'user' : 'user', # same
         'password' : 'passwd', # weird
         'host' : 'host', # same
@@ -437,15 +444,21 @@ def connect(config, client_class=AutoMySQLClient):
         'compress' : 'compress'
     }
 
+    value_conv = {
+        'port' : int
+    }
+
     args = {}
     for key in config:
         # skip undefined values
-        if config[key] is None:
+        if config.get(key) is None:
             continue
-        # convert my.cnf parameters to what MySQLdb expects
-        if key in CNF_TO_MYSQLDB:
-            args[CNF_TO_MYSQLDB[key]] = config[key]
-        else:
+        try:
+            # normalize the value. port => int
+            value = value_conv.get(key, str)(config[key])
+            # convert my.cnf parameters to what MySQLdb expects
+            args[cnf_to_mysqldb[key]] = value
+        except KeyError:
             LOG.warn("Skipping unknown parameter %s", key)
     # also, always use utf8
     return client_class(charset='utf8', **args)
