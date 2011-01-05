@@ -27,6 +27,7 @@ class SQLitePlugin(object):
         self.target_directory = target_directory
         self.dry_run = dry_run
         self.invalid_databases = []
+        self.databases = []
         
         LOG.info("Validating config: %s", self.name)
         self.config.validate_config(CONFIGSPEC)
@@ -45,6 +46,10 @@ class SQLitePlugin(object):
                 "SQLite binary [%s] doesn't exist!" % self.sqlite_bin    
                 
         for db in self.config['sqlite']['databases']:
+            # sometimes picks up empty string ('')
+            if not db:
+                continue
+                
             path = os.path.abspath(os.path.expanduser(db))
             if not os.path.exists(path):
                 LOG.error("SQLite database [%s] doesn't exist!" % path)
@@ -60,15 +65,19 @@ class SQLitePlugin(object):
             if process.returncode != 0:
                 LOG.error(stderroutput)
                 self.invalid_databases.append(db)
+            else:
+                self.databases.append(db)
 
-                                
+        if len(self.databases) == 0 and len(self.invalid_databases) == 0:
+            raise BackupError, "No SQLite databases to backup!"
+            
     def estimate_backup_size(self):
         """
         Return total estimated size of all databases we are backing up (does 
         not account for post-compression).
         """
         total_size = 0
-        for db in self.config['sqlite']['databases']:
+        for db in self.databases:
             if db in self.invalid_databases:
                 continue
             path = os.path.abspath(os.path.expanduser(db))
@@ -84,7 +93,7 @@ class SQLitePlugin(object):
         zopts = (self.config['compression']['method'], 
                  int(self.config['compression']['level']))
         LOG.info("SQLite binary is [%s]" % self.sqlite_bin)         
-        for db in self.config['sqlite']['databases']:
+        for db in self.databases:
             path = os.path.abspath(os.path.expanduser(db))
             
             if db in self.invalid_databases:
