@@ -66,3 +66,8 @@ holland-xtrabackup
 holland-sqlite
 ++++++++++++++
 - add missing inline compression option.
+
+
+holland-pgdump
+++++++++++++++
+- Added holland-pgdump plugin (Contribution from Micah Yoder)
