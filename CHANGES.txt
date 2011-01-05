@@ -61,3 +61,8 @@ holland-xtrabackup
   this was only logged to xtrabackup.log in the backup directory.
   (Fixes launchpad bug #671971)
 - holland-xtrabackup should now be built by default in contrib/holland.spec
+
+
+holland-sqlite
+++++++++++++++
+- add missing inline compression option.
