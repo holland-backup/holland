@@ -24,6 +24,11 @@ class BackupManager(AbstractBackupManager):
         self.post_backup = Signal()
 
     def dry_run(self, job):
+        """Dry-run through the backup process
+
+        :param job: ``holland.core.backup.BackupJob`` instance
+        :raises BackupError:
+        """
         plugin = self.setup(job)
         try:
             self.dry_run(plugin)
@@ -36,7 +41,8 @@ class BackupManager(AbstractBackupManager):
     def run(self, job):
         """Run a backup job
 
-        :raises: BackupError on failure
+        :param job: ``holland.core.backup.BackupJob`` instance
+        :raises BackupError: on failure
         """
         plugin = self.setup(job)
         try:
@@ -47,7 +53,7 @@ class BackupManager(AbstractBackupManager):
             except:
                 pass
 
-    def setup(self, job):
+    def _setup(self, job):
         "Setup a plugin for a backup run"
         plugincls = self.load_plugin(job)
         plugin = self.init_plugin(plugincls, job)
@@ -55,7 +61,7 @@ class BackupManager(AbstractBackupManager):
         return plugin
 
     #@staticmethod
-    def load_plugin(job):
+    def _load_plugin(job):
         """Load the plugin associated with the given job
 
         :raises: BackupError on error
@@ -63,19 +69,19 @@ class BackupManager(AbstractBackupManager):
         name = job.config['holland:backup']['plugin']
         plugincls = load_plugin('holland.backup', name)
         return plugincls(job)
-    load_plugin = staticmethod(load_plugin)
+    _load_plugin = staticmethod(_load_plugin)
 
     #@staticmethod
-    def init_plugin(plugincls, job):
+    def _init_plugin(plugincls, job):
         """Initialize a plugin by calling its constructor"""
         try:
             return plugincls(job)
         except:
             exc = sys.exc_info()[1]
             raise BackupError(exc)
-    init_plugin = staticmethod(init_plugin)
+    _init_plugin = staticmethod(_init_plugin)
 
-    def setup_plugin(self, plugin):
+    def _setup_plugin(self, plugin):
         """Run through a plugin's setup method
 
         :raises: BackupError when plugin.setup() raises an unexpected runtime
@@ -91,7 +97,7 @@ class BackupManager(AbstractBackupManager):
         self.pre_backup.send_robust(sender=self, plugin=plugin)
 
     #@staticmethod
-    def backup(plugin, path):
+    def _backup(plugin, path):
         """Run a plugin's backup() method
 
         :raises: BackupError on failure
@@ -103,9 +109,9 @@ class BackupManager(AbstractBackupManager):
         except:
             exc = sys.exc_info()[1]
             raise BackupError(exc)
-    backup = staticmethod(backup)
+    _backup = staticmethod(_backup)
 
-    def finish(self, plugin):
+    def _finish(self, plugin):
         "Signal the finale of a plugin's backup lifecycle"
         plugin.teardown()
         self.post_backup.send_robust(sender=self, plugin=plugin)
