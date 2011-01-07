@@ -1,12 +1,11 @@
 import os, sys
 import logging
-from pkg_resources import get_distribution
+from holland import __version__
 from holland.cli.config import load_global_config, ValidateError
 from holland.cli.log import configure_logging, configure_basic_logger
 from holland.cli.commands import ArgparseCommand, argument, load_command, \
                                  CommandNotFoundError
 
-HOLLAND_VERSION = get_distribution('holland').version
 HOLLAND_BANNER = """
 Holland Backup v%s
 Copyright (c) 2008-2010 Rackspace US, Inc.
@@ -17,7 +16,7 @@ More info available at http://hollandbackup.org
 [[[[[[[]]]]]]] [[[[[[[]]]]]]]
 [[[[[[[]]]]]]] [[[[[[[]]]]]]]
 
-""" % HOLLAND_VERSION
+""" % __version__
 
 LOG = logging.getLogger(__name__)
 
