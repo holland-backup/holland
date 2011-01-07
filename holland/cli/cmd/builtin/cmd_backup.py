@@ -1,5 +1,6 @@
 import os, sys
-from holland.core import BackupManager, BackupJob, BackupError, BackupSpool
+from holland.core import BackupManager, BackupJob, BackupError, BackupSpool, \
+                         PluginError
 from holland.cli.cmd.base import ArgparseCommand, argument
 from holland.cli.config import load_backup_config
 
@@ -39,10 +40,17 @@ class Backup(ArgparseCommand):
                 path += '.conf'
             try:
                 config = load_backup_config(path)
+            except PluginError, exc:
+                self.stderr("Failed to load plugin: %s",
+                            exc)
+                return 1
             except IOError, exc:
                 self.stderr("Failed to load config %s: %s",
                             path, exc)
                 return 1
+
+            name = os.path.splitext(os.path.basename(path))[0]
+
             try:
                 job = BackupJob(name, config, spool)
                 run_backup(job)
