@@ -49,7 +49,7 @@ def build_snapshot(config, logical_volume):
                  snapshot_size)
         if snapshot_size < 1:
             raise BackupError("Insufficient free extents on %s "
-                              "to create snapshot (free extents = %d)" %
+                              "to create snapshot (free extents = %s)" %
                               (logical_volume.device_name(),
                               logical_volume.vg_free_count))
     else:
