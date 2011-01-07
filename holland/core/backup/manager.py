@@ -29,7 +29,7 @@ class BackupManager(AbstractBackupManager):
         :param job: ``holland.core.backup.BackupJob`` instance
         :raises BackupError:
         """
-        plugin = self.setup(job)
+        plugin = self._setup(job)
         try:
             self.dry_run(plugin)
         finally:
@@ -44,7 +44,7 @@ class BackupManager(AbstractBackupManager):
         :param job: ``holland.core.backup.BackupJob`` instance
         :raises BackupError: on failure
         """
-        plugin = self.setup(job)
+        plugin = self._setup(job)
         try:
             self.backup(plugin)
         finally:
@@ -55,8 +55,8 @@ class BackupManager(AbstractBackupManager):
 
     def _setup(self, job):
         "Setup a plugin for a backup run"
-        plugincls = self.load_plugin(job)
-        plugin = self.init_plugin(plugincls, job)
+        plugincls = self._load_plugin(job)
+        plugin = self._init_plugin(plugincls, job)
         self.setup_plugin(plugin)
         return plugin
 
@@ -67,15 +67,14 @@ class BackupManager(AbstractBackupManager):
         :raises: BackupError on error
         """
         name = job.config['holland:backup']['plugin']
-        plugincls = load_plugin('holland.backup', name)
-        return plugincls(job)
+        return load_plugin('holland.backup', name)
     _load_plugin = staticmethod(_load_plugin)
 
     #@staticmethod
     def _init_plugin(plugincls, job):
         """Initialize a plugin by calling its constructor"""
         try:
-            return plugincls(job)
+            return plugincls(job.name)
         except:
             exc = sys.exc_info()[1]
             raise BackupError(exc)
