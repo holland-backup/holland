@@ -1,6 +1,6 @@
 import os, sys
 from holland.core import BackupManager, BackupJob, BackupError, BackupSpool
-from holland.cli.commands.base import ArgparseCommand, argument
+from holland.cli.cmd.base import ArgparseCommand, argument
 from holland.cli.config import load_backup_config
 
 class Backup(ArgparseCommand):
@@ -46,10 +46,8 @@ class Backup(ArgparseCommand):
             try:
                 job = BackupJob(name, config, spool)
                 run_backup(job)
-                print "OKAY?"
             except BackupError, exc:
                 self.stderr("Failed backup '%s': %s", name, exc)
-                print "ARGH"
                 return 1
         else:
             return 0

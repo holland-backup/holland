@@ -3,7 +3,7 @@ import logging
 from holland import __version__
 from holland.cli.config import load_global_config, ValidateError
 from holland.cli.log import configure_logging, configure_basic_logger
-from holland.cli.commands import ArgparseCommand, argument, load_command, \
+from holland.cli.cmd import ArgparseCommand, argument, load_command, \
                                  CommandNotFoundError
 
 HOLLAND_BANNER = """

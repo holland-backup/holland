@@ -1,4 +1,4 @@
-from holland.cli.commands.base import ArgparseCommand, argument
+from holland.cli.cmd.base import ArgparseCommand, argument
 
 class Purge(ArgparseCommand):
     name = 'purge'

@@ -1,4 +1,6 @@
-from holland.cli.commands.base import ArgparseCommand, argument
+"""holland help command"""
+
+from holland.cli.cmd.base import ArgparseCommand, argument
 from holland.core.plugin import iterate_plugins
 
 class Help(ArgparseCommand):
@@ -27,7 +29,7 @@ class Help(ArgparseCommand):
     epilog = property(epilog)
 
     def execute(self, namespace):
-        from holland.cli.commands import load_command
+        from holland.cli.cmd import load_command
         if namespace.command:
             cmd = load_command('holland.commands', namespace.command)
         else:

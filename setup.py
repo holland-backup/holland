@@ -37,13 +37,13 @@ setup(
 
     # Holland subcommands
     [holland.commands]
-    help          = holland.cli.commands:Help
-    listplugins   = holland.cli.commands:ListPlugins
-    listcommands  = holland.cli.commands:ListCommands
-    listbackups   = holland.cli.commands:ListBackups
-    backup        = holland.cli.commands:Backup
-    mk-config     = holland.cli.commands:MakeConfig
-    purge         = holland.cli.commands:Purge
+    help          = holland.cli.cmd:Help
+    listplugins   = holland.cli.cmd:ListPlugins
+    listcommands  = holland.cli.cmd:ListCommands
+    listbackups   = holland.cli.cmd:ListBackups
+    backup        = holland.cli.cmd:Backup
+    mk-config     = holland.cli.cmd:MakeConfig
+    purge         = holland.cli.cmd:Purge
     """,
     namespace_packages=['holland', 'holland.backup', 'holland.lib'],
     **extra

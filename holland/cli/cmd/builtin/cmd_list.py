@@ -2,7 +2,7 @@
 
 import logging
 from holland.core.plugin import iterate_plugins
-from holland.cli.commands.base import ArgparseCommand, argument
+from holland.cli.cmd.base import ArgparseCommand, argument
 
 LOG = logging.getLogger(__name__)
 

@@ -1,9 +1,9 @@
 """Holland CLI pluggable command support"""
 import logging
 from holland.core.plugin import iterate_plugins
-from holland.cli.commands.base import *
-from holland.cli.commands.builtin import *
-from holland.cli.commands.error import CommandNotFoundError
+from holland.cli.cmd.base import *
+from holland.cli.cmd.builtin import *
+from holland.cli.cmd.error import CommandNotFoundError
 
 LOG = logging.getLogger(__name__)
 
