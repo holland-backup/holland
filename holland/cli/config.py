@@ -7,7 +7,7 @@ LOG = logging.getLogger(__name__)
 
 cli_configspec = """
 [holland]
-backup-directory = string(default=None)
+backup-directory = string(default='.')
 backupsets       = force_list(default=())
 umask            = octal(default=None)
 path             = string(default=None)
@@ -71,7 +71,7 @@ def load_backup_config(path, provider=None):
         provider_cfg.merge(backup_cfg)
         backup_cfg = provider_cfg
 
-    plugincls = plugin.load_plugin('holland.backup',
-                                   backup_cfg['holland:backup']['plugin'])
+    plugincls = load_plugin('holland.backup',
+                            backup_cfg['holland:backup']['plugin'])
     configspec = plugincls.configspec()
     return load_config(backup_cfg, configspec)
