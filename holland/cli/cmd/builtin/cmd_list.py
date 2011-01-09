@@ -26,6 +26,18 @@ class ListCommands(ArgparseCommand):
             self.stderr("%-20s - %s", cmd.name + aliases, cmd.summary)
         return 0
 
+    #@classmethod
+    def plugin_info(cls):
+        return PluginInfo(
+            name=self.name,
+            summary=self.summary,
+            description=self.description,
+            author='Rackspace',
+            version='1.1.0',
+            holland_version='1.1.0'
+        )
+    plugin_info = classmethod(plugin_info)
+
 class ListPlugins(ArgparseCommand):
     name = 'list-plugins'
     summary = 'List available holland plugins'
@@ -47,6 +59,18 @@ class ListPlugins(ArgparseCommand):
             self.stderr("[backup]  %-20s - %s", backup_plugin.name, backup_plugin.summary)
         return 42
 
+    #@classmethod
+    def plugin_info(self):
+        return PluginInfo(
+            name=self.name,
+            summary=self.summary,
+            description=self.description,
+            author='Rackspace',
+            version='1.1.0',
+            holland_version='1.1.0'
+        )
+    plugin_info = classmethod(plugin_info)
+
 class ListBackups(ArgparseCommand):
     name = 'list-backups'
     aliases = ['lb']
@@ -56,5 +80,20 @@ class ListBackups(ArgparseCommand):
     '''
 
     def execute(self, namespace):
-        self.stderr("Not implemented")
-        return 1
+        from holland.core import BackupSpool
+        spool = BackupSpool(self.config['holland:backup']['backup-directory'])
+        for backup in spool:
+            self.stderr("-12s: %s", backup.name, backup.path)
+        return 0
+
+    #@classmethod
+    def plugin_info(self):
+        return PluginInfo(
+            name=self.name,
+            summary=self.summary,
+            description=self.description,
+            author='Rackspace',
+            version='1.1.0',
+            holland_version='1.1.0'
+        )
+    plugin_info = classmethod(plugin_info)

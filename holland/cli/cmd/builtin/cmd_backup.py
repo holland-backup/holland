@@ -54,3 +54,13 @@ class Backup(ArgparseCommand):
 
         # should never reach here
         return 1
+
+    def plugin_info(self):
+        return PluginInfo(
+            name=self.name,
+            summary=self.summary,
+            description=self.description,
+            author='Rackspace',
+            version='1.1.0',
+            holland_version='1.1.0'
+        )
