@@ -2,3 +2,10 @@
 
 class BackupError(Exception):
     """Base exception all backup errors derive from"""
+
+    def __init__(self, message, chained_exc):
+        self.message = message
+        self.chained_exc = chained_exc
+
+    def __str__(self):
+        return "%s: %s" % (self.message, self.chained_exc)
