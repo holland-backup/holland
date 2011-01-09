@@ -4,12 +4,26 @@ import sys
 import logging
 from textwrap import dedent
 from argparse import RawDescriptionHelpFormatter
+from holland.core import BasePlugin
 from util import StreamWriter, SafeArgumentParser, ArgparseError
 
 LOG = logging.getLogger(__name__)
 
-class BaseCommand(object):
+class BaseCommand(BasePlugin):
     """Basic command support"""
+
+    #: Name of this command
+    #: :type: str
+    name = ''
+
+    #: Textual summary of this command
+    #: :type: str
+    summary = ''
+
+    #: Textual description of this command
+    #: :type: str
+    description = ''
+
     def __init__(self, parent_parser=None, config=None):
         self.parent_parser = parent_parser
         self.config = config
@@ -19,29 +33,9 @@ class BaseCommand(object):
     # name aliases this command is also known by
     aliases = ()
 
-    #@property
-    def name(self):
-        """Main name of this command"""
-        raise NotImplementedError()
-    name = property(name)
-
-    #@property
-    def summary(self):
-        """Simple one-line string summarizing this command"""
-        raise NotImplementedError()
-    summary = property(summary)
-
-    #@property
-    def description(self):
-        """Text block describing this command"""
-        raise NotImplementedError()
-    description = property(description)
-
-    #@property
     def help(self):
         """Text documenting this command"""
         raise NotImplementedError()
-    help = property(help)
 
     def __call__(self, args, context=None):
         raise NotImplementedError()
@@ -57,6 +51,7 @@ class BaseCommand(object):
         """Check whether this command should match a given name"""
         return cls().name == name or name in cls.aliases
     matches = classmethod(matches)
+
 
 def argument(*args, **kwargs):
     """Simple wrapper for argparse parameters"""
