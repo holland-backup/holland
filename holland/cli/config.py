@@ -9,7 +9,7 @@ cli_configspec = """
 [holland]
 backup-directory = string(default='.')
 backupsets       = force_list(default=())
-umask            = octal(default=None)
+umask            = octal(default='0007')
 path             = string(default=None)
 tmpdir           = string(default=None)
 
@@ -18,6 +18,11 @@ file             = string(default='/var/log/holland/holland.log')
 format           = string(default='[%(levelname)s] %(message)s')
 level            = log_level(default=info)
 """.strip().splitlines()
+
+class HollandConfig(ConfigObj):
+    def validate_config(self, configspec):
+        self._handle_configspec(configspec)
+        self.validate(Validator(), copy=True)
 
 def is_octal(value):
     try:
@@ -71,7 +76,4 @@ def load_backup_config(path, provider=None):
         provider_cfg.merge(backup_cfg)
         backup_cfg = provider_cfg
 
-    plugincls = load_plugin('holland.backup',
-                            backup_cfg['holland:backup']['plugin'])
-    configspec = plugincls.configspec()
-    return load_config(backup_cfg, configspec)
+    return HollandConfig(backup_cfg)
