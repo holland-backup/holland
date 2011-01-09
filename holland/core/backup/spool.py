@@ -88,8 +88,8 @@ class BackupSpool(object):
             if exc.errno != errno.EEXIST:
                 raise
 
-        backupstore_path = os.path.join(self.root, name, storename)
-        tempfile.mkdtemp(prefix=storename + '.', dir=os.path.join(self.root, name))
+        backupstore_path = tempfile.mkdtemp(prefix=storename + '.',
+                                            dir=os.path.join(self.root, name))
         return BackupStore(name, backupstore_path, self)
 
     def list_backups(self, name):
