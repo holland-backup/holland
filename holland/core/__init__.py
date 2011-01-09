@@ -1,6 +1,17 @@
 """Holland core API"""
 
-from holland.core.plugin import load_plugin, iterate_plugins, PluginError
-from holland.core.spool import BackupSpool, BackupStore, SpoolError
-from holland.core.backup import BackupManager, BackupPlugin, BackupJob, \
-                                BackupError
+from holland.core.plugin import load_plugin, iterate_plugins, BasePlugin, PluginError
+from holland.core.backup import *
+
+__all__ = [
+    'BasePlugin',
+    'load_plugin',
+    'iterate_plugins',
+    'PluginError',
+    'BackupSpool',
+    'BackupStore',
+    'BackupRunner',
+    'BackupJob',
+    'BackupPlugin',
+    'BackupError',
+]
