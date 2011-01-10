@@ -2,6 +2,12 @@
 CHANGES
 =======
 
+LP# refers to holland launchpad bugs here: 
+http://launchpad.net/holland-backup
+
+GH# referes to the deprecated github bug tracker here:
+https://github.com/holland-backup/holland/issues
+
 1.0.6 - ?
 ---------
 holland
@@ -19,7 +25,7 @@ holland
 - holland.conf now accepts a tmpdir option for environments where
   manipulating TEMPDIR environment variable is not convenient
 - holland backup --help is now consistent with holland help backup
-  (Fixes launchpad bug #677716)
+  (Fixes LP#677716)
 - holland now warns about unknown options in config files
 - The example plugin has been deprecated in favor of the holland-random
   plugin, which provides a more useful starting example
@@ -27,8 +33,8 @@ holland
   trace would be printed on stderr.  As of 1.0.6 this is only done in when
   the logging level is set to 'debug'
 - holland backup --dry-run previously failed for mysqldump backups when 
-  per-table exclusions were specified. (Fixes github issue #60)
-- config files are now read as utf8 (Fixes github #57)
+  per-table exclusions were specified. (Fixes GH#60)
+- config files are now read as utf8 (Fixes GH#57)
 
 
 holland-mysqldump
@@ -44,14 +50,16 @@ holland-mysqldump
 
 holland-mysqllvm
 ++++++++++++++++
+- when a volume group has zero free extents, an unhandled exception would be
+  thrown due to a bug in formatting the error message (Fixed LP#699795)
 - holland-mysqllvm had a bug in the example config file that would always
   maintain two backups
 - holland-mysqllvm now catches SIGHUP/SIGTERM more consistently
 - holland-mysqllvm logs error output from various commands more consistently
 - holland-mysqllvm will not create snapshot-mountpoint if it does
-  not exist (Fixes launchpad bug #671965)
+  not exist (Fixes LP#671965)
 - holland-mysqllvm previously failed to automatically mount xfs snapshots
-  with nouuid.  This is now automatically detected (Fixes github issue #61)
+  with nouuid.  This is now automatically detected (Fixes GH#61)
 - additional tests for ext3 and xfs filesystems were added to holland.lib.lvm
 
 
@@ -59,7 +67,7 @@ holland-xtrabackup
 ++++++++++++++++++
 - holland-xtrabackup now logs stderr output on a backup failure. Previously
   this was only logged to xtrabackup.log in the backup directory.
-  (Fixes launchpad bug #671971)
+  (Fixes LP#671971)
 - holland-xtrabackup should now be built by default in contrib/holland.spec
 
 
