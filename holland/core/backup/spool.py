@@ -43,6 +43,11 @@ class BackupStore(object):
         """Purge the data for this backup store"""
         shutil.rmtree(self.path)
 
+    def check_space(self, required_bytes):
+        from holland.core.util import disk_capacity
+        if disk_capacity(self.path) < required_bytes:
+            raise SpoolError("Insufficient space")
+
     #@property
     def timestamp(self):
         """Timestamp of the backup store"""
