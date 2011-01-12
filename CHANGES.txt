@@ -3,13 +3,14 @@ CHANGES
 =======
 
 LP# refers to holland launchpad bugs here: 
-http://launchpad.net/holland-backup
+http://bugs.launchpad.net/holland-backup
 
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
-1.0.6 - ?
----------
+1.0.6 - Jan 12, 2011 
+--------------------
+
 holland
 +++++++
 - holland backup better differentiates between a dry-run and normal backup
@@ -79,3 +80,5 @@ holland-sqlite
 holland-pgdump
 ++++++++++++++
 - Added holland-pgdump plugin (Contribution from Micah Yoder)
+
+
