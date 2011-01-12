@@ -86,10 +86,11 @@ class CompressionOutput(object):
             args = [cmd]
             if level:
                 args += ['-%d' % level]
-            self.pid = subprocess.Popen(args, 
-                                        stdin=subprocess.PIPE, 
-                                        stdout=self.fileobj.fileno(), 
-                                        stderr=subprocess.PIPE)
+            self.pid = subprocess.Popen(args,
+                                        stdin=subprocess.PIPE,
+                                        stdout=self.fileobj.fileno(),
+                                        stderr=subprocess.PIPE,
+                                        close_fds=True)
             self.fd = self.pid.stdin.fileno()
         self.name = path
         self.closed = False
@@ -109,11 +110,11 @@ class CompressionOutput(object):
             self.fileobj.close()
             self.fileobj = open(self.fileobj.name, 'r')
             cmp_f = open(self.name, 'w')
-            LOGGER.debug("Running %r < %r[%d] > %r[%d]", 
-                         args, self.fileobj.name, self.fileobj.fileno(), 
+            LOGGER.debug("Running %r < %r[%d] > %r[%d]",
+                         args, self.fileobj.name, self.fileobj.fileno(),
                          cmp_f.name, cmp_f.fileno())
-            pid = subprocess.Popen(args, 
-                                   stdin=self.fileobj.fileno(), 
+            pid = subprocess.Popen(args,
+                                   stdin=self.fileobj.fileno(),
                                    stdout=cmp_f.fileno())
             status = pid.wait()
             os.unlink(self.fileobj.name)
