@@ -79,7 +79,6 @@ def _mysqldb_connect(mocker, *args, **kwargs):
         if key == 'password':
             key = 'passwd'
         kwargs[key] = value
-    print "MySQLdb.connect(**%r)" % kwargs
     return MySQLdb.connect(**kwargs)
 
 if __name__ == '__main__':
