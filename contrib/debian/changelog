@@ -3,7 +3,7 @@ holland (1.0.6-1) unstable; urgency=low
   * New upstream release
   * Added holland-pgdump
 
- -- Andrew Garner <andrew.garner@rackspace.com>  Tue, 11 Jan 2010 23:05:37 -0500
+ -- Andrew Garner <andrew.garner@rackspace.com>  Tue, 11 Jan 2011 23:05:37 -0500
 
 holland (1.0.3-1) unstable; urgency=low
 
