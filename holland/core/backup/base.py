@@ -8,14 +8,10 @@ class BackupJob(object):
     """A backup job that may be created and passed to a backup manager in order
     to perform a backup"""
 
-    def __init__(self, name, config):
-        self.name = name
+    def __init__(self, plugin, config, store):
+        self.plugin = plugin
         self.config = config
-
-    @property
-    def plugin(self):
-        """Load a plugin from this backup job's config"""
-        return self.config['holland:backup']['plugin']
+        self.store = store
 
 class BackupPlugin(ConfigurablePlugin):
     """Interface that Holland Backup Plugins should conform to"""
