@@ -1,4 +1,5 @@
 from configobj import ConfigObj
+from validate import Validator
 
 class HollandConfig(ConfigObj):
     def validate_config(self, configspec, validation_functions=None):
