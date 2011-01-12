@@ -3,7 +3,7 @@
 # el4 also... which doesn't support it
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
-%{!?holland_version: %global holland_version 1.0.5}
+%{!?holland_version: %global holland_version 1.0.6}
 
 # default %%rhel to make things easier to build
 %{!?rhel: %global rhel %%(%{__sed} 's/^[^0-9]*\\([0-9]\\+\\).*/\\1/' /etc/redhat-release)}
@@ -372,7 +372,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc ChangeLog README README.plugins README.providers 
+%doc CHANGES.txt README README.plugins README.providers 
 %doc INSTALL LICENSE config/backupsets/examples/ 
 %if %{with sphinxdocs}
 %doc docs/build/html/
@@ -500,6 +500,11 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
+* Wed Jan 12 2011 BJ Dierkes <wdierkes@rackspace.com> - 1.0.6-1
+- Latest sources from upstream.  Full change log available at:
+  http://hollandbackup.org/releases/stable/1.0/CHANGES.txt
+- ChangeLog became CHANGES.txt
+
 * Tue Dec 14 2010 BJ Dierkes <wdierkes@rackspace.com> - 1.0.5-1
 - Development version
 
