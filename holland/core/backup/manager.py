@@ -55,7 +55,7 @@ class BackupManager(object):
         store = job.store
 
         try:
-            self.backup_pre.signal(job)
+            self.backup_pre.send_robust(job)
             plugin.configure(job.config)
             LOG.info("+ Configured plugin")
             plugin.setup()
@@ -63,7 +63,7 @@ class BackupManager(object):
             try:
                 store.check_space(plugin.estimate())
                 LOG.info("+ Verified free space is available")
-                LOG.info("Running backup", section=True)
+                LOG.info("Running backup")
                 plugin.backup()
             finally:
                 try:
@@ -73,9 +73,9 @@ class BackupManager(object):
                     LOG.warning("+ Error while running plugin shutdown.")
                     LOG.warning("  Please see the trace log")
         except:
-            self.backup_fail.signal(job)
+            self.backup_fail.send_robust(job)
             raise
-        self.backup_post.signal(job)
+        self.backup_post.send_robust(job)
 
     def _dry_run(self, job):
         """Dry-Run through a plugin lifecycle
