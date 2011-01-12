@@ -73,6 +73,8 @@ class MySQLDumpPlugin(object):
     """MySQLDump Backup Plugin interface for Holland"""
     CONFIGSPEC = CONFIGSPEC
 
+    name = 'mysqldump'
+
     def __init__(self, name, config, target_directory, dry_run=False):
         self.name = name
         self.config = config
