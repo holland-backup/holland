@@ -19,10 +19,16 @@ class PluginInfo(dict):
             return self[name]
         except KeyError:
             raise AttributeError('%s object has no attribute %r' %
-                                 (self.__class__.__name__, name)
+                                 (self.__class__.__name__, name))
 
 class BasePlugin(object):
     """Base class from which all Holland plugins should derive"""
+    #: name of this plugin
+    name = None
+
+    #: aliases for this plugin
+    aliases = ()
+
     def setup(self):
         """Called by a manager to allow this plugin to perform any necessary
         setup"""
