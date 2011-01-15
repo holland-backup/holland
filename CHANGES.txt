@@ -2,62 +2,52 @@
 CHANGES
 =======
 
-1.0.6 - ?
----------
-holland
-+++++++
-- holland backup better differentiates between a dry-run and normal backup
-  in logging output
-- holland mk-config now produces cleaner output and includes a --minimal
-  option to strip comments from the backupset output.
-- holland now more elegantly handles running the same backupset more than
-  once per second.  Previously this could result in a stack trace as the
-  backupset directory already exists.
-- holland now maintains newest and oldest symlinks in each backupset
-  directory pointing to the newest and oldest backup.
-  (Contribution from Micah Yoder)
-- holland.conf now accepts a tmpdir option for environments where
-  manipulating TEMPDIR environment variable is not convenient
-- holland backup --help is now consistent with holland help backup
-  (Fixes launchpad bug #677716)
-- holland now warns about unknown options in config files
-- The example plugin has been deprecated in favor of the holland-random
-  plugin, which provides a more useful starting example
-- previously when logging failed (disk space, permissions, etc.) a stack
-  trace would be printed on stderr.  As of 1.0.6 this is only done in when
-  the logging level is set to 'debug'
-- holland backup --dry-run previously failed for mysqldump backups when 
-  per-table exclusions were specified. (Fixes github issue #60)
-- config files are now read as utf8 (Fixes github #57)
+1.1.0a1
+-------
+holland.core
+++++++++++++
+- Refactored holland command line functionality from holland.core 
+  into a separate holland.cli module
+- holland.core.backports have been moved into holland.cli. Any compatibility
+  or portability concerns regarding 3rd party modules are now considered a
+  frontend responsibility
+- holland.core.commands have been reimplemented and moved into the holland.cli
+  package
+- holland.core.config has been reimplemented and moved into the holland.cli
+  package
+- Forked django.dispatch into holland.core.dispatch to provide a robust
+  and general callback mechanism.  Hooks will be implemented on top of
+  this support.
 
+holland.core.plugin
++++++++++++++++++++
+- New implementation of holland.core.plugin
+- holland.core.plugin.BasePlugin exposes a standard interface for
+  all holland plugins. holland.core framework interfaces that support 
+  plugins will now expose some subclass of holland.core.plugin.BasePlugin
+- BasePlugin.plugin_info now supports an api versioning mechanism.  Plugins
+  should now return provide an api_version attribute in their plugin_info()
+  that matches the version of holland they were designed against. See the
+  documentation for further details.
+- holland.core.plugin.PluginManager exposes a standard for loading
+  plugins.  The default implementation now abstracts away pkg_resources'
+  entrypoints via EntrypointPluginManager
+  Entrypoints have been abstracted behind a new interface in
+  holland.core.plugin.PluginManager
+
+holland.cli
++++++++++++
+- Added new holland.cli package for the holland command frontend
+- Added holland.cli.cmd package to expose a pluggable command API
+
+holland.devtools
+++++++++++++++++
+- Added new devtools package to assist with plugin development
+- Added basic python-paster template to create a new backup plugin
+  with holland:backup
 
 holland-mysqldump
 +++++++++++++++++
-- holland-mysqldump now only stops the SQL_THREAD when stop-slave is 
-  requested
-- error messages from MySQLdb are now decoded from utf8 as necessary
-- holland-mysqldump now defaults max-allowed-packet to 128M
-- holland-mysqldump now excludes performance_schema by default
-- holland-mysqldump now more reliably parses my.cnf files specified via
-  defaults-extra-files
-
-
-holland-mysqllvm
-++++++++++++++++
-- holland-mysqllvm had a bug in the example config file that would always
-  maintain two backups
-- holland-mysqllvm now catches SIGHUP/SIGTERM more consistently
-- holland-mysqllvm logs error output from various commands more consistently
-- holland-mysqllvm will not create snapshot-mountpoint if it does
-  not exist (Fixes launchpad bug #671965)
-- holland-mysqllvm previously failed to automatically mount xfs snapshots
-  with nouuid.  This is now automatically detected (Fixes github issue #61)
-- additional tests for ext3 and xfs filesystems were added to holland.lib.lvm
-
-
-holland-xtrabackup
-++++++++++++++++++
-- holland-xtrabackup now logs stderr output on a backup failure. Previously
-  this was only logged to xtrabackup.log in the backup directory.
-  (Fixes launchpad bug #671971)
-- holland-xtrabackup should now be built by default in contrib/holland.spec
+- Refactored mysqldump plugin to use the new BackupPlugin interface in 1.1
+- file-per-database now supports parallel execution controlled by the
+  mysqldump.parallelism setting (default: 1)
