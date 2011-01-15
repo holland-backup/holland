@@ -54,22 +54,21 @@ class StreamPlugin(BasePlugin):
     def __init__(self, name):
         self.name = name
 
-    #@classmethod
     def open(cls, name, method, *args, **kwargs):
         raise NotImplementedError()
-    open = classmethod(open)
 
-    #@classmethod
     def stream_info(self, name, method, *args, **kwargs):
         return StreamInfo(
             extension='gz',
             name=name + '.gz',
             description="%s -%d" % (cmd, level)
         )
-    stream_info = classmethod(stream_info)
 
 
 class StreamInfo(dict):
+    def __getattr__(self, key):
+        return self[key]
+
     def __str__(self):
         return self.description
 

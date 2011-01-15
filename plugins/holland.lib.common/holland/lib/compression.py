@@ -29,7 +29,7 @@ class CompressionStreamPlugin(StreamPlugin):
         else:
             raise StreamError("Invalid mode %r" % mode)
 
-    def info(self, filename, mode, level=None, inline=True):
+    def stream_info(self, filename, mode, level=None, inline=True):
         args = ''.join([
             self.name,
             'r' in mode and '--decompress' or '--stdout',
