@@ -67,12 +67,15 @@ class MySQLBackup(object):
     def run_all(self, databases):
         options = self.options + [
             self._lock_method(databases)
-        ] + [ db.name.encode('utf8') for db in databases ]
+        ] + [ db.name.encode('utf8') for db in databases if not db.excluded ]
 
         fileobj = self.open_sql_file('all_databases.sql', 'w')
         MySQLDump(options, fileobj).run()
 
     def run_each(self, databases, parallelism=1):
+        databases = [db for db in databases if not db.excluded]
+        if not databases:
+            raise BackupError("No databases to backup")
         if parallelism > 1:
             databases = list(databases)
             databases.sort(cmp=lambda x,y: cmp(y.size, x.size))
