@@ -2,7 +2,7 @@
 
 import os, sys
 import logging
-from holland.core.exceptions import BackupError
+from holland.core import BackupError
 from holland.backup.mysqldump.mock import MockEnvironment
 from holland.backup.mysqldump.util import *
 from holland.backup.mysqldump.runner import MySQLBackup

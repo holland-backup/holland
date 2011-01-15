@@ -86,7 +86,7 @@ def mysqldump_options_from_config(config, server_version):
     return options
 
 def generate_manifest(path, schema, config):
-    from holland.lib.compression import stream_info
+    from holland.core.stream import load_stream_plugin
     from holland.lib.safefilename import encode
     path = os.path.join(path, 'backup_data', 'MANIFEST.txt')
     method = config['compression']['method']
@@ -95,9 +95,8 @@ def generate_manifest(path, schema, config):
     try:
         for database in schema.databases:
             name = encode(database.name)[0]
-            print >> fileobj, database.name, stream_info(name,
-                                                         method=method,
-                                                         level=level)
+            stream = load_stream_plugin(method)
+            print >> fileobj, database.name, stream.format(name)
     finally:
         fileobj.close()
 
@@ -201,7 +200,7 @@ def start_slave(client):
         client.disconnect()
 
 def sql_open(base_path, config):
-    from holland.lib.compression import open_stream
+    from holland.core.stream import open_stream
     from holland.lib.safefilename import encode
     def _open(name, mode):
         name = encode(name)[0]
