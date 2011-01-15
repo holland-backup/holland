@@ -20,16 +20,17 @@ class BackupManager(object):
     >>> mgr = BackupManager('/var/spool/holland')
     >>> mgr.backup('/etc/holland/backupsets/foo.conf', dry_run=True)
     """
-    def __init__(self, spool_directory):
+    def __init__(self, spool_directory, config_dir):
         self.spool = BackupSpool(spool_directory)
+        self.config_dir = config_dir
         self.backup_pre  = Signal()
         self.backup_post = Signal()
         self.backup_fail = Signal()
 
     def backup(self, name, dry_run=False):
         """Run a backup given a backupset name"""
-        LOG.info("Backup: %s", name, extra={ 'section' : True })
-        config = load_backup_config(name)
+        LOG.info("Backup: %s", name)
+        config = load_backup_config(name, config_dir=self.config_dir)
         LOG.info("+ Loaded config %s", config.filename)
         name = os.path.splitext(os.path.basename(name))[0]
         plugincls = load_backup_plugin(config)

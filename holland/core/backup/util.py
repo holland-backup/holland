@@ -3,10 +3,12 @@
 from holland.core.config import load_config
 from holland.core.plugin import load_plugin
 
-def load_backup_config(name):
+def load_backup_config(name, config_dir=None):
     """Load a backup configuration given a name/path"""
     if not name.endswith('.conf'):
         name += '.conf'
+    if config_dir and not os.path.isabspath(name):
+        name = os.path.join(config_dir, 'backupsets', name)
     return load_config(name)
 
 def load_backup_plugin(config):

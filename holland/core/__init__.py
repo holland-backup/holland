@@ -10,8 +10,7 @@ __all__ = [
     'PluginError',
     'BackupSpool',
     'BackupStore',
-    'BackupRunner',
-    'BackupJob',
+    'BackupManager',
     'BackupPlugin',
     'BackupError',
 ]
