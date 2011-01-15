@@ -1,6 +1,9 @@
+"""Compression plugins for the holland.core.stream API"""
+
+import os
 import errno
-from tempfile import TemporaryFile
-from subprocess import Popen, PIPE
+from tempfile import TemporaryFile, mkstemp
+from subprocess import Popen, PIPE, STDOUT, check_call, CalledProcessError
 from holland.core.stream import StreamPlugin, StreamInfo, StreamError, \
                                 PluginInfo
 from holland.core.stream.base import RealFileLike
@@ -9,6 +12,7 @@ class CompressionStreamPlugin(StreamPlugin):
     name = None
     aliases = ()
     extension = ''
+
     def open(self, filename, mode, level=None, inline=True):
         if 'r' in mode:
             return ReadCommand(filename, [self.name, '--decompress'])
@@ -18,7 +22,10 @@ class CompressionStreamPlugin(StreamPlugin):
             args = [self.name, '--stdout']
             if level:
                 args += ['-%d' % abs(level)]
-            return WriteCommand(filename, args)
+            if inline:
+                return WriteCommand(filename, args)
+            else:
+                return PostCompressFile(args, filename, 'wb')
         else:
             raise StreamError("Invalid mode %r" % mode)
 
@@ -35,10 +42,31 @@ class CompressionStreamPlugin(StreamPlugin):
         )
 
 
+class PostCompressFile(file):
+    def __init__(self, argv, *args, **kwargs):
+        self.argv = argv
+        file.__init__(self, *args, **kwargs)
+
+    def close(self):
+        file.close(self)
+        try:
+            stdout, tmppath = mkstemp(dir=os.path.dirname(self.name))
+            stderr = TemporaryFile()
+            check_call(self.argv,
+                       stdin=open(self.name, 'r'),
+                       stdout=stdout,
+                       stderr=stderr,
+                       close_fds=True)
+            os.rename(tmppath, self.name)
+        except CalledProcessError, exc:
+            raise IOError("Compression command failed when closing file: %s" %
+                          exc)
+
+
 class ReadCommand(RealFileLike):
     def __init__(self, filename, argv):
         self.name = filename
-        self._fileobj = open(filename, 'r')
+        self._fileobj = open(filename, 'rb')
         self._err = TemporaryFile()
         self.process = Popen(
             list(argv),
@@ -81,7 +109,7 @@ class ReadCommand(RealFileLike):
 class WriteCommand(RealFileLike):
     def __init__(self, filename, argv):
         self.name = filename
-        self._fileobj = open(filename, 'w')
+        self._fileobj = open(filename, 'wb')
         self._err = TemporaryFile()
         try:
             self.process = Popen(
@@ -149,3 +177,4 @@ class LzmaPlugin(CompressionStreamPlugin):
         if name == 'lzma':
             name = 'xz'
         self.name = name
+
