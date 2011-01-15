@@ -44,6 +44,9 @@ setup(
     backup        = holland.cli.cmd:Backup
     mk-config     = holland.cli.cmd:MakeConfig
     purge         = holland.cli.cmd:Purge
+
+    [paste.paster_create_template]
+    holland-backup = holland.dev.paster:HollandBackupTemplate
     """,
     namespace_packages=['holland', 'holland.backup', 'holland.lib'],
     **extra
