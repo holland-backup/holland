@@ -20,6 +20,7 @@ def schema_from_config(config):
     schema = MySQLSchema()
     schema.add_database_filter(include_glob(*config['databases']))
     schema.add_database_filter(exclude_glob(*config['exclude-databases']))
+    LOG.info("+ Excluding: %s", ','.join(config['exclude-databases']))
     schema.add_table_filter(include_glob_qualified(*config['tables']))
     schema.add_table_filter(exclude_glob_qualified(*config['exclude-tables']))
     schema.add_engine_filter(include_glob(*config['engines']))
@@ -95,8 +96,9 @@ def generate_manifest(path, schema, config):
     try:
         for database in schema.databases:
             name = encode(database.name)[0]
-            stream = load_stream_plugin(method)
-            print >> fileobj, database.name, stream.format(name)
+            stream = load_stream_plugin(method)(method)
+            print >> fileobj, database.name, \
+                  stream.stream_info(name + '.sql', method).name
     finally:
         fileobj.close()
 
@@ -138,6 +140,8 @@ def refresh_schema(schema, client):
         schema.refresh(db_iter, tbl_iter)
     except MySQLError, exc:
         raise BackupError("Failed to refresh schema: %s" % exc)
+
+    LOG.info("schema.databases => %r", schema.databases)
 
 def locate_mysqldump(search_path):
     from holland.lib.which import which, WhichError
