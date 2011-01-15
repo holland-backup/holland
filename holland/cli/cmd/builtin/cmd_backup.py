@@ -25,7 +25,10 @@ class Backup(ArgparseCommand):
             try:
                 backupmgr.backup(path)
             except BackupError, exc:
-                self.stderr("Failed backup '%s': %s", path, exc)
+                if isinstance(exc.chained_exc, KeyboardInterrupt):
+                    self.stderr("Interrupted")
+                else:
+                    self.stderr("Failed backup '%s': %s", path, exc)
                 break
         else:
             return 0
