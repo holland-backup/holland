@@ -46,7 +46,7 @@ class MySQLDumpPlugin(object):
         LOG.info("+ exclusions >> %s", defaults_file)
         mysqld_version = server_version(self._client)
         argv = argv_from_config(defaults_file, self.config, mysqld_version)
-        dotsql_generator = sql_open(self.path,
+        dotsql_generator = sql_open(os.path.join(self.path, 'backup_data'),
                                     self.config['compression'])
         lock_method = lock_method_from_config(self.config)
         if lock_method:
@@ -74,9 +74,9 @@ class MySQLDumpPlugin(object):
                     generate_manifest(self.path, self._schema, self.config)
                     backup.run_each(self._schema.databases, parallelism)
                 else:
-                    backup.run_all(self._schema.database)
+                    backup.run_all(self._schema.databases)
             except:
-                LOG.exception("Failure")
+                LOG.debug("Failure(exception)", exc_info=True)
                 raise BackupError("Backup failed", sys.exc_info()[1])
         finally:
             if dry_run:
