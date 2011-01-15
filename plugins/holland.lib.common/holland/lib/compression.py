@@ -1,189 +1,151 @@
-import os
-import logging
 import errno
-import subprocess
-import which
+from tempfile import TemporaryFile
+from subprocess import Popen, PIPE
+from holland.core.stream import StreamPlugin, StreamInfo, StreamError, \
+                                PluginInfo
+from holland.core.stream.base import RealFileLike
 
-LOGGER = logging.getLogger(__name__)
+class CompressionStreamPlugin(StreamPlugin):
+    name = None
+    aliases = ()
+    extension = ''
+    def open(self, filename, mode, level=None, inline=True):
+        if 'r' in mode:
+            return ReadCommand(filename, [self.name, '--decompress'])
+        elif 'w' in mode:
+            if not filename.endswith(self.extension):
+                filename += self.extension
+            args = [self.name, '--stdout']
+            if level:
+                args += ['-%d' % abs(level)]
+            return WriteCommand(filename, args)
+        else:
+            raise StreamError("Invalid mode %r" % mode)
 
-COMPRESSION_METHODS = {
-    'gzip'  : ('gzip', '.gz'),
-    'pigz'  : ('pigz', '.gz'),
-    'bzip2' : ('bzip2', '.bz2'),
-    'lzop'  : ('lzop', '.lzo'),
-    'lzma'  : ('xz', '.xz'),
-}
+    def info(self, filename, mode, level=None, inline=True):
+        args = ''.join([
+            self.name,
+            'r' in mode and '--decompress' or '--stdout',
+            ('w' in mode and inline) and ' (inline)' or ''
+        ])
+        return StreamInfo(
+            extension=self.extension,
+            name=filename + self.extension,
+            description=args
+        )
 
-def lookup_compression(method):
-    """
-    Looks up the passed compression method in supported COMPRESSION_METHODS
-    and returns a tuple in the form of ('command_name', 'file_extension').
 
-    Arguments:
-
-    method -- A string identifier of the compression method (i.e. 'gzip').
-    """
-    try:
-        cmd, ext = COMPRESSION_METHODS[method]
-        try:
-            return which.which(cmd), ext
-        except which.WhichError, e:
-            raise OSError("No command found for compression method '%s'" %
-                    method)
-    except KeyError:
-        raise OSError("Unsupported compression method '%s'" % method)
-
-class CompressionInput(object):
-    """
-    Class to create a compressed file descriptor for reading.  Functions like
-    a standard file descriptor such as from open().
-    """
-    def __init__(self, path, mode, cmd, bufsize=1024*1024):
-        self.fileobj = open(path, 'r')
-        self.pid = subprocess.Popen([cmd, '--decompress'], 
-                                    stdin=self.fileobj.fileno(), 
-                                    stdout=subprocess.PIPE, 
-                                    bufsize=bufsize)
-        self.fd = self.pid.stdout.fileno()
-        self.name = path
-        self.closed = False
-
-    def fileno(self):
-        return self.fd
-
-    def read(self, size):
-        return os.read(self.fd, size)
-
-    def next(self):
-        return self.pid.stdout.next()
-
-    def __iter__(self):
-        return iter(self.pid.stdout)
+class ReadCommand(RealFileLike):
+    def __init__(self, filename, argv):
+        self.name = filename
+        self._fileobj = open(filename, 'r')
+        self._err = TemporaryFile()
+        self.process = Popen(
+            list(argv),
+            stdin=self._fileobj,
+            stdout=PIPE,
+            stderr=self._err,
+            close_fds=True
+        )
 
     def close(self):
-        import signal
-        os.kill(self.pid.pid, signal.SIGTERM)
+        if self.closed:
+            return
+        self.process.stdout.close()
+        self.process.wait()
         self.fileobj.close()
-        self.pid.stdout.close()
-        self.pid.wait()
-        self.closed = True
-
-
-class CompressionOutput(object):
-    """
-    Class to create a compressed file descriptor for writing.  Functions like
-    a standard file descriptor such as from open().
-    """
-    def __init__(self, path, mode, cmd, level, inline):
-        self.cmd = cmd
-        self.level = level
-        self.inline = inline
-        if not inline:
-            self.fileobj = open(os.path.splitext(path)[0], mode)
-            self.fd = self.fileobj.fileno()
-        else:
-            self.fileobj = open(path, 'w')
-            args = [cmd]
-            if level:
-                args += ['-%d' % level]
-            self.pid = subprocess.Popen(args,
-                                        stdin=subprocess.PIPE,
-                                        stdout=self.fileobj.fileno(),
-                                        stderr=subprocess.PIPE,
-                                        close_fds=True)
-            self.fd = self.pid.stdin.fileno()
-        self.name = path
-        self.closed = False
+        if self.process.returncode != 0:
+            raise IOError("gzip exited with non-zero status (%d)" %
+                          self.process.returncode)
+        RealFileLike.close(self)
 
     def fileno(self):
-        return self.fd
+        return self.process.stdout.fileno()
+
+    def read(self, size=None):
+        args = []
+        if size is not None:
+            args.append(size)
+        return self.process.stdout.read(*args)
+
+    def readline(self, size=None):
+        args = []
+        if size is not None:
+            args.append(size)
+        return self.process.stdout.readline(*args)
 
     def write(self, data):
-        return os.write(self.fd, data)
+        raise IOError("File not open for writing")
+
+
+class WriteCommand(RealFileLike):
+    def __init__(self, filename, argv):
+        self.name = filename
+        self._fileobj = open(filename, 'w')
+        self._err = TemporaryFile()
+        try:
+            self.process = Popen(
+                list(argv),
+                stdin=PIPE,
+                stdout=self._fileobj,
+                stderr=self._err,
+                close_fds=True
+            )
+        except OSError, exc:
+            if exc.errno == errno.ENOENT:
+                raise IOError("%r: command not found" % argv[0])
+            raise
 
     def close(self):
-        self.closed = True
-        if not self.inline:
-            args = [self.cmd]
-            if self.level:
-                args += ['-%d' % self.level, '-']
-            self.fileobj.close()
-            self.fileobj = open(self.fileobj.name, 'r')
-            cmp_f = open(self.name, 'w')
-            LOGGER.debug("Running %r < %r[%d] > %r[%d]",
-                         args, self.fileobj.name, self.fileobj.fileno(),
-                         cmp_f.name, cmp_f.fileno())
-            pid = subprocess.Popen(args,
-                                   stdin=self.fileobj.fileno(),
-                                   stdout=cmp_f.fileno())
-            status = pid.wait()
-            os.unlink(self.fileobj.name)
-        else:
-            self.pid.stdin.close()
-            # Check for anything on stderr
-            for line in self.pid.stderr:
-                errmsg = line.strip()
-                if not errmsg:
-                    # gzip, among others, output a spurious blank line 
-                    continue
-                LOGGER.error("Compression Error: %s", errmsg)
-            self.fileobj.close()
-            status = self.pid.wait()
-            if status != 0:
-                raise IOError(errno.EPIPE,
-                              "Compression program %r exited with status %d" %
-                                (self.cmd, status))
+        if self.closed:
+            return
+        self.process.stdin.close()
+        self.process.wait()
+        self._fileobj.close()
+        if self.process.returncode != 0:
+            raise IOError("gzip exited with non-zero status (%d)" %
+                          self.process.returncode)
+        RealFileLike.close(self)
+
+    def fileno(self):
+        return self.process.stdin.fileno()
+
+    def read(self, size=None):
+        raise IOError("File not open for reading")
+
+    def readline(self, size=None):
+        self.read()
+
+    def write(self, data):
+        self.process.stdin.write(data)
+
+    def writelines(self, sequence):
+        self.process.stdin.writelines(sequence)
 
 
-def stream_info(path, method=None, level=None):
-    """
-    Determine compression command, and compressed path based on original path
-    and compression method.  If method is not passed, or level is 0 the
-    original path is returned.
+class GzipPlugin(CompressionStreamPlugin):
+    name = 'gzip'
+    aliases = ['pigz']
+    extension = '.gz'
 
-    Arguments:
 
-    path    -- Path to file to compress/decompress
-    method  -- Compression method (i.e. 'gzip', 'bzip2', 'lzop')
-    level   -- Compression level (0-9)
-    """
-    if not method or level == 0:
-        return path
+class LzopPlugin(CompressionStreamPlugin):
+    name = 'lzop'
+    extension = '.lzo'
 
-    cmd, ext = lookup_compression(method)
 
-    if not cmd:
-        raise IOError("Unknown compression method '%s'" % cmd)
+class BzipPlugin(CompressionStreamPlugin):
+    name = 'bzip2'
+    aliases = ['pbzip2']
+    extension = '.bz'
 
-    if not path.endswith(ext):
-        path += ext
 
-    return cmd, path
+class LzmaPlugin(CompressionStreamPlugin):
+    name = 'lzma'
+    aliases = ['xz', 'pxz']
+    extension = '.xz'
 
-def open_stream(path, mode, method=None, level=None, inline=True):
-    """
-    Opens a compressed data stream, and returns a file descriptor type object
-    that acts much like os.open() does.  If no method is passed, or the 
-    compression level is 0, simply returns a file descriptor from open().
-
-    Arguments:
-
-    mode    -- File access mode (i.e. 'r' or 'w')
-    method  -- Compression method (i.e. 'gzip', 'bzip2', 'lzop')
-    level   -- Compression level
-    inline  -- Boolean whether to compress inline, or after the file is written.
-    """
-    if not method or method == 'none' or level == 0:
-        return open(path, mode)
-    else:
-        cmd, path = stream_info(path, method)
-        if not cmd:
-            raise IOError("Unknown compression method '%s'" % cmd)
-
-        if mode == 'r':
-            return CompressionInput(path, mode, cmd=cmd)
-        elif mode == 'w':
-            return CompressionOutput(path, mode, cmd=cmd, level=level, 
-                                     inline=inline)
-        else:
-            raise IOError("invalid mode: %s" % mode)
+    def __init__(self, name):
+        if name == 'lzma':
+            name = 'xz'
+        self.name = name
