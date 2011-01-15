@@ -25,7 +25,7 @@ class Backup(ArgparseCommand):
             try:
                 backupmgr.backup(path)
             except BackupError, exc:
-                self.stderr("Failed backup '%s': %s", name, exc)
+                self.stderr("Failed backup '%s': %s", path, exc)
                 break
         else:
             return 0
