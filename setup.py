@@ -46,7 +46,8 @@ setup(
     purge         = holland.cli.cmd:Purge
 
     [paste.paster_create_template]
-    holland-backup = holland.dev.paster:HollandBackupTemplate
+    holland:backup = holland.devtools:HollandBackupTemplate
+    holland:stream = holland.devtools:HollandStreamTemplate
     """,
     namespace_packages=['holland', 'holland.backup', 'holland.lib'],
     **extra
