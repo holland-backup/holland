@@ -1,0 +1,27 @@
+from setuptools import setup, find_packages
+
+version = ${repr(version)|"0.0"}
+
+setup(name=${repr(project)},
+    version=version,
+    description="${description|nothing}",
+    long_description="""\
+${long_description|nothing}""",
+    classifiers=[], # Get strings from http://www.python.org/pypi?%3Aaction=list_classifiers
+    keywords=${repr(keywords)|empty},
+    author=${repr(author)|empty},
+    author_email=${repr(author_email)|empty},
+    url=${repr(url)|empty},
+    license=${repr(license_name)|empty},
+    packages=find_packages(exclude=['ez_setup']),
+    include_package_data=True,
+    zip_safe=${repr(bool(zip_safe))|False},
+    install_requires=[
+      # -*- Extra requirements: -*-
+    ],
+    entry_points="""
+    [holland.backup]
+    ${plugin|plugin} = holland.backup.${plugin}:Plugin
+    """,
+    namespace_packaes=['holland', 'holland.backup']
+)
