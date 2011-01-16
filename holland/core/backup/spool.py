@@ -28,6 +28,13 @@ class BackupStore(object):
         except IndexError:
             return None
 
+    def oldest(self, n=1):
+        """Return the oldest backups in this store's backupset"""
+        if not self.spool:
+            return []
+        backups = self.spool.list_backups(self.name)
+        return backups[0:-n]
+
     def previous(self):
         """Find the backup store temporally preceding this one"""
         if not self.spool:
@@ -43,9 +50,16 @@ class BackupStore(object):
         """Purge the data for this backup store"""
         shutil.rmtree(self.path)
 
-    def check_space(self, required_bytes):
+    def spool_capacity(self):
+        """Find the available space in bytes on this store"""
         from holland.core.util import disk_capacity
-        if disk_capacity(self.path) < required_bytes:
+        return disk_capacity(self.path)
+
+    def check_space(self, required_bytes):
+        """Check that sufficient space exists for this
+        backupstore
+        """
+        if self.spool_capacity() < required_bytes:
             raise SpoolError("Insufficient space")
 
     #@property
