@@ -13,27 +13,28 @@ LOG = logging.getLogger(__name__)
 class MySQLDumpPlugin(object):
     name = 'mysqldump'
 
-    def __init__(self, backupstore):
-        self.backupstore = backupstore
-        self.path = self.backupstore.path
+    def __init__(self, name):
+        self.name = name
         self.config = None
 
     def configure(self, config):
         config.validate_config(CONFIGSPEC)
         self.config = config
 
-    def setup(self):
+    def setup(self, backupstore):
+        self.backupstore = backupstore
+        self.path = backupstore.path
+
+    def pre(self):
         self._schema = schema_from_config(self.config['mysqldump'])
         self._client = client_from_config(self.config['mysql:client'])
+        refresh_schema(self._schema, self._client)
 
     def estimate(self):
         LOG.info("Estimating backup size")
         LOG.info("----------------------")
         if self.config['mysqldump']['estimate-method'].startswith('const:'):
             return parse_size(self.config['mysqldump']['estimate-method'])
-
-        refresh_schema(self._schema, self._client)
-
         return sum([db.size for db in self._schema.databases])
 
     def _setup(self):
@@ -58,6 +59,9 @@ class MySQLDumpPlugin(object):
         LOG.info("----------------")
         LOG.info(":databases: %s",
                  ','.join([db.name for db in self._schema.databases]))
+
+        raise BackupError("I hate you")
+
         if dry_run:
             mockenv = MockEnvironment()
             mockenv.replace_environment()
@@ -84,7 +88,7 @@ class MySQLDumpPlugin(object):
             if self.config['mysqldump']['stop-slave']:
                 start_slave(self._client)
 
-    def teardown(self):
+    def post(self):
         pass
 
     #@classmethod

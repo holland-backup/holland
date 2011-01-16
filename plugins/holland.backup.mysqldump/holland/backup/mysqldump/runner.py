@@ -1,6 +1,7 @@
 import time
 import logging
 from subprocess import Popen, PIPE, list2cmdline
+from holland.core import BackupError
 
 LOG = logging.getLogger(__name__)
 
