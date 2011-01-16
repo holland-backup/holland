@@ -60,8 +60,6 @@ class MySQLDumpPlugin(object):
         LOG.info(":databases: %s",
                  ','.join([db.name for db in self._schema.databases]))
 
-        raise BackupError("I hate you")
-
         if dry_run:
             mockenv = MockEnvironment()
             mockenv.replace_environment()
