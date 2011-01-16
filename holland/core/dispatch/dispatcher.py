@@ -9,7 +9,7 @@ except NameError:
 
 import saferef
 
-DEBUG = False
+DEBUG = True
 
 WEAKREF_TYPES = (weakref.ReferenceType, saferef.BoundMethodWeakref)
 
@@ -41,7 +41,7 @@ class Signal(object):
         self.providing_args = set(providing_args)
         self.lock = threading.Lock()
 
-    def connect(self, receiver, sender=None, weak=True, dispatch_uid=None):
+    def connect(self, receiver, sender=None, weak=False, dispatch_uid=None):
         """
         Connect receiver to sender for signal.
 
@@ -155,7 +155,7 @@ class Signal(object):
         finally:
             self.lock.release()
 
-    def send(self, sender, **named):
+    def send(self, sender=None, **named):
         """
         Send signal from sender to all connected receivers.
 
@@ -182,7 +182,7 @@ class Signal(object):
             responses.append((receiver, response))
         return responses
 
-    def send_robust(self, sender, **named):
+    def send_robust(self, sender=None, **named):
         """
         Send signal from sender to all connected receivers catching errors.
 
