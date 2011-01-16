@@ -1,4 +1,5 @@
 """Base plugin classes"""
+from holland.core.config import Configspec
 
 class PluginInfo(dict):
     """Information about a plugin
@@ -29,13 +30,6 @@ class BasePlugin(object):
     #: aliases for this plugin
     aliases = ()
 
-    def setup(self):
-        """Called by a manager to allow this plugin to perform any necessary
-        setup"""
-
-    def teardown(self):
-        """Called by a manager when it is done with this plugin"""
-
     def plugin_info(self):
         """Provide information about this plugin
 
@@ -46,15 +40,17 @@ class BasePlugin(object):
 class ConfigurablePlugin(BasePlugin):
     """A plugin that accepts a configuration dictionary"""
 
-    #XXX: Specify a standard configspec format
+    #py23compat
     #@classmethod
     def configspec(cls):
         """Provide a configspec that this plugin expects
 
-        :returns: Any parseable data that ConfigObj accepts
+        :returns: instance of holland.core.config.Configspec
         """
-        raise NotImplementedError()
+        return Configspec()
     configspec = classmethod(configspec)
 
     def configure(self, config):
         """Configure this plugin with the given dict-like object"""
+        config.validate_config(self.configspec())
+        self.config = config
