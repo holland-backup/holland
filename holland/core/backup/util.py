@@ -1,6 +1,6 @@
 """utility functions"""
 
-from holland.core.config import load_config
+from holland.core.config import load_config, std_backup_spec
 from holland.core.plugin import load_plugin
 from holland.core.backup.error import BackupError
 from holland.core.backup.spool import SpoolError
@@ -14,13 +14,7 @@ def load_backup_config(name, config_dir=None):
         name = os.path.join(config_dir, 'backupsets', name)
 
     cfg = load_config(name)
-    cfg.validate_config("""
-    [holland:backup]
-    auto-purge-failures = boolean(default=yes)
-    purge-policy = option(manual,before-backup,after-backup, default=after-backup)
-    backups-to-keep = integer(default=1)
-    estimated-size-factor = float(default=1.0)
-    """.splitlines())
+    cfg.validate_config(std_backup_spec)
     return cfg
 
 def load_backup_plugin(config):

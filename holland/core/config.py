@@ -2,6 +2,7 @@ from configobj import ConfigObj, Section
 from validate import Validator
 
 class BaseConfig(ConfigObj):
+    """Config class"""
     def __init__(self, *args, **kwargs):
         ConfigObj.__init__(self,
                            list_values=False,
@@ -15,13 +16,34 @@ class BaseConfig(ConfigObj):
         self.validate(Validator(validation_functions), copy=True)
 
 class Configspec(ConfigObj):
+    """Specification for a configuration
+
+    This should follow the standard format of an ini
+    file but the values are spec definitions that define
+    what valid values are for the associated keys.
+
+    Example:
+    [myconfig]
+    foo = integer(min=2,max=42, default=3)
+    """
     def __init__(self, value):
         ConfigObj.__init__(self,
                            value,
                            list_values=False,
                            interpolation=False)
 
+#: configspec that every backupset should implement
+std_backup_spec = Configspec("""
+[holland:backup]
+plugin                  = string
+auto-purge-failures     = boolean(default=yes)
+purge-policy            = option(manual,before-backup,after-backup,default=after-backup)
+backups-to-keep         = integer(default=1)
+estimated-size-factor   = float(default=1.0)
+""".strip().splitlines())
+
 def load_config(path):
+    """Load the configuration from the file path"""
     cfg = BaseConfig(path, file_error=True)
     # normalize _ => - in keys; foo-bar = foo_bar
 
