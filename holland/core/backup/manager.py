@@ -7,7 +7,9 @@
 import os, sys
 import logging
 from holland.core.backup.util import load_backup_config, load_backup_plugin, \
-                                     DryRunWrapper, SafeSignal
+                                     DryRunWrapper, SafeSignal, \
+                                     FailureAutoPurger, BackupRotater, \
+                                     BackupSpaceChecker
 from holland.core.backup.spool import BackupSpool
 from holland.core.backup.base import BackupJob
 from holland.core.dispatch import Signal
@@ -33,22 +35,32 @@ class BackupManager(object):
         config = load_backup_config(name, config_dir=self.config_dir)
         LOG.info("+ Loaded config %s", config.filename)
         name = os.path.splitext(os.path.basename(name))[0]
-        plugincls = load_backup_plugin(config)
-        LOG.info("+ Found plugin %s", plugincls.name)
+        plugin = load_backup_plugin(config)(name)
+        LOG.info("+ Found plugin %s", plugin.name)
         store = self.spool.add_store(name)
         LOG.info("+ Initialized backup directory %s", store.path)
-
-        try:
-            plugin = plugincls(store)
-            LOG.info("+ Initialized plugin")
-        except:
-            store.purge()
-            raise
         job = BackupJob(plugin, config, store)
+        self._register_hooks(config)
         if dry_run:
             self._dry_run(job)
         else:
             self._run(job)
+
+    def _register_hooks(self, config):
+        config = config['holland:backup']
+        if config['auto-purge-failures']:
+            self.backup_fail.connect(FailureAutoPurger(LOG))
+
+        self.backup_pre.connect(BackupSpaceChecker(LOG))
+
+        purge_policy = config['purge-policy']
+        if purge_policy != 'manual':
+            if purge_policy == 'before-backup':
+                signal = self.backup_pre
+            else:
+                signal = self.backup_post
+            signal.connect(BackupRotater(LOG))
+
 
     def _run(self, job):
         """Run through a backup lifecycle"""
@@ -56,27 +68,27 @@ class BackupManager(object):
         store = job.store
 
         try:
-            self.backup_pre.send_robust(job)
             plugin.configure(job.config)
             LOG.info("+ Configured plugin")
-            plugin.setup()
+            plugin.setup(job.store)
             LOG.debug("+ Ran plugin setup")
+            plugin.pre()
+            LOG.info("+ Ran plugin pre")
+            self.backup_pre.send(job=job)
             try:
-                store.check_space(plugin.estimate())
-                LOG.info("+ Verified free space is available")
                 LOG.info("Running backup")
                 plugin.backup()
             finally:
                 try:
-                    plugin.teardown()
-                    LOG.debug("+ Ran plugin cleanup")
+                    plugin.post()
+                    LOG.debug("+ Ran plugin post")
                 except:
                     LOG.warning("+ Error while running plugin shutdown.")
                     LOG.warning("  Please see the trace log")
         except:
-            self.backup_fail.send_robust(job)
+            self.backup_fail.send_robust(job=job)
             raise
-        self.backup_post.send_robust(job)
+        self.backup_post.send(job=job)
 
     def _dry_run(self, job):
         """Dry-Run through a plugin lifecycle
@@ -90,6 +102,11 @@ class BackupManager(object):
         self.backup_pre = SafeSignal(self.backup_pre)
         self.backup_post = SafeSignal(self.backup_post)
         self.backup_fail = SafeSignal(self.backup_post)
+
+        # always purge the backupstore on a dry-run
+        self.backup_post.connect(PurgeHook(LOG))
+        self.backup_fail.connect(PurgeHook(LOG))
+
         try:
             self._run(job)
         finally:
