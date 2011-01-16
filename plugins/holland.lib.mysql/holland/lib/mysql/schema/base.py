@@ -19,7 +19,7 @@ class MySQLSchema(object):
     def excluded_tables(self):
         """Iterate over tables excluded in this schema"""
         for database in self.databases:
-            for table in database:
+            for table in database.tables:
                 if table.excluded:
                     yield table
     excluded_tables = property(excluded_tables)

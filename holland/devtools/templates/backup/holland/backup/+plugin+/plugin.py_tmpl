@@ -1,0 +1,79 @@
+from holland.core import BackupPlugin, PluginInfo
+
+CONFIGSPEC = """\
+[${plugin}]
+
+""".splitlines()
+
+class NewPlugin(BackupPlugin):
+    def __init__(self, backupstore):
+        self.backupstore = backupstore
+        self.config = None
+
+    def configure(self, config):
+        config.validate_config(self.configspec())
+        self.config = config
+
+    def pre(self):
+        """Setup prior to running backup
+
+        This method can do anything useful and is generally
+        used to setup a common resource potentially used
+        by both estimate_size() and backup()/dry_run()
+        """
+
+    def estimate(self):
+        """Calculate the backup size
+
+        This should be a best-effort guesstimate by the
+        plugin at how large the final backup size will be.
+
+        A naive plugin can simply return 0 here, but a more
+        accurate estimate can be useful
+        """
+        return 0
+
+    def backup(self):
+        """Perform a backup"""
+        raise BackupError("Not implemented")
+
+    def dry_run(self):
+        """Dry-run through the backup process"""
+
+    def post(self):
+        """Teardown any resources configured by the plugin
+
+        This method will be called even if backup fails, provided
+        that holland itself has not been terminated
+        """
+
+    def cleanup(self):
+        """Cleanup a previous backup run
+
+        This method is called by an explicit cleanup request.
+        For instance, if a snapshot was created on a previous run
+        this may be called to allow the plugin to free that resource.
+        """
+
+    #@classmethod
+    def configspec(cls):
+        """Provide a specification for the configuration this plugin supports
+
+        This spec can be used by external commands to generate a new
+        configuration or validate an existing configuration.
+
+        Currently this can return any format that ConfigObj supports - such as
+        a list of lines for an ini file.
+        """
+
+        return CONFIGSPEC
+
+    #@classmethod
+    def plugin_info(cls):
+        return PluginInfo(
+            name='${plugin}',
+            summary='${plugin_summary}',
+            description='${plugin_description}',
+            version='${version}',
+            api_version='${holland_version}'
+        )

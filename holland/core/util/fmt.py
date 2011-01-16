@@ -1,5 +1,10 @@
+"Formatting utility functions"
+
+from math import floor, log
+from time import strftime, localtime
+
 def format_interval(seconds):
-    """ Format an integer number of seconds to a human readable string."""
+    "Format an integer number of seconds to a human readable string."
     units = [
         (('week', 'weeks'), 604800),
         (('day', 'days'), 86400),
@@ -9,32 +14,30 @@ def format_interval(seconds):
     ]
     result = []
     for names, value in units:
-        n, seconds = divmod(seconds, value)
-        if n > 0:
-            result.append('%d %s' % (n, names[n > 1]))
+        quotient, seconds = divmod(seconds, value)
+        if quotient > 0:
+            plural = bool(quotient > 1)
+            result.append('%d %s' % (quotient, names[plural]))
     if seconds:
-        result.append("%.2f %s" % (seconds, ['second', 'seconds'][seconds != 1.0]))
+        result.append("%.2f %s" %
+                      (seconds, ['second', 'seconds'][seconds != 1.0]))
     return ', '.join(result)
 
-def format_datetime(epoch):
-    from time import strftime, localtime
-    return strftime("%a %b %d %Y %I:%M:%S%p", localtime(epoch))
+def format_datetime(epoch, format="%a %b %d %Y %I:%M:%S%p"):
+    "Format a datetime from an integer epoch"
+    return strftime(format, localtime(epoch))
 
-def format_bytes(bytes, precision=2):
-    """Format an integer number of bytes to a human readable string."""
-    import math
+def format_bytes(nbytes, precision=2):
+    "Format an integer number of bytes to a human readable string."
 
-    if bytes < 0:
-        raise ArithmeticError("Only Positive Integers Allowed")
-
-    if bytes != 0:
-        exponent = math.floor(math.log(bytes, 1024))
+    if nbytes != 0:
+        exponent = floor(log(abs(nbytes), 1024))
     else:
         exponent = 0
 
     return "%.*f%s" % (
         precision,
-        bytes / (1024 ** exponent),
+        nbytes / (1024 ** exponent),
         ['B','KB','MB','GB','TB','PB','EB','ZB','YB'][int(exponent)]
     )
 

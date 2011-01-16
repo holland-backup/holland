@@ -20,7 +20,15 @@ setup(name='holland.lib.common',
           # -*- Extra requirements: -*-
       ],
       entry_points="""
-      # -*- Entry points: -*-
+      [holland.stream]
+      gzip      = holland.lib.compression:GzipPlugin
+      pigz      = holland.lib.compression:GzipPlugin
+      bzip2     = holland.lib.compression:BzipPlugin
+      pbzip2    = holland.lib.compression:BzipPlugin
+      lzma      = holland.lib.compression:LzmaPlugin
+      xz        = holland.lib.compression:LzmaPlugin
+      pxz       = holland.lib.compression:LzmaPlugin
+      lzop      = holland.lib.compression:LzopPlugin
       """,
       namespace_packages=['holland','holland.lib']
-      )
+)
