@@ -26,7 +26,7 @@ class Configspec(ConfigObj):
     [myconfig]
     foo = integer(min=2,max=42, default=3)
     """
-    def __init__(self, value):
+    def __init__(self, value=None):
         ConfigObj.__init__(self,
                            value,
                            list_values=False,
@@ -40,6 +40,9 @@ auto-purge-failures     = boolean(default=yes)
 purge-policy            = option(manual,before-backup,after-backup,default=after-backup)
 backups-to-keep         = integer(default=1)
 estimated-size-factor   = float(default=1.0)
+fail-backup             = force_list(default=list())
+pre-backup              = force_list(default=list())
+post-backup             = force_list(default=list())
 """.strip().splitlines())
 
 def load_config(path):

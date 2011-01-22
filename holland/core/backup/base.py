@@ -1,9 +1,13 @@
 """Standard Holland Backup API classes"""
 
+import logging
 from holland.core.plugin import load_plugin, ConfigurablePlugin
 from holland.core.backup.spool import SpoolError
 from holland.core.backup.error import BackupError
-from holland.core.hooks import BaseHook
+from holland.core.backup.hooks import *
+from holland.core.dispatch import Signal
+
+LOG = logging.getLogger(__name__)
 
 class BackupJob(object):
     """A backup job that may be created and passed to a backup manager in order
@@ -13,23 +17,37 @@ class BackupJob(object):
         self.plugin = plugin
         self.config = config
         self.store = store
-        self.init_hooks(events={
-            'pre-backup'    : self.backup_pre,
-            'post-backup'   : self.backup_post,
-            'failed-backup' : self.backup_fail,
-        })
 
     def init_hooks(self, events):
         """Initialize hooks based on the job config"""
         config = self.config['holland:backup']
-        for event, signal in self.events.items():
+        LOG.info("+++ Initializing hooks")
+        for event, signal in events.items():
             for name in config[event]:
-                hook = load_plugin('holland.hooks', name)
+                if name in ('space-check', 'auto-purge', 'rotate-backups'):
+                    continue
+                hook = load_plugin('holland.hooks', name)(name)
                 hook.configure(self.config)
-                signal.connect(sender=self.store.name, hook)
+                LOG.info("Connecting %r(%s) to %r(%s)", signal, event, hook,
+                        name)
+                signal.connect(hook, sender=None)
+        events['pre-backup'].connect(CheckForSpaceHook('space-check'))
+        events['pre-backup'].connect(WriteConfigHook('write-config'))
+        if config['auto-purge-failures']:
+            events['fail-backup'].connect(AutoPurgeFailuresHook('auto-purge'))
+        if config['purge-policy'] == 'after-backup':
+            events['post-backup'].connect(RotateBackupsHook('rotate-backups'))
+        elif config['purge-policy'] == 'before-backup':
+            events['post-backup'].connect(RotateBackupsHook('rotate-backups'))
 
-    def notify(self, signal):
-        signal.sender_robust(job=self)
+    def notify(self, signal, robust=True):
+        if robust:
+            results = signal.send_robust(sender=None, job=self)
+            for signal, result in results:
+                if isinstance(result, Exception):
+                    raise result
+        else:
+            signal.send(sender=None, job=self)
 
     def run(self, dry_run=False):
         """Run through a backup lifecycle"""
@@ -43,27 +61,27 @@ class BackupJob(object):
                 'fail-backup'   : backup_fail,
             })
         else:
-            cleanup = lambda sender, signal, job: job.store.purge()
-            backup_post.connect(sender=None, cleanup)
-            backup_fail.connect(sender=None, cleanup)
+            hook = DryRunPurgeHook('dry-run-purge')
+            backup_post.connect(hook, sender=None)
+            backup_fail.connect(hook, sender=None)
 
         try:
-            plugin.configure(self.config)
+            self.plugin.configure(self.config)
             LOG.info("+ Configured plugin")
-            plugin.setup(self.store)
+            self.plugin.setup(self.store)
             LOG.debug("+ Ran plugin setup")
-            plugin.pre()
+            self.plugin.pre()
             LOG.info("+ Ran plugin pre")
-            self.notify(backup_pre)
+            self.notify(backup_pre, robust=False) # abort immediately
             try:
                 LOG.info("Running backup")
                 if dry_run:
-                    plugin.dry_run()
+                    self.plugin.dry_run()
                 else:
-                    plugin.backup()
+                    self.plugin.backup()
             finally:
                 try:
-                    plugin.post()
+                    self.plugin.post()
                     LOG.debug("+ Ran plugin post")
                 except:
                     LOG.warning("+ Error while running plugin shutdown.")
@@ -88,7 +106,3 @@ class BackupPlugin(ConfigurablePlugin):
         """Provide information about this backup"""
         raise NotImplementedError()
 
-
-class BackupHook(BaseHook):
-    def execute(self, job):
-        """Process a backup job event"""

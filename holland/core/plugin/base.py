@@ -30,6 +30,9 @@ class BasePlugin(object):
     #: aliases for this plugin
     aliases = ()
 
+    def __init__(self, name):
+        self.name = name
+
     def plugin_info(self):
         """Provide information about this plugin
 

@@ -5,6 +5,9 @@ import time
 import errno
 import shutil
 import tempfile
+import logging
+
+LOG = logging.getLogger(__name__)
 
 class SpoolError(Exception):
     """Base error class that all spool errors derive from"""

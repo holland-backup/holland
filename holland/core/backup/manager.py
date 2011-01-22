@@ -6,13 +6,9 @@
 
 import os, sys
 import logging
-from holland.core.backup.util import load_backup_config, load_backup_plugin, \
-                                     DryRunWrapper, SafeSignal, \
-                                     FailureAutoPurger, BackupRotater, \
-                                     BackupSpaceChecker
+from holland.core.backup.util import load_backup_config, load_backup_plugin
 from holland.core.backup.spool import BackupSpool
 from holland.core.backup.base import BackupJob
-from holland.core.dispatch import Signal
 
 LOG = logging.getLogger(__name__)
 
@@ -37,11 +33,8 @@ class BackupManager(object):
         store = self.spool.add_store(name)
         LOG.info("+ Initialized backup directory %s", store.path)
         job = BackupJob(plugin, config, store)
-        if dry_run:
-            self._dry_run(job)
-        else:
-            job.init_hooks()
         job.run(dry_run)
+        return job
 
 
     def cleanup(self, path):
