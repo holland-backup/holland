@@ -44,11 +44,6 @@ setup(
     mk-config       = holland.cli.cmd:MakeConfig
     purge           = holland.cli.cmd:Purge
 
-    [holland.hooks]
-    rotate-backups  = holland.core.backup.hooks:AutoPurgeHook
-    auto-purge      = holland.core.backup.hooks:AutoPurgeFailuresHook
-    save-config     = holland.core.backup.hooks:WriteConfigHook
-
     [paste.paster_create_template]
     holland:backup  = holland.devtools:HollandBackupTemplate
     holland:stream  = holland.devtools:HollandStreamTemplate
