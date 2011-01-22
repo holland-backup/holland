@@ -21,15 +21,12 @@ class BackupJob(object):
     def init_hooks(self, events):
         """Initialize hooks based on the job config"""
         config = self.config['holland:backup']
-        LOG.info("+++ Initializing hooks")
         for event, signal in events.items():
             for name in config[event]:
                 if name in ('space-check', 'auto-purge', 'rotate-backups'):
                     continue
                 hook = load_plugin('holland.hooks', name)(name)
                 hook.configure(self.config)
-                LOG.info("Connecting %r(%s) to %r(%s)", signal, event, hook,
-                        name)
                 signal.connect(hook, sender=None)
         events['pre-backup'].connect(CheckForSpaceHook('space-check'))
         events['pre-backup'].connect(WriteConfigHook('write-config'))
