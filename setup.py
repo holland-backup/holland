@@ -36,17 +36,22 @@ setup(
 
     # Holland subcommands
     [holland.commands]
-    help          = holland.cli.cmd:Help
-    listplugins   = holland.cli.cmd:ListPlugins
-    listcommands  = holland.cli.cmd:ListCommands
-    listbackups   = holland.cli.cmd:ListBackups
-    backup        = holland.cli.cmd:Backup
-    mk-config     = holland.cli.cmd:MakeConfig
-    purge         = holland.cli.cmd:Purge
+    help            = holland.cli.cmd:Help
+    listplugins     = holland.cli.cmd:ListPlugins
+    listcommands    = holland.cli.cmd:ListCommands
+    listbackups     = holland.cli.cmd:ListBackups
+    backup          = holland.cli.cmd:Backup
+    mk-config       = holland.cli.cmd:MakeConfig
+    purge           = holland.cli.cmd:Purge
+
+    [holland.hooks]
+    rotate-backups  = holland.core.backup.hooks:AutoPurgeHook
+    auto-purge      = holland.core.backup.hooks:AutoPurgeFailuresHook
+    save-config     = holland.core.backup.hooks:WriteConfigHook
 
     [paste.paster_create_template]
-    holland:backup = holland.devtools:HollandBackupTemplate
-    holland:stream = holland.devtools:HollandStreamTemplate
+    holland:backup  = holland.devtools:HollandBackupTemplate
+    holland:stream  = holland.devtools:HollandStreamTemplate
     """,
     namespace_packages=['holland', 'holland.backup', 'holland.lib'],
     **extra
