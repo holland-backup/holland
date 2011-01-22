@@ -5,7 +5,6 @@ class BaseConfig(ConfigObj):
     """Config class"""
     def __init__(self, *args, **kwargs):
         ConfigObj.__init__(self,
-                           list_values=False,
                            interpolation=False,
                            write_empty_values=True,
                            encoding='utf8',
