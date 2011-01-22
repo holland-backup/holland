@@ -29,6 +29,9 @@ setup(name='holland.lib.common',
       xz        = holland.lib.compression:LzmaPlugin
       pxz       = holland.lib.compression:LzmaPlugin
       lzop      = holland.lib.compression:LzopPlugin
+
+      [holland.hooks]
+      cmd       = holland.lib.hooks:CommandHook
       """,
       namespace_packages=['holland','holland.lib']
 )
