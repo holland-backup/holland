@@ -1,7 +1,7 @@
 import os, sys
 import logging
 from holland import __version__
-from holland.cli.config import load_global_config, ValidateError
+from holland.cli.config import load_global_config
 from holland.cli.log import configure_logging, configure_basic_logger
 from holland.cli.cmd import ArgparseCommand, argument, load_command, \
                                  CommandNotFoundError
@@ -44,13 +44,6 @@ class HollandCli(ArgparseCommand):
             config = load_global_config(opts.config)
         except IOError, exc:
             self.stderr("Failed to load config file: %s", exc)
-            return 1
-        except SyntaxError, exc:
-            self.stderr("Error while reading config file: %s",
-                        exc, exc_info=True)
-            return 1
-        except ValidateError, exc:
-            self.stderr("Error while validating config file: %s", exc)
             return 1
 
         if opts.log_level:
