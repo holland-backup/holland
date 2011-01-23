@@ -41,7 +41,7 @@ class Signal(object):
         self.providing_args = set(providing_args)
         self.lock = threading.Lock()
 
-    def connect(self, receiver, sender=None, weak=False, dispatch_uid=None):
+    def connect(self, receiver, sender=None, weak=True, dispatch_uid=None):
         """
         Connect receiver to sender for signal.
 

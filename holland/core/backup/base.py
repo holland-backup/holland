@@ -29,20 +29,24 @@ class BackupJob(object):
                     continue
                 hook = load_plugin('holland.hooks', name)(name)
                 hook.configure(self.config)
-                signal.connect(hook, sender=None)
+                signal.connect(hook, sender=None, weak=False)
         config_writer = WriteConfigHook('write-config')
         backup_info = BackupInfoHook('backup-info')
-        events['pre-backup'].connect(backup_info)
-        events['pre-backup'].connect(CheckForSpaceHook('space-check'))
-        events['pre-backup'].connect(config_writer)
-        events['post-backup'].connect(backup_info)
-        events['post-backup'].connect(config_writer)
+        events['pre-backup'].connect(backup_info, weak=False)
+        events['pre-backup'].connect(CheckForSpaceHook('space-check'),
+                                     weak=False)
+        events['pre-backup'].connect(config_writer, weak=False)
+        events['post-backup'].connect(backup_info, weak=False)
+        events['post-backup'].connect(config_writer, weak=False)
         if config['auto-purge-failures']:
-            events['fail-backup'].connect(AutoPurgeFailuresHook('auto-purge'))
+            events['fail-backup'].connect(AutoPurgeFailuresHook('auto-purge'),
+                                          weak=False)
         if config['purge-policy'] == 'after-backup':
-            events['post-backup'].connect(RotateBackupsHook('rotate-backups'))
+            events['post-backup'].connect(RotateBackupsHook('rotate-backups'),
+                                          weak=False)
         elif config['purge-policy'] == 'before-backup':
-            events['post-backup'].connect(RotateBackupsHook('rotate-backups'))
+            events['post-backup'].connect(RotateBackupsHook('rotate-backups'),
+                                          weak=False)
 
     def notify(self, signal, robust=True):
         if robust:
