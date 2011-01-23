@@ -4,6 +4,8 @@ import re
 
 class Scanner(object):
     def __init__(self, lexicon, flags=0):
+        import sre_parse
+        import sre_compile
         from sre_constants import BRANCH, SUBPATTERN
         self.lexicon = lexicon
         # combine phrases into a compound pattern
