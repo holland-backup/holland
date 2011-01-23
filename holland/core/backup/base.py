@@ -1,6 +1,8 @@
 """Standard Holland Backup API classes"""
 
 import logging
+from datetime import datetime
+from holland.core.util import directory_size
 from holland.core.plugin import load_plugin, ConfigurablePlugin
 from holland.core.backup.spool import SpoolError
 from holland.core.backup.error import BackupError
@@ -30,6 +32,7 @@ class BackupJob(object):
                 signal.connect(hook, sender=None)
         events['pre-backup'].connect(CheckForSpaceHook('space-check'))
         events['pre-backup'].connect(WriteConfigHook('write-config'))
+        events['post-backup'].connect(WriteConfigHook('write-config'))
         if config['auto-purge-failures']:
             events['fail-backup'].connect(AutoPurgeFailuresHook('auto-purge'))
         if config['purge-policy'] == 'after-backup':
@@ -48,7 +51,7 @@ class BackupJob(object):
 
     def run(self, dry_run=False):
         """Run through a backup lifecycle"""
-        backup_pre = Signal(providing_args=['job'])
+        backup_pre  = Signal(providing_args=['job'])
         backup_post = Signal(providing_args=['job'])
         backup_fail = Signal(providing_args=['job'])
         if not dry_run:
@@ -62,6 +65,9 @@ class BackupJob(object):
             backup_post.connect(hook, sender=None)
             backup_fail.connect(hook, sender=None)
 
+        self.config['holland:backup:run'] = {
+            'start-time' : datetime.now().isoformat()
+        }
         try:
             self.plugin.configure(self.config)
             LOG.info("+ Configured plugin")
@@ -86,6 +92,8 @@ class BackupJob(object):
         except:
             self.notify(backup_fail)
             raise
+        self.config['holland:backup:run']['stop-time'] = datetime.now().isoformat()
+        self.config['holland:backup:run']['disk-size'] = directory_size(self.store.path)
         self.notify(backup_post)
 
 class BackupPlugin(ConfigurablePlugin):
