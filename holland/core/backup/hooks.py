@@ -2,6 +2,7 @@
 
 import os
 import logging
+from datetime import datetime
 from holland.core.hooks import BaseHook
 from holland.core.backup.error import BackupError
 from holland.core.util.fmt import format_bytes
@@ -40,8 +41,22 @@ class WriteConfigHook(BackupHook):
 
     def execute(self, job):
         path = os.path.join(job.store.path, 'backup.conf')
-        job.config.write(open(path, 'w'))
+        job.config.write(path)
         LOG.info("+ Saved config to %s", path)
+
+class BackupInfoHook(BackupHook):
+    def __init__(self, name):
+        super(BackupInfoHook, self).__init__(name)
+        self.initialized = False
+
+    def execute(self, job):
+        if not self.initialized:
+            config = job.config.setdefault('holland:backup:run', {})
+            self.initialized = True
+            config['start-time'] = datetime.now().isoformat()
+        else:
+            config = job.config['holland:backup:run']
+            config['stop-time'] = datetime.now().isoformat()
 
 class CheckForSpaceHook(BackupHook):
 

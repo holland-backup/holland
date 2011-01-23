@@ -30,9 +30,13 @@ class BackupJob(object):
                 hook = load_plugin('holland.hooks', name)(name)
                 hook.configure(self.config)
                 signal.connect(hook, sender=None)
+        config_writer = WriteConfigHook('write-config')
+        backup_info = BackupInfoHook('backup-info')
+        events['pre-backup'].connect(backup_info)
         events['pre-backup'].connect(CheckForSpaceHook('space-check'))
-        events['pre-backup'].connect(WriteConfigHook('write-config'))
-        events['post-backup'].connect(WriteConfigHook('write-config'))
+        events['pre-backup'].connect(config_writer)
+        events['post-backup'].connect(backup_info)
+        events['post-backup'].connect(config_writer)
         if config['auto-purge-failures']:
             events['fail-backup'].connect(AutoPurgeFailuresHook('auto-purge'))
         if config['purge-policy'] == 'after-backup':
