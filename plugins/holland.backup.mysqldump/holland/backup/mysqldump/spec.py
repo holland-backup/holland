@@ -21,7 +21,7 @@ flush-privileges   = boolean(default=yes)
 dump-routines      = boolean(default=no)
 dump-events        = boolean(default=no)
 stop-slave         = boolean(default=no)
-max-allowed-packet = string(default=128M)
+max-allowed-packet = string(default="128M")
 bin-log-position   = boolean(default=no)
 
 file-per-database  = boolean(default=yes)

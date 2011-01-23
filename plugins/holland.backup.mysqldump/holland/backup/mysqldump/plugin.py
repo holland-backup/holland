@@ -2,7 +2,7 @@
 
 import os, sys
 import logging
-from holland.core import BackupError
+from holland.core import BackupError, BackupPlugin, Configspec
 from holland.backup.mysqldump.mock import MockEnvironment
 from holland.backup.mysqldump.util import *
 from holland.backup.mysqldump.runner import MySQLBackup
@@ -10,16 +10,12 @@ from holland.backup.mysqldump.spec import CONFIGSPEC
 
 LOG = logging.getLogger(__name__)
 
-class MySQLDumpPlugin(object):
+class MySQLDumpPlugin(BackupPlugin):
     name = 'mysqldump'
 
     def __init__(self, name):
         self.name = name
         self.config = None
-
-    def configure(self, config):
-        config.validate_config(CONFIGSPEC)
-        self.config = config
 
     def setup(self, backupstore):
         self.backupstore = backupstore
@@ -91,9 +87,17 @@ class MySQLDumpPlugin(object):
 
     #@classmethod
     def configspec(cls):
-        return CONFIGSPEC
+        return Configspec.parse(CONFIGSPEC)
     configspec = classmethod(configspec)
 
-    def info(self):
-        # deprecated
-        return ""
+    def plugin_info(self):
+        """Provide information about this plugin"""
+        return PluginInfo(
+            name='mysqldump',
+            summary='Backup MySQL databases via the mysqldump command',
+            description='''
+
+            ''',
+            version='1.1.0a1',
+            api_version='1.1.0a1',
+        )
