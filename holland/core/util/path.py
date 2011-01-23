@@ -46,15 +46,6 @@ def getmount(path):
         path = os.path.abspath(os.path.join(path, os.pardir))
     return path
 
-def disk_capacity(target_path):
-    """Find the total capacity of the filesystem that target_path is on
-
-    :returns: integer number of bytes
-    """
-    path = getmount(target_path)
-    info = os.statvfs(path)
-    return info.f_frsize*info.f_blocks
-
 def disk_free(target_path):
     """
     Find the amount of space free on a given path
@@ -74,9 +65,11 @@ def directory_size(path):
 
     Returns the size in bytes on success
     """
-    total_size = 0
+    total_size = os.path.getsize(path)
     for root, dirs, files in os.walk(path):
-        del dirs
+        for name in dirs:
+            path = os.path.join(root, name)
+            total_size += os.path.getsize(path)
         for name in files:
             path = os.path.join(root, name)
             try:
