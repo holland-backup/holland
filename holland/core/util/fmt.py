@@ -1,5 +1,6 @@
 "Formatting utility functions"
 
+import logging
 from math import floor, log
 from time import strftime, localtime
 
@@ -35,26 +36,12 @@ def format_bytes(nbytes, precision=2):
     else:
         exponent = 0
 
-    return "%.*f%s" % (
-        precision,
-        nbytes / (1024 ** exponent),
-        ['B','KB','MB','GB','TB','PB','EB','ZB','YB'][int(exponent)]
-    )
-
-def format_loglevel(str_level):
-    """
-    Coerces a string to an integer logging level which
-    maps to a standard python logging level
-    """
-    import logging
-    std_levels = {
-        'debug'     : logging.DEBUG,
-        'info'      : logging.INFO,
-        'warning'   : logging.WARNING,
-        'error'     : logging.ERROR,
-        'critical'  : logging.CRITICAL
-    }
-
-    level = str_level.lower().strip()
-
-    return std_levels.get(level)
+    try:
+        return "%.*f%s" % (
+            precision,
+            nbytes / (1024 ** exponent),
+            ['B','KB','MB','GB','TB','PB','EB','ZB','YB'][int(exponent)]
+        )
+    except IndexError:
+        raise ArithmeticError("format_bytes() cannot format values beyond "
+                              "yottabytes. Got: %d" % nbytes)
