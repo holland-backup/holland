@@ -20,6 +20,9 @@ class Config(OrderedDict):
     cont_cre        = re.compile(r'\s+(?P<value>.+?)$')
     include_cre     = re.compile(r'%include (?P<name>.+?)\s*$')
 
+    #: last filename used to load this config
+    filename        = None
+
     #@classmethod
     def parse(cls, iterable):
         """Parse a sequence of lines and return the resulting ``Config`` instance.
@@ -89,6 +92,7 @@ class Config(OrderedDict):
             finally:
                 fileobj.close()
             main.merge(cfg)
+            main.filename = path
         return main
     read = classmethod(read)
 
