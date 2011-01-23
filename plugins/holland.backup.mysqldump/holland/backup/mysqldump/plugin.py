@@ -82,6 +82,9 @@ class MySQLDumpPlugin(BackupPlugin):
             if self.config['mysqldump']['stop-slave']:
                 start_slave(self._client)
 
+    def dryrun(self):
+        self.backup(dry_run=True)
+
     def post(self):
         pass
 
