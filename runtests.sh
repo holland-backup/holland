@@ -5,10 +5,12 @@ set -e
 
 export PYLINTRC=$PWD/.pylintrc
 nosetests -v --with-xunit tests
-coverage=$(which coverage 2>/dev/null)
+which coverage 2>&1 > /dev/null
 if [ $? -ne 0 ]
 then
 coverage=python-coverage
+else
+coverage=coverage
 fi
 $coverage xml
 pylint -f parseable holland > pylint.txt
