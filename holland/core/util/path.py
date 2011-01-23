@@ -69,11 +69,14 @@ def directory_size(path):
     for root, dirs, files in os.walk(path):
         for name in dirs:
             path = os.path.join(root, name)
-            total_size += os.path.getsize(path)
+            try:
+                total_size += os.lstat(path).st_size
+            except OSError:
+                pass
         for name in files:
             path = os.path.join(root, name)
             try:
-                nbytes = os.path.getsize(path)
+                nbytes = os.lstat(path).st_size
                 total_size += nbytes
             except OSError:
                 pass
