@@ -4,7 +4,7 @@ set -x
 set -e
 
 export PYLINTRC=$PWD/.pylintrc
-nosetests -v --with-xunit
+nosetests -v --with-xunit tests
 coverage=$(which coverage 2>/dev/null)
 if [ $? -ne 0 ]
 then
