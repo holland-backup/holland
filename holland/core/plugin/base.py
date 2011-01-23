@@ -55,5 +55,4 @@ class ConfigurablePlugin(BasePlugin):
 
     def configure(self, config):
         """Configure this plugin with the given dict-like object"""
-        config.validate_config(self.configspec())
-        self.config = config
+        self.config = self.configspec().validate(config)
