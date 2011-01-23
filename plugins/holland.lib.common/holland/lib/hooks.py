@@ -34,11 +34,12 @@ class CommandHook(BackupHook):
                         pid.returncode)
 
     def configspec(self):
-        return Configspec("""
+        from textwrap import dedent
+        return Configspec.parse(dedent("""
         [holland:hook:cmd]
         shell = string(default="/bin/sh")
         cmd = string(default="/bin/true")
-        """.splitlines()
+        """).splitlines()
         )
     def plugin_info(self):
         return PluginInfo(
