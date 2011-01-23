@@ -23,7 +23,7 @@ class Backup(ArgparseCommand):
                                   os.path.dirname(self.config.filename or ''))
         for path in namespace.backupset:
             try:
-                backupmgr.backup(path)
+                backupmgr.backup(path, dry_run=namespace.dry_run)
             except BackupError, exc:
                 if isinstance(exc.chained_exc, KeyboardInterrupt):
                     self.stderr("Interrupted")
