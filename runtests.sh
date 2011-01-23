@@ -13,3 +13,5 @@ coverage=coverage
 fi
 $coverage xml
 pylint -f parseable holland > pylint.txt
+
+exit 0
