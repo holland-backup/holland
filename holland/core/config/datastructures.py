@@ -182,10 +182,12 @@ class SortedDict(dict):
         for k, v in dict_.iteritems():
             self[k] = v
 
-    def setdefault(self, key, default):
-        if key not in self:
-            self.keyOrder.append(key)
-        return super(SortedDict, self).setdefault(key, default)
+    def setdefault(self, key, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            self[key] = default
+            return self[key]
 
     def value_for_index(self, index):
         """Returns the value of the item at the given zero-based index."""
