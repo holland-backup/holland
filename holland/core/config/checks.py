@@ -1,6 +1,7 @@
 """This module contains standard checks for Configspec values"""
 
 import csv
+import logging
 try:
     from io import StringIO
 except ImportError: #pragma: nocover
@@ -86,6 +87,14 @@ class OptionCheck(BaseCheck):
     def format(self, value):
         return str(value)
 
+class LogLevelCheck(BaseCheck):
+    def check(self, value):
+        if isinstance(value, int):
+            return value
+        try:
+            return logging._levelNames[value.upper()]
+        except KeyError:
+            raise ValueError("Invalid log level '%s'" % value)
 
 class ListCheck(BaseCheck):
 
@@ -132,4 +141,5 @@ builtin_checks = (
     ('force_list', ListCheck),
     ('tuple', TupleCheck),
     ('cmdline', CmdlineCheck),
+    ('log_level', LogLevelCheck),
 )
