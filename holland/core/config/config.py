@@ -2,7 +2,7 @@ import os
 import re
 import codecs
 import logging
-from datastructures import SortedDict as OrderedDict
+from holland.core.util.datastructures import SortedDict as OrderedDict
 
 LOG = logging.getLogger(__name__)
 

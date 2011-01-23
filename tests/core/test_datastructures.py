@@ -5,7 +5,7 @@ import pickle
 import unittest
 
 from copy import copy, deepcopy
-from holland.core.config.datastructures import *
+from holland.core.util.datastructures import *
 
 
 class DatastructuresTestCase(unittest.TestCase):
