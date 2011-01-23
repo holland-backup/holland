@@ -3,6 +3,7 @@ import time
 import tempfile
 from itertools import tee, izip
 from nose.tools import *
+from holland.core.util.path import disk_free
 from holland.core.backup.spool import *
 
 def pairwise(iterable):
@@ -45,7 +46,29 @@ def test_backups():
         "%s has only %d stores, but expected %d" %
             (name, len(spool.list_backups(name)), numstores))
 
+def test_str_and_repr():
+    spool = BackupSpool(spooldir)
+    # just test that str(spool) does something sane
+    ok_(isinstance(spool.__str__(), basestring))
+    for name, _ in backupsets.iteritems():
+        for backup in spool.list_backups(name):
+            ok_(isinstance(backup, BackupStore))
+            ok_(isinstance(backup.__str__(), basestring))
+
+def test_ignore_plain_file():
+    "Test that list_backups() doesn't treat a file like a backup store"
+    spool = BackupSpool(spooldir)
+    # just test that str(spool) does something sane
+    ok_(isinstance(spool.__str__(), basestring))
+    for name, _ in backupsets.iteritems():
+        path = os.path.join(spooldir, name, 'foo.txt')
+        open(path, 'w').close() # touch a file
+        for backup in spool.list_backups(name):
+            ok_(os.path.isdir(backup.path))
+
+#XXX: what about two backups created simultaneously?
 def test_backup_ordering():
+    "Test each backup precedes the next"
     spool = BackupSpool(spooldir)
 
     for name, _ in backupsets.iteritems():
@@ -54,7 +77,8 @@ def test_backup_ordering():
                         "Expected backup %s < %s but this was not the case" %
                         (backupa.path, backupb.path))
 
-def test_backup_ordering_internal():
+def test_relative_backup_ordering():
+    "Test that each backup is a previous backup of the next"
     spool = BackupSpool(spooldir)
 
     for name, _ in backupsets.iteritems():
@@ -69,6 +93,17 @@ def test_backupstore_previous_of_first_is_none():
         first_backup = spool.list_backups(name)[0]
         assert_equal(first_backup.previous(), None)
 
+def test_backupstore_capacity():
+    spool = BackupSpool(spooldir)
+
+    for name, _ in backupsets.iteritems():
+        first_backup = spool.list_backups(name)[0]
+        assert_equal(first_backup.spool_capacity(),
+                     disk_free(first_backup.path))
+        # no spool will likely have a yottabyte free.  if so, we can simply
+        # check capacity() + 1 byte :P
+        assert_raises(SpoolError, first_backup.check_space, 1024**8)
+
 def test_backupstore_latest():
     spool = BackupSpool(spooldir)
 
@@ -77,6 +112,14 @@ def test_backupstore_latest():
         last_backup = spool.list_backups(name)[-1]
         assert_equal(last_backup, first_backup.latest())
 
+def test_backupstore_oldest():
+    spool = BackupSpool(spooldir)
+
+    for name, _ in backupsets.iteritems():
+        last_backup = spool.list_backups(name)[-1]
+        assert_equal(spool.list_backups(name)[0],
+                     last_backup.oldest(count=1)[0])
+
 def test_backupstore_w_nullspool():
     spool = BackupSpool(spooldir)
     for name, _ in backupsets.iteritems():
@@ -84,6 +127,7 @@ def test_backupstore_w_nullspool():
             backup.spool = None
             assert_false(backup.previous())
             assert_false(backup.latest())
+            assert_false(backup.oldest())
 
 def test_backupsets():
     spool = BackupSpool(spooldir)
