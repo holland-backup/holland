@@ -87,14 +87,6 @@ class OptionCheck(BaseCheck):
     def format(self, value):
         return str(value)
 
-class LogLevelCheck(BaseCheck):
-    def check(self, value):
-        if isinstance(value, int):
-            return value
-        try:
-            return logging._levelNames[value.upper()]
-        except KeyError:
-            raise ValueError("Invalid log level '%s'" % value)
 
 class ListCheck(BaseCheck):
 
@@ -130,6 +122,22 @@ class CmdlineCheck(BaseCheck):
 
     def format(self, value):
         return list2cmdline(value)
+
+
+class LogLevelCheck(BaseCheck):
+    def check(self, value):
+        if isinstance(value, int):
+            return value
+        try:
+            return logging._levelNames[value.upper()]
+        except KeyError:
+            raise ValueError("Invalid log level '%s'" % value)
+
+    def format(self, value):
+        try:
+            return logging._levelNames[value].lower()
+        except KeyError:
+            raise ValueError("Unknown logging level '%s'" % value)
 
 builtin_checks = (
     ('boolean', BoolCheck),
