@@ -6,6 +6,7 @@ import errno
 import shutil
 import tempfile
 import logging
+from holland.core.util import disk_free
 
 LOG = logging.getLogger(__name__)
 
@@ -31,12 +32,12 @@ class BackupStore(object):
         except IndexError:
             return None
 
-    def oldest(self, n=1):
+    def oldest(self, count=1):
         """Return the oldest backups in this store's backupset"""
         if not self.spool:
             return []
         backups = self.spool.list_backups(self.name)
-        return backups[0:-n]
+        return backups[0:-count]
 
     def previous(self):
         """Find the backup store temporally preceding this one"""
@@ -55,8 +56,7 @@ class BackupStore(object):
 
     def spool_capacity(self):
         """Find the available space in bytes on this store"""
-        from holland.core.util import disk_capacity
-        return disk_capacity(self.path)
+        return disk_free(self.path)
 
     def check_space(self, required_bytes):
         """Check that sufficient space exists for this
@@ -122,7 +122,6 @@ class BackupSpool(object):
             backup_path = os.path.join(path, store_path)
             if not os.path.isdir(backup_path):
                 continue
-            import sys
             results.append(BackupStore(name, backup_path, self))
         #XXX: python2.3 compatibility
         results.sort()
