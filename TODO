@@ -26,6 +26,11 @@ holland.core.hooks
   cmd = rsync -avz ${backupdir} /path/to/dev/
   #EOF
 
-  We should probably assume `command` as the default
-  plugin for simplicity, although more full-featured
-  python plugins might be created in the future.
+* We should probably assume `command` as the default plugin for simplicity, 
+  although more full-featured python plugins might be created in the future.
+
+* Hooks priorities may be useful as well - that is perhaps we should load all
+  hooks for an event and sort them by priority before adding them to the 
+  dispatcher Signal.  Alternatively we can extend Signal() to support a
+  priority when connecting.  Presorting is somewhat faster but I don't think
+  performance will be a major concern here.
