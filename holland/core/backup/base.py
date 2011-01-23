@@ -65,9 +65,6 @@ class BackupJob(object):
             backup_post.connect(hook, sender=None)
             backup_fail.connect(hook, sender=None)
 
-        self.config['holland:backup:run'] = {
-            'start-time' : datetime.now().isoformat()
-        }
         try:
             self.plugin.configure(self.config)
             LOG.info("+ Configured plugin")
@@ -79,7 +76,7 @@ class BackupJob(object):
             try:
                 LOG.info("Running backup")
                 if dry_run:
-                    self.plugin.dry_run()
+                    self.plugin.dryrun()
                 else:
                     self.plugin.backup()
             finally:
@@ -92,20 +89,28 @@ class BackupJob(object):
         except:
             self.notify(backup_fail)
             raise
-        self.config['holland:backup:run']['stop-time'] = datetime.now().isoformat()
-        self.config['holland:backup:run']['disk-size'] = directory_size(self.store.path)
         self.notify(backup_post)
 
 class BackupPlugin(ConfigurablePlugin):
     """Interface that Holland Backup Plugins should conform to"""
 
-    def backup(self, path):
+    def pre(self):
+        """Run before starting a backup"""
+
+    def estimate(self):
+        """Estimate the size of the backup this plugin would produce"""
+        raise NotImplementedError()
+
+    def backup(self):
         """Backup to the specified path"""
         raise NotImplementedError()
 
-    def dry_run(self, path):
+    def dryrun(self):
         """Perform a dry-run backup to the specified path"""
         raise NotImplementedError()
+
+    def post(self):
+        """Run after a backup"""
 
     def backup_info(self):
         """Provide information about this backup"""
