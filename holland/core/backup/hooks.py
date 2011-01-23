@@ -59,5 +59,6 @@ class CheckForSpaceHook(BackupHook):
         LOG.info("+ Spool directory %s has %s available",
                  job.store.path, format_bytes(available_bytes))
 
+        job.config['holland:backup:run']['estimated-size'] = format_bytes(estimated_bytes)
         if available_bytes < estimated_bytes*estimate_factor:
             raise BackupError("Insufficient space for backup")
