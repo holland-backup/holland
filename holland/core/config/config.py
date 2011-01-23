@@ -1,7 +1,10 @@
 import os
 import re
 import codecs
+import logging
 from datastructures import SortedDict as OrderedDict
+
+LOG = logging.getLogger(__name__)
 
 class ConfigError(Exception):
     """General error when processing config"""
@@ -22,6 +25,9 @@ class Config(OrderedDict):
 
     #: last filename used to load this config
     filename        = None
+
+    #: an object that's always asked when formatting a key/value pair
+    formatter       = None
 
     #@classmethod
     def parse(cls, iterable):
@@ -194,6 +200,8 @@ class Config(OrderedDict):
         return str(section)
 
     def __setitem__(self, key, value):
+        if isinstance(value, dict) and not isinstance(value, self.__class__):
+            value = self.__class__(value)
         if isinstance(value, self.__class__):
             key = self.sectionxform(key)
         elif isinstance(value, basestring):
@@ -210,4 +218,10 @@ class Config(OrderedDict):
                 lines.append("")
             elif isinstance(value, basestring):
                 lines.append("%s = %s" % (key, value))
+            else:
+                LOG.info("!!! Skipping key %r", key)
         return os.linesep.join(lines)
+
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__,
+                           dict.__repr__(self))
