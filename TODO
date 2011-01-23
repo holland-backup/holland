@@ -1,0 +1,29 @@
+holland.core.config
+-------------------
+* Leading whitespace is always improperly evaluated as continuation lines
+* Inline comments are not supported (and certainly used in some holland-1.0
+  configs).  This must be fixed
+
+holland.core.hooks
+------------------
+* Hooks must be able to be run multiple times.  Right now the single command
+  hook assumes a single section [holland:hooks:cmd] but we should rather use
+  a user-specified section:
+
+  [holland:backup]
+  ...
+  # events
+  after-backup = push-to-staging, also-push-to-devbox
+  ...
+  [push-to-staging]
+  plugin = command
+  cmd = rsync -avz ${backupdir} /path/to/staging/
+
+  [push-to-devbox]
+  plugin = command
+  cmd = rsync -avz ${backupdir} /path/to/dev/
+  #EOF
+
+  We should probably assume `command` as the default
+  plugin for simplicity, although more full-featured
+  python plugins might be created in the future.
