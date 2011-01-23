@@ -20,7 +20,7 @@ exclude_lines =
     if 0:
     if __name__ == .__main__.:
 
-omit = holland/cli/backports/
+omit = tests,holland/cli/backports/,.usr/
 ignore_errors = True
 
 [html]
