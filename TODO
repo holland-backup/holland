@@ -3,6 +3,8 @@ holland.core.config
 * Leading whitespace is always improperly evaluated as continuation lines
 * Inline comments are not supported (and certainly used in some holland-1.0
   configs).  This must be fixed
+* validation needs to raise errors consistently and reports on missing
+  values at the end
 
 holland.core.hooks
 ------------------
