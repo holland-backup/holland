@@ -70,3 +70,40 @@ def test_directory_size():
     # test handling OSError as well - perhaps have an unreadable directory
     # also, in practice this function may be used against an active directory
     # that may have entries randomly deleted as we're stat'ing them
+
+
+# pycompat tests
+
+def test_scanner():
+    def s_ident(scanner, token): return token
+    def s_operator(scanner, token): return "op%s" % token
+    def s_float(scanner, token): return float(token)
+    def s_int(scanner, token): return int(token)
+    scanner = pycompat.Scanner([
+        (r"[a-zA-Z_]\w*", s_ident),
+        (r"\d+\.\d*", s_float),
+        (r"\d+", s_int),
+        (r"=|\+|-|\*|/", s_operator),
+        (r"\s+", None),
+    ])
+    results, remainder = scanner.scan("sum = 3*foo + 312.50 + bar")
+    assert_false(remainder)
+    assert_equals(results, ['sum', 'op=', 3, 'op*', 'foo', 'op+', 312.50, 'op+', 'bar'])
+
+    results, remainder = scanner.scan('sum = foo + ,foo,bar,baz')
+    assert_equals(remainder, ',foo,bar,baz')
+
+def test_template():
+    cmd = "du -sh ${backupdir} | awk '{ print $1;}'"
+    tpl = pycompat.Template(cmd)
+
+    assert_equals(tpl.safe_substitute(backupdir='/var/spool/holland'),
+                  "du -sh /var/spool/holland | awk '{ print $1;}'")
+
+    assert_raises(ValueError, tpl.substitute, backupdir='/var/spool/holland')
+
+    # escape $1 properly for substitute()
+    cmd = cmd.replace('$1', '$$1')
+    tpl = pycompat.Template(cmd)
+    assert_equals(tpl.substitute(backupdir='/var/spool/holland'),
+                  "du -sh /var/spool/holland | awk '{ print $1;}'")
