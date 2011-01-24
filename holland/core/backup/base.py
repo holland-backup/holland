@@ -113,6 +113,7 @@ class BackupRunner(object):
                              dry_run)
 
         spool_entry.config['holland:backup']['start-time'] = time.time()
+        spool_entry.flush()
         self.apply_cb('pre-backup', spool_entry)
 
         try:

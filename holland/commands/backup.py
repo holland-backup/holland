@@ -138,6 +138,8 @@ class PurgeManager(object):
                         "purge all backups which is probably not intended. "
                         "Setting backups-to-keep to 1")
             retention_count = 1
+        if event == 'pre-backup':
+            retention_count += 1
         self.purge_backupset(backupset, retention_count)
         backupset.update_symlinks()
 
