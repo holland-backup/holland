@@ -127,6 +127,13 @@ class MySQLDumpPlugin(object):
             self.client.disconnect()
 
     def _fast_refresh_schema(self):
+        # determine if we can skip expensive table metadata lookups entirely
+        # and just worry about finding database names
+        # However, with lock-method=auto-detect we must look at table engines
+        # to determine what lock method to use
+        config = self.config['mysqldump']
+        fast_iterate = config['lock-method'] != 'auto-detect'
+
         try:
             db_iter = DatabaseIterator(self.client)
             tbl_iter = SimpleTableIterator(self.client, record_engines=True)
@@ -134,7 +141,7 @@ class MySQLDumpPlugin(object):
                 self.client.connect()
                 self.schema.refresh(db_iter=db_iter,
                                     tbl_iter=tbl_iter,
-                                    fast_iterate=True)
+                                    fast_iterate=fast_iterate)
             except MySQLError, exc:
                 LOG.debug("MySQLdb error [%d] %s", exc_info=True, *exc.args)
                 raise BackupError("MySQL Error [%d] %s" % exc.args)
