@@ -3,22 +3,23 @@
 class PluginError(Exception):
     """Base plugin error exception"""
 
-class PluginImportError(PluginError):
-    """Raised when importing a plugin fails
+class PluginLoadError(PluginError):
+    """Failure to load a plugin
 
-    :attr module: module this plugin belongs to
+    :attr group: plugin group
+    :attr name:  plugin name
+    :attr exc:   original exception raised
     """
-
-    def __init__(self, module):
-        PluginError.__init__(self)
-        self.module = module
-
-class PluginInstanceError(PluginError):
-    """Raise when attempting to instantiate a plugin class"""
-
-    def __init__(self, cls):
-        PluginError.__init__(self)
-        self.cls = cls
+    def __init__(self, group, name, exc):
+        self.group = group
+        self.name = name
+        self.exc = exc
 
 class PluginNotFoundError(PluginError):
     """Raise when a plugin could not be found"""
+    def __init__(self, group, name):
+        self.group = group
+        self.name = name
+
+    def __str__(self):
+        return "No plugin %s in group %s" % (self.name, self.group)
