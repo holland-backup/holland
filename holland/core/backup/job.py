@@ -23,8 +23,9 @@ class BackupJob(object):
             for name in config[event]:
                 if name in ('space-check', 'auto-purge', 'rotate-backups'):
                     continue
-                hook = load_plugin('holland.hooks', name)(name)
-                hook.configure(self.config)
+                hook_config = self.config.setdefault(name, Config())
+                hook = load_plugin('holland.hooks', hook_config['plugin'])(name)
+                hook.configure(hook_config)
                 signal.connect(hook, sender=None, weak=False)
         config_writer = WriteConfigHook('write-config')
         backup_info = BackupInfoHook('backup-info')
