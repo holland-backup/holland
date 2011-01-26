@@ -8,7 +8,7 @@ import os, sys
 import logging
 from holland.core.backup.util import load_backup_config, load_backup_plugin
 from holland.core.backup.spool import BackupSpool
-from holland.core.backup.base import BackupJob
+from holland.core.backup.job import BackupJob
 
 LOG = logging.getLogger(__name__)
 
