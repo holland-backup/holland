@@ -75,6 +75,8 @@ def test_directory_size():
 # pycompat tests
 
 def test_scanner():
+    # example from
+    # http://mail.python.org/pipermail/python-dev/2003-April/035075.html
     def s_ident(scanner, token): return token
     def s_operator(scanner, token): return "op%s" % token
     def s_float(scanner, token): return float(token)
