@@ -23,8 +23,14 @@ class BackupJob(object):
             for name in config[event]:
                 if name in ('space-check', 'auto-purge', 'rotate-backups'):
                     continue
-                hook_config = self.config.setdefault(name, Config())
-                hook = load_plugin('holland.hooks', hook_config['plugin'])(name)
+                hook_config = self.config.setdefault(name,
+                                                     self.config.__class__())
+                try:
+                    hook = load_plugin('holland.hooks', hook_config['plugin'])(name)
+                except KeyError:
+                    LOG.error("Could not load hook %s - you must specify a "
+                              "plugin in the [%s] section", name, name)
+                    continue
                 hook.configure(hook_config)
                 signal.connect(hook, sender=None, weak=False)
         config_writer = WriteConfigHook('write-config')
