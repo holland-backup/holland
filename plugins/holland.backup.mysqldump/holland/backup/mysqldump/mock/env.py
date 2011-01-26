@@ -60,7 +60,7 @@ def _setup_mysqlclient(mocker):
     client.disconnect()
     mocker.count(min=0,max=None)
     # replace stop_slave, start_slave
-    client.stop_slave()
+    client.stop_slave(ARGS, KWARGS)
     mocker.count(min=0,max=None)
     client.start_slave()
     mocker.count(min=0,max=None)

@@ -183,7 +183,7 @@ def defaults_from_config(config, path):
 def stop_slave(client):
     try:
         client.connect()
-        client.stop_slave()
+        client.stop_slave(sql_thread_only=True)
         status = client.show_slave_status()
     finally:
         client.disconnect()
