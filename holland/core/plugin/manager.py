@@ -14,7 +14,7 @@ class AbstractPluginManager(object):
         """Load a plugin for the given name"""
         raise NotImplementedError()
 
-    def iterate(self, group, name):
+    def iterate(self, group):
         """Iterate over plugins for the given name"""
         raise NotImplementedError()
 
@@ -80,7 +80,7 @@ class EntrypointDependencyError(PluginError):
 
     def __str__(self):
         return "Could not find dependency '%s' for plugin %s in group %s" % \
-               (req, name, group)
+               (self.req, self.name, self.group)
 
 class EntrypointVersionConflictError(PluginError):
     def __init__(self, group, name, entrypoint, dist, req):
@@ -92,4 +92,4 @@ class EntrypointVersionConflictError(PluginError):
 
     def __str__(self):
         # XXX: this error message could be improved.
-        return "Version Conflict. Requested %s Found %s" % (req, dist)
+        return "Version Conflict. Requested %s Found %s" % (self.req, self.dist)
