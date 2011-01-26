@@ -3,7 +3,7 @@
 import os
 import logging
 from datetime import datetime
-from holland.core.hooks import BaseHook
+from holland.core.hooks import BaseHook, load_hooks_from_config
 from holland.core.backup.base import BackupError
 from holland.core.util.fmt import format_bytes
 
@@ -77,3 +77,41 @@ class CheckForSpaceHook(BackupHook):
         job.config['holland:backup:run']['estimated-size'] = format_bytes(estimated_bytes)
         if available_bytes < estimated_bytes*estimate_factor:
             raise BackupError("Insufficient space for backup")
+
+def setup_user_hooks(beacon, config):
+    """Initialize hooks based on the job config"""
+    backup_config = config['holland:backup']
+    for event, signal in beacon.iteritems():
+        for hook in load_hooks_from_config(backup_config[event], config):
+            signal.connect(hook, sender=None, weak=False)
+
+def setup_builtin_hooks(beacon, config):
+    config_writer = WriteConfigHook('<internal>')
+    estimation = CheckForSpaceHook('<internal>')
+    backup_info = BackupInfoHook('<internal>')
+
+    beacon.before_backup.connect(backup_info, weak=False)
+    beacon.before_backup.connect(estimation, weak=False)
+    beacon.before_backup.connect(config_writer, weak=False)
+
+    beacon.after_backup.connect(backup_info, weak=False)
+    beacon.after_backup.connect(config_writer, weak=False)
+
+    config = config['holland:backup']
+    if config['auto-purge-failures']:
+        purge_failures_hook = AutoPurgeFailuresHook('<internal>')
+        beacon.backup_failure.connect(purge_failures_hook, weak=False)
+
+    if config['purge-policy'] == 'after-backup':
+        rotate_backups = RotateBackupsHook('<internal>')
+        beacon.after_backup.connect(rotate_backups, weak=False)
+    elif config['purge-policy'] == 'before-backup':
+        rotate_backups = RotateBackupsHook('<internal>')
+        beacon.after_backup.connect(rotate_backups, weak=False)
+
+def setup_dryrun_hooks(beacon):
+    "Setup hook actions that should be run during a dry-run backup"
+    # Purge a backup
+    hook = DryRunPurgeHook('<internal>')
+    beacon.before_backup.connect(hook, sender=None)
+    beacon.backup_failure.connect(hook, sender=None)

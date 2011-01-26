@@ -2,6 +2,7 @@
 
 from holland.core.config import Config, Configspec
 from holland.core.plugin import load_plugin
+from holland.core.dispatch import Signal
 
 std_backup_spec = Configspec.parse("""
 [holland:backup]
@@ -13,9 +14,9 @@ purge-policy            = option("manual",
                                  default="after-backup")
 backups-to-keep         = integer(default=1)
 estimated-size-factor   = float(default=1.0)
-fail-backup             = force_list(default=list())
-pre-backup              = force_list(default=list())
-post-backup             = force_list(default=list())
+before-backup           = force_list(default=list())
+after-backup            = force_list(default=list())
+backup-failure          = force_list(default=list())
 """.splitlines())
 
 def load_backup_config(name, config_dir=None):
@@ -34,3 +35,24 @@ def load_backup_plugin(config):
     name = config['holland:backup']['plugin']
     return load_plugin('holland.backup', name)
 
+class Beacon(dict):
+    """Simple Signal container"""
+    def __init__(self, names):
+        for name in names:
+            self[name] = Signal()
+
+    def notify(self, name, robust=True, **kwargs):
+        signal = self[name]
+        if robust:
+            for receiver, result in signal.send_robust(sender=None, **kwargs):
+                if isinstance(result, Exception):
+                    raise result
+        else:
+            signal.send(sender=None, **kwargs)
+
+    def __getattr__(self, key):
+        try:
+            return self[key.replace('_', '-')]
+        except KeyError:
+            raise AttributeError('%r object has no attribute %r' % 
+                                 (self.__class__.__name__, key))

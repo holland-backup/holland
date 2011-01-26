@@ -28,3 +28,17 @@ class BaseHook(ConfigurablePlugin):
     def execute(self, **kwargs):
         """Execute this hook"""
 
+def load_hooks_from_config(hooks, config):
+    """Initialize hooks based on the job config"""
+    for name in hooks:
+        hook_config = config.setdefault(name,
+                                        config.__class__())
+        hook_plugin = hook_config['plugin']
+        try:
+            hook = load_plugin('holland.hooks', hook_plugin)(name)
+        except KeyError:
+            LOG.error("Could not load hook %s - you must specify a "
+                      "plugin in the [%s] section", name, name)
+            continue
+        hook.configure(hook_config)
+        yield hook
