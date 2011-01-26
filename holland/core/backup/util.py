@@ -2,9 +2,6 @@
 
 from holland.core.config import Config, Configspec
 from holland.core.plugin import load_plugin
-from holland.core.backup.error import BackupError
-from holland.core.backup.spool import SpoolError
-from holland.core.util.fmt import format_bytes
 
 std_backup_spec = Configspec.parse("""
 [holland:backup]

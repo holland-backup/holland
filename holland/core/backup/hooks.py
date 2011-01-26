@@ -4,7 +4,7 @@ import os
 import logging
 from datetime import datetime
 from holland.core.hooks import BaseHook
-from holland.core.backup.error import BackupError
+from holland.core.backup.base import BackupError
 from holland.core.util.fmt import format_bytes
 
 LOG = logging.getLogger(__name__)
