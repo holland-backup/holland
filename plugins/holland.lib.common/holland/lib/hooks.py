@@ -12,8 +12,11 @@ from string import Template
 LOG = logging.getLogger(__name__)
 
 class CommandHook(BackupHook):
+    def configure(self, config):
+        self.config = self.configspec().validate(config)
+
     def execute(self, job):
-        config = job.config['holland:hook:cmd']
+        config = self.config
         cmd = Template(config['cmd']).safe_substitute(backupdir=job.store.path)
         args = [
             config['shell'], '-c',
@@ -36,7 +39,6 @@ class CommandHook(BackupHook):
     def configspec(self):
         from textwrap import dedent
         return Configspec.parse(dedent("""
-        [holland:hook:cmd]
         shell = string(default="/bin/sh")
         cmd = string(default="/bin/true")
         """).splitlines()
