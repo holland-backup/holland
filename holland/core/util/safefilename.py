@@ -3,16 +3,17 @@
 Based on the identically named codec from the bobcat project
 """
 
-import re
 import codecs
 try:
     bytes
 except NameError:
     bytes = str
 
+from holland.core.util.pycompat import Scanner
+
 def decode(input, errors='strict'):
     """Decode a filename into the original unicode string"""
-    scanner = re.Scanner([
+    scanner = Scanner([
         (b"[a-z0-9-+!$%&\'@~#.,^]+", lambda s, t: bytes(t).decode('ascii')),
         (b"_", lambda s, t: ' '),
         (b'\{[a-z]+\}', lambda s, t: bytes(t[1:-1]).upper().decode('ascii')),
