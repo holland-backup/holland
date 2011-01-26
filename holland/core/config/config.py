@@ -16,9 +16,8 @@ class Config(OrderedDict):
     """Simple ini config"""
     section_cre     = re.compile(r'\s*\[(?P<name>[^]]+)\]\s*(?:#.*)?$')
     key_cre         = re.compile(r'(?P<key>[^:=\s\[][^:=]*)=\s*(?P<value>.*)$')
-    value_cre       = re.compile(r"(?:'(?P<sqs>[^'\\]*(?:\\.[^'\\]*)*)'"
-                                 r'|"(?P<dqs>[^"\\]*(?:\\.[^"\\]*)*)"'
-                                 r'|(?P<raw>.*?))\s*(?:#.*)?$')
+    value_cre       = re.compile(r'(?P<value>(?:[^"\\#]|\\.|'
+                                 r'"(?:[^"\\]*(?:\\.[^"\\]*)*)")*)')
     empty_cre       = re.compile(r'\s*($|#|;)')
     cont_cre        = re.compile(r'\s+(?P<value>.+?)$')
     include_cre     = re.compile(r'%include (?P<name>.+?)\s*$')
@@ -53,8 +52,8 @@ class Config(OrderedDict):
             m = cls.key_cre.match(line)
             if m:
                 key, value = m.group('key', 'value')
-                key = key.strip()
-                value = value.strip()
+                key = cfg.optionxform(key.strip())
+                value = cfg.valuexform(value)
                 section[key] = value
                 continue
             m = cls.cont_cre.match(line)
@@ -187,6 +186,18 @@ class Config(OrderedDict):
         :returns: tranformed option
         """
         return str(option)
+
+    def valuexform(self, value):
+        """Transform a value in an option = value pair
+
+        This method defaults to stripping an inline comment
+        from the end of a value
+        """
+        match = self.value_cre.match(value)
+        end = match.end()
+        if value[end:end+1] and value[end:end+1] != '#':
+            raise ValueError(value)
+        return match.group('value').strip()
 
     def sectionxform(self, section):
         """Transforms the section name ``section``
