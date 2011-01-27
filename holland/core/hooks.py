@@ -4,7 +4,7 @@ This module provides a convenience wrapper around dispatcher Signals
 and provides the basis for a Hook plugin used in other places in the
 holland backup framework
 """
-from holland.core.plugin import ConfigurablePlugin
+from holland.core.plugin import ConfigurablePlugin, load_plugin
 
 class BaseHook(ConfigurablePlugin):
     """Base hook class
