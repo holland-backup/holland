@@ -12,6 +12,14 @@ class ConfigError(Exception):
 class ConfigSyntaxError(ConfigError, SyntaxError):
     """Syntax error when processing config"""
 
+class BaseFormatter(object):
+    """Format values in a config file"""
+    def format(self, key, value):
+        # only return strings
+        if isinstance(value, basestring):
+            return value
+        return None
+
 class Config(OrderedDict):
     """Simple ini config"""
     section_cre     = re.compile(r'\s*\[(?P<name>[^]]+)\]\s*(?:#.*)?$')
@@ -26,7 +34,7 @@ class Config(OrderedDict):
     filename        = None
 
     #: an object that's always asked when formatting a key/value pair
-    formatter       = None
+    formatter       = BaseFormatter()
 
     #@classmethod
     def parse(cls, iterable):
@@ -227,10 +235,10 @@ class Config(OrderedDict):
                 lines.append("[%s]" % key)
                 lines.append(str(value))
                 lines.append("")
-            elif isinstance(value, basestring):
-                lines.append("%s = %s" % (key, value))
             else:
-                LOG.info("!!! Skipping key %r", key)
+                value = self.formatter.format(key, value)
+                if value is not None:
+                    lines.append("%s = %s" % (key, value))
         return os.linesep.join(lines)
 
     def __repr__(self):
