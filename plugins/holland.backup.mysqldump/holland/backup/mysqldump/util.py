@@ -141,8 +141,6 @@ def refresh_schema(schema, client):
     except MySQLError, exc:
         raise BackupError("Failed to refresh schema: %s" % exc)
 
-    LOG.info("schema.databases => %r", schema.databases)
-
 def locate_mysqldump(search_path):
     from holland.lib.which import which, WhichError
     if not search_path:
