@@ -3,9 +3,10 @@
 import csv
 import logging
 try:
-    from io import StringIO
+    from io import StringIO, BytesIO
 except ImportError: #pragma: nocover
     from cStringIO import StringIO
+    BytesIO = StringIO
 from subprocess import list2cmdline
 from shlex import split
 
