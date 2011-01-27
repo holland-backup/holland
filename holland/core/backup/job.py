@@ -48,6 +48,6 @@ class BackupJob(object):
                     LOG.warning("+ Error while running plugin shutdown.")
                     LOG.warning("  Please see the trace log")
         except:
-            beacon.notify('failed-backup', job=self)
+            beacon.notify('backup-failure', job=self)
             raise
         beacon.notify('after-backup', job=self)
