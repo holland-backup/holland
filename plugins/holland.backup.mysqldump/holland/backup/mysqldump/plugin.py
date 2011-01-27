@@ -54,7 +54,8 @@ class MySQLDumpPlugin(BackupPlugin):
         LOG.info("mysqldump backup")
         LOG.info("----------------")
         LOG.info(":databases: %s",
-                 ','.join([db.name for db in self._schema.databases]))
+                 ','.join([db.name + (db.excluded and '(excluded)' or '')
+                          for db in self._schema.databases]))
 
         if dry_run:
             mockenv = MockEnvironment()
