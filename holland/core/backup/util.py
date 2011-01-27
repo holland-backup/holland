@@ -54,5 +54,5 @@ class Beacon(dict):
         try:
             return self[key.replace('_', '-')]
         except KeyError:
-            raise AttributeError('%r object has no attribute %r' % 
+            raise AttributeError('%r object has no attribute %r' %
                                  (self.__class__.__name__, key))
