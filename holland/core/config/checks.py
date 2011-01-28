@@ -37,6 +37,8 @@ class BoolCheck(BaseCheck):
             'false': False,
             '0'    : False,
         }
+        if isinstance(value, bool):
+            return value
         value = value or self.default
         return valid_bools[value.lower()]
 
