@@ -36,6 +36,13 @@ class Config(OrderedDict):
     #: an object that's always asked when formatting a key/value pair
     formatter       = BaseFormatter()
 
+    #: dict mapping keys to source file/lines
+    source          = ()
+
+    def __init__(self, *args, **kwargs):
+        super(Config, self).__init__(*args, **kwargs)
+        self.source = {}
+
     #@classmethod
     def parse(cls, iterable):
         """Parse a sequence of lines and return the resulting ``Config`` instance.
@@ -45,16 +52,22 @@ class Config(OrderedDict):
         """
         cfg = cls()
         section = cfg
+        name = getattr(iterable, 'name', '<unknown>')
         key = None
         for lineno, line in enumerate(iterable):
             if cls.empty_cre.match(line):
                 continue
             m = cls.section_cre.match(line)
             if m:
-                name = m.group('name')
-                #XXX: we throw away cls() if there is an existing
-                #     section of the same name (which we will reuse)
-                section = cfg.setdefault(name, cls())
+                sectname = m.group('name')
+                try:
+                    section = cfg[sectname]
+                except KeyError:
+                    cfg[sectname] = cls()
+                    section = cfg[sectname]
+                LOG.info("Recording source of section '%s' as %s:%d",
+                         sectname, name, lineno + 1)
+                cfg.source[sectname] = '%s:%d' % (name, lineno + 1)
                 key = None # reset key
                 continue
             m = cls.key_cre.match(line)
@@ -63,13 +76,24 @@ class Config(OrderedDict):
                 key = cfg.optionxform(key.strip())
                 value = cfg.valuexform(value)
                 section[key] = value
+                LOG.info("Recording source of key '%s' as %s:%d",
+                         key, name, lineno + 1)
+                section.source[key] = '%s:%d' % (name, lineno + 1)
                 continue
             m = cls.cont_cre.match(line)
             if m:
                 if not key:
                     raise ConfigError("unexpected continuation line")
+                section[key] += line.strip()
+                if '-' not in section.source[key]:
+                    LOG.info("Recording source of key '%s' as %s-%d",
+                             key, section.source[key], lineno + 1)
+                    section.source[key] += '-%d' % (lineno+1)
                 else:
-                    section[key] += line.strip()
+                    src_info = section.source[key].split('-')[0]
+                    LOG.info("Recording source of key '%s' as %s-%d",
+                             key, src_info, lineno + 1)
+                    section.source[key] = src_info + '-%d' % (lineno + 1)
                 continue
             m = cls.include_cre.match(line)
             if m:
@@ -133,6 +157,7 @@ class Config(OrderedDict):
                 section.merge(value)
             else:
                 self[key] = value
+        self.source.update(src_config.source)
 
     def meld(self, config):
         """Meld another config instance with this one.
@@ -156,6 +181,7 @@ class Config(OrderedDict):
                 except KeyError:
                     section = self.__class__()
                     self[key] = section
+                    self.source[key] = config.source[key]
                 section.meld(value)
             else:
                 try:
@@ -163,6 +189,7 @@ class Config(OrderedDict):
                 except KeyError:
                     # only add the value if it does not already exist
                     self[key] = value
+                    self.source[key] = value
 
     def write(self, path, encoding='utf8'):
         """Write a representaton of the config to the specified filename.
