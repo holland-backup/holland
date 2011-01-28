@@ -1,5 +1,6 @@
 # parse.py
 import re
+from holland.core.config.util import unquote
 try:
     Scanner = re.Scanner
 except AttributeError:
@@ -47,26 +48,6 @@ class Lexer(object):
 
     def __iter__(self):
         return self.iterable
-
-def unquote(value):
-    """Remove quotes from a string."""
-    META_CRE = re.compile(r'''\\(['"btnr\\s])''')
-    META = {
-        'b' : "\b",
-        't' : "\t",
-        'n' : "\n",
-        'r' : "\r",
-        '\\': "\\",
-        's' : " ",
-        '"' : '"',
-        "'" : "'",
-    }
-    if len(value) and value[0] == '"' and value[-1] == '"':
-        value = value[1:-1]
-    elif len(value) > 1 and value[0] == "'" and value[-1] == "'":
-        value = value[1:-1]
-
-    return META_CRE.sub(lambda m: META[m.group(1)], value)
 
 class CheckError(Exception): pass
 

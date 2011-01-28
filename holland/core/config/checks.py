@@ -7,12 +7,17 @@ try:
 except ImportError: #pragma: nocover
     from cStringIO import StringIO
     BytesIO = StringIO
-from subprocess import list2cmdline
-from shlex import split
+import shlex
+import subprocess
+from holland.core.config.util import unquote
 
 class BaseCheck(object):
     def __init__(self, default=None):
         self.default = default
+
+    def normalize(self, value):
+        "Normalize a string value"
+        return unquote(value)
 
     def check(self, value):
         """Check a value and return its conversion
@@ -24,6 +29,12 @@ class BaseCheck(object):
     def format(self, value):
         """Format a value as it should be written in a config file"""
         return str(value)
+
+class CheckError(ValueError):
+    "Raised when a check fails"
+    def __init__(self, message, value):
+        ValueError.__init__(self, message)
+        self.value = value
 
 class BoolCheck(BaseCheck):
     def check(self, value):
@@ -47,7 +58,10 @@ class BoolCheck(BaseCheck):
 
 class FloatCheck(BaseCheck):
     def check(self, value):
-        return float(value)
+        try:
+            return float(value)
+        except ValueError, exc:
+            raise CheckError(str(exc), value)
 
     def format(self, value):
         return "%f" % value
@@ -65,7 +79,10 @@ class IntCheck(BaseCheck):
             return value
         if value is None:
             return value
-        return int(value, self.base)
+        try:
+            return int(value, self.base)
+        except ValueError, exc:
+            raise CheckError(str(exc), value)
 
     def format(self, value):
         return str(value)
@@ -85,7 +102,7 @@ class OptionCheck(BaseCheck):
     def check(self, value):
         if value in self.options:
             return value
-        raise ValueError("invalid option %r" % value)
+        raise CheckError("invalid option %r" % value, value)
 
     def format(self, value):
         return str(value)
@@ -98,6 +115,11 @@ class ListCheck(BaseCheck):
         for line in unicode_csv_data:
             yield line.encode('utf-8')
     _utf8_encode = staticmethod(_utf8_encode)
+
+    def normalize(self, value):
+        "Normalize a value"
+        # skip BaseCheck's unquoting behavior
+        return value
 
     def check(self, value):
         if isinstance(value, list):
@@ -121,10 +143,10 @@ class TupleCheck(ListCheck):
 
 class CmdlineCheck(BaseCheck):
     def check(self, value):
-        return [arg.decode('utf8') for arg in split(value.encode('utf8'))]
+        return [arg.decode('utf8') for arg in shlex.split(value.encode('utf8'))]
 
     def format(self, value):
-        return list2cmdline(value)
+        return subprocess.list2cmdline(value)
 
 
 class LogLevelCheck(BaseCheck):
@@ -134,13 +156,13 @@ class LogLevelCheck(BaseCheck):
         try:
             return logging._levelNames[value.upper()]
         except KeyError:
-            raise ValueError("Invalid log level '%s'" % value)
+            raise CheckError("Invalid log level '%s'" % value, value)
 
     def format(self, value):
         try:
             return logging._levelNames[value].lower()
         except KeyError:
-            raise ValueError("Unknown logging level '%s'" % value)
+            raise CheckError("Unknown logging level '%s'" % value, value)
 
 builtin_checks = (
     ('boolean', BoolCheck),

@@ -1,5 +1,5 @@
 """This module provides support for configs that validate other configs"""
-from config import Config, BaseFormatter
+from config import Config, ConfigError, BaseFormatter
 from parsing import CheckParser
 from checks import builtin_checks
 
@@ -14,6 +14,9 @@ class CheckFormatter(BaseFormatter):
             return check.format(value)
         except KeyError:
             return value
+
+class ValidationError(ConfigError):
+    """Raise when a check fails to validate properly"""
 
 class Configspec(Config):
     """A configuration that can validate other configurations
@@ -52,6 +55,7 @@ class Configspec(Config):
             else:
                 name, args, kwargs = CheckParser.parse(value)
                 check = self.registry[name](*args, **kwargs)
+                value = check.normalize(value)
                 try:
                     value = config[key]
                 except KeyError:
