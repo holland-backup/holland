@@ -1,5 +1,5 @@
 import os, sys
-from holland.core import BackupManager, BackupError
+from holland.core import BackupManager, BackupError, ConfigError
 from holland.cli.cmd.base import ArgparseCommand, argument
 
 class Backup(ArgparseCommand):
@@ -23,7 +23,13 @@ class Backup(ArgparseCommand):
         backupmgr = BackupManager(self.config['holland']['backup-directory'])
 
         for name in namespace.backupset:
-            config = self.config.load_backupset(name)
+            try:
+                config = self.config.load_backupset(name)
+            except ConfigError, exc:
+                self.stderr("Failed to load backupset config %s: %s",
+                            name, exc)
+                return 1
+
             if not namespace.skip_hooks:
                 try:
                     config['holland:backup']['hooks'] = 'no'
