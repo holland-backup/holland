@@ -43,7 +43,7 @@ class HollandCli(ArgparseCommand):
         try:
             config = load_global_config(opts.config)
         except IOError, exc:
-            self.stderr("Failed to load config file: %s", exc)
+            self.stderr("Failed to load config file %s: %s", opts.config, exc)
             return 1
 
         if opts.log_level:
