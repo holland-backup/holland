@@ -29,7 +29,7 @@ class GlobalHollandConfig(Config):
     def load_backupset(self, name):
         if not os.path.isabs(name):
             name = os.path.join(self.basedir(), name)
-        if not name.endswith('.conf'):
+        if not os.path.isdir(name) and not name.endswith('.conf'):
             name += '.conf'
 
         cfg = Config.read([name])
