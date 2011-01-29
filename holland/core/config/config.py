@@ -1,4 +1,6 @@
-import os
+"""Process config files"""
+
+import os, sys
 import re
 import codecs
 import logging
@@ -8,6 +10,9 @@ LOG = logging.getLogger(__name__)
 
 class ConfigError(Exception):
     """General error when processing config"""
+
+class ConfigFileError(ConfigError, IOError):
+    """I/O error when reading config file"""
 
 class ConfigSyntaxError(ConfigError, SyntaxError):
     """Syntax error when processing config"""
@@ -120,7 +125,10 @@ class Config(OrderedDict):
         """
         main = cls()
         for path in filenames:
-            fileobj = codecs.open(path, 'r', encoding=encoding)
+            try:
+                fileobj = codecs.open(path, 'r', encoding=encoding)
+            except:
+                raise ConfigFileError(*sys.exc_info()[1].args)
             try:
                 cfg = cls.parse(fileobj)
             finally:
