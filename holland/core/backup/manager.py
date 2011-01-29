@@ -26,7 +26,7 @@ class BackupManager(object):
         LOG.info("Backup: %s", config.name)
         config = validate_backup_config(config)
         name = config.name
-        plugin = load_backup_plugin(config)(name)
+        plugin = load_backup_plugin(config)
         LOG.info("+ Found plugin %s", plugin.name)
         store = self.spool.add_store(name)
         LOG.info("+ Initialized backup directory %s", store.path)
