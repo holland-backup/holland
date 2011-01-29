@@ -11,6 +11,7 @@ class Backup(ArgparseCommand):
     aliases = ('bk',)
     arguments = [
         argument('--dry-run', '-n', action='store_true'),
+        argument('--skip-hooks', action='store_true')
         argument('backupset', nargs='*'),
     ]
 
@@ -21,9 +22,19 @@ class Backup(ArgparseCommand):
 
         backupmgr = BackupManager(self.config['holland']['backup-directory'],
                                   os.path.dirname(self.config.filename or ''))
-        for path in namespace.backupset:
+
+        for name in namespace.backupset:
+            config = self.config.load_backupset(name)
+            if not namespace.skip_hooks:
+                try:
+                    config['holland:backup']['hooks'] = 'no'
+                except KeyError:
+                    # ignore bad configs - this gets caught by the
+                    # BackupManager during config validation
+                    pass
+
             try:
-                backupmgr.backup(path, dry_run=namespace.dry_run)
+                backupmgr.backup(config, dry_run=namespace.dry_run)
             except BackupError, exc:
                 if isinstance(exc.chained_exc, KeyboardInterrupt):
                     self.stderr("Interrupted")
