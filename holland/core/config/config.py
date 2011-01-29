@@ -35,6 +35,10 @@ class Config(OrderedDict):
     cont_cre        = re.compile(r'\s+(?P<value>.+?)$')
     include_cre     = re.compile(r'%include (?P<name>.+?)\s*$')
 
+    #: path where this configuration was loaded from or None if not loaded from
+    #  a file
+    path = None
+
     #: an object that's always asked when formatting a key/value pair
     formatter       = BaseFormatter()
 
@@ -67,8 +71,6 @@ class Config(OrderedDict):
                 except KeyError:
                     cfg[sectname] = cls()
                     section = cfg[sectname]
-                LOG.info("Recording source of section '%s' as %s:%d",
-                         sectname, name, lineno + 1)
                 cfg.source[sectname] = '%s:%d' % (name, lineno + 1)
                 key = None # reset key
                 continue
@@ -78,8 +80,6 @@ class Config(OrderedDict):
                 key = cfg.optionxform(key.strip())
                 value = cfg.valuexform(value)
                 section[key] = value
-                LOG.info("Recording source of key '%s' as %s:%d",
-                         key, name, lineno + 1)
                 section.source[key] = '%s:%d' % (name, lineno + 1)
                 continue
             m = cls.cont_cre.match(line)
@@ -88,13 +88,9 @@ class Config(OrderedDict):
                     raise ConfigError("unexpected continuation line")
                 section[key] += line.strip()
                 if '-' not in section.source[key]:
-                    LOG.info("Recording source of key '%s' as %s-%d",
-                             key, section.source[key], lineno + 1)
                     section.source[key] += '-%d' % (lineno+1)
                 else:
                     src_info = section.source[key].split('-')[0]
-                    LOG.info("Recording source of key '%s' as %s-%d",
-                             key, src_info, lineno + 1)
                     section.source[key] = src_info + '-%d' % (lineno + 1)
                 continue
             m = cls.include_cre.match(line)
@@ -134,6 +130,7 @@ class Config(OrderedDict):
             finally:
                 fileobj.close()
             main.merge(cfg)
+            main.path = path
         return main
     read = classmethod(read)
 
