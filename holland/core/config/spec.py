@@ -48,7 +48,7 @@ class Configspec(Config):
                 except KeyError:
                     cfgsect = config.setdefault(key, config.__class__())
                 if not isinstance(value, Configspec):
-                    value = Configspec(value)
+                    value = self.__class__(value)
                 value.validate(cfgsect)
                 if isinstance(config, Config):
                     cfgsect.formatter = CheckFormatter(value)
