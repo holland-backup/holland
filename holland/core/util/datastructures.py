@@ -189,6 +189,12 @@ class SortedDict(dict):
             self[key] = default
             return self[key]
 
+    def rename(self, key, new_key):
+        value = self[key]
+        index = self.keyOrder.index(key)
+        self.insert(index, new_key, value)
+        del self[key]
+
     def value_for_index(self, index):
         """Returns the value of the item at the given zero-based index."""
         return self[self.keyOrder[index]]

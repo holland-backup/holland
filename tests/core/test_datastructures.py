@@ -48,6 +48,21 @@ class SortedDictTests(DatastructuresTestCase):
         sd.insert(2, 7, 'seven')
         self.assertEquals(sd.items(), [(6, 'six'), (7, 'seven'), (1, 'one'), (9, 'nine')])
 
+    def test_rename_key(self):
+        sd = SortedDict(self.d1)
+
+        sd.rename(9, 'NiNeR')
+        self.assertEquals(sd.items(),
+                          [(7, 'seven'), (1, 'one'), ('NiNeR', 'nine')])
+
+        sd.rename(7, 'Sem')
+        self.assertEquals(sd.items(),
+                          [('Sem', 'seven'), (1, 'one'), ('NiNeR', 'nine')])
+
+        sd.rename('Sem', 'seven')
+        self.assertEquals(sd.items(),
+                          [('seven', 'seven'), (1, 'one'), ('NiNeR', 'nine')])
+
     def test_overwrite_ordering(self):
         """ Overwriting an item keeps it's place. """
         self.d1[1] = 'ONE'
