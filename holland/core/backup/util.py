@@ -1,9 +1,12 @@
 """utility functions"""
 
+import logging
 from holland.core.config import Configspec
 from holland.core.plugin import load_plugin
 from holland.core.dispatch import Signal
 from holland.core.backup.base import BackupError
+
+LOG = logging.getLogger(__name__)
 
 std_backup_spec = Configspec.parse("""
 [holland:backup]
@@ -31,7 +34,19 @@ def load_backup_plugin(config):
     if not name:
         raise BackupError("No plugin specified in [holland:backup] in %s" %
                           config.path)
-    return load_plugin('holland.backup', name)
+    try:
+        plugincls = load_plugin('holland.backup', name)
+    except PluginError, exc:
+        raise BackupError(str(exc), exc)
+
+    try:
+        return plugincls(name)
+    except (SystemExit, KeyboardInterrupt):
+        raise
+    except Exception, exc:
+        LOG.debug("Error when instantiating plugin class '%s': %s",
+                  plugincls, exc, exc_info=True)
+        raise BackupError("Failed to load plugin: %s" % name, exc)
 
 class Beacon(dict):
     """Simple Signal container"""
