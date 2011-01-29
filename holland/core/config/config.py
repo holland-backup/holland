@@ -221,7 +221,7 @@ class Config(OrderedDict):
         :param option: option name
         :returns: tranformed option
         """
-        return str(option)
+        return str(option.replace('_', '-'))
 
     def valuexform(self, value):
         """Transform a value in an option = value pair
