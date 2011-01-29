@@ -18,11 +18,37 @@ format           = string(default='[%(levelname)s] %(message)s')
 level            = log_level(default="info")
 """.splitlines())
 
+class GlobalHollandConfig(Config):
+    def load_backupset(self, name):
+        if not os.path.isabs(name):
+            name = os.path.join(self.name, name)
+        if not name.endswith('.conf'):
+            name += '.conf'
+
+        cfg = Config.read([name])
+
+        # load providers/$plugin.conf if available
+        plugin = cfg.get('holland:backup', {}).get('plugin')
+        if plugin:
+            provider_path = os.path.join(self.name, 'providers', plugin)
+            try:
+                cfg.meld(Config.read([provider_path]))
+            except ConfigError:
+                LOG.debug("No global provider found.  Skipping.")
+        return cfg
+
+    #@classmethod
+    def configspec(self):
+        return cli_configspec
+    configspec = classmethod(configspec)
+
 def load_global_config(path):
     if path:
-        cfg = Config.read([path])
+        cfg = GlobalHollandConfig.read([path])
+        cfg.path = path
     else:
-        cfg = Config()
+        cfg = GlobalHollandConfig()
+        cfg.path = os.getcwd()
 
-    cli_configspec.validate(cfg)
+    cfg.configspec().validate(cfg)
     return cfg
