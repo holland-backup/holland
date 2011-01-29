@@ -28,16 +28,20 @@ class GlobalHollandConfig(Config):
 
     def load_backupset(self, name):
         if not os.path.isabs(name):
-            name = os.path.join(self.basedir(), name)
+            name = os.path.join(self.basedir(), 'backupsets', name)
         if not os.path.isdir(name) and not name.endswith('.conf'):
             name += '.conf'
+
+        LOG.info("Loading %s", name)
 
         cfg = Config.read([name])
 
         # load providers/$plugin.conf if available
         plugin = cfg.get('holland:backup', {}).get('plugin')
         if plugin:
-            provider_path = os.path.join(self.basedir(), 'providers', plugin)
+            provider_path = os.path.join(self.basedir(),
+                                         'providers',
+                                         plugin + '.conf')
             try:
                 cfg.meld(Config.read([provider_path]))
             except ConfigError:
