@@ -109,7 +109,7 @@ def setup_builtin_hooks(beacon, config):
         rotate_backups = RotateBackupsHook('<internal>')
         beacon.after_backup.connect(rotate_backups, weak=False)
 
-def setup_dryrun_hooks(beacon):
+def setup_dryrun_hooks(beacon, config):
     "Setup hook actions that should be run during a dry-run backup"
     # Purge a backup
     hook = DryRunPurgeHook('<internal>')
