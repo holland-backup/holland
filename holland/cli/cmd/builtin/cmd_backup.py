@@ -11,7 +11,7 @@ class Backup(ArgparseCommand):
     aliases = ('bk',)
     arguments = [
         argument('--dry-run', '-n', action='store_true'),
-        argument('--skip-hooks', action='store_true')
+        argument('--skip-hooks', action='store_true'),
         argument('backupset', nargs='*'),
     ]
 
@@ -20,8 +20,7 @@ class Backup(ArgparseCommand):
             self.stderr("Nothing to backup")
             return 1
 
-        backupmgr = BackupManager(self.config['holland']['backup-directory'],
-                                  os.path.dirname(self.config.filename or ''))
+        backupmgr = BackupManager(self.config['holland']['backup-directory'])
 
         for name in namespace.backupset:
             config = self.config.load_backupset(name)
@@ -39,7 +38,7 @@ class Backup(ArgparseCommand):
                 if isinstance(exc.chained_exc, KeyboardInterrupt):
                     self.stderr("Interrupted")
                 else:
-                    self.stderr("Failed backup '%s': %s", path, exc)
+                    self.stderr("Failed backup '%s': %s", config.name, exc)
                 break
         else:
             return 0
