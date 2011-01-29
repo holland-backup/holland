@@ -16,17 +16,21 @@ class Backup(ArgparseCommand):
         argument('backupset', nargs='*'),
     ]
 
+    def __init__(self, *args, **kwargs):
+        super(Backup, self).__init__(*args, **kwargs)
+        self.parser.set_defaults(
+                directory=self.config['holland']['backup-directory'],
+                backupset=self.config['holland']['backupsets'],
+        )
+
     def execute(self, namespace):
         backupsets = namespace.backupset
-        if not backupsets:
-            backupsets = self.config['holland']['backupsets']
 
         if not backupsets:
             self.stderr("Nothing to backup")
             return 1
 
-        backupmgr = BackupManager(namespace.directory or
-                                  self.config['holland']['backup-directory'])
+        backupmgr = BackupManager(namespace.directory)
 
         for name in backupsets:
             try:
