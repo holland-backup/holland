@@ -6,7 +6,7 @@
 
 import os, sys
 import logging
-from holland.core.backup.util import load_backup_config, load_backup_plugin
+from holland.core.backup.util import validate_backup_config, load_backup_plugin
 from holland.core.backup.spool import BackupSpool
 from holland.core.backup.job import BackupJob
 
@@ -18,16 +18,14 @@ class BackupManager(object):
     >>> mgr = BackupManager('/var/spool/holland')
     >>> mgr.backup('/etc/holland/backupsets/foo.conf', dry_run=True)
     """
-    def __init__(self, spool_directory, config_dir):
+    def __init__(self, spool_directory):
         self.spool = BackupSpool(spool_directory)
-        self.config_dir = config_dir
 
-    def backup(self, name, dry_run=False):
+    def backup(self, config, dry_run=False):
         """Run a backup given a backupset name"""
-        LOG.info("Backup: %s", name)
-        config = load_backup_config(name, config_dir=self.config_dir)
-        LOG.info("+ Loaded config %s", config.filename)
-        name = os.path.splitext(os.path.basename(name))[0]
+        LOG.info("Backup: %s", config.name)
+        config = validate_backup_config(config)
+        name = config.name
         plugin = load_backup_plugin(config)(name)
         LOG.info("+ Found plugin %s", plugin.name)
         store = self.spool.add_store(name)

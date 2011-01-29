@@ -1,8 +1,9 @@
 """utility functions"""
 
-from holland.core.config import Config, Configspec
+from holland.core.config import Configspec
 from holland.core.plugin import load_plugin
 from holland.core.dispatch import Signal
+from holland.core.backup.base import BackupError
 
 std_backup_spec = Configspec.parse("""
 [holland:backup]
@@ -20,20 +21,16 @@ after-backup            = force_list(default=list())
 backup-failure          = force_list(default=list())
 """.splitlines())
 
-def load_backup_config(name, config_dir=None):
-    """Load a backup configuration given a name/path"""
-    if not name.endswith('.conf'):
-        name += '.conf'
-    if config_dir and not os.path.isabspath(name):
-        name = os.path.join(config_dir, 'backupsets', name)
-
-    cfg = Config.read([name])
-    std_backup_spec.validate(cfg)
-    return cfg
+def validate_backup_config(cfg):
+    """Validate a backup configuration"""
+    return std_backup_spec.validate(cfg)
 
 def load_backup_plugin(config):
     """Load a backup plugin from a backup config"""
     name = config['holland:backup']['plugin']
+    if not name:
+        raise BackupError("No plugin specified in [holland:backup] in %s" %
+                          config.path)
     return load_plugin('holland.backup', name)
 
 class Beacon(dict):
