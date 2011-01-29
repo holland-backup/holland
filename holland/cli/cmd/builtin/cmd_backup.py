@@ -10,19 +10,25 @@ class Backup(ArgparseCommand):
     """
     aliases = ('bk',)
     arguments = [
+        argument('--backup-directory', '-d', dest='directory'),
         argument('--dry-run', '-n', action='store_true'),
         argument('--skip-hooks', action='store_true'),
         argument('backupset', nargs='*'),
     ]
 
     def execute(self, namespace):
-        if not namespace.backupset:
+        backupsets = namespace.backupset
+        if not backupsets:
+            backupsets = self.config['holland']['backupsets']
+
+        if not backupsets:
             self.stderr("Nothing to backup")
             return 1
 
-        backupmgr = BackupManager(self.config['holland']['backup-directory'])
+        backupmgr = BackupManager(namespace.directory or
+                                  self.config['holland']['backup-directory'])
 
-        for name in namespace.backupset:
+        for name in backupsets:
             try:
                 config = self.config.load_backupset(name)
             except ConfigError, exc:
@@ -30,7 +36,7 @@ class Backup(ArgparseCommand):
                             name, exc)
                 return 1
 
-            if not namespace.skip_hooks:
+            if namespace.skip_hooks:
                 try:
                     config['holland:backup']['hooks'] = 'no'
                 except KeyError:
