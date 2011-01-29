@@ -21,7 +21,7 @@ class Help(ArgparseCommand):
         result = []
         for cmd in iterate_plugins('holland.commands'):
             if cmd != self.__class__:
-                cmd = cmd()
+                cmd = cmd(self.parent_parser, self.config)
             else:
                 cmd = self
                 result.append("%-15s - %s" % (cmd.name, cmd.summary))

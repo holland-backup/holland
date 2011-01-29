@@ -49,7 +49,7 @@ class BaseCommand(BasePlugin):
     #@classmethod
     def matches(cls, name):
         """Check whether this command should match a given name"""
-        return cls().name == name or name in cls.aliases
+        return cls.name == name or name in cls.aliases
     matches = classmethod(matches)
 
 
