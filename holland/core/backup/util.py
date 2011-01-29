@@ -14,6 +14,7 @@ purge-policy            = option("manual",
                                  default="after-backup")
 backups-to-keep         = integer(default=1)
 estimated-size-factor   = float(default=1.0)
+hooks                   = boolean(default="yes")
 before-backup           = force_list(default=list())
 after-backup            = force_list(default=list())
 backup-failure          = force_list(default=list())
