@@ -44,7 +44,7 @@ class Backup(ArgparseCommand):
             except (KeyboardInterrupt, SystemExit):
                 raise
             except (ConfigError, BackupError), exc:
-                LOG.error("Backup '%s' failed: %s", name, exc)
+                self.stderr("Backup '%s' failed: %s", name, exc)
                 break
         else:
             return 0
