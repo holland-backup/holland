@@ -64,7 +64,7 @@ class FloatCheck(BaseCheck):
             raise CheckError(str(exc), value)
 
     def format(self, value):
-        return "%f" % value
+        return "%.2f" % value
 
 class IntCheck(BaseCheck):
     def __init__(self, default=None, min=None, max=None, base=10):
@@ -85,6 +85,8 @@ class IntCheck(BaseCheck):
             raise CheckError(str(exc), value)
 
     def format(self, value):
+        if value is None:
+            return value
         return str(value)
 
 class StringCheck(BaseCheck):
