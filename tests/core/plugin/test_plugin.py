@@ -32,7 +32,9 @@ class MockMetadata(FileMetadata):
 import os, sys
 # ensure our test pkg 'pkg' is importable
 sys.path.append(os.path.dirname(__file__))
-distribution = Distribution('pkg', metadata=MockMetadata('pkg'))
+distribution = Distribution('pkg',
+                            project_name='pkgtest',
+                            metadata=MockMetadata('pkg'))
 working_set.add(distribution)
 
 
