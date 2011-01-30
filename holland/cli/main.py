@@ -1,4 +1,4 @@
-import os, sys
+import os
 import logging
 from holland import __version__
 from holland.cli.config import load_global_config

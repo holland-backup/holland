@@ -2,7 +2,6 @@
 import os
 import logging
 from holland.core import Config, Configspec, ConfigError
-from holland.core import load_plugin
 
 LOG = logging.getLogger(__name__)
 
