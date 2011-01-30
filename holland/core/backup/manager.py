@@ -6,7 +6,7 @@
 
 import os, sys
 import logging
-from holland.core.backup.util import validate_backup_config, load_backup_plugin
+from holland.core.backup.util import load_backup_plugin
 from holland.core.backup.spool import BackupSpool
 from holland.core.backup.job import BackupJob
 
@@ -24,7 +24,7 @@ class BackupManager(object):
     def backup(self, config, dry_run=False):
         """Run a backup given a backupset name"""
         LOG.info("Backup: %s", config.name)
-        config = validate_backup_config(config)
+        config = BackupJob.configspec().validate(config)
         name = config.name
         plugin = load_backup_plugin(config)
         LOG.info("+ Found plugin %s", plugin.name)
@@ -33,7 +33,6 @@ class BackupManager(object):
         job = BackupJob(plugin, config, store)
         job.run(dry_run)
         return job
-
 
     def cleanup(self, path):
         """Run a plugin's cleanup method"""
