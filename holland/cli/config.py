@@ -28,10 +28,9 @@ class GlobalHollandConfig(Config):
     def load_backupset(self, name):
         if not os.path.isabs(name):
             name = os.path.join(self.basedir(), 'backupsets', name)
+
         if not os.path.isdir(name) and not name.endswith('.conf'):
             name += '.conf'
-
-        LOG.info("Loading %s", name)
 
         cfg = Config.read([name])
 
