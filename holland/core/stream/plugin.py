@@ -2,18 +2,19 @@
 
 import os
 try:
-    set = set
-except NameError:
-    from sets import Set as set
+    _set = set
+except NameError: #pragma: no cover
+    from sets import Set as _set
 try:
     SEEK_SET = os.SEEK_SET
     SEEK_CUR = os.SEEK_CUR
     SEEK_END = os.SEEK_END
-except AttributeError:
+except AttributeError: #pragma: no cover
     SEEK_SET = 0
     SEEK_CUR = 1
     SEEK_END = 2
-from holland.core.plugin import BasePlugin, PluginError, PluginInfo, \
+
+from holland.core.plugin import BasePlugin, PluginError, \
                                 load_plugin, iterate_plugins
 
 
@@ -27,7 +28,7 @@ def available_methods():
     These names are suitable for passing to open_stream(..., method=name, ...)
     """
     results = []
-    for plugin in set(iterate_plugins('holland.stream')):
+    for plugin in _set(iterate_plugins('holland.stream')):
         results.append(plugin.name)
         results.extend(plugin.aliases)
     return results
@@ -51,26 +52,19 @@ class StreamPlugin(BasePlugin):
     name = ''
     aliases = ()
 
-    def __init__(self, name):
-        self.name = name
-
-    def open(cls, name, method, *args, **kwargs):
+    def open(self, name, method, *args, **kwargs):
+        """Open a stream and return a FileLike instance"""
         raise NotImplementedError()
 
     def stream_info(self, name, method, *args, **kwargs):
-        return StreamInfo(
-            extension='gz',
-            name=name + '.gz',
-            description="%s -%d" % (cmd, level)
+        """Provide information about this stream"""
+        return dict(
+            extension='',
+            name=name,
+            description="%s: args=%r kwargs=%r" % (self.__class__.__name__,
+                                                   args, kwargs)
         )
 
-
-class StreamInfo(dict):
-    def __getattr__(self, key):
-        return self[key]
-
-    def __str__(self):
-        return self.description
 
 class StreamError(IOError):
     """Exception in stream"""
