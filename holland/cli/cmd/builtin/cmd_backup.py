@@ -1,4 +1,4 @@
-import os, sys
+"""Command to run a holland backup"""
 from holland.core import BackupManager, BackupError, ConfigError
 from holland.cli.cmd.base import ArgparseCommand, argument
 
@@ -24,6 +24,7 @@ class Backup(ArgparseCommand):
         )
 
     def execute(self, namespace):
+        "Run the backup command"
         backupsets = namespace.backupset
 
         if not backupsets:
@@ -32,35 +33,37 @@ class Backup(ArgparseCommand):
 
         backupmgr = BackupManager(namespace.directory)
 
+        skip_hooks = namespace.skip_hooks
+        dry_run = namespace.dry_run
+
         for name in backupsets:
             try:
-                config = self.config.load_backupset(name)
-            except ConfigError, exc:
-                self.stderr("Failed to load backupset config %s: %s",
-                            name, exc)
-                return 1
-
-            if namespace.skip_hooks:
-                try:
-                    config['holland:backup']['hooks'] = 'no'
-                except KeyError:
-                    # ignore bad configs - this gets caught by the
-                    # BackupManager during config validation
-                    pass
-
-            try:
-                backupmgr.backup(config, dry_run=namespace.dry_run)
-            except BackupError, exc:
-                if isinstance(exc.chained_exc, KeyboardInterrupt):
-                    self.stderr("Interrupted")
-                else:
-                    self.stderr("Failed backup '%s': %s", config.name, exc)
+                self.run_backup(name, backupmgr,
+                                skip_hooks=skip_hooks,
+                                dry_run=dry_run)
+            except (KeyboardInterrupt, SystemExit):
+                raise
+            except (ConfigError, BackupError), exc:
+                LOG.error("Backup '%s' failed: %s", name, exc)
                 break
         else:
             return 0
         return 1
 
+    def run_backup(self, name, backupmgr, skip_hooks=False, dry_run=False):
+        "Run a single backup"
+        config = self.config.load_backupset(name)
+        if skip_hooks:
+            try:
+                config['holland:backup']['hooks'] = 'no'
+            except KeyError:
+                # ignore bad configs - this gets caught by the
+                # BackupManager during config validation
+                pass
+        backupmgr.backup(config, dry_run=dry_run)
+
     def plugin_info(self):
+        "Backup command plugin info"
         return PluginInfo(
             name=self.name,
             summary=self.summary,
