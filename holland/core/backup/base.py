@@ -2,6 +2,7 @@
 
 import logging
 from holland.core.plugin import ConfigurablePlugin
+from holland.core.config import Configspec
 
 LOG = logging.getLogger(__name__)
 
@@ -46,3 +47,22 @@ class BackupPlugin(ConfigurablePlugin):
         """Provide information about this backup"""
         raise NotImplementedError()
 
+    #@staticmethod
+    def configspec():
+        from textwrap import dedent
+        return Configspec.parse(dedent("""
+        [holland:backup]
+        plugin                  = string
+        auto-purge-failures     = boolean(default=yes)
+        purge-policy            = option("manual",
+                                         "before-backup",
+                                         "after-backup",
+                                         default="after-backup")
+        backups-to-keep         = integer(default=1)
+        estimated-size-factor   = float(default=1.0)
+        hooks                   = boolean(default="yes")
+        before-backup           = force_list(default=list())
+        after-backup            = force_list(default=list())
+        backup-failure          = force_list(default=list())
+        """).splitlines())
+    configspec = staticmethod(configspec)
