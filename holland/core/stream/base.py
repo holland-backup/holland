@@ -5,7 +5,7 @@ try:
     SEEK_SET = os.SEEK_SET
     SEEK_CUR = os.SEEK_CUR
     SEEK_END = os.SEEK_END
-except AttributeError:
+except AttributeError: #pragma: no cover
     SEEK_SET = 0
     SEEK_CUR = 1
     SEEK_END = 2
@@ -36,11 +36,11 @@ class FileLike(object):
 
     def read(self, size=None):
         """Read at most size bytes from the file"""
-        return NotImplementedError()
+        return ''
 
     def readline(self, size=None):
         """Read one entire line from the file."""
-        raise NotImplementedError()
+        return ''
 
     def readlines(self, sizehint=None):
         """Read until EOF using readline() and return a list containing the
@@ -49,7 +49,6 @@ class FileLike(object):
 
     def seek(self, offset, whence=SEEK_SET):
         """Set the file's current position"""
-        raise NotImplementedError()
 
     def tell(self):
         """Return the file's current position"""
@@ -57,7 +56,6 @@ class FileLike(object):
 
     def truncate(self, size=None):
         """Truncate the file's size"""
-        raise NotImplementedError()
 
     def write(self, data):
         """Write a string to the file"""
