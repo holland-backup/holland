@@ -9,27 +9,20 @@ platforms and even non-database related applications. Because of it's
 plugin structure, Holland can be used to backup anything you want by 
 whatever means you want.
 
-Plugins are provided as Python "eggs" - zip files with Python modules and
-extra metadata information.
-
 Dependencies
 ------------
 The core Holland framework has the following dependencies (available on any
 remotely modern Linux distribution):
 
 * Python >= 2.3
-* `pkg_resources <http://peak.telecommunity.com/DevCenter/PkgResources>`_
-* `python-setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_
+* `pkg_resources <http://packages.python.org/distribute/pkg_resources.html>`_
+* `python-setuptools <http://packages.python.org/distribute/>`_
+
+MySQL based plugins additional require the MySQLdb python connector:
 * `MySQLdb <http://mysql-python.sourceforge.net/>`_
 
-Additionally, the Maatkit plugin requires:
+For Red-Hat Enterprise Linux 5, all dependencies are available directly from
+the base channels.  Red-Hat Enterprise Linux 4, EPEL is required for
+python-setuptools. 
 
-* `Maatkit <http://maatkit.org>`_
-* `Perl-TermReadKey <http://search.cpan.org/~kjalb/TermReadKey/ReadKey.pm>`_
-
-For Red-Hat Enterprise Linux 5, all dependencies, except for Maatkti, are
-available directly from the base channels. Red-Hat Enterprise Linux 4, 
-EPEL is required for python-setuptools. 
-
-Note that other providers may have additional dependency requirements.
-
+Note that other plugins may have additional dependency requirements.
