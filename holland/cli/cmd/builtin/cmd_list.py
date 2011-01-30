@@ -17,7 +17,8 @@ class ListCommands(ArgparseCommand):
     def execute(self, namespace):
         self.stderr("")
         self.stderr("Available commands:")
-        commands = [plugin() for plugin in iterate_plugins('holland.commands')]
+        commands = [plugin(self.parent_parser, self.config)
+                    for plugin in iterate_plugins('holland.commands')]
         commands.sort()
         for cmd in commands:
             aliases = ''
