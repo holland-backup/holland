@@ -5,7 +5,8 @@ import tempfile
 from nose.tools import *
 from pkg_resources import FileMetadata, Distribution, working_set
 from holland.core import Config, load_plugin
-from holland.core.backup.job import BackupJob, BackupError
+from holland.core.backup.job import BackupJob
+from holland.core.backup import BackupPlugin, BackupError
 
 # Mock a real plugin without running setup.py
 # XXX: Share this code between tests/*/plugin and tests/*/backup/
@@ -59,7 +60,7 @@ def setup():
 
 def test_job():
     cfg = Config(test_config)
-    BackupJob.configspec().validate(cfg)
+    BackupPlugin.configspec().validate(cfg)
     store = FakeStore()
     plugin = load_plugin('holland.backup', 'foo')('foo')
 
@@ -73,7 +74,7 @@ def test_job():
 
 def test_job_failure():
     cfg = Config(test_config)
-    BackupJob.configspec().validate(cfg)
+    BackupPlugin.configspec().validate(cfg)
     store = FakeStore()
     plugin = load_plugin('holland.backup', 'foo')('foo')
     job = BackupJob(plugin, cfg, store)
