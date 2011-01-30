@@ -1,52 +1,55 @@
+"""Generate backupset configuration files"""
+
+import sys
 from holland.cli.cmd.base import ArgparseCommand, argument
-#from holland.cli.config.util import cleanup_config
+from holland.core import Config, load_plugin, BackupPlugin, PluginError
 
 class MakeConfig(ArgparseCommand):
+    """Generate a new config"""
+
     name = 'mk-config'
+    aliases = ['mc']
     summary = "Generate a configuration file from a plugin"
     description = """
     Generate a configuration file from a plugin
     """
 
     arguments = [
-        argument('--file'),
+        argument('--file', default='-'),
         argument('--name', help="Base name of the configuration to generate"),
         argument('--minimal', action='store_true'),
-        argument('plugin-type')
+        argument('--edit', action='store_true'),
+        argument('plugin')
     ]
 
     def execute(self, namespace):
         try:
-            plugin = load_plugin('holland.backup', namespace.plugin_type)
+            plugin = load_plugin('holland.backup', namespace.plugin)
         except PluginError, exc:
             self.error("Fail %s", exc)
             return 1
 
-        configspec = plugin.configspec
+        config = BackupPlugin.configspec().validate(Config())
+        config['holland:backup']['plugin'] = namespace.plugin
 
-        config = ConfigObj(base_config, configspec=configspec)
-        check(config)       # validate, check for required keys
-        cleanup(config)     # handle comments, comment out optional settings
+        plugin.configspec().validate(config)
 
         if namespace.edit:
-            # allow edit
-            # check(config); cleanup(config)
-            # if failure, continue, else break
-            while True:
-                edit(config)
-                try:
-                    check(config)
-                    cleanup(config)
-                except Error:
-                    if confirm("Errors were encountered. would you like to try again?"):
-                       continue
-                break
+            self.stderr("Edit is not supported")
+            return 1
 
-        output(config, namespace.file)
+        if namespace.file == '-':
+            namespace.file = sys.stdout
+        try:
+            config.write(namespace.file)
+        except IOError, exc:
+            self.stderr("Failed to write config file: %s", exc)
+            return 1
+        return 0
 
     #@classmethod
     def plugin_info(self):
-        return PluginInfo(
+        return dict(
             name=self.name,
             summary=self.summary,
             description=self.description,
