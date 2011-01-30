@@ -28,7 +28,7 @@ def decode(input, errors='strict'):
 
 def encode(input, errors='strict'):
     """Encode the unicode string into a filename"""
-    scanner = re.Scanner([
+    scanner = Scanner([
         (r"[a-z0-9-+!$%&\'@~#.,^]+", lambda s, t: t.encode('ascii')),
         (r" ", lambda s, t: '_'.encode('ascii')),
         (r'[A-Z]+', lambda s, t: ('{%s}' % t.lower()).encode('ascii')),
