@@ -1,3 +1,5 @@
+"""Log utility functions"""
+
 import os, sys
 import logging
 
@@ -16,7 +18,9 @@ def configure_basic_logger():
 
     if os.isatty(sys.stderr.fileno()):
         class NullHandler(logging.Handler):
+            """No-op log handler"""
             def emit(self, something):
+                """Null emitter"""
                 pass
         handler = NullHandler()
     else:
