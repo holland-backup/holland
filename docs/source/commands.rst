@@ -1,8 +1,11 @@
 .. _command-line-reference:
 
 Holland Command-Line Reference
-======================================
-Here are the commands available from the 'holland' command-line tool:
+==============================
+
+Holland provides a command line interface via the 'holland' command. Multiple
+actions can be executed by giving a subcommand to holland. There are several
+commands and more can be added through the Holland Command API.
 
 help (h)
 --------
