@@ -20,13 +20,9 @@ class Purge(ArgparseCommand):
 
     def execute(self, namespace):
         "Purge a backup"
-        for backup in namespace.backups:
-            try:
-                spool.purge(backup)
-            except:
-                return 1
 
-        return 0
+        self.stderr("Purge is currently not implemented in Holland 1.1")
+        return 1
 
     #@classmethod
     def plugin_info(cls):
