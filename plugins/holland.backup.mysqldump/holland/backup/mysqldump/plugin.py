@@ -94,9 +94,10 @@ class MySQLDumpPlugin(BackupPlugin):
         return Configspec.parse(CONFIGSPEC)
     configspec = classmethod(configspec)
 
-    def plugin_info(self):
+    #@classmethod
+    def plugin_info(cls):
         """Provide information about this plugin"""
-        return PluginInfo(
+        return dict(
             name='mysqldump',
             summary='Backup MySQL databases via the mysqldump command',
             description='''
@@ -105,3 +106,4 @@ class MySQLDumpPlugin(BackupPlugin):
             version='1.1.0a1',
             api_version='1.1.0a1',
         )
+    plugin_info = classmethod(plugin_info)
