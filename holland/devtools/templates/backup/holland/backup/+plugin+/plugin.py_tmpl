@@ -1,25 +1,25 @@
-from holland.core import BackupPlugin, PluginInfo
+"""${plugin} backup plugin for holland"""
+
+from holland.core import BackupPlugin, Configspec
 
 CONFIGSPEC = """\
 [${plugin}]
-
+# your configuration here
 """.splitlines()
 
 class NewPlugin(BackupPlugin):
-    def __init__(self, backupstore):
-        self.backupstore = backupstore
-        self.config = None
+    """Backup Plugin interface for ${plugin}"""
 
-    def configure(self, config):
-        config.validate_config(self.configspec())
-        self.config = config
+    def __init__(self, name):
+        self.name = name
+        self.config = None
 
     def pre(self):
         """Setup prior to running backup
 
         This method can do anything useful and is generally
         used to setup a common resource potentially used
-        by both estimate_size() and backup()/dry_run()
+        by both estimate_size() and backup()/dryrun()
         """
 
     def estimate(self):
@@ -37,7 +37,7 @@ class NewPlugin(BackupPlugin):
         """Perform a backup"""
         raise BackupError("Not implemented")
 
-    def dry_run(self):
+    def dryrun(self):
         """Dry-run through the backup process"""
 
     def post(self):
@@ -62,18 +62,20 @@ class NewPlugin(BackupPlugin):
         This spec can be used by external commands to generate a new
         configuration or validate an existing configuration.
 
-        Currently this can return any format that ConfigObj supports - such as
-        a list of lines for an ini file.
+        This method should return a holland.core.config.Configspec instance
         """
-
-        return CONFIGSPEC
+        return Configspec.parse(
+            CONFIGSPEC
+        )
+    configspec = classmethod(configspec)
 
     #@classmethod
     def plugin_info(cls):
-        return PluginInfo(
+        return dict(
             name='${plugin}',
             summary='${plugin_summary}',
-            description='${plugin_description}',
+            description='''${plugin_description}''',
             version='${version}',
             api_version='${holland_version}'
         )
+    plugin_info = classmethod(plugin_info)
