@@ -5,7 +5,6 @@ except ImportError:
 import logging
 from subprocess import Popen, PIPE, STDOUT
 from holland.core.backup.hooks import BackupHook
-from holland.core.plugin import PluginInfo
 from holland.core.config import Configspec
 from string import Template
 
@@ -36,15 +35,19 @@ class CommandHook(BackupHook):
             LOG.warning("+ [command-hook] Warning exited non-zero status %d",
                         pid.returncode)
 
-    def configspec(self):
+    #@classmethod
+    def configspec(cls):
         from textwrap import dedent
         return Configspec.parse(dedent("""
         shell = string(default="/bin/sh")
         cmd = string(default="/bin/true")
         """).splitlines()
         )
-    def plugin_info(self):
-        return PluginInfo(
+    configspec = classmethod(configspec)
+
+    #@classmethod
+    def plugin_info(cls):
+        return dict(
             author='Andrew Garner',
             name='cmdhook',
             summary='Run arbitrary commands at different stages in the backup lifecycle',
@@ -54,3 +57,4 @@ class CommandHook(BackupHook):
             version='1.0a1',
             api_version='1.1.0a1',
         )
+    plugin_info = classmethod(plugin_info)
