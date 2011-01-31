@@ -4,13 +4,13 @@ import os
 import errno
 from tempfile import TemporaryFile, mkstemp
 from subprocess import Popen, PIPE, STDOUT, check_call, CalledProcessError
-from holland.core.stream import StreamPlugin, StreamInfo, StreamError, \
-                                PluginInfo
+from holland.core.stream import StreamPlugin, StreamError
 from holland.core.stream.base import RealFileLike
 
 class CompressionStreamPlugin(StreamPlugin):
     name = None
     aliases = ()
+    summary = ''
     extension = ''
 
     def open(self, filename, mode, level=None, inline=True):
@@ -35,11 +35,22 @@ class CompressionStreamPlugin(StreamPlugin):
             'r' in mode and '--decompress' or '--stdout',
             ('w' in mode and inline) and ' (inline)' or ''
         ])
-        return StreamInfo(
+        return dict(
             extension=self.extension,
             name=filename + self.extension,
             description=args
         )
+
+    #@classmethod
+    def plugin_info(cls):
+        return dict(
+            name=cls.name,
+            summary=cls.summary,
+            author='Rackspace',
+            version='1.1.0',
+            api_version='1.1.0',
+        )
+    plugin_info = classmethod(plugin_info)
 
 
 class PostCompressFile(file):
@@ -155,26 +166,26 @@ class GzipPlugin(CompressionStreamPlugin):
     name = 'gzip'
     aliases = ['pigz']
     extension = '.gz'
-
+    summary = 'gzip/pigz compression codec'
 
 class LzopPlugin(CompressionStreamPlugin):
     name = 'lzop'
     extension = '.lzo'
-
+    summary = 'lzop compression codec'
 
 class BzipPlugin(CompressionStreamPlugin):
     name = 'bzip2'
     aliases = ['pbzip2']
     extension = '.bz'
-
+    summary = 'bzip2/pbzip2 compression codec'
 
 class LzmaPlugin(CompressionStreamPlugin):
     name = 'lzma'
     aliases = ['xz', 'pxz']
     extension = '.xz'
+    summary = 'lzma compression codec'
 
     def __init__(self, name):
         if name == 'lzma':
             name = 'xz'
         self.name = name
-
