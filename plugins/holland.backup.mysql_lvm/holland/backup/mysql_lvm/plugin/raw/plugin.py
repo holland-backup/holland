@@ -3,7 +3,7 @@
 import os
 import logging
 from holland.core.util.path import directory_size
-from holland.core.exceptions import BackupError
+from holland.core import BackupError, BackupPlugin
 from holland.lib.lvm import LogicalVolume, CallbackFailuresError, \
                             LVMCommandError, relpath, getmount
 from holland.lib.mysql.client import MySQLError
@@ -67,7 +67,7 @@ port = integer(default=None)
 socket = string(default=None)
 """.splitlines()
 
-class MysqlLVMBackup(object):
+class MysqlLVMBackup(BackupPlugin):
     """A Holland Backup plugin suitable for performing LVM snapshots of a 
     filesystem underlying a live MySQL instance.
 
@@ -75,16 +75,10 @@ class MysqlLVMBackup(object):
     """
     CONFIGSPEC = CONFIGSPEC
 
-    def __init__(self, name, config, target_directory, dry_run=False):
-        self.config = config
-        self.config.validate_config(self.configspec())
-        LOG.debug("Validated config: %r", self.config)
-        self.name = name
-        self.target_directory = target_directory
-        self.dry_run = dry_run
+    def pre(self):
         self.client = connect_simple(self.config['mysql:client'])
 
-    def estimate_backup_size(self):
+    def estimate(self):
         """Estimate the backup size this plugin will produce
 
         This is currently the total directory size of the MySQL datadir
@@ -97,10 +91,12 @@ class MysqlLVMBackup(object):
             raise BackupError("[%d] %s" % exc.args)
         return directory_size(datadir)
 
-    def configspec(self):
+    #@classmethod
+    def configspec(cls):
         """INI Spec for the configuration values this plugin supports"""
-        return self.CONFIGSPEC
-    
+        return Configspec.parse(CONFIGSPEC)
+    configspec = classmethod(configspec)
+
     def backup(self):
         """Run a backup by running through a LVM snapshot against the device
         the MySQL datadir resides on
@@ -147,11 +143,22 @@ class MysqlLVMBackup(object):
             # Something failed in the snapshot process
             raise BackupError(str(exc))
 
-def _dry_run(volume):
-    """Implement dry-run for LVM snapshots.  Not much to do here at the moment
-    """
-    LOG.info("[dry-run] Snapshotting %s/%s to %s/%s_snapshot",
+    def dryrun(self):
+        """Implement dry-run for LVM snapshots.  Not much to do here at the moment
+        """
+        LOG.info("[dry-run] Snapshotting %s/%s to %s/%s_snapshot",
              volume.vg_name,
              volume.lv_name,
              volume.vg_name,
              volume.lv_name)
+
+    #@classmethod
+    def plugin_info(cls):
+        return dict(
+            name='mysql-lvm',
+            summary='LVM snapshot backups for MySQL',
+            description='',
+            version='1.1',
+            api_version='1.1.0'
+        )
+    plugin_info = classmethod(plugin_info)

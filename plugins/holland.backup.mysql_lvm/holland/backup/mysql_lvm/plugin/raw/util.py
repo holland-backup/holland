@@ -3,7 +3,7 @@ import os
 import shutil
 import tempfile
 import logging
-from holland.lib.compression import open_stream
+from holland.core import open_stream
 from holland.backup.mysql_lvm.actions import FlushAndLockMySQLAction, \
                                              RecordMySQLReplicationAction, \
                                              InnodbRecoveryAction, \

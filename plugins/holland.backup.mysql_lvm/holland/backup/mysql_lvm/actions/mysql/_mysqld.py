@@ -5,7 +5,7 @@ import signal
 import logging
 from cStringIO import StringIO
 from subprocess import Popen, STDOUT, list2cmdline
-from holland.core.exceptions import BackupError
+from holland.core import BackupError
 from holland.lib.which import which, WhichError
 
 LOG = logging.getLogger(__name__)

@@ -5,9 +5,8 @@ import shutil
 import logging
 import tempfile
 from subprocess import list2cmdline, check_call, CalledProcessError
-from holland.core.exceptions import BackupError
+from holland.core import BackupError, BackupPlugin, open_stream
 from holland.core.util.path import directory_size
-from holland.lib.compression import open_stream
 from holland.lib.mysql.option import build_mysql_config, write_options
 from holland.lib.mysql.client import connect, MySQLError
 
@@ -35,19 +34,12 @@ host                = string(default=None)
 port                = integer(min=0, default=None)
 """.splitlines()
 
-class XtrabackupPlugin(object):
+class XtrabackupPlugin(BackupPlugin):
     """This plugin provides support for backing up a MySQL database using
     xtrabackup from Percona
     """
 
-    def __init__(self, name, config, target_directory, dry_run=False):
-        self.name = name
-        self.config = config
-        self.config.validate_config(CONFIGSPEC)
-        self.target_directory = target_directory
-        self.dry_run = dry_run
-
-    def estimate_backup_size(self):
+    def estimate(self):
         """Estimate the size of the backup this plugin will produce"""
         try:
             mysql_config = build_mysql_config(self.config['mysql:client'])
@@ -105,6 +97,18 @@ class XtrabackupPlugin(object):
             error_log.close()
             compression_stream.close()
 
-    def info(self):
+    def dryrun(self):
+        self.dry_run = True
+        self.backup()
+
+    #@classmethod
+    def plugin_info(cls):
         """Provide information about the backup this plugin produced"""
-        return ""
+        return dict(
+            name='xtrabackup',
+            summary='xtrabackup innodb hot backup plugin for holland',
+            description='',
+            version='1.1',
+            api_version='1.1.0',
+        )
+    plugin_info = classmethod(plugin_info)

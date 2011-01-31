@@ -6,7 +6,7 @@ import signal
 import logging
 from cStringIO import StringIO
 from subprocess import Popen, STDOUT, list2cmdline
-from holland.core.exceptions import BackupError
+from holland.core import BackupError
 from _mysqld import locate_mysqld_exe, generate_server_config, MySQLServer
 
 LOG = logging.getLogger(__name__)
@@ -23,12 +23,12 @@ class InnodbRecoveryAction(object):
         mysqld_exe = locate_mysqld_exe(self.mysqld_config)
         LOG.info("Bootstrapping with %s", mysqld_exe)
 
-        mycnf_path = os.path.join(self.mysqld_config['datadir'], 
+        mycnf_path = os.path.join(self.mysqld_config['datadir'],
                                   'my.innodb_recovery.cnf')
         self.mysqld_config['log-error'] = 'innodb_recovery.log'
         my_conf = generate_server_config(self.mysqld_config,
                                          mycnf_path)
-        
+
         mysqld = MySQLServer(mysqld_exe, my_conf)
         mysqld.start(bootstrap=True)
 

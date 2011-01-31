@@ -3,11 +3,12 @@
 import os
 import tempfile
 import logging
+from holland.core import Configspec
 from holland.lib.lvm import LogicalVolume, CallbackFailuresError, \
                             LVMCommandError, relpath, getmount
 from holland.lib.mysql.client import MySQLError
 from holland.core.util.path import directory_size
-from holland.core.exceptions import BackupError
+from holland.core import BackupError
 from holland.backup.mysql_lvm.plugin.common import build_snapshot, \
                                                    connect_simple
 from holland.backup.mysql_lvm.plugin.mysqldump.util import setup_actions
@@ -40,7 +41,7 @@ innodb-buffer-pool-size = string(default=128M)
 key-buffer-size         = string(default=16M)
 tmpdir                  = string(default=None)
 
-""".splitlines() + MySQLDumpPlugin.CONFIGSPEC
+""".splitlines()
 
 class MysqlDumpLVMBackup(object):
     """A Holland Backup plugin suitable for performing LVM snapshots of a 
@@ -68,10 +69,14 @@ class MysqlDumpLVMBackup(object):
 
         return self.mysqldump_plugin.estimate_backup_size()
 
-    def configspec(self):
+    #@classmethod
+    def configspec(cls):
         """INI Spec for the configuration values this plugin supports"""
-        return self.CONFIGSPEC
-    
+        spec = MySQLDumpPlugin.configspec()
+        spec.merge(Configspec.parse(CONFIGSPEC))
+        return spec
+    configspec = classmethod(configspec)
+
     def backup(self):
         """Run a backup by running through a LVM snapshot against the device
         the MySQL datadir resides on
@@ -116,11 +121,22 @@ class MysqlDumpLVMBackup(object):
             # Something failed in the snapshot process
             raise BackupError(str(exc))
 
-def _dry_run(volume):
-    """Implement dry-run for LVM snapshots.  Not much to do here at the moment
-    """
-    LOG.info("[dry-run] Snapshotting %s/%s to %s/%s_snapshot",
-             volume.vg_name,
-             volume.lv_name,
-             volume.vg_name,
-             volume.lv_name)
+    def _dry_run(volume):
+        """Implement dry-run for LVM snapshots.  Not much to do here at the moment
+        """
+        LOG.info("[dry-run] Snapshotting %s/%s to %s/%s_snapshot",
+                 volume.vg_name,
+                 volume.lv_name,
+                 volume.vg_name,
+                 volume.lv_name)
+
+    #@classmethod
+    def plugin_info(cls):
+        return dict(
+            name='mysqldump-lvm',
+            summary='mysqldump backups off an LVM snapshot',
+            author='Rackspace',
+            version='1.1',
+            api_version='1.1.0',
+        )
+    plugin_info = classmethod(plugin_info)
