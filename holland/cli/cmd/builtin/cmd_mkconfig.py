@@ -48,11 +48,11 @@ class MakeConfig(ArgparseCommand):
         return 0
 
     #@classmethod
-    def plugin_info(self):
+    def plugin_info(cls):
         return dict(
-            name=self.name,
-            summary=self.summary,
-            description=self.description,
+            name=cls.name,
+            summary=cls.summary,
+            description=cls.description,
             author='Rackspace',
             version='1.1.0',
             holland_version='1.1.0'

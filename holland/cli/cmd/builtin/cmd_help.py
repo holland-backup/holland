@@ -41,12 +41,14 @@ class Help(ArgparseCommand):
     def help(self):
         return self.parser.format_help()
 
-    def plugin_info(self):
-        return PluginInfo(
-            name=self.name,
-            summary=self.summary,
-            description=self.description,
+    #@classmethod
+    def plugin_info(cls):
+        return dict(
+            name=cls.name,
+            summary=cls.summary,
+            description=cls.description,
             author='Rackspace',
             version='1.1.0',
             holland_version='1.1.0'
         )
+    plugin_info = classmethod(plugin_info)

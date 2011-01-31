@@ -62,13 +62,15 @@ class Backup(ArgparseCommand):
                 pass
         backupmgr.backup(config, dry_run=dry_run)
 
-    def plugin_info(self):
+    #@classmethod
+    def plugin_info(cls):
         "Backup command plugin info"
-        return PluginInfo(
-            name=self.name,
-            summary=self.summary,
-            description=self.description,
+        return dict(
+            name=cls.name,
+            summary=cls.summary,
+            description=cls.description,
             author='Rackspace',
             version='1.1.0',
             api_version='1.1.0'
         )
+    plugin_info = classmethod(plugin_info)

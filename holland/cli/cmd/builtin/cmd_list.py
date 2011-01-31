@@ -1,13 +1,17 @@
 """Various list-* commands for holland.cli"""
 
+import sys
 import logging
 from holland.core.plugin import iterate_plugins
-from holland.cli.cmd.base import ArgparseCommand, argument
+from holland.cli.cmd.base import ArgparseCommand
 
 LOG = logging.getLogger(__name__)
 
 class ListCommands(ArgparseCommand):
+    """List available commands"""
+
     name = 'list-commands'
+    aliases = ['lc']
     summary = 'List available holland commands'
     description = """
     List the available commands in holland with some
@@ -15,6 +19,7 @@ class ListCommands(ArgparseCommand):
     """
 
     def execute(self, namespace):
+        """Run list-commands"""
         self.stderr("")
         self.stderr("Available commands:")
         commands = [plugin(self.parent_parser, self.config)
@@ -29,10 +34,10 @@ class ListCommands(ArgparseCommand):
 
     #@classmethod
     def plugin_info(cls):
-        return PluginInfo(
-            name=self.name,
-            summary=self.summary,
-            description=self.description,
+        return dict(
+            name=cls.name,
+            summary=cls.summary,
+            description=cls.description,
             author='Rackspace',
             version='1.1.0',
             holland_version='1.1.0'
@@ -40,7 +45,10 @@ class ListCommands(ArgparseCommand):
     plugin_info = classmethod(plugin_info)
 
 class ListPlugins(ArgparseCommand):
+    """List available plugins"""
+
     name = 'list-plugins'
+    aliases = ['lp']
     summary = 'List available holland plugins'
     description = """
     List available plugins in holland with some information about
@@ -48,24 +56,32 @@ class ListPlugins(ArgparseCommand):
 
     Currently this lists the following plugin types:
     holland.backups     - backups plugins
+    holland.stream      - output filtering plugins
+    holland.hooks       - hook plugins
     holland.commands    - command plugins
     """
 
     def execute(self, namespace):
         self.stderr("Available plugins:")
-        for command in iterate_plugins('holland.commands'):
-            command = command()
-            self.stderr("[command] %-20s - %s", command.name, command.summary)
-        for backup_plugin in iterate_plugins('holland.backup'):
-            self.stderr("[backup]  %-20s - %s", backup_plugin.name, backup_plugin.summary)
-        return 42
+        for group in ('backup', 'stream', 'hooks', 'commands'):
+            for plugin in iterate_plugins('holland.%s' % group):
+                try:
+                    info = plugin.plugin_info()
+                except:
+                    self.stderr("plugin %r plugin_info failed :(", plugin)
+                    self.stderr("%r", sys.exc_info())
+                    continue
+                self.stderr("%-10s %-20s - %s", "[%s]" % group,
+                            info['name'],
+                            info['summary'])
+        return 0
 
     #@classmethod
-    def plugin_info(self):
-        return PluginInfo(
-            name=self.name,
-            summary=self.summary,
-            description=self.description,
+    def plugin_info(cls):
+        return dict(
+            name=cls.name,
+            summary=cls.summary,
+            description=cls.description,
             author='Rackspace',
             version='1.1.0',
             holland_version='1.1.0'
@@ -88,11 +104,11 @@ class ListBackups(ArgparseCommand):
         return 0
 
     #@classmethod
-    def plugin_info(self):
-        return PluginInfo(
-            name=self.name,
-            summary=self.summary,
-            description=self.description,
+    def plugin_info(cls):
+        return dict(
+            name=cls.name,
+            summary=cls.summary,
+            description=cls.description,
             author='Rackspace',
             version='1.1.0',
             holland_version='1.1.0'

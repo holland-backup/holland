@@ -1,6 +1,9 @@
+"""Purge backups"""
+
 from holland.cli.cmd.base import ArgparseCommand, argument
 
 class Purge(ArgparseCommand):
+    """Purge backup command"""
     name = 'purge'
     summary = 'Purge a backup'
     description = """
@@ -16,6 +19,7 @@ class Purge(ArgparseCommand):
     ]
 
     def execute(self, namespace):
+        "Purge a backup"
         for backup in namespace.backups:
             try:
                 spool.purge(backup)
@@ -25,11 +29,11 @@ class Purge(ArgparseCommand):
         return 0
 
     #@classmethod
-    def plugin_info(self):
-        return PluginInfo(
-            name=self.name,
-            summary=self.summary,
-            description=self.description,
+    def plugin_info(cls):
+        return dict(
+            name=cls.name,
+            summary=cls.summary,
+            description=cls.description,
             author='Rackspace',
             version='1.1.0',
             holland_version='1.1.0'
