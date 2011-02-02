@@ -25,6 +25,9 @@ class BackupError(Exception):
 class BackupPlugin(ConfigurablePlugin):
     """Interface that Holland Backup Plugins should conform to"""
 
+    def setup(self, backupstore):
+        self.store = backupstore
+
     def pre(self):
         """Run before starting a backup"""
 
