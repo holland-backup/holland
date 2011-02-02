@@ -23,5 +23,5 @@ ${long_description|nothing}""",
     [holland.backup]
     ${plugin|plugin} = holland.backup.${plugin}:Plugin
     """,
-    namespace_packaes=['holland', 'holland.backup']
+    namespace_packages=['holland', 'holland.backup']
 )

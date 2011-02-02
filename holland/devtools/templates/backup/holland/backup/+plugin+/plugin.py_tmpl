@@ -76,6 +76,6 @@ class NewPlugin(BackupPlugin):
             summary='${plugin_summary}',
             description='''${plugin_description}''',
             version='${version}',
-            api_version='${holland_version}'
+            api_version='${api_version}'
         )
     plugin_info = classmethod(plugin_info)
