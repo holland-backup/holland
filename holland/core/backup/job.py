@@ -19,7 +19,8 @@ class BackupJob(object):
 
     def run(self, dry_run=False):
         """Run through a backup lifecycle"""
-        beacon = Beacon(['before-backup', 'after-backup', 'backup-failure'])
+        beacon = Beacon(['setup-backup', 'before-backup',
+                         'after-backup', 'backup-failure'])
         if not dry_run:
             if self.config['holland:backup']['hooks']:
                 setup_user_hooks(beacon, self.config)
@@ -28,6 +29,7 @@ class BackupJob(object):
             setup_dryrun_hooks(beacon, self.config)
 
         try:
+            beacon.notify('setup-backup', job=self, robust=False)
             self.plugin.configure(self.config)
             LOG.info("+ Configured plugin")
             self.plugin.setup(self.store)
