@@ -28,12 +28,12 @@ def configure_basic_logger():
 
     configure_logger(logger=root,
                      handler=handler,
-                     format=DEFAULT_LOG_FORMAT,
+                     fmt=DEFAULT_LOG_FORMAT,
                      level=logging.INFO)
 
-def configure_logger(logger, handler, format, level):
+def configure_logger(logger, handler, fmt, level):
     """Configure a new logger"""
-    formatter = logging.Formatter(format)
+    formatter = logging.Formatter(fmt)
     handler.setFormatter(formatter)
     logger.setLevel(level)
     logger.addHandler(handler)
@@ -44,13 +44,13 @@ def configure_logging(config):
     if os.isatty(sys.stderr.fileno()):
         configure_logger(logger=logging.getLogger(),
                          handler=logging.StreamHandler(),
-                         format=config['format'],
+                         fmt=config['format'],
                          level=config['level'])
 
     try:
         configure_logger(logger=logging.getLogger(),
                          handler=logging.FileHandler(config['file']),
-                         format=config['format'],
+                         fmt=config['format'],
                          level=config['level'])
     except IOError, exc:
         logging.info("Failed to open log file: %s", exc)

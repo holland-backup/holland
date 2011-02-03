@@ -1,7 +1,14 @@
+"""Config utility methods"""
+
 import re
 
 def unquote(value):
-    """Remove quotes from a string."""
+    """Remove quotes from a string
+
+    This will both remove quotes at the start
+    and end of a string and substitute any escaped
+    characters with their real values.
+    """
     escape_cre = re.compile(r'''\\(['"t\\])''')
     substitutions = {
         't' : "\t",

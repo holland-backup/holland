@@ -11,6 +11,7 @@ class PluginLoadError(PluginError):
     :attr exc:   original exception raised
     """
     def __init__(self, group, name, exc):
+        super(PluginLoadError, self).__init__(group, name, exc)
         self.group = group
         self.name = name
         self.exc = exc
@@ -18,6 +19,7 @@ class PluginLoadError(PluginError):
 class PluginNotFoundError(PluginError):
     """Raise when a plugin could not be found"""
     def __init__(self, group, name):
+        super(PluginLoadError, self).__init__(group, name)
         self.group = group
         self.name = name
 

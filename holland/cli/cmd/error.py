@@ -1,3 +1,5 @@
+"""Holland cli command api exceptions"""
+
 class CommandError(Exception):
     """Base exception class for command errors"""
 

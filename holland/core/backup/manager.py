@@ -4,7 +4,7 @@
 >>> mgr.backup('/etc/holland/backupsets/foo.conf', dry_run=True)
 """
 
-import os, sys
+import os
 import logging
 from holland.core.backup.util import load_backup_plugin
 from holland.core.backup.spool import BackupSpool

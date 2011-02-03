@@ -26,6 +26,7 @@ class Purge(ArgparseCommand):
 
     #@classmethod
     def plugin_info(cls):
+        """Purge plugin info"""
         return dict(
             name=cls.name,
             summary=cls.summary,

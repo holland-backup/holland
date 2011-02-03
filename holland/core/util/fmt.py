@@ -1,6 +1,5 @@
 "Formatting utility functions"
 
-import logging
 from math import floor, log
 from time import strftime, localtime
 
@@ -24,9 +23,9 @@ def format_interval(seconds):
                       (seconds, ['second', 'seconds'][seconds != 1.0]))
     return ', '.join(result)
 
-def format_datetime(epoch, format="%a %b %d %Y %I:%M:%S%p"):
+def format_datetime(epoch, fmt="%a %b %d %Y %I:%M:%S%p"):
     "Format a datetime from an integer epoch"
-    return strftime(format, localtime(epoch))
+    return strftime(fmt, localtime(epoch))
 
 def format_bytes(nbytes, precision=2):
     "Format an integer number of bytes to a human readable string."
