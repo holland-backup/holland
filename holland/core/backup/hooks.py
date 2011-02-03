@@ -81,9 +81,7 @@ class CheckForSpaceHook(BackupHook):
 def setup_user_hooks(beacon, config):
     """Initialize hooks based on the job config"""
     backup_config = config['holland:backup']
-    for event, signal in beacon.iteritems():
-        for hook in load_hooks_from_config(backup_config[event], config):
-            signal.connect(hook, sender=None, weak=False)
+    load_hooks_from_config(backup_config['hooks'], beacon, config)
 
 def setup_builtin_hooks(beacon, config):
     config_writer = WriteConfigHook('<internal>')
