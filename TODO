@@ -2,35 +2,37 @@ holland.core.config
 -------------------
 * Leading whitespace is always improperly evaluated as continuation lines
 * Inline comments are not supported (and certainly used in some holland-1.0
-  configs).  This must be fixed
+  configs).  This must be fixed [XXX: Fixed]
 * validation needs to raise errors consistently and reports on missing
   values at the end
+* validation should support 'required' 'aliasof' and 'deprecated' attributes
+  'required' -> this value is required for normal operation.  automatically 
+  a validation error when missing
+  'aliasof' -> alias of some other setting.   anytime we run into this we 
+               rewrite the config attribute to "real" key
+  'deprecated' -> flag this setting as deprecated so a warning is raised
+  		  perhaps allow a configurable message to note why the 
+		  deprecation has occurred and when the setting will be removed
+  'help' -> simple help message describing the setting
+
+* Test more invalid configs to see how we handle that.
 
 holland.core.hooks
 ------------------
-* Hooks must be able to be run multiple times.  Right now the single command
-  hook assumes a single section [holland:hooks:cmd] but we should rather use
-  a user-specified section:
-
-  [holland:backup]
-  ...
-  # events
-  after-backup = push-to-staging, also-push-to-devbox
-  ...
-  [push-to-staging]
-  plugin = command
-  cmd = rsync -avz ${backupdir} /path/to/staging/
-
-  [push-to-devbox]
-  plugin = command
-  cmd = rsync -avz ${backupdir} /path/to/dev/
-  #EOF
-
-* We should probably assume `command` as the default plugin for simplicity, 
-  although more full-featured python plugins might be created in the future.
-
 * Hooks priorities may be useful as well - that is perhaps we should load all
   hooks for an event and sort them by priority before adding them to the 
   dispatcher Signal.  Alternatively we can extend Signal() to support a
   priority when connecting.  Presorting is somewhat faster but I don't think
   performance will be a major concern here.
+
+* Disable hooks entirely by use of an option.  This should probably be set
+  via the command line as well as via a configuration option
+  [XXX: Fixed - added --skip-hooks.  and hooks can be commented out]
+
+
+holland.cli
+-----------
+* Implement purge command again.  This should simply call
+  BackupManager.purge(backup_id) where backup_id is either
+  a name of a "backupset/backup" or a backupset.  Must
+  adhere to holland 1.0's interface for compatibility.
