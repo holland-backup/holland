@@ -5,7 +5,7 @@ import logging
 from textwrap import dedent
 from argparse import RawDescriptionHelpFormatter
 from holland.core import BasePlugin
-from util import StreamWriter, SafeArgumentParser, ArgparseError
+from holland.cli.cmd.util import StreamWriter, SafeArgumentParser, ArgparseError
 
 LOG = logging.getLogger(__name__)
 
