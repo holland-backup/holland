@@ -81,6 +81,9 @@ class RealFileLike(FileLike):
         implementation to request I/O operations from the operating system"""
         raise NotImplementedError()
 
+    def tell(self):
+        return os.seek(self.fileno(), SEEK_CUR)
+
     def isatty(self):
         """Return True if the file is connected to a tty(-like) device, else
         False"""
