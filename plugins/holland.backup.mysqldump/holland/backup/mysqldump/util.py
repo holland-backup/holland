@@ -98,7 +98,7 @@ def generate_manifest(path, schema, config):
             name = encode(database.name)[0]
             stream = load_stream_plugin(method)(method)
             print >> fileobj, database.name, \
-                  stream.stream_info(name + '.sql', method).name
+                  stream.stream_info(name + '.sql', method)['name']
     finally:
         fileobj.close()
 
