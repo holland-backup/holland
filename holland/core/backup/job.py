@@ -1,10 +1,9 @@
 """Run a backup job"""
 
 import logging
-from holland.core.plugin import load_plugin
-from holland.core.config import Configspec
 from holland.core.backup.util import Beacon
-from holland.core.backup.hooks import *
+from holland.core.backup.hooks import setup_user_hooks, setup_builtin_hooks, \
+                                      setup_dryrun_hooks
 
 LOG = logging.getLogger(__name__)
 
@@ -22,7 +21,7 @@ class BackupJob(object):
         beacon = Beacon(['setup-backup', 'before-backup',
                          'after-backup', 'backup-failure'])
         if not dry_run:
-            if self.config['holland:backup']['hooks']:
+            if self.hooks():
                 setup_user_hooks(beacon, self.config)
             setup_builtin_hooks(beacon, self.config)
         else:
@@ -55,3 +54,11 @@ class BackupJob(object):
             beacon.notify('backup-failure', job=self)
             raise
         beacon.notify('after-backup', job=self)
+
+    def hooks(self):
+        """Extract hooks from the global config"""
+        return self.global_config()['hooks']
+
+    def global_config(self):
+        """Extract the [holland:backup] section from the job config"""
+        return self.config['holland:backup']
