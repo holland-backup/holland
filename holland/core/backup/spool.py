@@ -114,6 +114,17 @@ class BackupSpool(object):
                                             dir=os.path.join(self.root, name))
         return BackupStore(name, backupstore_path, self)
 
+    def load_store(self, path):
+        """Load an existing backup store"""
+        # just check we're not loading a store that's not a child of this spool
+        if os.path.commonprefix([self.root, path]) != self.root:
+            raise SpoolError("load_store() requested for %s which is not a "
+                             "subdirectory of %s" % (path, self.root))
+
+        #XXX: check this is a backupset
+        name = os.path.basename(os.path.dirname(path))
+        return BackupStore(name, path, self)
+
     def list_backups(self, name):
         """List backups for a backupset in temporal order"""
         path = os.path.join(self.root, name)
