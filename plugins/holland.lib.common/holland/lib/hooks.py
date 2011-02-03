@@ -14,6 +14,12 @@ class CommandHook(BackupHook):
     def configure(self, config):
         self.config = self.configspec().validate(config)
 
+    def register(self, signal_group):
+        event = self.config['events']
+        LOG.info("Connecting to signal %s [%r]",
+                 event, signal_group[event])
+        signal_group[event].connect(self, weak=False)
+
     def execute(self, job):
         config = self.config
         cmd = Template(config['cmd']).safe_substitute(backupdir=job.store.path)
@@ -39,6 +45,7 @@ class CommandHook(BackupHook):
     def configspec(cls):
         from textwrap import dedent
         return Configspec.parse(dedent("""
+        events = option('before-backup', 'after-backup', default='after-backup')
         shell = string(default="/bin/sh")
         cmd = string(default="/bin/true")
         """).splitlines()
