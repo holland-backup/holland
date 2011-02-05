@@ -14,18 +14,9 @@ def load_backup_plugin(config):
         raise BackupError("No plugin specified in [holland:backup] in %s" %
                           config.path)
     try:
-        plugincls = load_plugin('holland.backup', name)
+        return load_plugin('holland.backup', name)
     except PluginError, exc:
         raise BackupError(str(exc), exc)
-
-    try:
-        return plugincls(name)
-    except (SystemExit, KeyboardInterrupt):
-        raise
-    except Exception, exc:
-        LOG.debug("Error when instantiating plugin class '%s': %s",
-                  plugincls, exc, exc_info=True)
-        raise BackupError("Failed to load plugin: %s" % name, exc)
 
 class Beacon(dict):
     """Simple Signal container"""
