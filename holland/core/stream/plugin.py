@@ -42,7 +42,7 @@ def open_stream(filename, mode='r', method=None, *args, **kwargs):
     if method is None:
         method = 'file'
     try:
-        stream = load_stream_plugin(method)(method)
+        stream = load_stream_plugin(method)
     except PluginError, exc:
         raise IOError("No stream found for method %r: %s" % (method, exc))
     return stream.open(filename, mode, *args, **kwargs)
