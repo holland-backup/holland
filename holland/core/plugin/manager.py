@@ -35,7 +35,7 @@ class EntrypointPluginManager(AbstractPluginManager):
         # These are raised when an entrypoint has declared dependencies
         for plugin in pkg_resources.iter_entry_points(group, name):
             try:
-                return plugin.load()
+                return plugin.load()(plugin.name)
             except (SystemExit, KeyboardInterrupt):
                 raise
             except pkg_resources.DistributionNotFound, exc:
@@ -56,7 +56,7 @@ class EntrypointPluginManager(AbstractPluginManager):
         """
         for plugin in pkg_resources.iter_entry_points(group):
             try:
-                yield plugin.load()
+                yield plugin.load()(plugin.name)
             except (SystemExit, KeyboardInterrupt):
                 raise
             except:
