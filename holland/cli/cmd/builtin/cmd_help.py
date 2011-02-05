@@ -28,7 +28,7 @@ class Help(ArgparseCommand):
         return "\n".join(result)
     epilog = property(epilog)
 
-    def execute(self, namespace):
+    def execute(self, namespace, parser):
         from holland.cli.cmd import load_command
         if namespace.command:
             cmd = load_command('holland.commands', namespace.command)

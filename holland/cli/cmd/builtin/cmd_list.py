@@ -18,18 +18,17 @@ class ListCommands(ArgparseCommand):
     information about each.
     """
 
-    def execute(self, namespace):
+    def execute(self, namespace, parser):
         """Run list-commands"""
         self.stderr("")
         self.stderr("Available commands:")
-        commands = [plugin(self.parent_parser, self.config)
-                    for plugin in iterate_plugins('holland.commands')]
+        commands = list(iterate_plugins('holland.commands'))
         commands.sort()
         for cmd in commands:
             aliases = ''
             if cmd.aliases:
                 aliases = " (%s)" % ','.join(cmd.aliases)
-            self.stderr("%-20s - %s", cmd.name + aliases, cmd.summary)
+            self.stderr("%-15s%-5s %s", cmd.name, aliases, cmd.summary)
         return 0
 
     #@classmethod
@@ -61,10 +60,12 @@ class ListPlugins(ArgparseCommand):
     holland.commands    - command plugins
     """
 
-    def execute(self, namespace):
+    def execute(self, namespace, parser):
         self.stderr("Available plugins:")
         for group in ('backup', 'stream', 'hooks', 'commands'):
-            for plugin in iterate_plugins('holland.%s' % group):
+            plugin_list = list(iterate_plugins('holland.%s' % group))
+            plugin_list.sort()
+            for plugin in plugin_list:
                 try:
                     info = plugin.plugin_info()
                 except:
@@ -96,11 +97,11 @@ class ListBackups(ArgparseCommand):
     List available backups in the configured backup-directory
     '''
 
-    def execute(self, namespace):
+    def execute(self, namespace, parser):
         from holland.core import BackupSpool
-        spool = BackupSpool(self.config['holland:backup']['backup-directory'])
+        spool = BackupSpool(self.config['holland']['backup-directory'])
         for backup in spool:
-            self.stderr("-12s: %s", backup.name, backup.path)
+            self.stderr("%-12s: %s", backup.name, backup.path)
         return 0
 
     #@classmethod

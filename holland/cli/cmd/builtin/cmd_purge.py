@@ -18,7 +18,7 @@ class Purge(ArgparseCommand):
         argument('backups', nargs='*'),
     ]
 
-    def execute(self, namespace):
+    def execute(self, namespace, parser):
         "Purge a backup"
 
         self.stderr("Purge is currently not implemented in Holland 1.1")

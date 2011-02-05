@@ -4,7 +4,7 @@ import sys
 import logging
 from textwrap import dedent
 from argparse import RawDescriptionHelpFormatter
-from holland.core import BasePlugin
+from holland.core import BasePlugin, iterate_plugins
 from holland.cli.cmd.util import StreamWriter, SafeArgumentParser, ArgparseError
 
 LOG = logging.getLogger(__name__)
@@ -24,20 +24,44 @@ class BaseCommand(BasePlugin):
     #: :type: str
     description = ''
 
-    def __init__(self, parent_parser=None, config=None):
-        self.parent_parser = parent_parser
-        self.config = config
+    # name aliases this command is also known by
+    aliases = ()
+
+    def __init__(self, name):
+        BasePlugin.__init__(self, name)
+        self.parent = None
+        self.config = None
         self.stderr = StreamWriter(sys.stderr)
         self.stdout = StreamWriter(sys.stdout)
 
-    # name aliases this command is also known by
-    aliases = ()
+    def setup(self, parent):
+        """Link this command with its parent command
+
+        Only called on a subcommand
+        """
+        self.parent = parent
+
+    def configure(self, config):
+        """Configure this command
+
+        This provides this command with the global
+        config
+        """
+        self.config = config
 
     def help(self):
         """Text documenting this command"""
         raise NotImplementedError()
 
-    def __call__(self, args, context=None):
+    def chain(self, name, args):
+        """Chain to another command using the given arguments"""
+        cmd = [cmd for cmd in iterate_plugins('holland.commands')
+                    if cmd.matches(name)][0]
+        cmd.setup(self)
+        cmd.configure(self.config)
+        return cmd(args)
+
+    def __call__(self, args):
         raise NotImplementedError()
 
     def __cmp__(self, other):
@@ -46,11 +70,9 @@ class BaseCommand(BasePlugin):
     def __lt__(self, other):
         return self.name < other.name
 
-    #@classmethod
-    def matches(cls, name):
+    def matches(self, name):
         """Check whether this command should match a given name"""
-        return cls.name == name or name in cls.aliases
-    matches = classmethod(matches)
+        return self.name == name or name in self.aliases
 
 
 def argument(*args, **kwargs):
@@ -71,31 +93,39 @@ class ArgparseCommand(BaseCommand):
 
     def __init__(self, *args, **kwargs):
         super(ArgparseCommand, self).__init__(*args, **kwargs)
-        formatter_class = RawDescriptionHelpFormatter
-        self.parser = SafeArgumentParser(description=dedent(self.description),
-                                         prog=self.name,
-                                         epilog=dedent(self.epilog or ''),
-                                         formatter_class=formatter_class,
-                                         add_help=False)
+
+    def configure(self, config):
+        BaseCommand.configure(self, config)
+
+    def create_parser(self):
+        fmt_cls = RawDescriptionHelpFormatter
+        parser = SafeArgumentParser(description=dedent(self.description),
+                                    prog=self.name,
+                                    epilog=dedent(self.epilog or ''),
+                                    formatter_class=fmt_cls,
+                                    add_help=False)
         if self._add_help:
-            self.parser.add_argument('--help', '-h', action='store_true')
+            parser.add_argument('--help', '-h', action='store_true')
         for _args, _kwargs in self.arguments:
-            self.parser.add_argument(*_args, **_kwargs)
+            parser.add_argument(*_args, **_kwargs)
+        return parser
 
     def __call__(self, args=None):
+        parser = self.create_parser()
+
         try:
-            optns = self.parser.parse_args(args)
+            optns = parser.parse_args(args)
         except ArgparseError, exc:
             if exc.message:
                 self.stderr("%s", exc.message)
-                self.stderr("%s", self.parser.format_help())
+                self.stderr("%s", parser.format_help())
             return 1
         if getattr(optns, 'help', False):
             self.stderr("%s", self.help())
             return 1
-        return self.execute(optns)
+        return self.execute(optns, parser)
 
-    def execute(self, namespace):
+    def execute(self, namespace, parser):
         """Execute a command
 
         Subclasses should override this method and this will automatically be

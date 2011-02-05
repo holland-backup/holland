@@ -18,12 +18,19 @@ class Backup(ArgparseCommand):
 
     def __init__(self, *args, **kwargs):
         super(Backup, self).__init__(*args, **kwargs)
-        self.parser.set_defaults(
+
+    def configure(self, config):
+        self.config = config
+
+    def create_parser(self):
+        parser = ArgparseCommand.create_parser(self)
+        parser.set_defaults(
                 directory=self.config['holland']['backup-directory'],
                 backupset=self.config['holland']['backupsets'],
         )
+        return parser
 
-    def execute(self, namespace):
+    def execute(self, namespace, parser):
         "Run the backup command"
         backupsets = namespace.backupset
 

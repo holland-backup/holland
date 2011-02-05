@@ -22,7 +22,7 @@ class MakeConfig(ArgparseCommand):
         argument('plugin')
     ]
 
-    def execute(self, namespace):
+    def execute(self, namespace, parser):
         try:
             plugin = load_plugin('holland.backup', namespace.plugin)
         except PluginError, exc:

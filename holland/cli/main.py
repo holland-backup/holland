@@ -3,8 +3,7 @@ import logging
 from holland import __version__
 from holland.cli.config import load_global_config
 from holland.cli.log import configure_logging, configure_basic_logger
-from holland.cli.cmd import ArgparseCommand, argument, load_command, \
-                                 CommandNotFoundError
+from holland.cli.cmd import ArgparseCommand, argument, CommandNotFoundError
 
 HOLLAND_BANNER = """
 Holland Backup v%s
@@ -38,7 +37,11 @@ class HollandCli(ArgparseCommand):
         argument('args', nargs='...'),
     ]
 
-    def execute(self, opts):
+    def __init__(self, name):
+        ArgparseCommand.__init__(self, name)
+        self.configure(None)
+
+    def execute(self, opts, parser):
 
         try:
             config = load_global_config(opts.config)
@@ -58,15 +61,12 @@ class HollandCli(ArgparseCommand):
         configure_logging(config['logging'])
 
         if not opts.subcommand:
-            self.parser.print_help()
+            parser.print_help()
             opts.subcommand = 'list-commands'
 
+        self.configure(config)
         try:
-            cmd = load_command(group='holland.commands',
-                               name=opts.subcommand,
-                               config=config,
-                               parent_parser=self.parser)
-            return cmd(opts.args)
+            return self.chain(opts.subcommand, opts.args)
         except CommandNotFoundError, exc:
             self.stderr('Failed to load command "%s"', opts.subcommand)
             return 1
@@ -78,4 +78,4 @@ class HollandCli(ArgparseCommand):
             return 1
         return 1
 
-holland = HollandCli()
+holland = HollandCli('holland')
