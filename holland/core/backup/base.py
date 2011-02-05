@@ -46,10 +46,6 @@ class BackupPlugin(ConfigurablePlugin):
     def post(self):
         """Run after a backup"""
 
-    def backup_info(self):
-        """Provide information about this backup"""
-        raise NotImplementedError()
-
     #@staticmethod
     def configspec():
         from textwrap import dedent
