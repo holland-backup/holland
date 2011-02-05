@@ -41,16 +41,14 @@ class CompressionStreamPlugin(StreamPlugin):
             description=args
         )
 
-    #@classmethod
-    def plugin_info(cls):
+    def plugin_info(self):
         return dict(
-            name=cls.name,
-            summary=cls.summary,
+            name=self.name,
+            summary=self.summary,
             author='Rackspace',
             version='1.1.0',
             api_version='1.1.0',
         )
-    plugin_info = classmethod(plugin_info)
 
 
 class PostCompressFile(file):
