@@ -51,7 +51,10 @@ class MysqlDumpLVMBackup(object):
     """
     CONFIGSPEC = CONFIGSPEC
 
-    def __init__(self, name, config, target_directory, dry_run=False):
+    def __init__(self, name):
+        self.name = name
+
+    def configure(self, config):
         self.config = config
         self.config.validate_config(self.CONFIGSPEC)
         LOG.debug("Validated config: %r", self.config)
