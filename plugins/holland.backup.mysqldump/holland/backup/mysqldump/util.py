@@ -96,7 +96,7 @@ def generate_manifest(path, schema, config):
     try:
         for database in schema.databases:
             name = encode(database.name)[0]
-            stream = load_stream_plugin(method)(method)
+            stream = load_stream_plugin(method)
             print >> fileobj, database.name, \
                   stream.stream_info(name + '.sql', method)['name']
     finally:
