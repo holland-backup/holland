@@ -48,7 +48,7 @@ def load_hooks_from_config(hooks, signal_group, config):
             continue
 
         try:
-            hook = load_plugin('holland.hooks', hook_plugin)(name)
+            hook = load_plugin('holland.hooks', hook_plugin)
         except KeyError:
             LOG.error("Could not load hook %s - you must specify a "
                       "plugin in the [%s] section", name, name)
