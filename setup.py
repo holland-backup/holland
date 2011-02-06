@@ -22,7 +22,7 @@ setup(
     author_email="holland-discuss@lists.launchpad.net",
     url='http://www.hollandbackup.org',
     license="3-Clause BSD",
-    packages=find_packages(exclude=["ez_setup", "examples", "tests"]),
+    packages=find_packages(exclude=["ez_setup", "examples", "tests", "tests.*"]),
     include_package_data=True,
     zip_safe=False,
     test_suite='tests',
