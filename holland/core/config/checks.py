@@ -4,20 +4,20 @@ import csv
 import logging
 try:
     from io import StringIO, BytesIO
-except ImportError: #pragma: nocover
-    from cStringIO import StringIO
+except ImportError: #pragma: no cover
+    from StringIO import StringIO
     BytesIO = StringIO
 import shlex
 import subprocess
 from holland.core.config.util import unquote
 
 class BaseCheck(object):
-    def __init__(self, default=None):
-        self.default = default
-
     def normalize(self, value):
         "Normalize a string value"
-        return unquote(value)
+        if isinstance(value, basestring):
+            return unquote(value)
+        else:
+            return value
 
     def check(self, value):
         """Check a value and return its conversion
@@ -50,7 +50,6 @@ class BoolCheck(BaseCheck):
         }
         if isinstance(value, bool):
             return value
-        value = value or self.default
         return valid_bools[value.lower()]
 
     def format(self, value):
@@ -67,14 +66,12 @@ class FloatCheck(BaseCheck):
         return "%.2f" % value
 
 class IntCheck(BaseCheck):
-    def __init__(self, default=None, min=None, max=None, base=10):
+    def __init__(self, min=None, max=None, base=10):
         self.min = min
         self.max = max
         self.base = base
-        self.default = default
 
     def check(self, value):
-        value = value or self.default
         if isinstance(value, int):
             return value
         if value is None:
@@ -90,7 +87,7 @@ class IntCheck(BaseCheck):
         return str(value)
 
 class StringCheck(BaseCheck):
-    def check(self, value, default=None):
+    def check(self, value):
         return value
 
     def format(self, value):
@@ -99,7 +96,6 @@ class StringCheck(BaseCheck):
 class OptionCheck(BaseCheck):
     def __init__(self, *args, **kwargs):
         self.options = args
-        self.default = kwargs.get('default')
 
     def check(self, value):
         if value in self.options:
