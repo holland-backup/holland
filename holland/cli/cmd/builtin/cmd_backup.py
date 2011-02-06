@@ -25,8 +25,8 @@ class Backup(ArgparseCommand):
     def create_parser(self):
         parser = ArgparseCommand.create_parser(self)
         parser.set_defaults(
-                directory=self.config['holland']['backup-directory'],
-                backupset=self.config['holland']['backupsets'],
+            directory=self.config['holland']['backup-directory'],
+            backupset=self.config['holland']['backupsets']
         )
         return parser
 
@@ -69,15 +69,13 @@ class Backup(ArgparseCommand):
                 pass
         backupmgr.backup(config, dry_run=dry_run)
 
-    #@classmethod
-    def plugin_info(cls):
+    def plugin_info(self):
         "Backup command plugin info"
         return dict(
-            name=cls.name,
-            summary=cls.summary,
-            description=cls.description,
+            name=self.name,
+            summary=self.summary,
+            description=self.description,
             author='Rackspace',
             version='1.1.0',
             api_version='1.1.0'
         )
-    plugin_info = classmethod(plugin_info)
