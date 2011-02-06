@@ -3,7 +3,7 @@ import os
 import sys
 from setuptools import setup, find_packages
 
-version = '1.0.7'
+version = '1.1.0'
 
 setup(name="holland.backup.mysql_lvm",
       version=version,
@@ -28,7 +28,6 @@ setup(name="holland.backup.mysql_lvm",
       [holland.backup]
       mysql-lvm = holland.backup.mysql_lvm:MysqlLVMBackup
       mysqldump-lvm = holland.backup.mysql_lvm.plugin.mysqldump:MysqlDumpLVMBackup
-      
       """,
       namespace_packages=['holland', 'holland.backup', 'holland.restore'],
       )
