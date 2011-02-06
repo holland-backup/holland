@@ -7,7 +7,7 @@ def test_spec():
     spec = Configspec({ 'foo' : Configspec({ 'bar' : 'integer', 'baz' : 'float'
         }) })
     data = { 'foo' : { 'bar' : '32', 'baz' : '3.14159' } }
-    spec.validate(data)
+    data = spec.validate(data)
     assert_equals(data['foo']['bar'], 32)
     assert_equals(data['foo']['baz'], 3.14159)
 

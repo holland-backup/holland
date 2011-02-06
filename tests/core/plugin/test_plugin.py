@@ -42,7 +42,7 @@ def test_load_plugin():
     plugin = load_plugin('holland.plugin', 'foo')
     assert_equals(plugin.name, 'foo')
 
-    assert_equals([plugin.__name__ for plugin in
+    assert_equals([plugin.__class__.__name__ for plugin in
                    iterate_plugins('holland.plugin')],
                   ['Bar'])
 

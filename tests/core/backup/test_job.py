@@ -62,7 +62,7 @@ def test_job():
     cfg = Config(test_config)
     BackupPlugin.configspec().validate(cfg)
     store = FakeStore()
-    plugin = load_plugin('holland.backup', 'foo')('foo')
+    plugin = load_plugin('holland.backup', 'foo')
 
     job = BackupJob(plugin, cfg, store)
     job.run(dry_run=True)
@@ -76,7 +76,7 @@ def test_job_failure():
     cfg = Config(test_config)
     BackupPlugin.configspec().validate(cfg)
     store = FakeStore()
-    plugin = load_plugin('holland.backup', 'foo')('foo')
+    plugin = load_plugin('holland.backup', 'foo')
     job = BackupJob(plugin, cfg, store)
 
     plugin.die_please = True
