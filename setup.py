@@ -47,6 +47,6 @@ setup(
     holland:backup  = holland.devtools:HollandBackupTemplate
     holland:stream  = holland.devtools:HollandStreamTemplate
     """,
-    namespace_packages=['holland', 'holland.backup', 'holland.lib'],
+    namespace_packages=[],
     **extra
 )
