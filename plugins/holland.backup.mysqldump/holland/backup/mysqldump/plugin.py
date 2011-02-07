@@ -74,6 +74,11 @@ class MySQLDumpPlugin(BackupPlugin):
                     backup.run_each(self._schema.databases, parallelism)
                 else:
                     backup.run_all(self._schema.databases)
+            except KeyboardInterrupt:
+                raise BackupError("Interrupted")
+            except SystemExit:
+                # XXX: this shouldn't happen but we should have a better msg
+                raise BackupError("Shutdown encountered")
             except:
                 LOG.debug("Failure(exception)", exc_info=True)
                 raise BackupError("Backup failed", sys.exc_info()[1])
