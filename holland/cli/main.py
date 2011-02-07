@@ -1,4 +1,5 @@
 import os
+import signal
 import logging
 from holland import __version__
 from holland.cli.config import load_global_config
@@ -20,6 +21,10 @@ More info available at http://hollandbackup.org
 LOG = logging.getLogger(__name__)
 
 configure_basic_logger()
+
+def terminate(signum, frame):
+    """Terminate from SIGTERM cleanly"""
+    raise SystemExit("Caught SIGTERM")
 
 class HollandCli(ArgparseCommand):
     """Main holland command interface"""
@@ -59,6 +64,7 @@ class HollandCli(ArgparseCommand):
         if config['holland']['path']:
             os.environ['PATH'] = config['holland']['path']
         configure_logging(config['logging'])
+        signal.signal(signal.SIGTERM, terminate)
 
         if not opts.subcommand:
             parser.print_help()
