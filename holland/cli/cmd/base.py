@@ -55,7 +55,7 @@ class BaseCommand(BasePlugin):
 
     def load(self, name):
         """Load a command by name"""
-        for cmd in iterate_plugins('holland.commands'):
+        for cmd in list(iterate_plugins('holland.commands')):
             if cmd.matches(name):
                 cmd.setup(self)
                 cmd.configure(self.config)
