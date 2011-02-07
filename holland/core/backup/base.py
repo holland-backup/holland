@@ -13,6 +13,7 @@ class BackupError(Exception):
     """
 
     def __init__(self, message, chained_exc=None):
+        Exception.__init__(self, message)
         self.message = message
         self.chained_exc = chained_exc
 

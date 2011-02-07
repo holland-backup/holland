@@ -73,8 +73,7 @@ class EntrypointDependencyError(PluginError):
     """
 
     def __init__(self, group, name, entrypoint, req):
-        self.group = group
-        self.name = name
+        PluginError.__init__(self, group, name, None)
         self.entrypoint = entrypoint
         self.req = req
 
@@ -84,9 +83,8 @@ class EntrypointDependencyError(PluginError):
 
 class EntrypointVersionConflictError(PluginError):
     def __init__(self, group, name, entrypoint, dist, req):
-        self.group = group
-        self.name = name
-        self.ep = entrypoint
+        PluginError.__init__(self, group, name, None)
+        self.entrypoint = entrypoint
         self.dist = dist
         self.req = req
 
