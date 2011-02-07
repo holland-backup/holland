@@ -34,7 +34,11 @@ load-plugins=
 # Disable the message, report, category or checker with the given id(s). You
 # can either give multiple identifier separated by comma (,) or put this option
 # multiple time.
-#disable=
+
+# disable W0223 - subclass that doesn't override base abstract method - often a subclass
+# 	  	  is also abstract so this is generating a lot of false positives
+# disable W0142 - args/kwargs magic - this generates way too many false positives
+disable=W0223,W0142
 
 
 [REPORTS]
