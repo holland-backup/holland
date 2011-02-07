@@ -38,6 +38,13 @@ class Backup(ArgparseCommand):
             self.stderr("Nothing to backup")
             return 1
 
+        if not namespace.directory:
+            LOG.info("No backup-directory specified.  "
+                     "Please set a backup-directory in /etc/holland.conf or "
+                     "specify on on the backup line via the "
+                     "--backup-directory option.")
+            return 1
+
         backupmgr = BackupManager(namespace.directory)
 
         skip_hooks = namespace.skip_hooks
