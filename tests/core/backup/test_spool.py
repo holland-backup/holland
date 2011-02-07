@@ -1,5 +1,6 @@
 import sys
 import time
+import errno
 import tempfile
 from itertools import tee, izip
 from nose.tools import *
@@ -33,6 +34,21 @@ def _build_spool():
         for _ in xrange(numstores):
             spool.add_store(name)
             time.sleep(1)
+        backups = spool.list_backups(name)
+        bdir = os.path.dirname(backups[0].path)
+        try:
+            os.unlink(os.path.join(bdir, 'oldest'))
+        except OSError, exc:
+            if exc.errno != errno.ENOENT:
+                raise
+        try:
+            os.unlink(os.path.join(bdir, 'newest'))
+        except OSError, exc:
+            if exc.errno != errno.ENOENT:
+                raise
+
+        os.symlink(backups[0].path, os.path.join(bdir, 'oldest'))
+        os.symlink(backups[-1].path, os.path.join(bdir, 'newest'))
 
 def teardown():
     shutil.rmtree(spooldir)

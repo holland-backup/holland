@@ -133,7 +133,10 @@ class BackupSpool(object):
             backup_path = os.path.join(path, store_path)
             if not os.path.isdir(backup_path):
                 continue
-            results.append(BackupStore(name, backup_path, self))
+            backup_path = os.path.realpath(backup_path)
+            store = BackupStore(name, backup_path, self)
+            if store not in results:
+                results.append(store)
         #XXX: python2.3 compatibility
         results.sort()
         return results
