@@ -54,8 +54,11 @@ class GlobalHollandConfig(Config):
 
 def load_global_config(path):
     if path:
-        cfg = GlobalHollandConfig.read([path])
-        cfg.name = path
+        try:
+            cfg = GlobalHollandConfig.read([path])
+            cfg.name = path
+        except ConfigError, exc:
+            LOG.error("Failed to read %s: %s", path, exc)
     else:
         cfg = GlobalHollandConfig()
 

@@ -31,7 +31,7 @@ class HollandCli(ArgparseCommand):
     description = HOLLAND_BANNER
 
     arguments = [
-        argument('--config', '-c'),
+        argument('--config', '-c', default='/etc/holland/holland.conf'),
         argument('--log-level', '-l'),
         argument('subcommand', nargs='?'),
         argument('args', nargs='...'),
