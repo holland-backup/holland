@@ -94,9 +94,6 @@ class ArgparseCommand(BaseCommand):
     def __init__(self, *args, **kwargs):
         super(ArgparseCommand, self).__init__(*args, **kwargs)
 
-    def configure(self, config):
-        BaseCommand.configure(self, config)
-
     def create_parser(self):
         fmt_cls = RawDescriptionHelpFormatter
         parser = SafeArgumentParser(description=dedent(self.description),
@@ -135,4 +132,4 @@ class ArgparseCommand(BaseCommand):
 
     def help(self):
         """Format help via ArgumentParser"""
-        return self.parser.format_help()
+        return self.create_parser().format_help()
