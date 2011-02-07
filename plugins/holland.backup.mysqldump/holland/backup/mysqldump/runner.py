@@ -58,7 +58,7 @@ class MySQLBackup(object):
 
     def _lock_method(self, databases):
         if self.lock_method:
-            return lock_method
+            return self.lock_method
         else:
             if databases.is_transactional:
                 return '--single-transaction'

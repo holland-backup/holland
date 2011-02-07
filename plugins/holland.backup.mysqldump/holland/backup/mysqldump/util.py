@@ -168,6 +168,8 @@ def lock_method_from_config(config):
         return '--lock-tables'
     elif lock_method == 'flush-lock':
         return '--lock-all-tables'
+    elif lock_method == 'none':
+        return '--skip-lock-tables'
     else:
         raise ValueError("Invalid lock method '%s'" % lock_method)
 
