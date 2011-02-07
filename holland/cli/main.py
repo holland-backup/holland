@@ -1,6 +1,9 @@
+"""Main holland command"""
+
 import os
 import signal
 import logging
+from logging import _levelNames as log_levels
 from holland import __version__
 from holland.cli.config import load_global_config
 from holland.cli.log import configure_logging, configure_basic_logger
@@ -24,6 +27,7 @@ configure_basic_logger()
 
 def terminate(signum, frame):
     """Terminate from SIGTERM cleanly"""
+    LOG.debug("terminate(signum=%r, frame=%r)", signum, frame)
     raise SystemExit("Caught SIGTERM")
 
 class HollandCli(ArgparseCommand):
@@ -47,7 +51,14 @@ class HollandCli(ArgparseCommand):
         self.configure(None)
 
     def execute(self, opts, parser):
+        """Execute the main holland command
 
+        This will load the global config if it exists and
+        dispatch to a subcommand if one is specified.
+
+        If not subcommand is given this defaults to 'list-commands'
+        and only prints the available commands.
+        """
         try:
             config = load_global_config(opts.config)
         except IOError, exc:
@@ -56,7 +67,7 @@ class HollandCli(ArgparseCommand):
 
         if opts.log_level:
             config['logging']['level'] = \
-            logging._levelNames[opts.log_level.upper()]
+            log_levels[opts.log_level.upper()]
         if config['holland']['umask'] is not None:
             os.umask(config['holland']['umask'])
         if config['holland']['tmpdir']:
@@ -75,13 +86,26 @@ class HollandCli(ArgparseCommand):
             return self.chain(opts.subcommand, opts.args)
         except CommandNotFoundError, exc:
             self.stderr('Failed to load command "%s"', opts.subcommand)
-            return 1
         except: # unexpected command failure
             self.stderr('Unexpected exception while running command "%s"',
                         opts.subcommand)
             import traceback
             traceback.print_exc()
-            return 1
         return 1
 
+    def plugin_info(self):
+        """Plugin info for the main holland command"""
+        # this is not used as we do not expose the main script command as a
+        # plugin, but included here anyway for documentation purposes
+        return dict(
+            author='Rackspace',
+            name='holland',
+            summary='Main holland script',
+            description='''
+            This is the main holland cli command as bundled
+            with the holland backup framework.
+            ''',
+            version=__version__,
+            api_version=__version__
+        )
 holland = HollandCli('holland')
