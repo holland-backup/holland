@@ -38,7 +38,7 @@ load-plugins=
 # disable W0223 - subclass that doesn't override base abstract method - often a subclass
 # 	  	  is also abstract so this is generating a lot of false positives
 # disable W0142 - args/kwargs magic - this generates way too many false positives
-disable=W0223,W0142
+disable=W0223,W0142,R0201
 
 
 [REPORTS]
