@@ -204,11 +204,11 @@ class Config(OrderedDict):
         """
         try:
             write = path.write
-            write(str(self))
+            write(unicode(self))
         except AttributeError:
             fileobj = codecs.open(path, 'w', encoding=encoding)
             try:
-                fileobj.write(str(self))
+                fileobj.write(unicode(self))
             finally:
                 fileobj.close()
 
@@ -261,7 +261,7 @@ class Config(OrderedDict):
         for key, value in self.iteritems():
             if isinstance(value, Config):
                 lines.append("[%s]" % key)
-                lines.append(str(value))
+                lines.append(unicode(value))
                 lines.append("")
             else:
                 value = self.formatter.format(key, value)
