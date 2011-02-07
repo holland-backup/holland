@@ -23,10 +23,11 @@ class MakeConfig(ArgparseCommand):
     ]
 
     def execute(self, namespace, parser):
+        """Run the mkconfig command"""
         try:
             plugin = load_plugin('holland.backup', namespace.plugin)
         except PluginError, exc:
-            self.error("Fail %s", exc)
+            self.stderr("%s", exc)
             return 1
 
         config = BackupPlugin.configspec().validate(Config())
@@ -47,14 +48,12 @@ class MakeConfig(ArgparseCommand):
             return 1
         return 0
 
-    #@classmethod
-    def plugin_info(cls):
+    def plugin_info(self):
         return dict(
-            name=cls.name,
-            summary=cls.summary,
-            description=cls.description,
+            name=self.name,
+            summary=self.summary,
+            description=self.description,
             author='Rackspace',
             version='1.1.0',
             holland_version='1.1.0'
         )
-    plugin_info = classmethod(plugin_info)
