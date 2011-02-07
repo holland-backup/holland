@@ -40,9 +40,8 @@ class Backup(ArgparseCommand):
 
         if not namespace.directory:
             self.stderr("No backup-directory specified.  "
-                        "Please set a backup-directory in /etc/holland.conf or "
-                        "specify on on the backup line via the "
-                        "--backup-directory option.")
+                        "Please set a backup-directory in /etc/holland.conf "
+                        "or use the --backup-directory=<path> option")
             return 1
 
         backupmgr = BackupManager(namespace.directory)
