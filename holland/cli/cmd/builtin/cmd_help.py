@@ -26,8 +26,7 @@ class Help(ArgparseCommand):
 
     def execute(self, namespace, parser):
         if namespace.command:
-            cmd = [cmd for cmd in iterate_plugins('holland.commands')
-                       if cmd.matches(namespace.command)][0]
+            cmd = self.load(namespace.command)
         else:
             cmd = self
 
