@@ -82,7 +82,7 @@ class RealFileLike(FileLike):
         raise NotImplementedError()
 
     def tell(self):
-        return os.seek(self.fileno(), SEEK_CUR)
+        return os.lseek(self.fileno(), SEEK_CUR)
 
     def isatty(self):
         """Return True if the file is connected to a tty(-like) device, else
