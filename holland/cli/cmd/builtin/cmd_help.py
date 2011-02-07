@@ -1,9 +1,11 @@
 """holland help command"""
 
 from holland.cli.cmd.base import ArgparseCommand, argument
-from holland.core.plugin import iterate_plugins, load_plugin
+from holland.core.plugin import iterate_plugins
 
 class Help(ArgparseCommand):
+    """Holland help subcommand"""
+
     name = 'help'
     summary = 'Show help for holland commands'
     description = """
@@ -18,6 +20,7 @@ class Help(ArgparseCommand):
 
     #@property
     def epilog(self):
+        """List available commands in the help subcommand epilog"""
         result = []
         commands = list(iterate_plugins('holland.commands'))
         commands.sort()
@@ -30,22 +33,22 @@ class Help(ArgparseCommand):
     epilog = property(epilog)
 
     def execute(self, namespace, parser):
+        """Run the help command"""
         if namespace.command:
             cmd = self.load(namespace.command)
         else:
             cmd = self
 
         self.stderr("%s", cmd.help())
-        return 1
+        return 0
 
-    #@classmethod
-    def plugin_info(cls):
+    def plugin_info(self):
+        """Provide info about this plugin"""
         return dict(
-            name=cls.name,
-            summary=cls.summary,
-            description=cls.description,
+            name=self.name,
+            summary=self.summary,
+            description=self.description,
             author='Rackspace',
             version='1.1.0',
             holland_version='1.1.0'
         )
-    plugin_info = classmethod(plugin_info)
