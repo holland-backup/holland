@@ -6,6 +6,7 @@ from textwrap import dedent
 from argparse import RawDescriptionHelpFormatter
 from holland.core import BasePlugin, iterate_plugins
 from holland.cli.cmd.util import StreamWriter, SafeArgumentParser, ArgparseError
+from holland.cli.cmd.error import CommandNotFoundError
 
 LOG = logging.getLogger(__name__)
 
@@ -60,6 +61,7 @@ class BaseCommand(BasePlugin):
                 cmd.setup(self)
                 cmd.configure(self.config)
                 return cmd
+        raise CommandNotFoundError(name)
 
     def chain(self, name, args):
         """Chain to another command using the given arguments"""

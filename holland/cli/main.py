@@ -85,7 +85,8 @@ class HollandCli(ArgparseCommand):
         try:
             return self.chain(opts.subcommand, opts.args)
         except CommandNotFoundError, exc:
-            self.stderr('Failed to load command "%s"', opts.subcommand)
+            self.stderr("'%s' is not a valid holland command. "
+                        "See holland help for valid commands.", exc.name)
         except: # unexpected command failure
             self.stderr('Unexpected exception while running command "%s"',
                         opts.subcommand)
