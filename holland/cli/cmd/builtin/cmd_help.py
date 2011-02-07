@@ -1,7 +1,7 @@
 """holland help command"""
 
 from holland.cli.cmd.base import ArgparseCommand, argument
-from holland.core.plugin import iterate_plugins
+from holland.core.plugin import iterate_plugins, load_plugin
 
 class Help(ArgparseCommand):
     name = 'help'
@@ -20,26 +20,19 @@ class Help(ArgparseCommand):
     def epilog(self):
         result = []
         for cmd in iterate_plugins('holland.commands'):
-            if cmd != self.__class__:
-                cmd = cmd(self.parent_parser, self.config)
-            else:
-                cmd = self
-                result.append("%-15s - %s" % (cmd.name, cmd.summary))
+            result.append("%-15s - %s" % (cmd.name, cmd.summary))
         return "\n".join(result)
     epilog = property(epilog)
 
     def execute(self, namespace, parser):
-        from holland.cli.cmd import load_command
         if namespace.command:
-            cmd = load_command('holland.commands', namespace.command)
+            cmd = [cmd for cmd in iterate_plugins('holland.commands')
+                       if cmd.matches(namespace.command)][0]
         else:
             cmd = self
 
         self.stderr("%s", cmd.help())
         return 1
-
-    def help(self):
-        return self.parser.format_help()
 
     #@classmethod
     def plugin_info(cls):
