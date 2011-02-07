@@ -34,7 +34,7 @@ class RotateBackupsHook(BackupHook):
         LOG.info("+ Keep %d backups", retention_count)
         for backup in job.store.oldest(retention_count):
             backup.purge()
-            LOG.info("+ Purged old backup %s", job.store.path)
+            LOG.info("+ Purged old backup %s", backup.path)
 
 class WriteConfigHook(BackupHook):
     """Write config to backup store when called"""
