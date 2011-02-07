@@ -22,7 +22,7 @@
 %global bcond_without() %{expand:%%{!?_without_%{1}:%%global with_%{1} 1}}
 %endif
 
-%bcond_with     tests
+%bcond_without  tests
 %bcond_with     sphinxdocs
 %bcond_without  pgdump
 %bcond_without  sqlite
@@ -41,7 +41,10 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 BuildRequires:  python2-devel python-setuptools 
 %if %{with sphinxdocs}
-BuildRequires:  python-sphinx
+BuildRequires:  python-sphinx >= 1.0
+%endif
+%if %{with tests}
+BuildRequires:  python-nose
 %endif
 Requires:       python-setuptools
 
@@ -276,6 +279,10 @@ cat > %{buildroot}%{_sysconfdir}/logrotate.d/holland <<EOF
 }
 EOF
 
+%if %{with tests}
+%check
+%{__python} setup.py nosetests
+%endif
 
 %clean
 rm -rf %{buildroot}
@@ -368,6 +375,9 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
+* Sun Feb 06 2011 Andrew Garner <andrew.garner@rackspace.com> - 1.1.0-2
+- Run holland test suite by default (disable with --without tests)
+
 * Sun Feb 06 2011 Andrew Garner <andrew.garner@rackspace.com> - 1.1.0-1
 - Updating for holland-1.1
 - Removed deprecated packages (mysqlhotcopy, maatkit, example)
