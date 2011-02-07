@@ -36,7 +36,8 @@ class Lexer(object):
     def expect(self, *token_ids):
         token = self.next()
         if token.id not in token_ids:
-            raise CheckError("Expected one of %r but got %r" % (token_ids, token))
+            raise CheckError("Expected one of %r but got %r" %
+                             (token_ids, token))
         return token
 
     def next(self):
@@ -98,7 +99,8 @@ class CheckParser(object):
 
         method = lexer.next()
         if method.id != cls.T_ID:
-            raise CheckError("Expected identifier as first token in check string but got %r")
+            raise CheckError("Expected identifier as first token in check "
+                             "string but got %r" % method.id)
 
         # bare-name check
         try:
@@ -137,7 +139,8 @@ class CheckParser(object):
                 break
 
         if token.text != ')':
-            raise CheckError("Expected check expression to end with ')' but got %r" % token)
+            raise CheckError("Expected check expression to end with ')' "
+                             "but got %r" % token)
         return tuple(args), kwargs
     _parse_argument_list = classmethod(_parse_argument_list)
 

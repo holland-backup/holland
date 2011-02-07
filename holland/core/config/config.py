@@ -51,7 +51,7 @@ class Config(OrderedDict):
 
     #@classmethod
     def parse(cls, iterable):
-        """Parse a sequence of lines and return the resulting ``Config`` instance.
+        """Parse a sequence of lines and return a ``Config`` instance.
 
         :param iterable: any iterable object that yield lines of text
         :returns: new ``Config`` instance

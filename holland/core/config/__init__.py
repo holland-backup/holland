@@ -1,5 +1,5 @@
-__version__ = '1.0.0a1'
+"""Holland Config support"""
 
-from config import Config, ConfigError
-from spec import Configspec
-from parsing import CheckParser
+from holland.core.config.config import Config, ConfigError
+from holland.core.config.spec import Configspec
+from holland.core.config.parsing import CheckParser
