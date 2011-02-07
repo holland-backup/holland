@@ -53,12 +53,17 @@ class BaseCommand(BasePlugin):
         """Text documenting this command"""
         raise NotImplementedError()
 
+    def load(self, name):
+        """Load a command by name"""
+        for cmd in iterate_plugins('holland.commands'):
+            if cmd.matches(name):
+                cmd.setup(self)
+                cmd.configure(self.config)
+                return cmd
+
     def chain(self, name, args):
         """Chain to another command using the given arguments"""
-        cmd = [cmd for cmd in iterate_plugins('holland.commands')
-                    if cmd.matches(name)][0]
-        cmd.setup(self)
-        cmd.configure(self.config)
+        cmd = self.load(name)
         return cmd(args)
 
     def __call__(self, args):
