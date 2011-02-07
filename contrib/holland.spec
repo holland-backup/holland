@@ -3,11 +3,12 @@
 # el4 also... which doesn't support it
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
-%{!?holland_version: %global holland_version 1.0.7}
+%{!?holland_version: %global holland_version 1.1.0}
 
 # default %%rhel to make things easier to build
 %{!?rhel: %global rhel %%(%{__sed} 's/^[^0-9]*\\([0-9]\\+\\).*/\\1/' /etc/redhat-release)}
 
+# bcond compatibility macros for rhel4
 %if %{!?with:1}0
 %global with() %{expand:%%{?with_%{1}:1}%%{!?with_%{1}:0}}
 %endif
@@ -22,10 +23,7 @@
 %endif
 
 %bcond_with     tests
-%bcond_with     example 
 %bcond_with     sphinxdocs
-%bcond_with     mysqlhotcopy
-%bcond_with     maatkit
 %bcond_without  pgdump
 %bcond_without  sqlite
 %bcond_without  xtrabackup
@@ -60,35 +58,6 @@ Requires:       %{name} = %{version}-%{release} MySQL-python
 %description common
 Library for common functionality used by holland plugins
 
-%if %{with example}
-%package example
-Summary: Example Backup Provider Plugin for Holland
-Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
-
-%description example
-Example Backup Plugin for Holland
-%endif
-
-%package random
-Summary: Random Backup Provider Plugin for Holland
-Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
-
-%description random
-Random Backup Provider Plugin for Holland
-
-%if %{with maatkit}
-%package maatkit
-Summary: Holland mk-parallel-dump plugin
-Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}, %{name}-common = %{version}-%{release}
-Requires: maatkit
-
-%description maatkit
-This plugin provides support for holland to perform MySQL backups using the 
-mk-parallel-dump script from the Maatkit toolkit.
-%endif
 
 %package mysqldump
 Summary: Logical mysqldump backup plugin for Holland
@@ -100,18 +69,6 @@ Requires: %{name} = %{version}-%{release} %{name}-common = %{version}-%{release}
 This plugin allows holland to perform logical backups of a MySQL database
 using the mysqldump command.
 
-%if %{with mysqlhotcopy}
-%package mysqlhotcopy
-Summary: Raw non-transactional backup plugin for Holland
-License: GPLv2
-Group: Development/Libraries
-Requires: %{name} = %{version}-%{release} %{name}-common = %{version}-%{release}
-
-%description mysqlhotcopy
-This plugin allows holland to perform backups of MyISAM and other 
-non-transactional table types in MySQL by issuing a table lock and copying the
-raw files from the data directory.
-%endif
 
 %package mysqllvm
 Summary: Holland LVM snapshot backup plugin for MySQL 
@@ -125,6 +82,7 @@ Requires: lvm2 MySQL-python tar
 %description mysqllvm
 This plugin allows holland to perform LVM snapshot backups of a MySQL database
 and to generate a tar archive of the raw data directory.
+
 
 %if %{with pgdump}
 %package    pgdump
@@ -180,6 +138,7 @@ rm plugins/ACTIVE
 # docs
 pushd docs
 make html
+make man
 rm -f build/html/.buildinfo
 popd
 %endif
@@ -199,31 +158,10 @@ cd plugins/holland.lib.lvm
 %{__python} setup.py build
 cd -
 
-%if %{with example}
-# plugin : holland.backup.example
-cd plugins/holland.backup.example
-%{__python} setup.py build
-cd -
-%endif
-
-%if %{with maatkit}
-# plugin : holland.backup.maatkit
-cd plugins/holland.backup.maatkit
-%{__python} setup.py build
-cd -
-%endif
-
 # plugin : holland.backup.mysqldump
 cd plugins/holland.backup.mysqldump
 %{__python} setup.py build
 cd -
-
-%if %{with mysqlhotcopy}
-# plugin : holland.backup.mysqlhotcopy
-cd plugins/holland.backup.mysqlhotcopy
-%{__python} setup.py build
-cd -
-%endif
 
 # plugin : holland.backup.mysql_lvm
 cd plugins/holland.backup.mysql_lvm
@@ -267,7 +205,9 @@ rm -rf %{buildroot}
 %{__python} setup.py install -O1 --skip-build --root %{buildroot} --install-scripts %{_sbindir}
 install -m 0640 config/holland.conf %{buildroot}%{_sysconfdir}/holland/
 %{__mkdir_p} -p %{buildroot}%{_mandir}/man1
-install -m 0644 docs/man/holland.1 %{buildroot}%{_mandir}/man1
+%if %{with sphinxdocs}
+install -m 0644 docs/build/man/holland.1 %{buildroot}%{_mandir}/man1
+%endif
 %{__mkdir_p} %{buildroot}%{python_sitelib}/holland/{lib,backup,commands,restore}
 
 # library : holland.lib.common
@@ -285,37 +225,11 @@ cd plugins/holland.lib.lvm
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 cd -
 
-%if %{with example}
-# plugin : holland.backup.example
-cd plugins/holland.backup.example
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
-cd -
-install -m 0640 config/providers/example.conf %{buildroot}%{_sysconfdir}/holland/providers/
-%endif
-
-%if %{with maatkit}
-# plugin : holland.backup.maatkit
-cd plugins/holland.backup.maatkit
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
-cd -
-install -m 0640 config/providers/maatkit.conf %{buildroot}%{_sysconfdir}/holland/providers/
-%endif
-
 # plugin : holland.backup.mysqldump
 cd plugins/holland.backup.mysqldump
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 cd -
 install -m 0640 config/providers/mysqldump.conf %{buildroot}%{_sysconfdir}/holland/providers/
-
-%if %{with mysqlhotcopy}
-# plugin : holland.backup.mysqlhotcopy
-cd plugins/holland.backup.mysqlhotcopy
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
-install -c -m 0644 docs/man/holland-mysqlhotcopy.5 \
-                   %{buildroot}%{_mandir}/man5
-cd -
-install -m 0640 config/providers/mysqlhotcopy.conf %{buildroot}%{_sysconfdir}/holland/providers/
-%endif
 
 # plugin : holland.backup.mysql_lvm
 cd plugins/holland.backup.mysql_lvm
@@ -330,12 +244,6 @@ cd plugins/holland.backup.pgdump
 cd -
 install -m 0640 config/providers/pgdump.conf %{buildroot}%{_sysconfdir}/holland/providers/
 %endif
-
-# plugin : holland.backup.random
-cd plugins/holland.backup.random
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
-cd -
-install -m 0640 config/providers/random.conf %{buildroot}%{_sysconfdir}/holland/providers/
 
 %if %{with sqlite}
 # plugin : holland.backup.sqlite
@@ -352,6 +260,9 @@ cd plugins/holland.backup.xtrabackup
 cd -
 install -m 0640 config/providers/xtrabackup.conf %{buildroot}%{_sysconfdir}/holland/providers/
 %endif
+
+# ensure we have no .pth files
+rm -f %{buildroot}%{python_sitelib}/holland*nspkg.pth
 
 # logrotate
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/logrotate.d
@@ -372,19 +283,23 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc CHANGES.txt README README.plugins README.providers 
+%doc CHANGES.txt README.rst README.plugins README.providers 
 %doc INSTALL LICENSE config/backupsets/examples/ 
 %if %{with sphinxdocs}
 %doc docs/build/html/
 %endif
 %{_sbindir}/holland
 %dir %{python_sitelib}/holland/
+%{python_sitelib}/holland/__init__.py*
 %{python_sitelib}/holland/core/
-%{python_sitelib}/holland-%{version}-*-nspkg.pth
+%{python_sitelib}/holland/cli/
+# XXX: this should probably move to a dev package
+%{python_sitelib}/holland/devtools/
 %{python_sitelib}/holland-%{version}-*.egg-info
+%if %{with sphinxdocs}
 %{_mandir}/man1/holland.1*
+%endif
 %{_localstatedir}/log/holland/
-%{python_sitelib}/holland/commands/*.py*
 %attr(0755,root,root) %dir %{_sysconfdir}/holland/
 %attr(0755,root,root) %dir %{_sysconfdir}/holland/backupsets
 %attr(0755,root,root) %dir %{_sysconfdir}/holland/providers
@@ -394,7 +309,6 @@ rm -rf %{buildroot}
 # virtual namespaces
 %dir %{python_sitelib}/holland/backup/
 %dir %{python_sitelib}/holland/restore/
-%dir %{python_sitelib}/holland/commands/
 %dir %{python_sitelib}/holland/lib/
 
 %files common
@@ -403,47 +317,17 @@ rm -rf %{buildroot}
 %{python_sitelib}/%{name}/lib/compression.py*
 %{python_sitelib}/%{name}/lib/archive/
 %{python_sitelib}/%{name}/lib/safefilename.py*
+%{python_sitelib}/%{name}/lib/hooks.py*
 %{python_sitelib}/%{name}/lib/which.py*
 %{python_sitelib}/%{name}/lib/multidict.py*
 %{python_sitelib}/%{name}/lib/mysql/
-%{python_sitelib}/holland.lib.common-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.lib.common-%{version}-*.egg-info
-%{python_sitelib}/holland.lib.mysql-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.lib.mysql-%{version}-*.egg-info
-
-%if %{with example}
-%files example
-%defattr(-,root,root,-)
-%doc plugins/holland.backup.example/{README,LICENSE}
-%{python_sitelib}/holland/backup/example.py*
-%{python_sitelib}/holland.backup.example-%{version}-*-nspkg.pth
-%{python_sitelib}/holland.backup.example-%{version}-*.egg-info
-%config(noreplace) %{_sysconfdir}/holland/providers/example.conf
-%endif
-
-%files random
-%defattr(-,root,root,-)
-%doc plugins/holland.backup.random/{README,LICENSE}
-%{python_sitelib}/holland/backup/random.py*
-%{python_sitelib}/holland.backup.random-%{version}-*-nspkg.pth
-%{python_sitelib}/holland.backup.random-%{version}-*.egg-info
-%config(noreplace) %{_sysconfdir}/holland/providers/random.conf
-
-%if %{with maatkit}
-%files maatkit
-%defattr(-,root,root,-)
-%doc plugins/holland.backup.maatkit/{README,LICENSE}
-%{python_sitelib}/holland/backup/maatkit.py*
-%{python_sitelib}/holland.backup.maatkit-%{version}-*-nspkg.pth
-%{python_sitelib}/holland.backup.maatkit-%{version}-*.egg-info
-%config(noreplace) %{_sysconfdir}/holland/providers/maatkit.conf
-%endif
 
 %files mysqldump
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.mysqldump/{README,LICENSE}
 %{python_sitelib}/holland/backup/mysqldump/
-%{python_sitelib}/holland.backup.mysqldump-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.mysqldump-%{version}-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/mysqldump.conf
 
@@ -451,29 +335,15 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.mysql_lvm/{README,LICENSE}
 %{python_sitelib}/holland/backup/mysql*_lvm/
-%{python_sitelib}/holland.backup.mysql*_lvm-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.mysql*_lvm-%{version}-*.egg-info
 %{python_sitelib}/%{name}/lib/lvm/
-%{python_sitelib}/holland.lib.lvm-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.lib.lvm-%{version}-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/mysql-lvm.conf
-
-%if %{with mysqlhotcopy}
-%files mysqlhotcopy
-%defattr(-,root,root,-)
-%doc plugins/holland.backup.mysqlhotcopy/{README,LICENSE}
-%{python_sitelib}/holland/backup/mysqlhotcopy.py*
-%{python_sitelib}/holland.backup.mysqlhotcopy-%{version}-*-nspkg.pth
-%{python_sitelib}/holland.backup.mysqlhotcopy-%{version}-*.egg-info
-%config(noreplace) %{_sysconfdir}/holland/providers/mysqlhotcopy.conf
-%{_mandir}/man5/holland-mysqlhotcopy.5*
-%endif
 
 %if %{with pgdump}
 %files pgdump
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.pgdump/{README,LICENSE}
-%{python_sitelib}/holland.backup.pgdump-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.pgdump-%{version}-*.egg-info
 %{python_sitelib}/holland/backup/pgdump/
 %config(noreplace) %{_sysconfdir}/holland/providers/pgdump.conf
@@ -484,7 +354,6 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.sqlite/{README,LICENSE}
 %{python_sitelib}/holland/backup/sqlite.py*
-%{python_sitelib}/holland.backup.sqlite-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.sqlite-%{version}-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/sqlite.conf
 %endif
@@ -494,12 +363,18 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.xtrabackup/{README,LICENSE}
 %{python_sitelib}/holland/backup/xtrabackup/
-%{python_sitelib}/holland.backup.xtrabackup-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.xtrabackup-%{version}-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/xtrabackup.conf
 %endif
 
 %changelog
+* Sun Feb 06 2011 Andrew Garner <andrew.garner@rackspace.com> - 1.1.0-1
+- Updating for holland-1.1
+- Removed deprecated packages (mysqlhotcopy, maatkit, example)
+- Added holland/cli and holland/devtools to main holland package
+- Added holland/lib/hooks to holland-common package
+- holland.1 manpage is now only included when using --with sphinxdocs
+
 * Wed Jan 12 2011 BJ Dierkes <wdierkes@rackspace.com> - 1.0.7-1
 - Development version
 
