@@ -100,6 +100,14 @@ class ArgparseCommand(BaseCommand):
         super(ArgparseCommand, self).__init__(*args, **kwargs)
 
     def create_parser(self):
+        """Build the ArgparseParser used by this command
+
+        By default this creates an instance of ``SafeArgumentParser`` -
+        an ArgumentParser that raises an excepton on error rather than
+        calling sys.exit()
+
+        :returns: ArgumentParser instance
+        """
         fmt_cls = RawDescriptionHelpFormatter
         parser = SafeArgumentParser(description=dedent(self.description),
                                     prog=self.name,
