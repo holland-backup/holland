@@ -59,6 +59,7 @@ def load_global_config(path):
             cfg.name = path
         except ConfigError, exc:
             LOG.error("Failed to read %s: %s", path, exc)
+            cfg = GlobalHollandConfig()
     else:
         cfg = GlobalHollandConfig()
 
