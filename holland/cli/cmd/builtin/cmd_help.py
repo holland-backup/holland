@@ -19,8 +19,13 @@ class Help(ArgparseCommand):
     #@property
     def epilog(self):
         result = []
-        for cmd in iterate_plugins('holland.commands'):
-            result.append("%-15s - %s" % (cmd.name, cmd.summary))
+        commands = list(iterate_plugins('holland.commands'))
+        commands.sort()
+        for cmd in commands:
+            aliases = ''
+            if cmd.aliases:
+                aliases = " (%s)" % ','.join(cmd.aliases)
+            result.append("%-15s%-5s %s" % (cmd.name, aliases, cmd.summary))
         return "\n".join(result)
     epilog = property(epilog)
 
