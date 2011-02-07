@@ -68,7 +68,7 @@ class MySQLBackup(object):
     def run_all(self, databases):
         options = self.options + [
             self._lock_method(databases)
-        ] + [ db.name.encode('utf8') for db in databases if not db.excluded ]
+        ] + [ db.name for db in databases if not db.excluded ]
 
         fileobj = self.open_sql_file('all_databases.sql', 'w')
         MySQLDump(options, fileobj).run()
@@ -85,7 +85,7 @@ class MySQLBackup(object):
             options = self.options[:]
             options += [
                 self._lock_method(database),
-                database.name.encode('utf8')
+                database.name
             ]
             fileobj = self.open_sql_file(database.name, 'w')
             mysqldump = MySQLDump(options, fileobj)
@@ -102,7 +102,7 @@ class MySQLDump(object):
     def _start(self):
         if self.pid:
             raise ValueError("Already started this mysqldump")
-        self.pid = Popen(self.argv,
+        self.pid = Popen([arg.encode('utf8') for arg in self.argv],
                          stdout=self.fileobj.fileno(),
                          stderr=PIPE,
                          close_fds=True)
