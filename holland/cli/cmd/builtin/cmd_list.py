@@ -3,7 +3,7 @@
 import sys
 import logging
 from holland.core.plugin import iterate_plugins
-from holland.cli.cmd.base import ArgparseCommand
+from holland.cli.cmd.base import ArgparseCommand, argument
 
 LOG = logging.getLogger(__name__)
 
@@ -97,9 +97,19 @@ class ListBackups(ArgparseCommand):
     List available backups in the configured backup-directory
     '''
 
+    arguments = [
+        argument('--backup-directory', '-d'),
+    ]
     def execute(self, namespace, parser):
         from holland.core import BackupSpool
-        spool = BackupSpool(self.config['holland']['backup-directory'])
+        backup_directory = namespace.backup_directory or \
+                           self.config['holland']['backup-directory']
+
+        if backup_directory is None:
+            self.stderr("No backup-directory specified")
+            return 1
+
+        spool = BackupSpool(backup_directory)
         for backup in spool:
             self.stderr("%-12s: %s", backup.name, backup.path)
         return 0
