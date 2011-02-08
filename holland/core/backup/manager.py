@@ -18,7 +18,7 @@ class BackupManager(object):
     """Manage the backup process
 
     >>> mgr = BackupManager('/var/spool/holland')
-    >>> mgr.backup('/etc/holland/backupsets/foo.conf', dry_run=True)
+    >>> mgr.backup(Config.read(['/etc/holland/backupsets/foo.conf']), dry_run=True)
     """
     def __init__(self, spool_directory):
         self.spool = BackupSpool(spool_directory)
@@ -35,6 +35,27 @@ class BackupManager(object):
         job = BackupJob(plugin, config, store)
         job.run(dry_run)
         return job
+
+    def purge_backupset(self, name, retention_count=0, dry_run=False):
+        """Purge a entire backupset
+
+        :param retention_count: number of recent backups to keep
+        :param dry_run: whether to only test what the purge process would do
+        :returns: tuple of all_backups, kept_backups, purged_backups
+        """
+        return self.spool.purge(name, retention_count, dry_run)
+
+    def purge_backup(self, path, dry_run=False):
+        """Purge one backup
+
+        :returns: purged backup
+        """
+        backupset, instance = name.split('/')
+        path = os.path.join(self.spool.root, backupset, instance)
+        backup = spool.load_store(path)
+        if dry_run is False:
+            backup.purge()
+        return backup
 
     def cleanup(self, path):
         """Run a plugin's cleanup method"""
