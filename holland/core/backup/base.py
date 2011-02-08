@@ -58,7 +58,8 @@ class BackupPlugin(ConfigurablePlugin):
                                          "before-backup",
                                          "after-backup",
                                          default="after-backup")
-        backups-to-keep         = integer(default=1)
+        backups-to-keep         = integer(default=1, aliasof="retention-count")
+        retention-count         = integer(default=1)
         estimated-size-factor   = float(default=1.0)
         hooks                   = list(default=list())
         """).splitlines())
