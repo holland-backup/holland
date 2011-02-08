@@ -167,17 +167,22 @@ class BackupSpool(object):
         results.sort()
         return results
 
-    def purge_backupset(self, name, retention_count=0):
-        """Purge backups in a backupset"""
-        backups = self.list_backups(name)
-        while retention_count > 0:
-            try:
-                backups.pop(-1)
-                retention_count -= 1
-            except IndexError:
-                break
-        for backup in backups:
-            backup.purge()
+    def purge(self, backupset, retention_count=0, dry_run=False):
+        """Purge backups in a backupset
+
+        :returns: tuple of backup sublists
+                  (all_backups, sublist_kept, sublist_purged)
+        """
+        if retention_count < 0:
+            raise ValueError("retention_count must not be negative")
+        backups = self.list_backups(backupset)
+        idx = max(len(backups) - retention_count, 0)
+        retained_backups = backups[idx:]
+        purged_backups = backups[0:idx]
+        if dry_run is False:
+            for backup in purged_backups:
+                backup.purge()
+        return backups, retained_backups, purged_backups
 
     def __iter__(self):
         for name in self.list_backupsets():

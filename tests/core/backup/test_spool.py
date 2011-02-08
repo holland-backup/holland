@@ -24,7 +24,6 @@ backupsets = {
 def setup():
     global spooldir
     spooldir = tempfile.mkdtemp()
-    print >>sys.stderr, "Created temporary spool path for testing %s" % \
     spooldir
     _build_spool()
 
@@ -52,7 +51,6 @@ def _build_spool():
 
 def teardown():
     shutil.rmtree(spooldir)
-    print >>sys.stderr, "Removed temporary spool path %s on cleanup" % spooldir
 
 def test_backups():
     spool = BackupSpool(spooldir)
@@ -173,8 +171,11 @@ def test_backupset_purge():
     name = spool.list_backupsets()[0]
 
     assert_true(spool.list_backups(name))
-    spool.purge_backupset(name)
+    original_backups = spool.list_backups(name)
+    backups, kept, purged = spool.purge(name)
     assert_false(spool.list_backups(name))
+    assert_false(kept)
+    assert_equals(purged, original_backups)
 
 def test_backupset_purge_with_retention():
     _build_spool()
@@ -182,12 +183,20 @@ def test_backupset_purge_with_retention():
 
     backups = spool.list_backups('default')
     assert_true(len(backups), 3)
-    spool.purge_backupset('default', retention_count=1)
+    backups, kept, purged = spool.purge('default', retention_count=1)
+    # check that purge did not lie about kept backups
+    assert_equals(len(kept), 1)
+    assert_equals(kept, spool.list_backups('default'))
     assert_true(len(spool.list_backups('default')), 1)
 
     _build_spool()
     backups = spool.list_backups('default')
-    spool.purge_backupset('default', retention_count=len(backups) + 1)
+    backups, kept, purged = spool.purge('default',
+                                        retention_count=len(backups) + 1)
+    # purged should be empty
+    assert_false(purged)
+    # kept backups should be identical all backups
+    assert_equals(kept, backups)
     assert_true(len(spool.list_backups('default')), len(backups))
 
 def test_backupstore_purged():
@@ -205,6 +214,6 @@ def test_backupstore_purged_latest_is_none():
 
     backups = spool.list_backups('default')
     assert_true(backups) # we should have > 0 backups
-    spool.purge_backupset('default') # now clear them out
+    spool.purge('default') # now clear them out
     backup = backups[0] # take a previously deleted backup
     assert_false(backup.latest()) # this should be None
