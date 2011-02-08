@@ -46,7 +46,9 @@ class Purge(ArgparseCommand):
 
         for name in namespace.backups:
             if '/' in name:
-                mgr.purge_backup(name, dry_run=namespace.dry_run)
+                backup = mgr.purge_backup(name, dry_run=namespace.dry_run)
+                self.stderr("- Purged %s [%s]", backup.path,
+                            format_bytes(backup.size()))
             else:
                 retention_count = namespace.retention_count
                 if retention_count is None:
