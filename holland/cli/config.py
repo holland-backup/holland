@@ -1,7 +1,7 @@
 """Load a holland.conf config file"""
 import os
 import logging
-from holland.core import Config, Configspec, ConfigError
+from holland.core import Config, Configspec, ConfigError, BackupPlugin
 
 LOG = logging.getLogger(__name__)
 
@@ -45,6 +45,8 @@ class GlobalHollandConfig(Config):
             except ConfigError:
                 LOG.debug("No global provider found.  Skipping.")
         cfg.name = os.path.splitext(os.path.basename(name))[0]
+        # validate the holland:backup section
+        BackupPlugin.configspec().validate(cfg)
         return cfg
 
     #@classmethod
