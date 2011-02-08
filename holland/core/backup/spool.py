@@ -6,7 +6,7 @@ import errno
 import shutil
 import tempfile
 import logging
-from holland.core.util import disk_free
+from holland.core.util import disk_free, directory_size
 
 LOG = logging.getLogger(__name__)
 
@@ -19,6 +19,8 @@ class BackupStore(object):
         self.name = name
         self.path = path
         self.spool = spool
+        # cached size of last known size even if we're purged
+        self._size = 0
 
     def latest(self, name=None):
         """Find the latest backup by a backupset name"""
@@ -52,7 +54,20 @@ class BackupStore(object):
 
     def purge(self):
         """Purge the data for this backup store"""
+        self.size() # to cache the size prior to deletion
         shutil.rmtree(self.path)
+
+    def size(self):
+        """Find the size on disk occupied by this backup store
+
+        :returns: bytes occupied by this backup store
+        """
+        try:
+            self._size = directory_size(self.path)
+        except OSError, exc:
+            if exc.errno != errno.ENOENT:
+                raise
+        return self._size
 
     def spool_capacity(self):
         """Find the available space in bytes on this store"""
