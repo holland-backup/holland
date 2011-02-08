@@ -19,22 +19,15 @@ setup(name='holland.backup.mysqldump',
       include_package_data=True,
       zip_safe=True,
       test_suite='tests',
-      tests_require=[
-        'holland >= 0.9.6',
-      ],
       install_requires=[
         # 'nose', # Not required, but needed if you want to run nose tests...
       ],
-      extras_require = {
-        'mysql' : 'holland.lib.mysql',
-        'common' : 'holland.lib.common'
-      },
       entry_points="""
       [holland.backup]
-      mysqldump = holland.backup.mysqldump:provider [mysql, common]
+      mysqldump = holland.backup.mysqldump:provider
 
-      [holland.restore]
-      mysqldump = holland.restore.mysqldump:MySQLRestore
+      [holland.hooks]
+      mysql-select = holland.lib.mysqldump:MySQLSelectHook
       """,
-      namespace_packages=['holland', 'holland.backup'],
+      namespace_packages=['holland', 'holland.lib', 'holland.backup'],
     )
