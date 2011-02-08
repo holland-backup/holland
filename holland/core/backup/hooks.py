@@ -30,7 +30,7 @@ class RotateBackupsHook(BackupHook):
     """Purge old backups when run"""
 
     def execute(self, job):
-        retention_count = job.config['holland:backup']['backups-to-keep']
+        retention_count = job.config['holland:backup']['retention-count']
         LOG.info("+ Keep %d backups", retention_count)
         for backup in job.store.oldest(retention_count):
             backup.purge()
