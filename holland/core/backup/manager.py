@@ -50,9 +50,9 @@ class BackupManager(object):
 
         :returns: purged backup
         """
-        backupset, instance = name.split('/')
+        backupset, instance = path.split('/')
         path = os.path.join(self.spool.root, backupset, instance)
-        backup = spool.load_store(path)
+        backup = self.spool.load_store(path)
         if dry_run is False:
             backup.purge()
         return backup
