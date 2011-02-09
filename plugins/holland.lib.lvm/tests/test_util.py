@@ -21,6 +21,7 @@ def test_relpath():
     assert_raises(ValueError, relpath, '')
     assert_equals(relpath('/foo/bar/baz', '/foo/bar'), 'baz')
     assert_equals(relpath('/foo/bar/', '/foo/bar/'), os.curdir)
+    assert_equals(relpath('/var/lib/mysql', '/'), 'var/lib/mysql')
 
 def test_signalmanager():
     sigmgr = SignalManager()
