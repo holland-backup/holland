@@ -132,7 +132,7 @@ def test_backupstore_oldest():
     for name, _ in backupsets.iteritems():
         last_backup = spool.list_backups(name)[-1]
         assert_equal(spool.list_backups(name)[0],
-                     last_backup.oldest(count=1)[0])
+                     last_backup.oldest(retention_count=1)[0])
 
 def test_backupstore_w_nullspool():
     spool = BackupSpool(spooldir)
