@@ -34,12 +34,19 @@ class BackupStore(object):
         except IndexError:
             return None
 
-    def oldest(self, count=1):
-        """Return the oldest backups in this store's backupset"""
+    def oldest(self, retention_count=1):
+        """Return the oldest backups in this store's backupset
+
+        This does not include this store so the returned list can
+        be safely used to purge the last ``count`` backups.
+        """
         if not self.spool:
             return []
         backups = self.spool.list_backups(self.name)
-        return backups[0:-count]
+        if self in backups:
+            backups.remove(self)
+
+        return backups[0:-retention_count]
 
     def previous(self):
         """Find the backup store temporally preceding this one"""
