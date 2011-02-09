@@ -22,7 +22,10 @@ class CommandHook(BackupHook):
 
     def execute(self, job):
         config = self.config
-        cmd = Template(config['cmd']).safe_substitute(backupdir=job.store.path)
+        cmd = Template(config['cmd']).safe_substitute(backupdir=job.store.path,
+                                                      plugin=job.plugin.plugin_info()['name'],
+                                                      backupset=job.store.name
+                                                      )
         args = [
             config['shell'], '-c',
             cmd
