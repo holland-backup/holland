@@ -41,8 +41,7 @@ class CommandHook(BackupHook):
             LOG.warning("+ [command-hook] Warning exited non-zero status %d",
                         pid.returncode)
 
-    #@classmethod
-    def configspec(cls):
+    def configspec(self):
         from textwrap import dedent
         return Configspec.parse(dedent("""
         events = option('before-backup', 'after-backup', default='after-backup')
@@ -50,10 +49,8 @@ class CommandHook(BackupHook):
         cmd = string(default="/bin/true")
         """).splitlines()
         )
-    configspec = classmethod(configspec)
 
-    #@classmethod
-    def plugin_info(cls):
+    def plugin_info(self):
         return dict(
             author='Andrew Garner',
             name='cmdhook',
@@ -64,4 +61,3 @@ class CommandHook(BackupHook):
             version='1.0a1',
             api_version='1.1.0a1',
         )
-    plugin_info = classmethod(plugin_info)
