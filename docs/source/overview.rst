@@ -9,8 +9,7 @@ others may wish to have more fine-grained control over their backups and/or
 use another method other than mysqldump.
 
 For instance, one can configure a backup set to backup certain databases
-using Maatkit, others using the mysqlhotcopy (not to be confused with the
-utility that comes with MySQL of the same name), etc. All this is done
+using mysqldump, others using the mysql-lvm plugins etc. All this is done
 by a mix of providers and backup-sets.
 
 Backup-Sets
@@ -32,21 +31,6 @@ As of Holland 0.5, there are 5 providers:
 
     Uses the ``mysqldump`` utility to backup databases.
 
-* MySQL Hot-Copy
-
-    Backs up the actual files that comprise one's MyISAM tables. While this
-    does require locking the tables involved in the backup, this can often
-    result in a much faster backup over using ``mysqldump``. It does NOT
-    handle transactional tables (such as InnoDB). Note that this provider
-    has not been extensively tested and is more of a proof of concept.
-
-* Maatkit
-
-    Uses the ``mk-parallel-dump`` utility which, under certain circumstances,
-    is faster than a standard ``mysqldump``. Note that this provider is
-    really more of a proof of concept. It should normally not be used for
-    production cases.
-    
 * Example
 
     This is used solely as a template for designing providers. It otherwise

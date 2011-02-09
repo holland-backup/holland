@@ -79,12 +79,10 @@ in a backup-set. Note that each provider's configuration file should begin
 with ``[provider-name]``.
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     provider_configs/example
     provider_configs/mysqldump
-    provider_configs/mysqlhotcopy
-    provider_configs/maatkit
     provider_configs/mysql-lvm
 
 Backup-Set Configs
@@ -130,10 +128,3 @@ Backups are placed under the directory defined in the
 :ref:`backup_directory<holland-config-backup_directory>`
 section of the main configuration file. Each backup resides under a directory
 corresponding to the backup-set name followed by a date-encoded directory.
-
-
-
-
-
-
-
