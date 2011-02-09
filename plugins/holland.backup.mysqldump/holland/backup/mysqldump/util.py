@@ -102,6 +102,11 @@ def generate_manifest(path, schema, config):
     finally:
         fileobj.close()
 
+def log_host_info(client):
+    host = client.get_host_info()
+    port = client.show_variables('port')
+    user = client.query('SELECT USER()')
+    LOG.info("Connected to %s (port = %s) as %s", host, port, user)
 def client_from_config(config):
     from holland.lib.mysql import connect, build_mysql_config, PassiveMySQLClient
     try:
