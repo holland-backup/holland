@@ -70,8 +70,8 @@ def relpath(path, start=os.curdir):
     if not path:
         raise ValueError("no path specified")
 
-    start_list = os.path.abspath(start).split(os.sep)
-    path_list = os.path.abspath(path).split(os.sep)
+    start_list = [x for x in os.path.abspath(start).split(os.sep) if x]
+    path_list = [x for x in os.path.abspath(path).split(os.sep) if x]
 
     # Work out how much of the filepath is shared by start and path.
     i = len(os.path.commonprefix([start_list, path_list]))
