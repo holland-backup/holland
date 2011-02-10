@@ -182,7 +182,7 @@ class BackupSpool(object):
         try:
             fcntl.lockf(lock, fcntl.LOCK_EX|fcntl.LOCK_NB)
         except IOError, exc:
-            if exc.errno not in (errno.EAGAIN, errno.EACCESS):
+            if exc.errno in (errno.EAGAIN, errno.EACCES):
                 raise SpoolLockError("Failed to acquire lock: %s" % exc)
         return lock
 
