@@ -24,6 +24,7 @@ class MySQLDumpPlugin(BackupPlugin):
     def pre(self):
         self._schema = schema_from_config(self.config['mysqldump'])
         self._client = client_from_config(self.config['mysql:client'])
+        self._client.connect()
         log_host_info(self._client)
         refresh_schema(self._schema, self._client)
 
