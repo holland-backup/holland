@@ -352,6 +352,18 @@ class MySQLClient(object):
         cursor.close()
         return self.show_variable(key, session)
 
+    def current_user(self):
+        """Fetch the current MySQL user associated with this client
+
+        :returns: ``user@host`` string
+        """
+        cursor = self.cursor()
+        try:
+            if cursor.execute('SELECT USER()'):
+                return cursor.fetchone()[0]
+        finally:
+            cursor.close()
+
     def server_version(self):
         """
         server_version(self)
