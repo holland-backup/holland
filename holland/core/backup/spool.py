@@ -3,6 +3,7 @@
 import os
 import time
 import errno
+import fcntl
 import shutil
 import tempfile
 import logging
@@ -13,6 +14,9 @@ LOG = logging.getLogger(__name__)
 class SpoolError(Exception):
     """Base error class that all spool errors derive from"""
 
+class SpoolLockError(SpoolError):
+    """Raised when a lock error is encountered during a spool operation"""
+
 class BackupStore(object):
     """Manage the storage space of a backup"""
     def __init__(self, name, path, spool=None):
@@ -21,6 +25,8 @@ class BackupStore(object):
         self.spool = spool
         # cached size of last known size even if we're purged
         self._size = 0
+        # to lock this backup to coordinate backup/purging
+        self._lock = None
 
     def latest(self, name=None):
         """Find the latest backup by a backupset name"""
@@ -33,20 +39,6 @@ class BackupStore(object):
             return backups[-1]
         except IndexError:
             return None
-
-    def oldest(self, retention_count=1):
-        """Return the oldest backups in this store's backupset
-
-        This does not include this store so the returned list can
-        be safely used to purge the last ``count`` backups.
-        """
-        if not self.spool:
-            return []
-        backups = self.spool.list_backups(self.name)
-        if self in backups:
-            backups.remove(self)
-
-        return backups[0:-retention_count]
 
     def previous(self):
         """Find the backup store temporally preceding this one"""
@@ -173,6 +165,26 @@ class BackupSpool(object):
         #XXX: python2.3 compatibility
         results.sort()
         return results
+
+    def lock(self, name):
+        """Lock a backupset
+
+        A lock will be checked prior to performing any critical operation such
+        as purging or allocating new backup sets.
+        """
+        try:
+            os.mkdir(os.path.join(self.root, name))
+        except OSError, exc:
+            if exc.errno != errno.EEXIST:
+                raise SpoolError("Error when locking spool: %s" % exc)
+
+        lock = open(os.path.join(self.root, name, '.holland'), 'a')
+        try:
+            fcntl.lockf(lock, fcntl.LOCK_EX|fcntl.LOCK_NB)
+        except IOError, exc:
+            if exc.errno not in (errno.EAGAIN, errno.EACCESS):
+                raise SpoolLockError("Failed to acquire lock: %s" % exc)
+        return lock
 
     def purge(self, backupset, retention_count=0, dry_run=False):
         """Purge backups in a backupset
