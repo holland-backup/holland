@@ -30,10 +30,13 @@ class BackupManager(object):
         name = config.name
         plugin = load_backup_plugin(config)
         LOG.info("+ Found plugin %s", plugin.name)
+        lock = self.spool.lock(name)
+        LOG.info("+ Locked spool %s", lock.name)
         store = self.spool.add_store(name)
         LOG.info("+ Initialized backup directory %s", store.path)
         job = BackupJob(plugin, config, store)
         job.run(dry_run)
+        lock.close()
         return job
 
     def purge_backupset(self, name, retention_count=0, dry_run=False):
@@ -43,7 +46,11 @@ class BackupManager(object):
         :param dry_run: whether to only test what the purge process would do
         :returns: tuple of all_backups, kept_backups, purged_backups
         """
-        return self.spool.purge(name, retention_count, dry_run)
+        lock = self.spool.lock(name)
+        try:
+            return self.spool.purge(name, retention_count, dry_run)
+        finally:
+            lock.close()
 
     def purge_backup(self, path, dry_run=False):
         """Purge one backup
@@ -51,10 +58,12 @@ class BackupManager(object):
         :returns: purged backup
         """
         backupset, instance = path.split('/')
+        lock = self.spool.lock(backupset)
         path = os.path.join(self.spool.root, backupset, instance)
         backup = self.spool.load_store(path)
         if dry_run is False:
             backup.purge()
+        lock.close()
         return backup
 
     def cleanup(self, path):
