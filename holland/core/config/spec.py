@@ -34,6 +34,9 @@ class ValidationError(ConfigError):
     def __init__(self, errors):
         self.errors = errors
 
+    def __str__(self):
+        return "%d validation errors found." % (len(self.errors))
+
 class Configspec(Config):
     """A configuration that can validate other configurations
     """
@@ -78,7 +81,7 @@ class Configspec(Config):
                 try:
                     check.validate(cfgsect)
                 except ValidationError, exc:
-                    errors.append(exc.errors)
+                    errors.extend(exc.errors)
                 cfgsect.formatter = CheckFormatter(check)
             else:
                 # parse the check
@@ -99,7 +102,7 @@ class Configspec(Config):
                 # if no default and no value specified it will be a missing
                 # required value
                 if value is missing:
-                    errors.append(CheckError("Required value for %r", key))
+                    errors.append(CheckError("Required value for %r" % key))
                     continue
 
                 value = check.normalize(value)
