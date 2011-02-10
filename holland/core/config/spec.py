@@ -92,7 +92,10 @@ class Configspec(Config):
                     value = config[key]
                 except KeyError:
                     # use check's default value otherwise
-                    value = default
+                    try:
+                        value = config[alias]
+                    except KeyError:
+                        value = default
                 # if no default and no value specified it will be a missing
                 # required value
                 if value is missing:
