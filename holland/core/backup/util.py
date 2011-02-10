@@ -29,6 +29,8 @@ class Beacon(dict):
         if robust:
             for receiver, result in signal.send_robust(sender=None, **kwargs):
                 if isinstance(result, Exception):
+                    LOG.debug("Received (%r) raised an exception: %r",
+                            receiver, result)
                     raise result
         else:
             signal.send(sender=None, **kwargs)
