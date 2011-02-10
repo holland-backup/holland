@@ -335,6 +335,8 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.mysqldump/{README,LICENSE}
 %{python_sitelib}/holland/backup/mysqldump/
+# XXX: hooks for testing 1.1a1
+%{python_sitelib}/holland/lib/mysqldump/
 %{python_sitelib}/holland.backup.mysqldump-%{version}-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/mysqldump.conf
 
