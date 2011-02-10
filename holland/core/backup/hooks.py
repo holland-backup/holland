@@ -32,9 +32,14 @@ class RotateBackupsHook(BackupHook):
     def execute(self, job):
         retention_count = job.config['holland:backup']['retention-count']
         LOG.info("+ Keep %d backups", retention_count)
-        for backup in job.store.oldest(retention_count):
-            backup.purge()
+        if retention_count == 0:
+            LOG.debug("Increasing retention-count to maintain new backup")
+            retention_count += 1
+        backups, kept, purged = job.store.spool.purge(job.store.name, retention_count)
+        for backup in purged:
             LOG.info("+ Purged old backup %s", backup.path)
+        for backup in kept:
+            LOG.info("+ Kept backup %s", backup.path)
 
 class WriteConfigHook(BackupHook):
     """Write config to backup store when called"""
@@ -105,7 +110,7 @@ def setup_builtin_hooks(beacon, config):
         beacon.after_backup.connect(rotate_backups, weak=False)
     elif config['purge-policy'] == 'before-backup':
         rotate_backups = RotateBackupsHook('<internal>')
-        beacon.after_backup.connect(rotate_backups, weak=False)
+        beacon.before_backup.connect(rotate_backups, weak=False)
 
 def setup_dryrun_hooks(beacon, config):
     "Setup hook actions that should be run during a dry-run backup"
