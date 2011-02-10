@@ -10,7 +10,7 @@ import logging
 from subprocess import Popen, PIPE, STDOUT
 from holland.core.backup.hooks import BackupHook
 from holland.core.config import Configspec
-from string import Template
+from holland.lib.mysql import connect
 
 LOG = logging.getLogger(__name__)
 
@@ -30,11 +30,22 @@ class MySQLSelectHook(BackupHook):
         if not host:
             LOG.error("No host matched :(")
         else:
-            LOG.info("Updating mysql:client with user=%r password=%r host=%r",
-                     user, password, host)
+            user, password, host, port = host
+            LOG.info("Updating mysql:client with user=%r password=%r host=%r port=%r",
+                     user, password, host, port)
+            section = job.config.setdefault('mysql:client', job.config.__class__())
+            section['user'] = user
+            section['password'] = password
+            section['host'] = host
+            section['port'] = port
 
     def _select_host(self):
-        url = r'(?P<user>[^:]+)(?:[:](?P<password>[^@]+))?[@](?P<host>[a-zA-Z0-9._-]+)'
+        url = (r'(?P<user>[^:]+)'
+              r'(?:[:](?P<password>[^@]+))?'
+              r'[@]'
+              r'(?P<host>[a-zA-Z0-9._-]+)'
+              r'(?:[:](?P<port>\d+))?')
+
         url_cre = re.compile(url)
         for host in self.config['hosts']:
             m = url_cre.match(host)
@@ -42,11 +53,14 @@ class MySQLSelectHook(BackupHook):
                 LOG.error("Skiping host %s because I could not detect its "
                           "components.", host)
             else:
-                user, password, host = m.groups()
-                client = connect(user=user, password=passwor, host=host)
+                user, password, host, port = m.groups()
+                LOG.info("Trying to connect with %r:%r@%r:%r", user, password,
+                        host, port)
+                client =connect(dict(user=user, password=password, host=host,
+                    port=port))
                 try:
                     if client.show_variable('read_only') == 'ON':
-                        return user, password, host
+                        return user, password, host, port
                 finally:
                     client.close()
         return None
