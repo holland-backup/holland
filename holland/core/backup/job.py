@@ -28,6 +28,7 @@ class BackupJob(object):
             setup_dryrun_hooks(beacon, self.config)
 
         try:
+            LOG.info("+ Running setup-backup hooks")
             beacon.notify('setup-backup', job=self, robust=False)
             self.plugin.configure(self.config)
             LOG.info("+ Configured plugin")
@@ -36,6 +37,7 @@ class BackupJob(object):
             self.plugin.pre()
             LOG.info("+ Ran plugin pre")
             # allow before-backup hooks to abort immediately
+            LOG.info("+ Running before-backup hooks")
             beacon.notify('before-backup', job=self, robust=False)
             try:
                 LOG.info("Running backup")
@@ -51,8 +53,10 @@ class BackupJob(object):
                     LOG.warning("+ Error while running plugin shutdown.")
                     LOG.warning("  Please see the trace log")
         except:
+            LOG.info("+ Running backup failure hooks")
             beacon.notify('backup-failure', job=self)
             raise
+        LOG.info("+ Running after-backup hooks")
         beacon.notify('after-backup', job=self)
 
     def hooks(self):
