@@ -125,8 +125,8 @@ class ListCheck(BaseCheck):
         data = self._utf8_encode(StringIO(value))
         reader = csv.reader(data, dialect='excel', delimiter=',',
                 skipinitialspace=True)
-        return [cell.decode('utf8') for row in reader for cell in row 
-                 if cell]
+        return [unquote(cell.decode('utf8')) for row in reader for cell in row
+                 if unquote(cell.decode('utf8'))]
 
     def format(self, value):
         result = BytesIO()
