@@ -1,5 +1,8 @@
 """Base plugin classes"""
-from holland.core.config import Configspec
+import logging
+from holland.core.config import Configspec, ValidationError
+
+LOG = logging.getLogger(__name__)
 
 class BasePlugin(object):
     """Base class from which all Holland plugins should derive"""
@@ -31,4 +34,11 @@ class ConfigurablePlugin(BasePlugin):
 
     def configure(self, config):
         """Configure this plugin with the given dict-like object"""
-        self.config = self.configspec().validate(config)
+        try:
+            self.config = self.configspec().validate(config)
+        except ValidationError, exc:
+            LOG.error("%d errors found while validating configuration",
+                    len(exc.errors))
+            for error in exc.errors:
+                LOG.error("%s", error)
+            raise
