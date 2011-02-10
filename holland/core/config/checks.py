@@ -36,6 +36,9 @@ class CheckError(ValueError):
         ValueError.__init__(self, message)
         self.value = value
 
+    def __str__(self):
+        return self.message
+
 class BoolCheck(BaseCheck):
     def check(self, value):
         valid_bools = {
@@ -79,7 +82,7 @@ class IntCheck(BaseCheck):
         try:
             return int(value, self.base)
         except ValueError, exc:
-            raise CheckError(str(exc), value)
+            raise CheckError("Invalid format for integer %s" % value, value)
 
     def format(self, value):
         if value is None:
