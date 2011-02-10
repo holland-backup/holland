@@ -29,11 +29,23 @@ class MockMetadata(FileMetadata):
             """
         raise KeyError("MockMetadata: %s" % name)
 
+class FakeSpool(object):
+    def __init__(self, backups):
+        self.backups = backups
+
+    def purge(self, name, retention_count):
+        for backup in self.backups:
+            backup.purge()
+
+        return [], [], self.backups
+
 class FakeStore(object):
+    name = 'fake'
+
     def __init__(self):
         self.purged = False
         self.path = tempfile.mkdtemp()
-        self.spool = None
+        self.spool = FakeSpool([self])
 
     def oldest(self, n=1):
         return []
