@@ -8,14 +8,16 @@ except AttributeError:
 
 class Token(object):
     """Lexer token"""
-    def __init__(self, text, token_id, value):
+    def __init__(self, text, token_id, value, position=()):
         self.text = text
         self.id = token_id
         self.value = value
+        self.position = position
 
     def __repr__(self):
-        return 'Token(text=%r, type=%r, value=%r)' % \
-               (self.text, self.id, self.value)
+        position = map(str, self.position)
+        return 'Token(text=%r, type=%r, value=%r, position=%r)' % \
+                (self.text, self.id, self.value, '-'.join(position))
 
 
 class TokenGenerator(object):
@@ -25,7 +27,10 @@ class TokenGenerator(object):
         self.conversion = conversion
 
     def __call__(self, scanner, value):
-        return Token(value, self.token_id, self.conversion(value))
+        return Token(text=value,
+                     token_id=self.token_id,
+                     value=self.conversion(value),
+                     position=scanner.match.span())
 
 
 class Lexer(object):
@@ -34,23 +39,37 @@ class Lexer(object):
         self.iterable = iter(iterable)
 
     def expect(self, *token_ids):
+        """Fetch the next token and raise a CheckParseError if its
+        type is not one of the provided, expected token ids
+
+        :returns: next Token instance
+        """
         token = self.next()
         if token.id not in token_ids:
-            raise CheckError("Expected one of %r but got %r" %
+            raise CheckParseError("Expected one of %r but got %r" %
                              (token_ids, token))
         return token
 
     def next(self):
+        """Fetch the next token
+
+        :returns: Token instance
+        """
         try:
             tok = self.iterable.next()
             return tok
         except StopIteration:
-            raise CheckError("Reached end-of-input when reading token")
+            raise CheckParseError("Reached end-of-input when reading token")
 
     def __iter__(self):
-        return self.iterable
+        return self
 
-class CheckError(Exception): pass
+class CheckError(Exception):
+    """Raise when an error is occured during a check"""
+
+class CheckParseError(Exception):
+    """Raised when an error is encountered during parsing a check string"""
+
 
 class CheckParser(object):
     """Parse the check DSL supported by ``Configspec``"""
@@ -62,8 +81,6 @@ class CheckParser(object):
     # rule patterns
     ident_re    = r'[a-zA-Z_][a-zA-Z0-9_]*'
     name_re     = r'[a-zA-Z_-][a-zA-Z0-9_-]*'
-    #str_re      = r"'([^'\\]*(?:\\.[^'\\]*)*)'"
-    #str_re      = r'"([^"\\]*(?:\\.[^"\\]*)*)"'
     str_re      = (r"'([^'\\]*(?:\\.[^'\\]*)*)'"r'|"([^"\\]*(?:\\.[^"\\]*)*)"')
     float_re    = r'(?<!\.)\d+\.\d+'
     int_re      = r'\d+'
@@ -73,7 +90,6 @@ class CheckParser(object):
     # scanner
     scanner = Scanner([
         (ident_re, TokenGenerator(T_ID)),
-        #(name_re, TokenGenerator(T_STR)),
         (str_re, TokenGenerator(T_STR, unquote)),
         (float_re, TokenGenerator(T_NUM, float)),
         (int_re, TokenGenerator(T_NUM, int)),
@@ -93,23 +109,25 @@ class CheckParser(object):
         tokens, remainder = cls.scanner.scan(check)
 
         if remainder:
-            raise CheckError("Failed to tokenize check at %r" % check)
+            offset = len(check) - len(remainder)
+            raise CheckParseError("Unexpected character at offset %d\n%s\n%s" %
+                                  (offset, check, " "*offset + "^"))
 
         lexer = Lexer(tokens)
 
         method = lexer.next()
         if method.id != cls.T_ID:
-            raise CheckError("Expected identifier as first token in check "
+            raise CheckParseError("Expected identifier as first token in check "
                              "string but got %r" % method.id)
 
         # bare-name check
         try:
             token = lexer.next()
-        except CheckError:
+        except CheckParseError:
             return method.value, (), {}
 
         if token.text != '(':
-            raise CheckError("Expected '(' as token following method name")
+            raise CheckParseError("Expected '(' as token following method name")
 
         args, kwargs = cls._parse_argument_list(lexer)
 
@@ -124,7 +142,7 @@ class CheckParser(object):
             if token.text == ')':
                 break
             if token.id not in (cls.T_ID, cls.T_STR, cls.T_NUM):
-                raise CheckError("Unexpected token %r" % token)
+                raise CheckParseError("Unexpected token %r" % token)
 
             arg = cls._parse_expression(lexer, token)
             token = lexer.expect(cls.T_SYM)
@@ -139,7 +157,7 @@ class CheckParser(object):
                 break
 
         if token.text != ')':
-            raise CheckError("Expected check expression to end with ')' "
+            raise CheckParseError("Expected check expression to end with ')' "
                              "but got %r" % token)
         return tuple(args), kwargs
     _parse_argument_list = classmethod(_parse_argument_list)
@@ -162,7 +180,7 @@ class CheckParser(object):
         args = []
         token = lexer.next()
         if token.text != '(':
-            raise CheckError("Expected '(' but got %r instead" % token)
+            raise CheckParseError("Expected '(' but got %r instead" % token)
         args, kwargs = cls._parse_argument_list(lexer)
         return list(args)
     _parse_list_expr = classmethod(_parse_list_expr)
