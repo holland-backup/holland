@@ -19,11 +19,10 @@ class CheckFormatter(BaseFormatter):
 
     def format(self, key, value):
         try:
-            name, args, kwargs = CheckParser.parse(self.configspec[key])
-            default = kwargs.pop('default', None)
-            aliasof = kwargs.pop('aliasof', None)
-            check = self.configspec.registry[name](*args, **kwargs)
-            return check.format(value)
+            check = Check.parse(self.configspec[key])
+            validator = self.configspec.registry[check.name]
+            validator = validator(check.args, check.kwargs)
+            return validator.format(value)
         except KeyError:
             return value
 
@@ -75,10 +74,8 @@ class Configspec(Config):
                 cfgsect.formatter = CheckFormatter(check)
             else:
                 # parse the check
-                name, args, kwargs = CheckParser.parse(check)
-                default = kwargs.pop('default', missing)
-                alias = kwargs.pop('aliasof', None)
-                check = self.registry[name](*args, **kwargs)
+                check = Check.parse(check)
+                validator = self.registry[check.name](check.args, check.kwargs)
 
                 # get the value if the config if it exists
                 try:
@@ -86,27 +83,26 @@ class Configspec(Config):
                 except KeyError:
                     # use check's default value otherwise
                     try:
-                        value = config[alias]
+                        value = config[check.aliasof]
                     except KeyError:
-                        value = default
+                        value = check.default
                 # if no default and no value specified it will be a missing
                 # required value
                 if value is missing:
                     errors.append(CheckError("Required value for %r" % key))
                     continue
 
-                value = check.normalize(value)
                 # perform check
                 try:
-                    result = check.check(value)
-                except CheckError, exc:
+                    result = validator.validate(value)
+                except ValidationError, exc:
                     errors.append(exc)
                     continue
                 # update config with result of check (unserialized value)
                 config[key] = result
                 # handle aliasing of keys to other keys
-                if alias:
-                    config.rename(key, alias)
+                if check.aliasof is not missing:
+                    config.rename(key, check.aliasof)
         config.formatter = CheckFormatter(self)
         if errors:
             raise ValidationError(errors)
