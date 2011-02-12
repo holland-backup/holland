@@ -1,6 +1,6 @@
 """Test parsing of the configspec check DSL"""
 from nose.tools import *
-from holland.core.config.parsing import CheckParser
+from holland.core.config.check import CheckParser
 
 def test_simple():
     name, args, kwargs = CheckParser.parse('integer')

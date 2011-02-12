@@ -1,6 +1,6 @@
 """This module tests the builtin Configspec checks"""
 from nose.tools import *
-from holland.core.config.checks import *
+from holland.core.config.validation import *
 
 def test_bool():
     pass
