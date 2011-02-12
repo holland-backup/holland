@@ -71,7 +71,7 @@ class Config(OrderedDict):
                 except KeyError:
                     cfg[sectname] = cls()
                     section = cfg[sectname]
-                cfg.source[sectname] = '%s:%d' % (name, lineno + 1)
+                cfg.source[sectname] = (name, lineno + 1)
                 key = None # reset key
                 continue
             m = cls.key_cre.match(line)
@@ -80,18 +80,14 @@ class Config(OrderedDict):
                 key = cfg.optionxform(key.strip())
                 value = cfg.valuexform(value)
                 section[key] = value
-                section.source[key] = '%s:%d' % (name, lineno + 1)
+                section.source[key] = (name, lineno + 1, lineno + 1)
                 continue
             m = cls.cont_cre.match(line)
             if m:
                 if not key:
                     raise ConfigError("unexpected continuation line")
                 section[key] += line.strip()
-                if '-' not in section.source[key]:
-                    section.source[key] += '-%d' % (lineno+1)
-                else:
-                    src_info = section.source[key].split('-')[0]
-                    section.source[key] = src_info + '-%d' % (lineno + 1)
+                section.source[key] = section.source[key][0:2] + (lineno + 1,)
                 continue
             m = cls.include_cre.match(line)
             if m:
