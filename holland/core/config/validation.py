@@ -11,7 +11,7 @@ import shlex
 import subprocess
 from holland.core.config.util import unquote
 
-class BaseCheck(object):
+class BaseValidator(object):
     def normalize(self, value):
         "Normalize a string value"
         if isinstance(value, basestring):
@@ -19,19 +19,28 @@ class BaseCheck(object):
         else:
             return value
 
-    def check(self, value):
-        """Check a value and return its conversion
+    def convert(self, value):
+        """Convert a value from its string representation to a python
+        object.
 
-        :raises: CheckError on failure
         """
+        return value
+
+    def validate(self, value):
+        """Validate a value and return its conversion
+
+        :raises: ValidatorError on failure
+        """
+        value = self.normalize(value)
+        value = self.convert(value)
         return value
 
     def format(self, value):
         """Format a value as it should be written in a config file"""
         return str(value)
 
-class CheckError(ValueError):
-    "Raised when a check fails"
+class ValidationError(ValueError):
+    """Raised when validation fails"""
     def __init__(self, message, value):
         ValueError.__init__(self, message)
         self.value = value
@@ -39,7 +48,7 @@ class CheckError(ValueError):
     def __str__(self):
         return self.message
 
-class BoolCheck(BaseCheck):
+class BoolValidator(BaseValidator):
     def check(self, value):
         valid_bools = {
             'yes'  : True,
@@ -58,17 +67,17 @@ class BoolCheck(BaseCheck):
     def format(self, value):
         return value and 'yes' or 'no'
 
-class FloatCheck(BaseCheck):
+class FloatValidator(BaseValidator):
     def check(self, value):
         try:
             return float(value)
         except ValueError, exc:
-            raise CheckError(str(exc), value)
+            raise ValidatorError(str(exc), value)
 
     def format(self, value):
         return "%.2f" % value
 
-class IntCheck(BaseCheck):
+class IntValidator(BaseValidator):
     def __init__(self, min=None, max=None, base=10):
         self.min = min
         self.max = max
@@ -82,34 +91,34 @@ class IntCheck(BaseCheck):
         try:
             return int(value, self.base)
         except ValueError, exc:
-            raise CheckError("Invalid format for integer %s" % value, value)
+            raise ValidatorError("Invalid format for integer %s" % value, value)
 
     def format(self, value):
         if value is None:
             return value
         return str(value)
 
-class StringCheck(BaseCheck):
+class StringValidator(BaseValidator):
     def check(self, value):
         return value
 
     def format(self, value):
         return value
 
-class OptionCheck(BaseCheck):
+class OptionValidator(BaseValidator):
     def __init__(self, *args, **kwargs):
         self.options = args
 
     def check(self, value):
         if value in self.options:
             return value
-        raise CheckError("invalid option %r" % value, value)
+        raise ValidatorError("invalid option %r" % value, value)
 
     def format(self, value):
         return str(value)
 
 
-class ListCheck(BaseCheck):
+class ListValidator(BaseValidator):
 
     #@staticmethod
     def _utf8_encode(unicode_csv_data):
@@ -119,7 +128,7 @@ class ListCheck(BaseCheck):
 
     def normalize(self, value):
         "Normalize a value"
-        # skip BaseCheck's unquoting behavior
+        # skip BaseValidator's unquoting behavior
         return value
 
     def check(self, value):
@@ -137,13 +146,13 @@ class ListCheck(BaseCheck):
         writer.writerow([cell.encode('utf8') for cell in value])
         return result.getvalue().decode('utf8').strip()
 
-class TupleCheck(ListCheck):
+class TupleValidator(ListValidator):
     def check(self, value):
-        value = super(TupleCheck, self).check(value)
+        value = super(TupleValidator, self).check(value)
         return tuple(value)
 
 
-class CmdlineCheck(BaseCheck):
+class CmdlineValidator(BaseValidator):
     def check(self, value):
         return [arg.decode('utf8') for arg in shlex.split(value.encode('utf8'))]
 
@@ -151,30 +160,30 @@ class CmdlineCheck(BaseCheck):
         return subprocess.list2cmdline(value)
 
 
-class LogLevelCheck(BaseCheck):
+class LogLevelValidator(BaseValidator):
     def check(self, value):
         if isinstance(value, int):
             return value
         try:
             return logging._levelNames[value.upper()]
         except KeyError:
-            raise CheckError("Invalid log level '%s'" % value, value)
+            raise ValidatorError("Invalid log level '%s'" % value, value)
 
     def format(self, value):
         try:
             return logging._levelNames[value].lower()
         except KeyError:
-            raise CheckError("Unknown logging level '%s'" % value, value)
+            raise ValidatorError("Unknown logging level '%s'" % value, value)
 
 builtin_checks = (
-    ('boolean', BoolCheck),
-    ('integer', IntCheck),
-    ('float', FloatCheck),
-    ('string', StringCheck),
-    ('option', OptionCheck),
-    ('list', ListCheck),
-    ('force_list', ListCheck),
-    ('tuple', TupleCheck),
-    ('cmdline', CmdlineCheck),
-    ('log_level', LogLevelCheck),
+    ('boolean', BoolValidator),
+    ('integer', IntValidator),
+    ('float', FloatValidator),
+    ('string', StringValidator),
+    ('option', OptionValidator),
+    ('list', ListValidator),
+    ('force_list', ListValidator),
+    ('tuple', TupleValidator),
+    ('cmdline', CmdlineValidator),
+    ('log_level', LogLevelValidator),
 )
