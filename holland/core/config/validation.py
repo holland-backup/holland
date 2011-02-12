@@ -12,6 +12,10 @@ import subprocess
 from holland.core.config.util import unquote
 
 class BaseValidator(object):
+    def __init__(self, args, kwargs):
+        self.args = args
+        self.kwargs = kwargs
+
     def normalize(self, value):
         "Normalize a string value"
         if isinstance(value, basestring):
@@ -49,7 +53,7 @@ class ValidationError(ValueError):
         return self.message
 
 class BoolValidator(BaseValidator):
-    def check(self, value):
+    def convert(self, value):
         valid_bools = {
             'yes'  : True,
             'on'   : True,
@@ -68,7 +72,7 @@ class BoolValidator(BaseValidator):
         return value and 'yes' or 'no'
 
 class FloatValidator(BaseValidator):
-    def check(self, value):
+    def convert(self, value):
         try:
             return float(value)
         except ValueError, exc:
@@ -78,18 +82,14 @@ class FloatValidator(BaseValidator):
         return "%.2f" % value
 
 class IntValidator(BaseValidator):
-    def __init__(self, min=None, max=None, base=10):
-        self.min = min
-        self.max = max
-        self.base = base
-
-    def check(self, value):
+    # XXX: support min,max
+    def convert(self, value):
         if isinstance(value, int):
             return value
         if value is None:
             return value
         try:
-            return int(value, self.base)
+            return int(value, self.kwargs.get('base', 10))
         except ValueError, exc:
             raise ValidatorError("Invalid format for integer %s" % value, value)
 
@@ -99,18 +99,15 @@ class IntValidator(BaseValidator):
         return str(value)
 
 class StringValidator(BaseValidator):
-    def check(self, value):
+    def convert(self, value):
         return value
 
     def format(self, value):
         return value
 
 class OptionValidator(BaseValidator):
-    def __init__(self, *args, **kwargs):
-        self.options = args
-
-    def check(self, value):
-        if value in self.options:
+    def convert(self, value):
+        if value in self.args:
             return value
         raise ValidatorError("invalid option %r" % value, value)
 
@@ -131,7 +128,7 @@ class ListValidator(BaseValidator):
         # skip BaseValidator's unquoting behavior
         return value
 
-    def check(self, value):
+    def convert(self, value):
         if isinstance(value, list):
             return value
         data = self._utf8_encode(StringIO(value))
@@ -147,13 +144,13 @@ class ListValidator(BaseValidator):
         return result.getvalue().decode('utf8').strip()
 
 class TupleValidator(ListValidator):
-    def check(self, value):
-        value = super(TupleValidator, self).check(value)
+    def convert(self, value):
+        value = super(TupleValidator, self).convert(value)
         return tuple(value)
 
 
 class CmdlineValidator(BaseValidator):
-    def check(self, value):
+    def convert(self, value):
         return [arg.decode('utf8') for arg in shlex.split(value.encode('utf8'))]
 
     def format(self, value):
@@ -161,7 +158,7 @@ class CmdlineValidator(BaseValidator):
 
 
 class LogLevelValidator(BaseValidator):
-    def check(self, value):
+    def convert(self, value):
         if isinstance(value, int):
             return value
         try:
@@ -175,7 +172,7 @@ class LogLevelValidator(BaseValidator):
         except KeyError:
             raise ValidatorError("Unknown logging level '%s'" % value, value)
 
-builtin_checks = (
+default_validators = (
     ('boolean', BoolValidator),
     ('integer', IntValidator),
     ('float', FloatValidator),
