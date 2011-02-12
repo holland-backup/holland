@@ -19,3 +19,11 @@ def unquote(value):
         value = value[1:-1]
 
     return escape_cre.sub(lambda m: substitutions.get(m.group(1), m.group(1)), value)
+
+class Missing(object):
+    def __str__(self):
+        return '<missing value>'
+    __repr__ = __str__
+
+missing = Missing()
+del Missing
