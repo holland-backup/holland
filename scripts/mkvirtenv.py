@@ -144,7 +144,7 @@ def install_configs(env_root):
     # copytree doesn't create all dirs on python 2.4
     if not os.path.exists(join(env_root, 'etc')):
         os.makedirs(join(env_root, 'etc'))
-    shutil.copytree(join(HOLLAND_ROOT, 'test_config'),
+    shutil.copytree(join(HOLLAND_ROOT, 'config'),
                     join(env_root, 'etc', 'holland'))
 
 def find_egg_env(path):
