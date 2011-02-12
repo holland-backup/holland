@@ -1,10 +1,15 @@
 # parse.py
 import re
-from holland.core.config.util import unquote
+from holland.core.config.util import unquote, missing
 try:
     Scanner = re.Scanner
 except AttributeError:
     from holland.core.util.pycompat import Scanner
+
+__all__ = [
+    'Check',
+    'CheckError',
+]
 
 class Token(object):
     """Lexer token"""
@@ -184,3 +189,42 @@ class CheckParser(object):
         args, kwargs = cls._parse_argument_list(lexer)
         return list(args)
     _parse_list_expr = classmethod(_parse_list_expr)
+
+class Check(object):
+    """Represents a parse Check string
+
+    A check is a python like mini-language defining a name and
+    set of arguments and keyword arguments that define a series
+    of constraints for some data check.  These are intrepreted
+    by a higher level Validator object.
+
+    Check BNF:
+
+    <check>             ::= <name> <arguments>
+    <arguments>         ::= ( <argument-list> ) | ""
+    <argument-list>     ::= <argument> | <argument>,<argument>
+    <argument>          ::= <identifier> | <integer> | <float> | <string>
+    <identifier>        ::= (<letter>|"_") (<letter>|<digit>|"_")
+    <integer>           ::= <digit> <digit>*
+    <float>             ::= <digit>+ "." <digit>*
+    <string>            ::= "'" stringitem* "'" | '"' stringitem* '"'
+    <stringitem>        ::= <stringchar> | <escapeseq>
+    <stringchar>        ::= <any source character except "\\" or newline or the
+                             quote>
+    <escapeseq>         ::= "\\" <any ASCII character>
+    """
+    def __init__(self, name, args, kwargs, default, aliasof):
+        self.name = name
+        self.args = args
+        self.kwargs = kwargs
+        self.default = default
+        self.aliasof = aliasof
+
+    #@classmethod
+    def parse(cls, check):
+        """Parse a check and return a new Check instance"""
+        name, args, kwargs = CheckParser.parse(check)
+        default = kwargs.pop('default', missing)
+        aliasof = kwargs.pop('aliasof', missing)
+        return cls(name, args, kwargs, default, aliasof)
+    parse = classmethod(parse)
