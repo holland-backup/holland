@@ -2,18 +2,16 @@
 
 import logging
 from config import Config, ConfigError, BaseFormatter
-from parsing import CheckParser
-from checks import builtin_checks, CheckError
+from holland.core.config.check import Check, CheckError
+from holland.core.config.validation import default_validators, ValidationError
+from holland.core.config.util import missing
 
 LOG = logging.getLogger(__name__)
 
-class Missing(object):
-    def __str__(self):
-        return '<missing value>'
-    __repr__ = __str__
-
-missing = Missing()
-del Missing
+class ValidateError(ValueError):
+    def __init__(self, errors):
+        ValueError.__init__(self)
+        self.errors = errors
 
 class CheckFormatter(BaseFormatter):
     def __init__(self, configspec):
@@ -29,14 +27,6 @@ class CheckFormatter(BaseFormatter):
         except KeyError:
             return value
 
-class ValidationError(ConfigError):
-    """Raise when a check fails to validate properly"""
-    def __init__(self, errors):
-        self.errors = errors
-
-    def __str__(self):
-        return "%d validation errors found." % (len(self.errors))
-
 class Configspec(Config):
     """A configuration that can validate other configurations
     """
@@ -45,7 +35,7 @@ class Configspec(Config):
 
     def __init__(self, *args, **kwargs):
         super(Configspec, self).__init__(*args, **kwargs)
-        self.registry = dict(builtin_checks)
+        self.registry = dict(default_validators)
 
     def validate(self, config):
         """Validate a config against this configspec.
