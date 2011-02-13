@@ -190,7 +190,7 @@ class CheckParser(object):
         return list(args)
     _parse_list_expr = classmethod(_parse_list_expr)
 
-class Check(object):
+class Check(tuple):
     """Represents a parse Check string
 
     A check is a python like mini-language defining a name and
@@ -213,12 +213,12 @@ class Check(object):
                              quote>
     <escapeseq>         ::= "\\" <any ASCII character>
     """
-    def __init__(self, name, args, kwargs, default, aliasof):
-        self.name = name
-        self.args = args
-        self.kwargs = kwargs
-        self.default = default
-        self.aliasof = aliasof
+
+    name = property(lambda self: self[0])
+    args = property(lambda self: self[1])
+    kwargs = property(lambda self: self[2])
+    default = property(lambda self: self[3])
+    aliasof = property(lambda self: self[4])
 
     #@classmethod
     def parse(cls, check):
@@ -226,5 +226,9 @@ class Check(object):
         name, args, kwargs = CheckParser.parse(check)
         default = kwargs.pop('default', missing)
         aliasof = kwargs.pop('aliasof', missing)
-        return cls(name, args, kwargs, default, aliasof)
+        return cls((name, args, kwargs, default, aliasof))
     parse = classmethod(parse)
+
+    def __repr__(self):
+        return "Check(name=%r, args=%r, kwargs=%r, default=%r, aliasof=%r)" % \
+                (self.name, self.args, self.kwargs, self.default, self.aliasof)
