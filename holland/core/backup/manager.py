@@ -7,9 +7,9 @@
 import os
 import logging
 from holland.core.backup.util import load_backup_plugin
-from holland.core.backup.spool import BackupSpool
+from holland.core.backup.spool import BackupSpool, SpoolError, SpoolLockError
 from holland.core.backup.job import BackupJob
-from holland.core.backup.base import BackupPlugin
+from holland.core.backup.base import BackupPlugin, BackupError
 from holland.core.config import Config
 
 LOG = logging.getLogger(__name__)
@@ -30,7 +30,15 @@ class BackupManager(object):
         name = config.name
         plugin = load_backup_plugin(config)
         LOG.info("+ Found plugin %s", plugin.name)
-        lock = self.spool.lock(name)
+        try:
+            lock = self.spool.lock(name)
+        except SpoolLockError, exc:
+            raise BackupError("%s appears to already be locked by process %s. "
+                              "Is holland already running?" %
+                              (os.path.join(self.spool.root, name), exc.pid))
+        except SpoolError, exc:
+            raise BackupError("There was a problem locking the backup "
+                              "directory %s: %s" % (self.spool.root, exc))
         LOG.info("+ Locked spool %s", lock.name)
         store = self.spool.add_store(name)
         LOG.info("+ Initialized backup directory %s", store.path)

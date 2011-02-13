@@ -16,6 +16,11 @@ class SpoolError(Exception):
 
 class SpoolLockError(SpoolError):
     """Raised when a lock error is encountered during a spool operation"""
+    def __init__(self, message, pid):
+        SpoolError.__init__(self, message)
+        self.message = message
+        self.pid = pid
+
 
 class BackupStore(object):
     """Manage the storage space of a backup"""
@@ -178,12 +183,16 @@ class BackupSpool(object):
             if exc.errno != errno.EEXIST:
                 raise SpoolError("Error when locking spool: %s" % exc)
 
-        lock = open(os.path.join(self.root, name, '.holland'), 'a')
+        lock = open(os.path.join(self.root, name, '.holland'), 'rb+')
         try:
             fcntl.lockf(lock, fcntl.LOCK_EX|fcntl.LOCK_NB)
         except IOError, exc:
             if exc.errno in (errno.EAGAIN, errno.EACCES):
-                raise SpoolLockError("Failed to acquire lock: %s" % exc)
+                pid = lock.read()
+                raise SpoolLockError("Failed to acquire lock: %s" % exc, pid)
+        lock.truncate()
+        lock.write(str(os.getpid()))
+        lock.flush()
         return lock
 
     def purge(self, backupset, retention_count=0, dry_run=False):
