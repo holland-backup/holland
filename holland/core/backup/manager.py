@@ -26,7 +26,7 @@ class BackupManager(object):
     def backup(self, config, dry_run=False):
         """Run a backup given a backupset name"""
         LOG.info("Backup: %s", config.name)
-        config = BackupPlugin.configspec().validate(config)
+        config = BackupPlugin.configspec().validate(config, True)
         name = config.name
         plugin = load_backup_plugin(config)
         LOG.info("+ Found plugin %s", plugin.name)

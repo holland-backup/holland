@@ -30,7 +30,9 @@ class BackupJob(object):
         try:
             LOG.info("+ Running setup-backup hooks")
             beacon.notify('setup-backup', job=self, robust=False)
+            control = self.config.pop('holland:backup')
             self.plugin.configure(self.config)
+            self.config.insert(0, 'holland:backup', control)
             LOG.info("+ Configured plugin")
             self.plugin.setup(self.store)
             LOG.debug("+ Ran plugin setup")
