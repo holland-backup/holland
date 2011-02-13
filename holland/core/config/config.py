@@ -51,6 +51,7 @@ class Config(OrderedDict):
     def __init__(self, *args, **kwargs):
         super(Config, self).__init__(*args, **kwargs)
         self.source = {}
+        self.name = 'root'
 
     #@classmethod
     def parse(cls, iterable):
@@ -154,6 +155,7 @@ class Config(OrderedDict):
                         raise TypeError('value-namespace conflict')
                 except KeyError:
                     section = self.__class__()
+                    section.name = key
                     self[key] = section
                 section.merge(value)
             else:
@@ -181,6 +183,7 @@ class Config(OrderedDict):
                         raise TypeError('value-namespace conflict')
                 except KeyError:
                     section = self.__class__()
+                    section.name = key
                     self[key] = section
                     self.source[key] = config.source[key]
                 section.meld(value)
