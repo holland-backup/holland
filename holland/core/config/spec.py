@@ -1,7 +1,8 @@
 """This module provides support for configs that validate other configs"""
 
 import logging
-from config import Config, ConfigError, BaseFormatter
+import warnings
+from holland.core.config.config import Config, ConfigError, BaseFormatter
 from holland.core.config.check import Check, CheckError
 from holland.core.config.validation import default_validators, ValidationError
 from holland.core.config.util import missing
@@ -79,6 +80,10 @@ class Configspec(Config):
                 except ValidationError, exc:
                     errors.append((exc, config.source.get(key, None)))
 
+        for key in config:
+            if key not in self:
+                warnings.warn("Unknown option %s in [%s]" %
+                               (key, config.name))
         config.formatter = CheckFormatter(self)
         if errors:
             raise ValidateError(errors)
