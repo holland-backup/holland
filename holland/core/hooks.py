@@ -6,7 +6,7 @@ holland backup framework
 """
 
 import logging
-from holland.core.plugin import ConfigurablePlugin, load_plugin
+from holland.core.plugin import ConfigurablePlugin, load_plugin, PluginError
 
 LOG = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class BaseHook(ConfigurablePlugin):
     really care what sender or signal is involved in the hook.
     """
     def __call__(self, sender, signal, **kwargs):
-        self.execute(**kwargs)
+        return self.execute(**kwargs)
 
     def execute(self, **kwargs):
         """Execute this hook"""
@@ -43,15 +43,14 @@ def load_hooks_from_config(hooks, signal_group, config):
         try:
             hook_plugin = hook_config['plugin']
         except KeyError:
-            LOG.error("Misconfigured hook [%s] - no plugin defined",
-                      name)
+            LOG.error("Could not load hook %s - you must specify a "
+                      "plugin in the [%s] section", name, name)
             continue
 
         try:
             hook = load_plugin('holland.hooks', hook_plugin)
-        except KeyError:
-            LOG.error("Could not load hook %s - you must specify a "
-                      "plugin in the [%s] section", name, name)
+        except PluginError, exc:
+            LOG.error("Failed to load hook plugin '%s': %s", hook_plugin, exc)
             continue
         LOG.info("Configuring and register hook [%s] (plugin=holland.hooks.%s)",
                  name, hook_plugin)
