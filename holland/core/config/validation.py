@@ -33,7 +33,7 @@ class BaseValidator(object):
     def validate(self, value):
         """Validate a value and return its conversion
 
-        :raises: ValidatorError on failure
+        :raises: ValidationError on failure
         """
         value = self.normalize(value)
         value = self.convert(value)
@@ -76,7 +76,7 @@ class FloatValidator(BaseValidator):
         try:
             return float(value)
         except ValueError, exc:
-            raise ValidatorError(str(exc), value)
+            raise ValidationError(str(exc), value)
 
     def format(self, value):
         return "%.2f" % value
@@ -91,7 +91,7 @@ class IntValidator(BaseValidator):
         try:
             return int(value, self.kwargs.get('base', 10))
         except ValueError, exc:
-            raise ValidatorError("Invalid format for integer %s" % value, value)
+            raise ValidationError("Invalid format for integer %s" % value, value)
 
     def format(self, value):
         if value is None:
@@ -109,7 +109,7 @@ class OptionValidator(BaseValidator):
     def convert(self, value):
         if value in self.args:
             return value
-        raise ValidatorError("invalid option %r" % value, value)
+        raise ValidationError("invalid option %r" % value, value)
 
     def format(self, value):
         return str(value)
@@ -164,13 +164,13 @@ class LogLevelValidator(BaseValidator):
         try:
             return logging._levelNames[value.upper()]
         except KeyError:
-            raise ValidatorError("Invalid log level '%s'" % value, value)
+            raise ValidationError("Invalid log level '%s'" % value, value)
 
     def format(self, value):
         try:
             return logging._levelNames[value].lower()
         except KeyError:
-            raise ValidatorError("Unknown logging level '%s'" % value, value)
+            raise ValidationError("Unknown logging level '%s'" % value, value)
 
 default_validators = (
     ('boolean', BoolValidator),
