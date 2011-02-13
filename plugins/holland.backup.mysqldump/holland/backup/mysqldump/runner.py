@@ -40,7 +40,8 @@ class ProcessQueue(object):
             pid.wait()
             if pid.returncode != 0:
                 self.terminate()
-                raise BackupError("mysqldump exited with non-zero status")
+                raise BackupError("mysqldump exited with non-zero status: %d" %
+                                  pid.returncode)
 
     def terminate(self):
         # termiante all queued processes
@@ -129,7 +130,11 @@ class MySQLDump(object):
         LOG.debug("okay fileobj closed")
         LOG.info("* mysqldump(%s[%d]) complete", self.argv[-1], self.pid.pid)
         if status != 0:
-            raise ProcessError("mysqldump exited with non-zero status")
+            for line in self.pid.stderr:
+                LOG.error("mysqldump(%s[%d])::", self.argv[-1], self.pid.pid,
+                          line.rstrip())
+            raise ProcessError("mysqldump exited with non-zero status: %d" %
+                               status)
 
     def poll(self):
         if self.pid is None:
