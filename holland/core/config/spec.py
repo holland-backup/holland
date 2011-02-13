@@ -55,7 +55,7 @@ class Configspec(Config):
         super(Configspec, self).__init__(*args, **kwargs)
         self.registry = dict(default_validators)
 
-    def validate(self, config):
+    def validate(self, config, ignore_unknown_sections=False):
         """Validate a config against this configspec.
 
         This method modifies ``config`` replacing option values with the
@@ -82,8 +82,10 @@ class Configspec(Config):
 
         for key in config:
             if key not in self:
+                if isinstance(config[key], dict) and ignore_unknown_sections:
+                    continue
                 warnings.warn("Unknown option %s in [%s]" %
-                               (key, config.name))
+                              (key, config.name))
         config.formatter = CheckFormatter(self)
         if errors:
             raise ValidateError(errors)
