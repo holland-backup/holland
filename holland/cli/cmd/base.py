@@ -5,7 +5,7 @@ import logging
 from textwrap import dedent
 from argparse import RawDescriptionHelpFormatter
 from holland.core import BasePlugin, iterate_plugins
-from holland.cli.cmd.util import StreamWriter, SafeArgumentParser, ArgparseError
+from holland.cli.cmd.util import LogWriter, SafeArgumentParser, ArgparseError
 from holland.cli.cmd.error import CommandNotFoundError
 
 LOG = logging.getLogger(__name__)
@@ -32,8 +32,8 @@ class BaseCommand(BasePlugin):
         BasePlugin.__init__(self, name)
         self.parent = None
         self.config = None
-        self.stderr = StreamWriter(sys.stderr)
-        self.stdout = StreamWriter(sys.stdout)
+        self.stderr = LogWriter(LOG, logging.ERROR)
+        self.stdout = LogWriter(LOG, logging.INFO)
 
     def setup(self, parent):
         """Link this command with its parent command
