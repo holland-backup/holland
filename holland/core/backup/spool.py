@@ -178,7 +178,7 @@ class BackupSpool(object):
         as purging or allocating new backup sets.
         """
         try:
-            os.mkdir(os.path.join(self.root, name))
+            os.makedirs(os.path.join(self.root, name))
         except OSError, exc:
             if exc.errno != errno.EEXIST:
                 raise SpoolError("Error when locking spool: %s" % exc)
