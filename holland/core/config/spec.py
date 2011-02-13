@@ -49,61 +49,80 @@ class Configspec(Config):
         if not isinstance(config, Config):
             config = Config(config)
 
-        for key, check in self.iteritems():
-            if isinstance(check, dict):
-                # recurse to section
+        for key, value in self.iteritems():
+            if isinstance(value, dict):
                 try:
-                    cfgsect = config[key]
-                except KeyError:
-                    # missing section in config that we are validating
-                    cfgsect = config.setdefault(key, config.__class__())
-
-                # ensure we are always validating a Config instance
-                if not isinstance(cfgsect, Config):
-                    cfgsect = config.__class__(cfgsect)
-                    config[key] = cfgsect
-
-                # handle raw dict objects as configspec input
-                if not isinstance(check, Configspec):
-                    check = self.__class__(check)
-
-                try:
-                    check.validate(cfgsect)
-                except ValidationError, exc:
+                    self.validate_section(key, config)
+                except ValidateError, exc:
                     errors.extend(exc.errors)
-                cfgsect.formatter = CheckFormatter(check)
             else:
-                # parse the check
-                check = Check.parse(check)
-                validator = self.registry[check.name](check.args, check.kwargs)
-
-                # get the value if the config if it exists
                 try:
-                    value = config[key]
-                except KeyError:
-                    # use check's default value otherwise
-                    try:
-                        value = config[check.aliasof]
-                    except KeyError:
-                        value = check.default
-                # if no default and no value specified it will be a missing
-                # required value
-                if value is missing:
-                    errors.append(CheckError("Required value for %r" % key))
-                    continue
-
-                # perform check
-                try:
-                    result = validator.validate(value)
+                    self.validate_option(key, value, config)
                 except ValidationError, exc:
-                    errors.append(exc)
-                    continue
-                # update config with result of check (unserialized value)
-                config[key] = result
-                # handle aliasing of keys to other keys
-                if check.aliasof is not missing:
-                    config.rename(key, check.aliasof)
+                    errors.append((exc, config.source.get(key, None)))
+
         config.formatter = CheckFormatter(self)
         if errors:
-            raise ValidationError(errors)
+            raise ValidateError(errors)
         return config
+
+    def validate_section(self, key, config):
+        """Validate a subsection """
+        try:
+            cfgsect = config[key]
+        except KeyError:
+            # missing section in config that we are validating
+            cfgsect = config.setdefault(key, config.__class__())
+
+        # ensure we are always validating a Config instance
+        if not isinstance(cfgsect, Config):
+            cfgsect = config.__class__(cfgsect)
+            config[key] = cfgsect
+
+        check = self[key]
+        # handle raw dict objects as configspec input
+        if not isinstance(check, Configspec):
+            check = self.__class__(check)
+
+        # recurse to the Configspec subsection
+        check.validate(cfgsect)
+
+    def _resolve_value(self, key, check, config):
+        """Resolve a value for a given key
+
+        This will find where a value is defined or raise an error if no such
+        key exists.  This looks for the value in the following places:
+
+        * Use the original config's value if one was specified
+        * if the config did not have a value, attempt to use the aliasof value
+        * if the key is not aliased then use the default value provided by the
+          check
+        * if no value at all is specified and there is no default for the check
+          raise a ValidationError
+        """
+        value = config.get(key, missing)
+        # if no value for the key was provided in the config try its
+        # alias, if one exists
+        if value is missing and check.aliasof is not missing:
+            value = config.get(check.aliasof, missing)
+        # if no alias was found, try the default
+        if value is missing:
+            value = check.default
+        # if not even a default value, raise an error noting this option is
+        # required
+        if value is missing:
+            raise ValidationError("Option '%s' requires a specified value" %
+                                  key)
+        return value
+
+    def validate_option(self, key, checkstr, config):
+        """Validate a single option for this configspec"""
+        check = Check.parse(checkstr)
+        validator = self.registry[check.name](check.args, check.kwargs)
+        value = self._resolve_value(key, check, config)
+        value = validator.validate(value)
+        config[key] = value
+        if check.aliasof is not missing:
+            config.rename(key, check.aliasof)
+
+
