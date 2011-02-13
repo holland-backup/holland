@@ -71,6 +71,7 @@ class Config(OrderedDict):
                 except KeyError:
                     cfg[sectname] = cls()
                     section = cfg[sectname]
+                    section.name = sectname
                 cfg.source[sectname] = (name, lineno + 1)
                 key = None # reset key
                 continue
