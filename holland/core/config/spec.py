@@ -81,10 +81,20 @@ class Configspec(Config):
 
         for key in config:
             if key not in self:
-                if isinstance(config[key], dict) and ignore_unknown_sections:
-                    continue
-                LOG.warn("Unknown option %s in [%s]" %
-                              (key, config.name))
+                if isinstance(config[key], dict):
+                    if ignore_unknown_sections:
+                        continue
+                    source, lineno = config.source[key]
+                    LOG.warn("Unknown section [%s]: %s line %d", key, source,
+                            lineno)
+                else:
+                    source, start, end = config.source[key]
+                    if start == end:
+                        line_range = "line %d" % start
+                    else:
+                        line_range = "lines %d-%d" % (start, end)
+                    LOG.warn("Unknown option %s in [%s] %s %s", key,
+                            config.name, source, line_range)
         config.formatter = CheckFormatter(self)
         if errors:
             raise ValidateError(errors)
@@ -97,6 +107,7 @@ class Configspec(Config):
         except KeyError:
             # missing section in config that we are validating
             cfgsect = config.setdefault(key, config.__class__())
+            cfgsect.name = key
 
         # ensure we are always validating a Config instance
         if not isinstance(cfgsect, Config):
