@@ -6,7 +6,7 @@ import logging
 from logging import _levelNames as log_levels
 from holland import __version__
 from holland.cli.config import load_global_config
-from holland.cli.log import configure_logging, configure_basic_logger
+import holland.cli.log as holland_logging
 from holland.cli.cmd import ArgparseCommand, argument, CommandNotFoundError
 
 HOLLAND_BANNER = """
@@ -23,7 +23,8 @@ More info available at http://hollandbackup.org
 
 LOG = logging.getLogger(__name__)
 
-configure_basic_logger()
+holland_logging.configure_warnings()
+holland_logging.configure_basic_logger()
 
 def terminate(signum, frame):
     """Terminate from SIGTERM cleanly"""
@@ -74,8 +75,10 @@ class HollandCli(ArgparseCommand):
             os.environ['TMPDIR'] = config['holland']['tmpdir']
         if config['holland']['path']:
             os.environ['PATH'] = config['holland']['path']
-        configure_logging(config['logging'])
+        holland_logging.configure_logging(config['logging'])
         signal.signal(signal.SIGTERM, terminate)
+        signal.signal(signal.SIGQUIT, terminate)
+        signal.signal(signal.SIGHUP, signal.SIG_IGN)
 
         if not opts.subcommand:
             parser.print_help()
