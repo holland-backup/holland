@@ -44,7 +44,7 @@ def configure_logging(config):
     if os.isatty(sys.stderr.fileno()):
         configure_logger(logger=logging.getLogger(),
                          handler=logging.StreamHandler(),
-                         fmt=config['format'],
+                         fmt='%(message)s',
                          level=config['level'])
 
     try:

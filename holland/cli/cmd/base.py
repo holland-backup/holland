@@ -32,7 +32,7 @@ class BaseCommand(BasePlugin):
         BasePlugin.__init__(self, name)
         self.parent = None
         self.config = None
-        self.stderr = LogWriter(LOG, logging.ERROR)
+        self.stderr = LogWriter(LOG, logging.INFO)
         self.stdout = LogWriter(LOG, logging.INFO)
 
     def setup(self, parent):
