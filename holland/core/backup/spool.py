@@ -179,11 +179,20 @@ class BackupSpool(object):
         """
         try:
             os.makedirs(os.path.join(self.root, name))
+            LOG.info("Created %s", os.path.join(self.root, name))
         except OSError, exc:
             if exc.errno != errno.EEXIST:
                 raise SpoolError("Error when locking spool: %s" % exc)
 
-        lock = open(os.path.join(self.root, name, '.holland'), 'rb+')
+        try:
+            lock = open(os.path.join(self.root, name, '.holland'), 'a+')
+            lock.seek(0)
+        except IOError, exc:
+            LOG.info("%s exits: %s", os.path.join(self.root, name),
+                     os.path.exists(os.path.join(self.root, name)))
+            raise SpoolError("Could not create lock file %s: %s" %
+                             (os.path.join(self.root, name, '.holland'),
+                              exc))
         try:
             fcntl.lockf(lock, fcntl.LOCK_EX|fcntl.LOCK_NB)
         except IOError, exc:
