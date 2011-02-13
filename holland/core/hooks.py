@@ -26,14 +26,20 @@ class BaseHook(ConfigurablePlugin):
     execute(**kwargs) will be called by default and is useful if you don't
     really care what sender or signal is involved in the hook.
     """
+    def configure(self, config):
+        configspec = self.configspec()
+        configspec['plugin'] = 'string'
+        self.config = configspec.validate(config)
+
+    def register(self, signal_group):
+        """Register this hook with one or more signals in the signal group"""
+
     def __call__(self, sender, signal, **kwargs):
         return self.execute(**kwargs)
 
     def execute(self, **kwargs):
         """Execute this hook"""
 
-    def register(self, signal_group):
-        """Register this hook with one or more signals in the signal group"""
 
 def load_hooks_from_config(hooks, signal_group, config):
     """Initialize hooks based on the job config"""
