@@ -46,7 +46,7 @@ class GlobalHollandConfig(Config):
                 LOG.debug("No global provider found.  Skipping.")
         cfg.name = os.path.splitext(os.path.basename(name))[0]
         # validate the holland:backup section
-        BackupPlugin.configspec().validate(cfg)
+        BackupPlugin.configspec().validate(cfg, ignore_unknown_sections=True)
         return cfg
 
     #@classmethod
