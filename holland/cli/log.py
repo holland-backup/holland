@@ -1,6 +1,7 @@
 """Log utility functions"""
 
 import os, sys
+import warnings
 import logging
 
 DEFAULT_LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
@@ -38,6 +39,23 @@ def configure_logger(logger, handler, fmt, level):
     logger.setLevel(level)
     logger.addHandler(handler)
 
+def log_warning(message, category, filename, lineno, file=None, line=None):
+    log = logging.getLogger()
+    warning_string = warnings.formatwarning(message,
+                                            category,
+                                            filename,
+                                            lineno)
+    if category == DeprecationWarning:
+        log.debug("%s", warning_string)
+    else:
+        log.debug(warning_string)
+        log.warn("%s", message)
+
+def configure_warnings():
+    # Monkey patch in routing warnings through logging
+    warnings.showwarning = log_warning
+
+
 def configure_logging(config):
     _clear_root_handlers()
 
@@ -55,3 +73,5 @@ def configure_logging(config):
     except IOError, exc:
         logging.info("Failed to open log file: %s", exc)
         logging.info("Skipping file logging.")
+
+    configure_warnings()
