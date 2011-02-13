@@ -13,6 +13,24 @@ class ValidateError(ValueError):
         ValueError.__init__(self)
         self.errors = errors
 
+    def __repr__(self):
+        result = [
+            "%d validation errors encountered" % len(self.errors)
+        ]
+        for error, source in self.errors:
+            if source:
+                lines = source[1:]
+                if lines[0] != lines[-1]:
+                    lines = "-".join([str(x) for x in lines])
+                else:
+                    lines = str(lines[-1])
+                result.append("%s line %s: %s" % (source[0], lines, error))
+            else:
+                result.append("%s" % error)
+        return "\n".join(result)
+
+    __str__ = __repr__
+
 class CheckFormatter(BaseFormatter):
     def __init__(self, configspec):
         self.configspec = configspec
@@ -112,7 +130,7 @@ class Configspec(Config):
         # required
         if value is missing:
             raise ValidationError("Option '%s' requires a specified value" %
-                                  key)
+                                  key, None)
         return value
 
     def validate_option(self, key, checkstr, config):
