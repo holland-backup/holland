@@ -25,20 +25,24 @@ class BaseValidator(object):
         self.args = args
         self.kwargs = kwargs
 
-    def normalize(self, value):
+    #@staticmethod
+    def normalize(value):
         "Normalize a string value"
         if isinstance(value, basestring):
             return unquote(value)
         else:
             return value
+    normalize = staticmethod(normalize)
 
-    def convert(self, value):
+    #@staticmethod
+    def convert(value):
         """Convert a value from its string representation to a python
         object.
 
         :returns: converted value
         """
         return value
+    convert = staticmethod(convert)
 
     def validate(self, value):
         """Validate a value and return its conversion
@@ -50,12 +54,14 @@ class BaseValidator(object):
         value = self.convert(value)
         return value
 
-    def format(self, value):
+    #@staticmethod
+    def format(value):
         """Format a value as it should be written in a config file
 
         :returns: value formatted to a string
         """
         return str(value)
+    format = staticmethod(format)
 
 class ValidationError(ValueError):
     """Raised when validation fails"""
@@ -116,30 +122,29 @@ class FloatValidator(BaseValidator):
 class IntValidator(BaseValidator):
     """Validate integer values"""
 
-    # XXX: support min,max
     def convert(self, value):
+        if value is None:
+            return value
         if isinstance(value, int):
-            return value
-        if value is None:
-            return value
-        try:
-            return int(value, self.kwargs.get('base', 10))
-        except ValueError, exc:
-            raise ValidationError("Invalid format for integer %s" % value, value)
+            value = value
+        else:
+            try:
+                value = int(value, self.kwargs.get('base', 10))
+            except ValueError, exc:
+                raise ValidationError("Invalid format for integer %s" % value, value)
 
-    def format(self, value):
-        if value is None:
-            return value
-        return str(value)
+        if self.kwargs.get('min') and value < self.kwargs.get('min'):
+            raise ValidationError("Integer value must be > %d" %
+            self.kwargs['min'])
+
+        if self.kwargs.get('max') and value > self.kwargs.get('max'):
+            raise ValidationError("Integer value exceeds maximum %d" %
+                    self.kwargs['max'])
+
+        return value
 
 class StringValidator(BaseValidator):
     """Validate string values"""
-
-    def convert(self, value):
-        return value
-
-    def format(self, value):
-        return value
 
 class OptionValidator(BaseValidator):
     """Validate against a list of options
@@ -147,12 +152,10 @@ class OptionValidator(BaseValidator):
     This constrains a value to being one of a series of constants
     """
     def convert(self, value):
+        """Ensure value is one of the available options"""
         if value in self.args:
             return value
         raise ValidationError("invalid option %r" % value, value)
-
-    def format(self, value):
-        return str(value)
 
 
 class ListValidator(BaseValidator):
@@ -175,6 +178,7 @@ class ListValidator(BaseValidator):
         return value
 
     def convert(self, value):
+        """Convert a csv string to a python list"""
         if isinstance(value, list):
             return value
         data = self._utf8_encode(StringIO(value))
@@ -184,6 +188,7 @@ class ListValidator(BaseValidator):
                  if unquote(cell.decode('utf8'))]
 
     def format(self, value):
+        """Format a list to a csv string"""
         result = BytesIO()
         writer = csv.writer(result, dialect='excel')
         writer.writerow([cell.encode('utf8') for cell in value])
@@ -196,6 +201,7 @@ class TupleValidator(ListValidator):
     a list.
     """
     def convert(self, value):
+        """Convert a csv string to a python tuple"""
         value = super(TupleValidator, self).convert(value)
         return tuple(value)
 
@@ -204,9 +210,11 @@ class CmdlineValidator(BaseValidator):
     """Validate a commmand line"""
 
     def convert(self, value):
+        """Convert a command line string to a list of command args"""
         return [arg.decode('utf8') for arg in shlex.split(value.encode('utf8'))]
 
     def format(self, value):
+        """Convert a list of command args to a single command line string"""
         return subprocess.list2cmdline(value)
 
 
@@ -224,6 +232,7 @@ class LogLevelValidator(BaseValidator):
     """
 
     def convert(self, value):
+        """Convert a string log level to its integer equivalent"""
         if isinstance(value, int):
             return value
         try:
@@ -232,6 +241,7 @@ class LogLevelValidator(BaseValidator):
             raise ValidationError("Invalid log level '%s'" % value, value)
 
     def format(self, value):
+        """Format an integer log level to its string representation"""
         try:
             return logging._levelNames[value].lower()
         except KeyError:
