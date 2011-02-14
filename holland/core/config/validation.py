@@ -12,6 +12,15 @@ import subprocess
 from holland.core.config.util import unquote
 
 class BaseValidator(object):
+    """Validator interface
+
+    Validators take some value and check that
+    it conforms to some set of constraints. If a value
+    is the string representation of the real value then
+    validate() will convert the string as needed.  format()
+    will do the opposite and serialize a value back into
+    useful config string.
+    """
     def __init__(self, args, kwargs):
         self.args = args
         self.kwargs = kwargs
@@ -27,6 +36,7 @@ class BaseValidator(object):
         """Convert a value from its string representation to a python
         object.
 
+        :returns: converted value
         """
         return value
 
@@ -34,13 +44,17 @@ class BaseValidator(object):
         """Validate a value and return its conversion
 
         :raises: ValidationError on failure
+        :returns: converted value
         """
         value = self.normalize(value)
         value = self.convert(value)
         return value
 
     def format(self, value):
-        """Format a value as it should be written in a config file"""
+        """Format a value as it should be written in a config file
+
+        :returns: value formatted to a string
+        """
         return str(value)
 
 class ValidationError(ValueError):
@@ -53,7 +67,16 @@ class ValidationError(ValueError):
         return self.message
 
 class BoolValidator(BaseValidator):
+    """Validator for boolean values
+
+    When converting a string this accepts the
+    following boolean formats:
+    True:  yes, on, true, 1
+    False: no, off, false, 0
+    """
+
     def convert(self, value):
+        """Convert a string value to a python Boolean"""
         valid_bools = {
             'yes'  : True,
             'on'   : True,
@@ -69,19 +92,30 @@ class BoolValidator(BaseValidator):
         return valid_bools[value.lower()]
 
     def format(self, value):
+        """Format a python boolean as a string value"""
         return value and 'yes' or 'no'
 
 class FloatValidator(BaseValidator):
+    """Validate float strings"""
+
     def convert(self, value):
+        """Convert a string to float
+
+        :raises: ValidationError
+        :returns: python float representation of value
+        """
         try:
             return float(value)
         except ValueError, exc:
-            raise ValidationError(str(exc), value)
+            raise ValidationError("Invalid format for float %s" % value, value)
 
     def format(self, value):
+        """Format a float to a string"""
         return "%.2f" % value
 
 class IntValidator(BaseValidator):
+    """Validate integer values"""
+
     # XXX: support min,max
     def convert(self, value):
         if isinstance(value, int):
@@ -99,6 +133,8 @@ class IntValidator(BaseValidator):
         return str(value)
 
 class StringValidator(BaseValidator):
+    """Validate string values"""
+
     def convert(self, value):
         return value
 
@@ -106,6 +142,10 @@ class StringValidator(BaseValidator):
         return value
 
 class OptionValidator(BaseValidator):
+    """Validate against a list of options
+
+    This constrains a value to being one of a series of constants
+    """
     def convert(self, value):
         if value in self.args:
             return value
@@ -116,6 +156,12 @@ class OptionValidator(BaseValidator):
 
 
 class ListValidator(BaseValidator):
+    """Validate a list
+
+    This will validate a string is a proper comma-separate list. Each string
+    in the list will be unquoted and a normal python list of the unquoted
+    and unescaped values will be returned.
+    """
 
     #@staticmethod
     def _utf8_encode(unicode_csv_data):
@@ -144,12 +190,19 @@ class ListValidator(BaseValidator):
         return result.getvalue().decode('utf8').strip()
 
 class TupleValidator(ListValidator):
+    """Validate a tuple
+
+    Identical to ``ListValidator`` but returns a tuple rather than
+    a list.
+    """
     def convert(self, value):
         value = super(TupleValidator, self).convert(value)
         return tuple(value)
 
 
 class CmdlineValidator(BaseValidator):
+    """Validate a commmand line"""
+
     def convert(self, value):
         return [arg.decode('utf8') for arg in shlex.split(value.encode('utf8'))]
 
@@ -158,6 +211,18 @@ class CmdlineValidator(BaseValidator):
 
 
 class LogLevelValidator(BaseValidator):
+    """Validate a logging level
+
+    This constraints a logging level to one of the standard levels supported
+    by the python logging module:
+
+    * debug
+    * info
+    * warning
+    * error
+    * fatal
+    """
+
     def convert(self, value):
         if isinstance(value, int):
             return value
@@ -172,6 +237,7 @@ class LogLevelValidator(BaseValidator):
         except KeyError:
             raise ValidationError("Unknown logging level '%s'" % value, value)
 
+#: default list of validators
 default_validators = (
     ('boolean', BoolValidator),
     ('integer', IntValidator),
