@@ -35,7 +35,11 @@ class Help(ArgparseCommand):
     def execute(self, namespace, parser):
         """Run the help command"""
         if namespace.command:
-            cmd = self.load(namespace.command)
+            try:
+                cmd = self.load(namespace.command)
+            except CommandNotFound:
+                self.stderr("No command '%s'", namespace.command)
+                return 1
         else:
             cmd = self
 
