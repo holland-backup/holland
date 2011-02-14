@@ -19,7 +19,6 @@ class ExampleHook(BaseHook):
         self.actions.append('configure')
 
     def register(self, signal_group):
-        BaseHook.configure(self, signal_group)
         self.actions.append('register')
         signal_group.faux_signal.connect(self, weak=False)
 
