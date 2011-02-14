@@ -26,7 +26,11 @@ def validate_config(config):
     print "Including backup plugin '%s' configspec" % backup_plugin
     configspec.merge(plugin.configspec())
     for hook in config['holland:backup']['hooks']:
-        name = config[hook]['plugin']
+        try:
+            name = config[hook]['plugin']
+        except KeyError:
+            LOG.error("No section [%s] defined for hook %s", hook, hook)
+            continue
         plugin = load_plugin('holland.hooks', name)
         print "Including hook '%s' configspec" % hook
         section = configspec.setdefault(hook, configspec.__class__())
