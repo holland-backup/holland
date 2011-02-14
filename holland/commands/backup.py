@@ -122,7 +122,8 @@ def purge_backup(event, entry):
 
 def call_hooks(event, entry):
     hook = event + "-hook"
-    if hook in entry.config['holland:backup']:
+
+    if entry.config['holland:backup'][hook] is not None:
         cmd = [entry.config['holland:backup'][hook]]
         try:
             cmd.append(hook)
