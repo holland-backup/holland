@@ -14,7 +14,7 @@ path             = string(default=None)
 tmpdir           = string(default=None)
 
 [logging]
-file             = string(default='/var/log/holland/holland.log')
+filename         = string(default='/var/log/holland/holland.log')
 format           = string(default='[%(levelname)s] %(message)s')
 level            = log_level(default="info")
 """.splitlines())

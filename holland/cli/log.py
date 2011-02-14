@@ -67,7 +67,7 @@ def configure_logging(config):
 
     try:
         configure_logger(logger=logging.getLogger(),
-                         handler=logging.FileHandler(config['file']),
+                         handler=logging.FileHandler(config['filename']),
                          fmt=config['format'],
                          level=config['level'])
     except IOError, exc:
