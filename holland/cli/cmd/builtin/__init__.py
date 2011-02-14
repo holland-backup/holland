@@ -1,9 +1,10 @@
 """Holland builtin commands"""
-from cmd_help import Help
-from cmd_backup import Backup
-from cmd_list import ListPlugins, ListCommands, ListBackups
-from cmd_purge import Purge
-from cmd_mkconfig import MakeConfig
+from holland.cli.cmd.builtin.cmd_help import Help
+from holland.cli.cmd.builtin.cmd_backup import Backup
+from holland.cli.cmd.builtin.cmd_list import ListPlugins, ListCommands, \
+                                             ListBackups
+from holland.cli.cmd.builtin.cmd_purge import Purge
+from holland.cli.cmd.builtin.cmd_mkconfig import MakeConfig
 
 __all__ = [
     'Backup',
