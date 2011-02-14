@@ -2,6 +2,8 @@
 set -u
 set -x
 
+python setup.py egg_info
+
 export PYLINTRC=$PWD/.pylintrc
 nosetests -v --with-xunit tests
 which coverage > /dev/null 2>&1
