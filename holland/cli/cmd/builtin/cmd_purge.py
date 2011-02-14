@@ -56,7 +56,7 @@ class Purge(ArgparseCommand):
                 self.stderr("Retention count: %r", retention_count)
                 backups, kept, purged = mgr.purge_backupset(name,
                                                             retention_count,
-                                                            dry_run=namespace.dry_run)
+                                                            namespace.dry_run)
                 self.stderr("Total backups:  %d", len(backups))
                 self.stderr("Kept backups:   %d", len(kept))
                 self.stderr("Purged backups: %d", len(purged))
@@ -69,6 +69,11 @@ class Purge(ArgparseCommand):
         return 0
 
     def _retention_count(self, backupset):
+        """Calculate the retention count for the backupset
+
+        If the existing backupset configuration is not available this
+        method currently assumes 1.
+        """
         try:
             config = self.config.load_backupset(backupset)['holland:backup']
             return config['retention-count']

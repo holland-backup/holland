@@ -21,6 +21,7 @@ class BasePlugin(object):
 
 class ConfigurablePlugin(BasePlugin):
     """A plugin that accepts a configuration dictionary"""
+    config = None
 
     def configspec(self):
         """Provide a configspec that this plugin expects

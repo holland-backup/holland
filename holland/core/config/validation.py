@@ -112,7 +112,7 @@ class FloatValidator(BaseValidator):
         """
         try:
             return float(value)
-        except ValueError, exc:
+        except ValueError:
             raise ValidationError("Invalid format for float %s" % value, value)
 
     def format(self, value):
@@ -130,8 +130,9 @@ class IntValidator(BaseValidator):
         else:
             try:
                 value = int(value, self.kwargs.get('base', 10))
-            except ValueError, exc:
-                raise ValidationError("Invalid format for integer %s" % value, value)
+            except ValueError:
+                raise ValidationError("Invalid format for integer %s" % value,
+                                      value)
 
         if self.kwargs.get('min') and value < self.kwargs.get('min'):
             raise ValidationError("Integer value must be > %d" %

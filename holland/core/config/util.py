@@ -18,7 +18,13 @@ def unquote(value):
     elif len(value) > 1 and value[0] == "'" and value[-1] == "'":
         value = value[1:-1]
 
-    return escape_cre.sub(lambda m: substitutions.get(m.group(1), m.group(1)), value)
+    def substitute(match):
+        char = match.group(1)
+        # either replace with a substitution or
+        # with the char itself \c => c if there is no substitution
+        return substitutions.get(char, char)
+
+    return escape_cre.sub(substitute, value)
 
 class Missing(object):
     def __str__(self):
