@@ -1,4 +1,5 @@
-# parse.py
+"""Parse configspec checks"""
+
 import re
 from holland.core.config.util import unquote, missing
 try:
