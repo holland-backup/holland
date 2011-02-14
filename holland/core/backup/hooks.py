@@ -35,7 +35,8 @@ class RotateBackupsHook(BackupHook):
         if retention_count == 0:
             LOG.debug("Increasing retention-count to maintain new backup")
             retention_count += 1
-        backups, kept, purged = job.store.spool.purge(job.store.name, retention_count)
+        backups, kept, purged = job.store.spool.purge(job.store.name,
+                                                      retention_count)
         for backup in purged:
             LOG.info("+ Purged old backup %s", backup.path)
         for backup in kept:
@@ -79,7 +80,8 @@ class CheckForSpaceHook(BackupHook):
         LOG.info("+ Spool directory %s has %s available",
                  job.store.path, format_bytes(available_bytes))
 
-        job.config['holland:backup:run']['estimated-size'] = format_bytes(estimated_bytes)
+        job_info = job.config['holland:backup:run']
+        job_info['estimated-size'] = format_bytes(estimated_bytes)
         if available_bytes < estimated_bytes*estimate_factor:
             raise BackupError("Insufficient space for backup")
 
