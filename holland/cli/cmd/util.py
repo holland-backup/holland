@@ -19,19 +19,3 @@ class SafeArgumentParser(ArgumentParser):
 
     def exit(self, status=0, message=None):
         raise ArgparseError(message, status)
-
-
-class StreamWriter(object):
-    def __init__(self, stream):
-        self.stream = stream
-
-    def __call__(self, format, *args):
-        print >>self.stream, format % args
-
-class LogWriter(object):
-    def __init__(self, logger, level):
-        self.logger = logger
-        self.level = level
-
-    def __call__(self, *args, **kwargs):
-        self.logger.log(self.level, *args, **kwargs)

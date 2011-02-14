@@ -5,7 +5,7 @@ import logging
 from textwrap import dedent
 from argparse import RawDescriptionHelpFormatter
 from holland.core import BasePlugin, iterate_plugins
-from holland.cli.cmd.util import LogWriter, SafeArgumentParser, ArgparseError
+from holland.cli.cmd.util import SafeArgumentParser, ArgparseError
 from holland.cli.cmd.error import CommandNotFoundError
 
 LOG = logging.getLogger(__name__)
@@ -32,8 +32,22 @@ class BaseCommand(BasePlugin):
         BasePlugin.__init__(self, name)
         self.parent = None
         self.config = None
-        self.stderr = LogWriter(LOG, logging.INFO)
-        self.stdout = LogWriter(LOG, logging.INFO)
+
+    def stderr(self, format, *args):
+        """Write a message to stderr
+
+        This logs via the python logging module
+        at INFO verbosity
+        """
+        LOG.info(format, *args)
+
+    def stdout(self, format, *args):
+        """Write a message to stdout
+
+        This logs via the python logging module
+        at INFO verbosity
+        """
+        LOG.info(format, *args)
 
     def setup(self, parent):
         """Link this command with its parent command
