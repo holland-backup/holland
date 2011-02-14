@@ -39,7 +39,13 @@ def configure_logger(logger, handler, fmt, level):
     logger.setLevel(level)
     logger.addHandler(handler)
 
-def log_warning(message, category, filename, lineno, file=None, line=None):
+def log_warning(message, category, filename, lineno, *args, **kwargs):
+    """Log a warning message.
+
+    This currently only logs DeprecationWarnings at debug level and otherwise
+    only logs the message at 'info' level.  The formatted warning can be
+    seen by enabling debug level logging.
+    """
     log = logging.getLogger()
     warning_string = warnings.formatwarning(message,
                                             category,
@@ -52,6 +58,7 @@ def log_warning(message, category, filename, lineno, file=None, line=None):
         log.warn("%s", message)
 
 def configure_warnings():
+    """Ensure warnings go through log_warning"""
     # Monkey patch in routing warnings through logging
     warnings.showwarning = log_warning
 
