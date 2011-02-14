@@ -32,25 +32,25 @@ class BaseCommand(BasePlugin):
         self.parent = None
         self.config = None
 
-    #@staticmethod
-    def stderr(self, fmt, *args):
+    #@classmethod
+    def stderr(cls, fmt, *args):
         """Write a message to stderr
 
         This logs via the python logging module
         at INFO verbosity
         """
         LOG.info(fmt, *args)
-    stderr = staticmethod(stderr)
+    stderr = classmethod(stderr)
 
-    #@staticmethod
-    def stdout(fmt, *args):
+    #@classmethod
+    def stdout(cls, fmt, *args):
         """Write a message to stdout
 
         This logs via the python logging module
         at INFO verbosity
         """
         LOG.info(fmt, *args)
-    stdout = staticmethod(stdout)
+    stdout = classmethod(stdout)
 
     def setup(self, parent):
         """Link this command with its parent command

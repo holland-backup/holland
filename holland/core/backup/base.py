@@ -26,6 +26,9 @@ class BackupError(Exception):
 class BackupPlugin(ConfigurablePlugin):
     """Interface that Holland Backup Plugins should conform to"""
 
+    #: BackupStore instance provides via the setup() method
+    store = None
+
     def setup(self, backupstore):
         self.store = backupstore
 

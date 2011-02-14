@@ -25,24 +25,24 @@ class BaseValidator(object):
         self.args = args
         self.kwargs = kwargs
 
-    #@staticmethod
-    def normalize(value):
+    #@classmethod
+    def normalize(cls, value):
         "Normalize a string value"
         if isinstance(value, basestring):
             return unquote(value)
         else:
             return value
-    normalize = staticmethod(normalize)
+    normalize = classmethod(normalize)
 
-    #@staticmethod
-    def convert(value):
+    #@classmethod
+    def convert(cls, value):
         """Convert a value from its string representation to a python
         object.
 
         :returns: converted value
         """
         return value
-    convert = staticmethod(convert)
+    convert = classmethod(convert)
 
     def validate(self, value):
         """Validate a value and return its conversion
@@ -54,14 +54,14 @@ class BaseValidator(object):
         value = self.convert(value)
         return value
 
-    #@staticmethod
-    def format(value):
+    #@classmethod
+    def format(cls, value):
         """Format a value as it should be written in a config file
 
         :returns: value formatted to a string
         """
         return str(value)
-    format = staticmethod(format)
+    format = classmethod(format)
 
 class ValidationError(ValueError):
     """Raised when validation fails"""
