@@ -40,7 +40,7 @@ class BaseCommand(BasePlugin):
         at INFO verbosity
         """
         LOG.info(fmt, *args)
-    sterr = staticmethod(stderr)
+    stderr = staticmethod(stderr)
 
     #@staticmethod
     def stdout(fmt, *args):
@@ -180,3 +180,19 @@ class ArgparseCommand(BaseCommand):
     def help(self):
         """Format help via ArgumentParser"""
         return self.create_parser().format_help()
+
+    def plugin_info(self):
+        """Provide plugin info about this command
+
+        This method should return a dictionary listing a minimum of the
+        following attributes:
+        * name          - short one word name of this command
+        * summary       - one line summary of this command
+        * description   - longer description of this command
+        * author        - author of this command in name [<email>] format
+        * version       - version of this command
+        * api_version   - version of holland this command is intended to work
+                          with
+        :returns: dict
+        """
+        raise NotImplementedError()
