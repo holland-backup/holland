@@ -1,6 +1,7 @@
 """holland help command"""
 
 from holland.cli.cmd.base import ArgparseCommand, argument
+from holland.cli.cmd.error import CommandNotFoundError
 from holland.core.plugin import iterate_plugins
 
 class Help(ArgparseCommand):
@@ -37,7 +38,7 @@ class Help(ArgparseCommand):
         if namespace.command:
             try:
                 cmd = self.load(namespace.command)
-            except CommandNotFound:
+            except CommandNotFoundError:
                 self.stderr("No command '%s'", namespace.command)
                 return 1
         else:
