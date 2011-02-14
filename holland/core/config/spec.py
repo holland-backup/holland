@@ -37,7 +37,12 @@ class CheckFormatter(BaseFormatter):
 
     def format(self, key, value):
         try:
-            check = Check.parse(self.configspec[key])
+            check = Check.parse(self.configspec.get(key))
+        except CheckError, exc:
+            raise ConfigError("Cannot format due to invalid check: %s" %
+                              self.configspec[key])
+
+        try:
             validator = self.configspec.registry[check.name]
             validator = validator(check.args, check.kwargs)
             return validator.format(value)
@@ -152,7 +157,12 @@ class Configspec(Config):
 
     def validate_option(self, key, checkstr, config):
         """Validate a single option for this configspec"""
-        check = Check.parse(checkstr)
+        try:
+            check = Check.parse(checkstr)
+        except CheckError, exc:
+            raise ValidationError("Internal Error.  Failed to parse a "
+                                  "validation check '%s'" % checkstr)
+
         validator = self.registry[check.name](check.args, check.kwargs)
         value = self._resolve_value(key, check, config)
         value = validator.validate(value)
