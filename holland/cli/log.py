@@ -64,6 +64,13 @@ def configure_warnings():
 
 
 def configure_logging(config):
+    """Configure CLI logging based on config
+
+    config must be a dict-like object that has 3 paramters:
+    * level - the log level
+    * format - the log output format
+    * filename - what file to log to (if any)
+    """
     _clear_root_handlers()
 
     if os.isatty(sys.stderr.fileno()):
