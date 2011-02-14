@@ -2,16 +2,33 @@ import os, sys
 import subprocess
 import shutil
 import tempfile
-from holland.core import Config
+from mocker import *
+from holland.core import Config, Configspec
 from holland.cli import main
 from nose.tools import *
 
-print >>sys.stderr, sys.executable
+mock = Mocker()
 
-# tedious setup to make sure this works with our plugins
-# mkdtemp staging_dir
-# make holland, virtualenv subdirs
-# install holland core into virtualenv
+class MySQLDumpPlugin:
+    """Simple stub for the real MySQLDumpPlugin
+
+    Used to test mk-config out of a plugin's
+    configspec
+    """
+    def __init__(self, name):
+        self.name = name
+
+    def configspec(self):
+        """This configspec has no relation to the real mysqldump
+        this is for testing mk-config only
+        """
+        from textwrap import dedent
+        return Configspec.parse(dedent("""
+        [mysqldump]
+        databases = list(default=list('*'))
+        port = integer(default=3306)
+        pi = float(default=3.14159)
+        """).splitlines())
 
 def setup():
     global staging_dir
@@ -31,9 +48,16 @@ def setup():
 
     cfg.write(os.path.join(staging_dir, 'holland', 'holland.conf'))
 
+    # stub out load_plugin for mysqldump
+    load_plugin = mock.replace('holland.core.plugin.load_plugin')
+    load_plugin('holland.backup', 'mysqldump')
+    mock.result(MySQLDumpPlugin('mysqldump'))
+    mock.replay()
+
 def teardown():
     global staging_dir
     shutil.rmtree(staging_dir)
+    mock.restore()
 
 def holland_config():
     global staging_dir
