@@ -44,6 +44,7 @@ def setup():
     cfg['holland']['tmpdir'] = os.path.join(staging_dir, 'tmp')
     cfg['holland']['path'] = os.environ['PATH']
     cfg['logging'] = Config()
+    cfg['logging']['filename'] = os.path.join(staging_dir, 'holland.log')
     cfg['logging']['level'] = 'info'
 
     cfg.write(os.path.join(staging_dir, 'holland', 'holland.conf'))
