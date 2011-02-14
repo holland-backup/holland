@@ -1,6 +1,5 @@
 """Base command classes"""
 
-import sys
 import logging
 from textwrap import dedent
 from argparse import RawDescriptionHelpFormatter
@@ -33,21 +32,25 @@ class BaseCommand(BasePlugin):
         self.parent = None
         self.config = None
 
-    def stderr(self, format, *args):
+    #@staticmethod
+    def stderr(self, fmt, *args):
         """Write a message to stderr
 
         This logs via the python logging module
         at INFO verbosity
         """
-        LOG.info(format, *args)
+        LOG.info(fmt, *args)
+    sterr = staticmethod(stderr)
 
-    def stdout(self, format, *args):
+    #@staticmethod
+    def stdout(fmt, *args):
         """Write a message to stdout
 
         This logs via the python logging module
         at INFO verbosity
         """
-        LOG.info(format, *args)
+        LOG.info(fmt, *args)
+    stdout = staticmethod(stdout)
 
     def setup(self, parent):
         """Link this command with its parent command
@@ -95,6 +98,21 @@ class BaseCommand(BasePlugin):
         """Check whether this command should match a given name"""
         return self.name == name or name in self.aliases
 
+    def plugin_info(self):
+        """Provide plugin info about this command
+
+        This method should return a dictionary listing a minimum of the
+        following attributes:
+        * name          - short one word name of this command
+        * summary       - one line summary of this command
+        * description   - longer description of this command
+        * author        - author of this command in name [<email>] format
+        * version       - version of this command
+        * api_version   - version of holland this command is intended to work
+                          with
+        :returns: dict
+        """
+        raise NotImplementedError()
 
 def argument(*args, **kwargs):
     """Simple wrapper for argparse parameters"""
