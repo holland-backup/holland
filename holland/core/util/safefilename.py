@@ -19,12 +19,12 @@ def decode(filename):
         (b'\([0-9a-f]{1,8}\)', lambda s, t: chr(int(bytes(t[1:-1]), 16))),
     ])
 
-    data, remaining = scanner.scan(data)
+    filename, remaining = scanner.scan(filename)
 
     if remaining:
-        raise ValueError("Failed to decode %s" % data)
+        raise ValueError("Failed to decode %s" % filename)
 
-    return ''.join(data), len(remaining)
+    return ''.join(filename), len(remaining)
 
 def encode(filename):
     """Encode the unicode string into a filename"""
@@ -36,9 +36,9 @@ def encode(filename):
          lambda s, t: ('(%s)' % hex(ord(t))[2:]).encode('ascii')),
     ])
 
-    data, remaining = scanner.scan(data)
+    filename, remaining = scanner.scan(filename)
 
     if remaining:
-        raise ValueError("Failed to decode %s" % data)
+        raise ValueError("Failed to decode %s" % filename)
 
-    return ''.encode('ascii').join(data), len(remaining)
+    return ''.encode('ascii').join(filename), len(remaining)
