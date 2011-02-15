@@ -67,9 +67,9 @@ class Config(OrderedDict):
         for lineno, line in enumerate(iterable):
             if cls.empty_cre.match(line):
                 continue
-            m = cls.section_cre.match(line)
-            if m:
-                sectname = m.group('name')
+            match = cls.section_cre.match(line)
+            if match:
+                sectname = match.group('name')
                 try:
                     section = cfg[sectname]
                 except KeyError:
@@ -79,24 +79,24 @@ class Config(OrderedDict):
                 cfg.source[sectname] = (name, lineno + 1)
                 key = None # reset key
                 continue
-            m = cls.key_cre.match(line)
-            if m:
-                key, value = m.group('key', 'value')
+            match = cls.key_cre.match(line)
+            if match:
+                key, value = match.group('key', 'value')
                 key = cfg.optionxform(key.strip())
                 value = cfg.valuexform(value)
                 section[key] = value
                 section.source[key] = (name, lineno + 1, lineno + 1)
                 continue
-            m = cls.cont_cre.match(line)
-            if m:
+            match = cls.cont_cre.match(line)
+            if match:
                 if not key:
                     raise ConfigError("unexpected continuation line")
                 section[key] += line.strip()
                 section.source[key] = section.source[key][0:2] + (lineno + 1,)
                 continue
-            m = cls.include_cre.match(line)
-            if m:
-                path = m.group('name')
+            match = cls.include_cre.match(line)
+            if match:
+                path = match.group('name')
                 if not os.path.isabs(path):
                     base_path = os.path.dirname(getattr(iterable, 'name', '.'))
                     path = os.path.join(base_path, path)
