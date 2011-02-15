@@ -104,6 +104,26 @@ class CheckParser(object):
     ])
 
     #@classmethod
+    def tokenize(cls, check):
+        """Tokenize a check into its constituent parts.
+
+        This method is used by ``CheckParser.parse()`` and should otherwise
+        only be used for testing or debugging check tokenizing behavior
+
+        :returns: list of ``Token`` instances
+        """
+        tokens, remainder = cls.scanner.scan(check)
+
+
+        if remainder:
+            offset = len(check) - len(remainder)
+            raise CheckParseError("Unexpected character at offset %d\n%s\n%s" %
+                                  (offset, check, " "*offset + "^"))
+
+        return tokens
+    tokenize = classmethod(tokenize)
+
+    #@classmethod
     def parse(cls, check):
         """Parse a check
 
@@ -112,12 +132,7 @@ class CheckParser(object):
 
         :returns: tuple (check_name, args, kwargs)
         """
-        tokens, remainder = cls.scanner.scan(check)
-
-        if remainder:
-            offset = len(check) - len(remainder)
-            raise CheckParseError("Unexpected character at offset %d\n%s\n%s" %
-                                  (offset, check, " "*offset + "^"))
+        tokens = cls.tokenize(check)
 
         lexer = Lexer(tokens)
 
@@ -142,6 +157,7 @@ class CheckParser(object):
 
     #@classmethod
     def _parse_argument_list(cls, lexer):
+        """Parse a list of arguments starting immediately after the open '('"""
         args = []
         kwargs = {}
         for token in lexer:
@@ -170,6 +186,11 @@ class CheckParser(object):
 
     #@classmethod
     def _parse_expression(cls, lexer, token):
+        """Parse a single expression
+
+        This will either be a literal and identifier or an
+        identifer=literal|identifier keyword pair
+        """
         if token.id in (cls.T_STR, cls.T_NUM):
             # literal value
             return token.value
@@ -188,6 +209,9 @@ class CheckParser(object):
         if token.text != '(':
             raise CheckParseError("Expected '(' but got %r instead" % token)
         args, kwargs = cls._parse_argument_list(lexer)
+        if kwargs:
+            raise CheckError("list expressions may not contain keyword "
+                             "arguments")
         return list(args)
     _parse_list_expr = classmethod(_parse_list_expr)
 
