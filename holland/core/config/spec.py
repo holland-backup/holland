@@ -98,7 +98,7 @@ class Configspec(Config):
                 except ValidationError, exc:
                     errors.append((exc, config.source.get(key, None)))
 
-        self.check_missing(config)
+        self.check_missing(config, ignore_unknown_sections)
         config.formatter = CheckFormatter(self)
         if errors:
             raise ValidateError(errors)
@@ -170,7 +170,7 @@ class Configspec(Config):
             config.rename(key, check.aliasof)
 
 
-    def check_missing(self, config):
+    def check_missing(self, config, ignore_unknown_sections):
         """Check for values in config with no corresponding configspec entry
 
         These are either bugs in the configspec or simply typos or invalid
