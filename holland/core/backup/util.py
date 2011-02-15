@@ -19,6 +19,13 @@ def load_backup_plugin(config):
         raise BackupError(str(exc), exc)
 
 def validate_config(config):
+    """Validate a config file
+
+    This method collects the configspecs from all the plugins involved in a
+    config and merges them together and validates a config in one pass.
+
+    :raises: ValidateError on validation errors
+    """
     configspec = BackupPlugin.configspec()
     configspec.validate(config, ignore_unknown_sections=True)
     backup_plugin = config['holland:backup']['plugin']
@@ -46,6 +53,13 @@ class Beacon(dict):
             self[name] = Signal()
 
     def notify(self, name, robust=True, **kwargs):
+        """Send notifications to the named signal in this SignalGroup
+
+        If ``robust`` is True then use send_robust and raise an exception
+        at the end if necessary.
+
+        ``**kwargs`` wil be send to each registered receiver for the signal
+        """
         signal = self[name]
         if robust:
             for receiver, result in signal.send_robust(sender=None, **kwargs):
