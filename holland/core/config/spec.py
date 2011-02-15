@@ -9,6 +9,10 @@ from holland.core.config.util import missing
 LOG = logging.getLogger(__name__)
 
 class ValidateError(ValueError):
+    """Raised when one or more errors are encountered during
+    Configspec.validate()
+
+    """
     def __init__(self, errors):
         ValueError.__init__(self)
         self.errors = errors
@@ -32,13 +36,23 @@ class ValidateError(ValueError):
     __str__ = __repr__
 
 class CheckFormatter(BaseFormatter):
+    """Format a ``Config`` instance based on
+    the validators associated with a Configspec
+    """
+
     def __init__(self, configspec):
+        BaseFormatter.__init__(self)
         self.configspec = configspec
 
     def format(self, key, value):
+        """Format an option/value pair based on the
+        associated Validator's format method
+
+        :returns: formatted value string
+        """
         try:
             check = Check.parse(self.configspec.get(key))
-        except CheckError, exc:
+        except CheckError:
             raise ConfigError("Cannot format due to invalid check: %s" %
                               self.configspec[key])
 
@@ -84,22 +98,7 @@ class Configspec(Config):
                 except ValidationError, exc:
                     errors.append((exc, config.source.get(key, None)))
 
-        for key in config:
-            if key not in self:
-                if isinstance(config[key], dict):
-                    if ignore_unknown_sections:
-                        continue
-                    source, lineno = config.source[key]
-                    LOG.warn("Unknown section [%s]: %s line %d", key, source,
-                            lineno)
-                else:
-                    source, start, end = config.source[key]
-                    if start == end:
-                        line_range = "line %d" % start
-                    else:
-                        line_range = "lines %d-%d" % (start, end)
-                    LOG.warn("Unknown option %s in [%s] %s %s", key,
-                            config.name, source, line_range)
+        self.check_missing(config)
         config.formatter = CheckFormatter(self)
         if errors:
             raise ValidateError(errors)
@@ -159,7 +158,7 @@ class Configspec(Config):
         """Validate a single option for this configspec"""
         try:
             check = Check.parse(checkstr)
-        except CheckError, exc:
+        except CheckError:
             raise ValidationError("Internal Error.  Failed to parse a "
                                   "validation check '%s'" % checkstr)
 
@@ -171,3 +170,25 @@ class Configspec(Config):
             config.rename(key, check.aliasof)
 
 
+    def check_missing(self, config):
+        """Check for values in config with no corresponding configspec entry
+
+        These are either bugs in the configspec or simply typos or invalid
+        options.
+        """
+        for key in config:
+            if key not in self:
+                if isinstance(config[key], dict):
+                    if ignore_unknown_sections:
+                        continue
+                    source, lineno = config.source[key]
+                    LOG.warn("Unknown section [%s]: %s line %d", key, source,
+                            lineno)
+                else:
+                    source, start, end = config.source[key]
+                    if start == end:
+                        line_range = "line %d" % start
+                    else:
+                        line_range = "lines %d-%d" % (start, end)
+                    LOG.warn("Unknown option %s in [%s] %s %s", key,
+                            config.name, source, line_range)

@@ -1,8 +1,8 @@
 """holland.core plugin API"""
 
-from holland.core.plugin.base import *
-from holland.core.plugin.manager import *
-from holland.core.plugin.error import *
+from holland.core.plugin.base import BasePlugin, ConfigurablePlugin
+from holland.core.plugin.manager import EntrypointPluginManager
+from holland.core.plugin.error import PluginError
 
 default_pluginmgr = EntrypointPluginManager()
 

@@ -18,10 +18,10 @@ def test_filelike():
     assert_raises(NotImplementedError, f.tell)
 
     # default returns EOF
-    assert_equals(f.read(), '')
-    assert_equals(f.readline(), '')
-    assert_equals(f.readlines(), [])
-    assert_raises(StopIteration, f.next)
+    assert_raises(NotImplementedError, f.read)
+    assert_raises(NotImplementedError, f.readline)
+    assert_raises(NotImplementedError, f.readlines)
+    assert_raises(NotImplementedError, f.next)
 
     f.close()
     ok_(f.closed)

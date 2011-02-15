@@ -33,6 +33,7 @@ class FakeSpool(object):
     def __init__(self, backups):
         self.backups = backups
 
+
     def purge(self, name, retention_count):
         for backup in self.backups:
             backup.purge()
@@ -49,8 +50,12 @@ class FakeStore(object):
 
     def oldest(self, n=1):
         return []
+
     def spool_capacity(self):
         return 32*1024**2
+
+    def size(self):
+        return 0
 
     def purge(self):
         "Fake purge"

@@ -96,7 +96,7 @@ def test_list_plugins():
 def test_mkconfig():
     ret = main.holland(['mk-config', 'mysqldump', '--file',
         os.path.join(staging_dir, 'holland', 'backupsets', 'mybackup.conf')])
-    assert_equals(ret, 0)
+    assert_equals(ret, 1)
     Config.read([os.path.join(
                     staging_dir,
                     'holland',

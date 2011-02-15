@@ -1,18 +1,9 @@
 """Generic support for loading file-like objects"""
 
-import os
 try:
     _set = set
 except NameError: #pragma: no cover
     from sets import Set as _set
-try:
-    SEEK_SET = os.SEEK_SET
-    SEEK_CUR = os.SEEK_CUR
-    SEEK_END = os.SEEK_END
-except AttributeError: #pragma: no cover
-    SEEK_SET = 0
-    SEEK_CUR = 1
-    SEEK_END = 2
 
 from holland.core.plugin import BasePlugin, PluginError, \
                                 load_plugin, iterate_plugins
@@ -61,6 +52,7 @@ class StreamPlugin(BasePlugin):
         return dict(
             extension='',
             name=name,
+            method=method,
             description="%s: args=%r kwargs=%r" % (self.__class__.__name__,
                                                    args, kwargs)
         )

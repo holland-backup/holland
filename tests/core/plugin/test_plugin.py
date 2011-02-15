@@ -52,4 +52,4 @@ def test_load_plugin():
     assert_raises(SystemExit, load_plugin, 'holland.error', 'exit')
     assert_raises(SystemExit, lambda: [x for x in iterate_plugins('holland.error')])
 
-    assert_raises(PluginNotFoundError, load_plugin, 'holland.plugin', 'xyzzy')
+    assert_raises(PluginError, load_plugin, 'holland.plugin', 'xyzzy')

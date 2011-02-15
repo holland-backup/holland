@@ -1,6 +1,7 @@
 """Generic support for loading file-like objects"""
 
 import os
+import logging
 try:
     SEEK_SET = os.SEEK_SET
     SEEK_CUR = os.SEEK_CUR
@@ -9,6 +10,8 @@ except AttributeError: #pragma: no cover
     SEEK_SET = 0
     SEEK_CUR = 1
     SEEK_END = 2
+
+LOG = logging.getLogger(__name__)
 
 class FileLike(object):
     """A file-like object"""
@@ -36,16 +39,16 @@ class FileLike(object):
 
     def read(self, size=None):
         """Read at most size bytes from the file"""
-        return ''
+        raise NotImplementedError()
 
     def readline(self, size=None):
         """Read one entire line from the file."""
-        return ''
+        raise NotImplementedError()
 
     def readlines(self, sizehint=None):
         """Read until EOF using readline() and return a list containing the
         lines thus read."""
-        return [line for line in self]
+        raise NotImplementedError()
 
     def seek(self, offset, whence=SEEK_SET):
         """Set the file's current position"""
@@ -70,6 +73,8 @@ class FileLike(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        LOG.debug("__exit__(exc_type=%r, exc_val=%r, exc_tb=%r)",
+                  exc_type, exc_val, exc_tb)
         self.close()
         return False
 
@@ -82,6 +87,7 @@ class RealFileLike(FileLike):
         raise NotImplementedError()
 
     def tell(self):
+        """Return the file's current position"""
         return os.lseek(self.fileno(), SEEK_CUR)
 
     def isatty(self):
@@ -91,3 +97,8 @@ class RealFileLike(FileLike):
 
 class PlainFile(RealFileLike, file):
     """Wrapper for a real file object"""
+
+    def fileno(self):
+        """Return the integer "file descriptor" that is used by the underlying
+        implementation to request I/O operations from the operating system"""
+        return self.fileno()

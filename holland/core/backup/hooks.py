@@ -3,6 +3,7 @@
 import os
 import logging
 from datetime import datetime
+from holland.core.config import Config
 from holland.core.hooks import BaseHook, load_hooks_from_config
 from holland.core.backup.base import BackupError
 from holland.core.util.fmt import format_bytes
@@ -30,6 +31,12 @@ class RotateBackupsHook(BackupHook):
     """Purge old backups when run"""
 
     def execute(self, job):
+        """Process the automated purge policy
+
+        If this runs before starting a new backup it is important to preserve
+        the existing backup directory or the plugin will have no where to
+        store data.
+        """
         retention_count = job.config['holland:backup']['retention-count']
         LOG.info("+ Keep %d backups", retention_count)
         if retention_count == 0:
@@ -46,27 +53,47 @@ class WriteConfigHook(BackupHook):
     """Write config to backup store when called"""
 
     def execute(self, job):
+        """Write a copy of the job config to the backup directory
+
+        This preserves the exact group of settings that were used
+        to produce this backup.
+        """
         path = os.path.join(job.store.path, 'backup.conf')
         job.config.write(path)
         LOG.info("+ Saved config to %s", path)
 
 class BackupInfoHook(BackupHook):
+    """Record information about the backup
+
+    This currently logs start and stop times in ISO8601 format
+    in the job.info file as well as the final backup size.
+    """
     def __init__(self, name):
         super(BackupInfoHook, self).__init__(name)
         self.initialized = False
+        self.config = Config()
 
     def execute(self, job):
+        """Record job info"""
+        path = os.path.join(job.store.path, 'job.info')
         if not self.initialized:
-            config = job.config.setdefault('holland:backup:run', {})
             self.initialized = True
-            config['start-time'] = datetime.now().isoformat()
+            self.config['start-time'] = datetime.now().isoformat()
+            self.config.write(path)
         else:
-            config = job.config['holland:backup:run']
-            config['stop-time'] = datetime.now().isoformat()
+            self.config['stop-time'] = datetime.now().isoformat()
+            self.config['actual-size'] = job.store.size()
+            self.config.write(path)
 
 class CheckForSpaceHook(BackupHook):
-
+    """Check for available space before starting a backup"""
     def execute(self, job):
+        """Estimate the available space from the plugin and abort if
+        there does not appear to be enought to successfully complete this
+        backup based on the estimate.
+
+        :raises: BackupError if estimated_space > available_space
+        """
         LOG.info("+ Estimating backup size")
         estimated_bytes = job.plugin.estimate()
         available_bytes = job.store.spool_capacity()
@@ -80,7 +107,7 @@ class CheckForSpaceHook(BackupHook):
         LOG.info("+ Spool directory %s has %s available",
                  job.store.path, format_bytes(available_bytes))
 
-        job_info = job.config['holland:backup:run']
+        job_info = Config.read([os.path.join(job.store.path, 'job.info')])
         job_info['estimated-size'] = format_bytes(estimated_bytes)
         if available_bytes < estimated_bytes*estimate_factor:
             raise BackupError("Insufficient space for backup")
@@ -91,6 +118,7 @@ def setup_user_hooks(beacon, config):
     load_hooks_from_config(backup_config['hooks'], beacon, config)
 
 def setup_builtin_hooks(beacon, config):
+    """Connect builtin hook actions with the events they should fire on"""
     config_writer = WriteConfigHook('<internal>')
     estimation = CheckForSpaceHook('<internal>')
     backup_info = BackupInfoHook('<internal>')
