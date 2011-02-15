@@ -41,6 +41,7 @@ def validate_config(config):
 class Beacon(dict):
     """Simple Signal container"""
     def __init__(self, names):
+        dict.__init__(self)
         for name in names:
             self[name] = Signal()
 
