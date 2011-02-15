@@ -55,7 +55,7 @@ class MakeConfig(ArgparseCommand):
     def plugin_info(self):
         """Provide plugin_info for mkconfig"""
         return dict(
-            name=self.name,
+            name='mk-config',
             summary=self.summary,
             description=self.description,
             author='Rackspace',

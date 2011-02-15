@@ -3,6 +3,9 @@ from holland.core import BackupManager, BackupError, ConfigError
 from holland.cli.cmd.base import ArgparseCommand, argument
 
 class Backup(ArgparseCommand):
+    """Run a backup for one or more backupset configurations
+
+    """
     name = 'backup'
     summary = "Run a backup"
     description = """

@@ -85,7 +85,7 @@ class Purge(ArgparseCommand):
     def plugin_info(self):
         """Purge plugin info"""
         return dict(
-            name=self.name,
+            name='purge',
             summary=self.summary,
             description=self.description,
             author='Rackspace',

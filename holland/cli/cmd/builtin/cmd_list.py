@@ -90,6 +90,14 @@ class ListPlugins(ArgparseCommand):
     plugin_info = classmethod(plugin_info)
 
 class ListBackups(ArgparseCommand):
+    """List backups stored in the backup directory
+
+    This command will look in the global backup directory (if one is
+    specified) or in the directory specified by the ``--backup-directory``
+    option.  If neither is provided this command will fail and exit with
+    non-zero status.
+    """
+
     name = 'list-backups'
     aliases = ['lb']
     summary = 'List spooled backups'
@@ -101,6 +109,7 @@ class ListBackups(ArgparseCommand):
         argument('--backup-directory', '-d'),
     ]
     def execute(self, namespace, parser):
+        """List backups in a backup spool"""
         from holland.core import BackupSpool
         backup_directory = namespace.backup_directory or \
                            self.config['holland']['backup-directory']

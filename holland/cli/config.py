@@ -58,7 +58,7 @@ class GlobalHollandConfig(Config):
         return cfg
 
     #@classmethod
-    def configspec(self):
+    def configspec(cls):
         """The holland.conf configspec"""
         return cli_configspec
     configspec = classmethod(configspec)

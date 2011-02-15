@@ -50,7 +50,7 @@ class Help(ArgparseCommand):
     def plugin_info(self):
         """Provide info about this plugin"""
         return dict(
-            name=self.name,
+            name='help',
             summary=self.summary,
             description=self.description,
             author='Rackspace',
