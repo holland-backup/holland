@@ -55,7 +55,7 @@ class RotateBackupsHook(BackupHook):
         if retention_count == 0:
             LOG.debug("Increasing retention-count to maintain new backup")
             retention_count += 1
-        backups, kept, purged = job.store.spool.purge(job.store.name,
+        _, kept, purged = job.store.spool.purge(job.store.name,
                                                       retention_count)
         for backup in purged:
             LOG.info("+ Purged old backup %s", backup.path)

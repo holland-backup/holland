@@ -20,12 +20,20 @@ level            = log_level(default="info")
 """.splitlines())
 
 class GlobalHollandConfig(Config):
-    name = None
+    """Config for the global holland.conf
+
+    This object is passed to each subcommand holland runs via that
+    commands configure() method. This provides access to global
+    config options and loading other configs relative to the root
+    holland.conf's directory
+    """
 
     def basedir(self):
-        return os.path.abspath(os.path.dirname(self.name or '.'))
+        """Find the base directory where this holland.conf lives"""
+        return os.path.abspath(os.path.dirname(self.path or '.'))
 
     def load_backupset(self, name):
+        """Load a backupset relative to this holland.conf instance"""
         if not os.path.isabs(name):
             name = os.path.join(self.basedir(), 'backupsets', name)
 
@@ -51,10 +59,16 @@ class GlobalHollandConfig(Config):
 
     #@classmethod
     def configspec(self):
+        """The holland.conf configspec"""
         return cli_configspec
     configspec = classmethod(configspec)
 
 def load_global_config(path):
+    """Conditionally load the global holland.conf
+
+    If the requested path does not exist a default
+    GlobalHollandConfig instance will be returned
+    """
     if path:
         try:
             cfg = GlobalHollandConfig.read([path])
