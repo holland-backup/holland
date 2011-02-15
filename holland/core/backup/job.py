@@ -25,7 +25,7 @@ class BackupJob(object):
                 setup_user_hooks(beacon, self.config)
             setup_builtin_hooks(beacon, self.config)
         else:
-            setup_dryrun_hooks(beacon, self.config)
+            setup_dryrun_hooks(beacon)
 
         try:
             LOG.info("+ Running setup-backup hooks")

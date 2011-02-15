@@ -11,19 +11,32 @@ from holland.core.util.fmt import format_bytes
 LOG = logging.getLogger(__name__)
 
 class BackupHook(BaseHook):
+    """Generic BackupHook"""
+
     def execute(self, job):
         """Process a backup job event"""
+        raise NotImplementedError()
 
+    def plugin_info(self):
+        return dict(
+            name='internal-hook'
+        )
 # builtin hooks
 
 class AutoPurgeFailuresHook(BackupHook):
+    """Purge failed backups immediately"""
+
     def execute(self, job):
+        """Purge failed backup"""
         LOG.info("+++ Running %s", job.store.path)
         job.store.purge()
         LOG.info("+ Purged failed job %s", job.store.path)
 
 class DryRunPurgeHook(BackupHook):
+    """Purge staging directory after a dry-run is complete"""
+
     def execute(self, job):
+        """Purge backup directory for dry-run backup"""
         job.store.purge()
         LOG.info("+ Purged %s after dry-run", job.store.path)
 
@@ -142,7 +155,7 @@ def setup_builtin_hooks(beacon, config):
         rotate_backups = RotateBackupsHook('<internal>')
         beacon.before_backup.connect(rotate_backups, weak=False)
 
-def setup_dryrun_hooks(beacon, config):
+def setup_dryrun_hooks(beacon):
     "Setup hook actions that should be run during a dry-run backup"
     # Purge a backup
     hook = DryRunPurgeHook('<internal>')
