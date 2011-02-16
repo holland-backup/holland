@@ -14,6 +14,8 @@ else
 coverage=coverage
 fi
 $coverage xml
+export PYTHONPATH="$PWD/holland/cli/backports/"
+
 pylint -f parseable holland > pylint.txt
 
 exit 0
