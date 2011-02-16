@@ -82,6 +82,10 @@ class EntrypointDependencyError(PluginError):
                (self.req, self.name, self.group)
 
 class EntrypointVersionConflictError(PluginError):
+    """Raises when multiple egg distributions provide the same requirement but
+    have different versions.
+    """
+
     def __init__(self, group, name, entrypoint, dist, req):
         PluginError.__init__(self, group, name, None)
         self.entrypoint = entrypoint

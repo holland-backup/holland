@@ -1,6 +1,7 @@
 """Standard Holland Backup API classes"""
 
 import logging
+from textwrap import dedent
 from holland.core.plugin import ConfigurablePlugin
 from holland.core.config import Configspec
 
@@ -30,6 +31,12 @@ class BackupPlugin(ConfigurablePlugin):
     store = None
 
     def setup(self, backupstore):
+        """Setup the backup directory
+
+        A ``BackupStore`` instance is provided to the plugin whose
+        ``path`` instance points to the directory where backup files
+        should be stored.
+        """
         self.store = backupstore
 
     def pre(self):
@@ -50,9 +57,12 @@ class BackupPlugin(ConfigurablePlugin):
     def post(self):
         """Run after a backup"""
 
-    #@staticmethod
-    def configspec():
-        from textwrap import dedent
+    #@classmethod
+    def configspec(cls):
+        """Provide standard backup configspec
+
+        :returns: Configspec instance
+        """
         return Configspec.parse(dedent("""
         [holland:backup]
         plugin                  = string
@@ -66,4 +76,4 @@ class BackupPlugin(ConfigurablePlugin):
         estimated-size-factor   = float(default=1.0)
         hooks                   = list(default=list())
         """).splitlines())
-    configspec = staticmethod(configspec)
+    configspec = classmethod(configspec)
