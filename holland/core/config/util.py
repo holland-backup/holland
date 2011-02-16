@@ -19,6 +19,12 @@ def unquote(value):
         value = value[1:-1]
 
     def substitute(match):
+        """Substitute an escaped character with its real value
+
+        This will attempt to lookup a meta character in a table and if none
+        specified will just convert an escaped character to its unescaped
+        variant
+        """
         char = match.group(1)
         # either replace with a substitution or
         # with the char itself \c => c if there is no substitution
@@ -27,6 +33,7 @@ def unquote(value):
     return escape_cre.sub(substitute, value)
 
 class Missing(object):
+    """Placeholder for a missing value"""
     def __str__(self):
         return '<missing value>'
     __repr__ = __str__
