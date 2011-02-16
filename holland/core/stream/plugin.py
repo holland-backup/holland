@@ -43,9 +43,12 @@ class StreamPlugin(BasePlugin):
     name = ''
     aliases = ()
 
-    def open(self, name, method, *args, **kwargs):
+    def open(self, name, mode, method, *args, **kwargs):
         """Open a stream and return a FileLike instance"""
-        raise NotImplementedError()
+        if method is not None:
+            raise StreamError("Invalid stream method '%s' for default Stream" %
+                              method)
+        return open(name, mode, *args, **kwargs)
 
     def stream_info(self, name, method, *args, **kwargs):
         """Provide information about this stream"""
