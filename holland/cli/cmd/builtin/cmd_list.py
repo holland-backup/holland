@@ -2,7 +2,7 @@
 
 import sys
 import logging
-from holland.core.plugin import iterate_plugins
+from holland.core import BackupSpool, iterate_plugins
 from holland.cli.cmd.base import ArgparseCommand, argument
 
 LOG = logging.getLogger(__name__)
@@ -110,7 +110,6 @@ class ListBackups(ArgparseCommand):
     ]
     def execute(self, namespace, parser):
         """List backups in a backup spool"""
-        from holland.core import BackupSpool
         backup_directory = namespace.backup_directory or \
                            self.config['holland']['backup-directory']
 
