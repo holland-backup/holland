@@ -169,6 +169,11 @@ class ListValidator(BaseValidator):
 
     #@staticmethod
     def _utf8_encode(unicode_csv_data):
+        """Shim to convert lines of text to utf8 byte strings to allow
+        processing by the csv module
+
+        :returns: iterable of utf8 bytestrings
+        """
         for line in unicode_csv_data:
             yield line.encode('utf-8')
     _utf8_encode = staticmethod(_utf8_encode)
@@ -232,19 +237,32 @@ class LogLevelValidator(BaseValidator):
     * fatal
     """
 
+    levels = {
+        'debug'         : logging.DEBUG,
+        'info'          : logging.INFO,
+        'warning'       : logging.WARNING,
+        'error'         : logging.ERROR,
+        'fatal'         : logging.FATAL,
+        logging.DEBUG   : 'debug',
+        logging.INFO    : 'info',
+        logging.WARNING : 'warning',
+        logging.ERROR   : 'error',
+        logging.FATAL   : 'fatal',
+    }
+
     def convert(self, value):
         """Convert a string log level to its integer equivalent"""
         if isinstance(value, int):
             return value
         try:
-            return logging._levelNames[value.upper()]
+            return self.levels[value.lower()]
         except KeyError:
             raise ValidationError("Invalid log level '%s'" % value, value)
 
     def format(self, value):
         """Format an integer log level to its string representation"""
         try:
-            return logging._levelNames[value].lower()
+            return self.levels[value].lower()
         except KeyError:
             raise ValidationError("Unknown logging level '%s'" % value, value)
 
