@@ -3,20 +3,15 @@
 Based on the identically named codec from the bobcat project
 """
 
-try:
-    bytes
-except NameError:
-    bytes = str
-
 from holland.core.util.pycompat import Scanner
 
 def decode(filename):
     """Decode a filename to the original filename"""
     scanner = Scanner([
-        (b"[a-z0-9-+!$%&\'@~#.,^]+", lambda s, t: bytes(t).decode('ascii')),
-        (b"_", lambda s, t: ' '),
-        (b'\{[a-z]+\}', lambda s, t: bytes(t[1:-1]).upper().decode('ascii')),
-        (b'\([0-9a-f]{1,8}\)', lambda s, t: chr(int(bytes(t[1:-1]), 16))),
+        ("[a-z0-9-+!$%&\'@~#.,^]+", lambda s, t: t.decode('ascii')),
+        ("_", lambda s, t: ' '),
+        ('\{[a-z]+\}', lambda s, t: t[1:-1].upper().decode('ascii')),
+        ('\([0-9a-f]{1,8}\)', lambda s, t: chr(int(t[1:-1], 16))),
     ])
 
     filename, remaining = scanner.scan(filename)
