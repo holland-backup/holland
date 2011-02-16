@@ -1,11 +1,7 @@
 """Parse configspec checks"""
 
-import re
 from holland.core.config.util import unquote, missing
-try:
-    Scanner = re.Scanner
-except AttributeError:
-    from holland.core.util.pycompat import Scanner
+from holland.core.util.pycompat import Scanner
 
 __all__ = [
     'Check',
@@ -16,27 +12,41 @@ class Token(object):
     """Lexer token"""
     def __init__(self, text, token_id, value, position=()):
         self.text = text
-        self.id = token_id
+        self.token_id = token_id
         self.value = value
         self.position = position
 
     def __repr__(self):
-        position = map(str, self.position)
-        return 'Token(text=%r, type=%r, value=%r, position=%r)' % \
-                (self.text, self.id, self.value, '-'.join(position))
+        return 'Token(text=%r, type=%r, value=%r, position=%d-%d)' % \
+                (self.text, self.token_id, self.value,
+                 self.position[0], self.position[1])
 
 
-class TokenGenerator(object):
-    """Generate a token"""
-    def __init__(self, token_id, conversion=str):
-        self.token_id = token_id
-        self.conversion = conversion
+def create_token(token_id, conversion=str):
+    """Create a token with the given id
 
-    def __call__(self, scanner, value):
-        return Token(text=value,
-                     token_id=self.token_id,
-                     value=self.conversion(value),
+    This will set the token's value attribute to the text value
+    after processing the the conversion method
+
+    This method is a decorator for a standard f(scanner,value)
+    tokenization dispatch function from re.Scanner
+
+    :returns: tokenization function
+    """
+    def generate(scanner, value):
+        """Generate the actual token
+
+        This initializes a new Token instance with the token_id
+        from the outer scope and sets the value based on the input
+        from re.Scanner
+
+        :returns: Token instance
+        """
+        return Token(token_id=token_id,
+                     text=value,
+                     value=conversion(value),
                      position=scanner.match.span())
+    return generate
 
 
 class Lexer(object):
@@ -51,7 +61,7 @@ class Lexer(object):
         :returns: next Token instance
         """
         token = self.next()
-        if token.id not in token_ids:
+        if token.token_id not in token_ids:
             raise CheckParseError("Expected one of %r but got %r" %
                              (token_ids, token))
         return token
@@ -95,11 +105,11 @@ class CheckParser(object):
 
     # scanner
     scanner = Scanner([
-        (ident_re, TokenGenerator(T_ID)),
-        (str_re, TokenGenerator(T_STR, unquote)),
-        (float_re, TokenGenerator(T_NUM, float)),
-        (int_re, TokenGenerator(T_NUM, int)),
-        (sym_re, TokenGenerator(T_SYM)),
+        (ident_re, create_token(T_ID)),
+        (str_re, create_token(T_STR, unquote)),
+        (float_re, create_token(T_NUM, float)),
+        (int_re, create_token(T_NUM, int)),
+        (sym_re, create_token(T_SYM)),
         (space_re, None)
     ])
 
@@ -137,9 +147,9 @@ class CheckParser(object):
         lexer = Lexer(tokens)
 
         method = lexer.next()
-        if method.id != cls.T_ID:
+        if method.token_id != cls.T_ID:
             raise CheckParseError("Expected identifier as first token in check "
-                             "string but got %r" % method.id)
+                             "string but got %r" % method.token_id)
 
         # bare-name check
         try:
@@ -163,7 +173,7 @@ class CheckParser(object):
         for token in lexer:
             if token.text == ')':
                 break
-            if token.id not in (cls.T_ID, cls.T_STR, cls.T_NUM):
+            if token.token_id not in (cls.T_ID, cls.T_STR, cls.T_NUM):
                 raise CheckParseError("Unexpected token %r" % token)
 
             arg = cls._parse_expression(lexer, token)
@@ -191,10 +201,10 @@ class CheckParser(object):
         This will either be a literal and identifier or an
         identifer=literal|identifier keyword pair
         """
-        if token.id in (cls.T_STR, cls.T_NUM):
+        if token.token_id in (cls.T_STR, cls.T_NUM):
             # literal value
             return token.value
-        elif token.id == cls.T_ID and token.text != 'list':
+        elif token.token_id == cls.T_ID and token.text != 'list':
             if token.text == 'None':
                 return None
             return token.value
@@ -204,6 +214,14 @@ class CheckParser(object):
 
     #@classmethod
     def _parse_list_expr(cls, lexer):
+        """Parse a list expression
+
+        This starts immediately after the 'list' token is detected.
+        A list expression may only contain expressions but may not contain
+        keyword arguments.
+
+        :returns: list of elements the comprise the expression
+        """
         args = []
         token = lexer.next()
         if token.text != '(':
