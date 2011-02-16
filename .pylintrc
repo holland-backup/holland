@@ -38,7 +38,9 @@ load-plugins=
 # disable W0223 - subclass that doesn't override base abstract method - often a subclass
 # 	  	  is also abstract so this is generating a lot of false positives
 # disable W0142 - args/kwargs magic - this generates way too many false positives
-disable=W0223,W0142,R0201
+# disable R0903 - too few public methods.  There's a lot of simple classes that are just
+#  	  	  attribute containers such as Token and so this isn't entirely helpful.
+disable=W0223,W0142,R0201,R0903
 
 
 [REPORTS]
