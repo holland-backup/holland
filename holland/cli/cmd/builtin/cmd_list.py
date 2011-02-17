@@ -1,6 +1,5 @@
 """Various list-* commands for holland.cli"""
 
-import sys
 import logging
 from holland.core import BackupSpool, iterate_plugins
 from holland.cli.cmd.base import ArgparseCommand, argument
@@ -68,9 +67,11 @@ class ListPlugins(ArgparseCommand):
             for plugin in plugin_list:
                 try:
                     info = plugin.plugin_info()
+                except (SystemExit, KeyboardInterrupt):
+                    raise
                 except:
-                    self.stderr("plugin %r plugin_info failed :(", plugin)
-                    self.stderr("%r", sys.exc_info())
+                    self.debug("Broken plugin %r - plugin_info() fails.",
+                               plugin, exc_info=True)
                     continue
                 self.stderr("%-10s %-20s - %s", "[%s]" % group,
                             info['name'],
