@@ -44,15 +44,13 @@ class BackupPlugin(ConfigurablePlugin):
 
     def estimate(self):
         """Estimate the size of the backup this plugin would produce"""
-        raise NotImplementedError()
+        return 0
 
     def backup(self):
         """Backup to the specified path"""
-        raise NotImplementedError()
 
     def dryrun(self):
         """Perform a dry-run backup to the specified path"""
-        raise NotImplementedError()
 
     def post(self):
         """Run after a backup"""
