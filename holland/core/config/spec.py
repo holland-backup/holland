@@ -89,12 +89,12 @@ class Configspec(Config):
         for key, value in self.iteritems():
             if isinstance(value, dict):
                 try:
-                    self.validate_section(key, config)
+                    self._validate_section(key, config)
                 except ValidateError, exc:
                     errors.extend(exc.errors)
             else:
                 try:
-                    self.validate_option(key, value, config)
+                    self._validate_option(key, value, config)
                 except ValidationError, exc:
                     errors.append((exc, config.source.get(key, None)))
 
@@ -104,7 +104,7 @@ class Configspec(Config):
             raise ValidateError(errors)
         return config
 
-    def validate_section(self, key, config):
+    def _validate_section(self, key, config):
         """Validate a subsection """
         try:
             cfgsect = config[key]
@@ -154,7 +154,7 @@ class Configspec(Config):
                                   key, None)
         return value
 
-    def validate_option(self, key, checkstr, config):
+    def _validate_option(self, key, checkstr, config):
         """Validate a single option for this configspec"""
         try:
             check = Check.parse(checkstr)
