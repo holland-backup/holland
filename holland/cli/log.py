@@ -39,7 +39,7 @@ def configure_logger(logger, handler, fmt, level):
     logger.setLevel(level)
     logger.addHandler(handler)
 
-def log_warning(message, category, filename, lineno, *args, **kwargs):
+def log_warning(message, category, filename, lineno, _file=None, _line=None):
     """Log a warning message.
 
     This currently only logs DeprecationWarnings at debug level and otherwise
@@ -47,12 +47,13 @@ def log_warning(message, category, filename, lineno, *args, **kwargs):
     seen by enabling debug level logging.
     """
     log = logging.getLogger()
+    args = [x for x in (_line,)]
     warning_string = warnings.formatwarning(message,
                                             category,
                                             filename,
-                                            lineno)
+                                            lineno, *args)
     if category == DeprecationWarning:
-        log.debug("%s", warning_string)
+        log.debug("(%s) %s", _file, warning_string)
     else:
         log.debug(warning_string)
         log.warn("%s", message)
