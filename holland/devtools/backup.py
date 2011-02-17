@@ -1,5 +1,6 @@
 """Backup plugin template for paster"""
 
+import os, shutil
 from paste.script.templates import Template, var
 from holland import __version__ as holland_version
 
@@ -29,6 +30,11 @@ class HollandBackupTemplate(Template):
     vars = vars
 
     def post(self, command, output_dir, vars):
-        import os, shutil
+        """Cleanup after basic_package behavior
+
+        Currently we want to have a holland/backup/+package+ but
+        basic_package installs just +package+.  This removes the
+        redundant base +package+
+        """
         path = os.path.join(output_dir, vars['package'])
         shutil.rmtree(path)
