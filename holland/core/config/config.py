@@ -20,6 +20,13 @@ class ConfigSyntaxError(ConfigError, SyntaxError):
 class BaseFormatter(object):
     """Format values in a config file"""
     def format(self, key, value):
+        """Format a value for a given key in a config file
+
+        :returns: formatted value
+        """
+        if not isinstance(key, basestring):
+            raise ValueError("config keys must be strings: %r" % key)
+
         # only return strings
         if isinstance(value, basestring):
             return value
