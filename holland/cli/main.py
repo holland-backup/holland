@@ -2,6 +2,7 @@
 
 import os
 import signal
+import traceback
 import logging
 from logging import _levelNames as log_levels
 from holland import __version__
@@ -93,7 +94,6 @@ class HollandCli(ArgparseCommand):
         except: # unexpected command failure
             self.stderr('Unexpected exception while running command "%s"',
                         opts.subcommand)
-            import traceback
             traceback.print_exc()
         return 1
 
