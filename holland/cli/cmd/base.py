@@ -33,6 +33,12 @@ class BaseCommand(BasePlugin):
         self.config = None
 
     #@classmethod
+    def debug(cls, fmt, *args, **kwargs):
+        """Writing a debugging message to the log"""
+        LOG.debug(fmt, *args, **kwargs)
+    debug = classmethod(debug)
+
+    #@classmethod
     def stderr(cls, fmt, *args):
         """Write a message to stderr
 
