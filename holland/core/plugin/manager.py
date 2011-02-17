@@ -26,7 +26,6 @@ class EntrypointPluginManager(AbstractPluginManager):
 
         Name must be in the format group.name
         """
-        # XXX: Handle various pkg_resources exceptions more gracefully
         # These typically give no information about what was going on froma
         # str(exc) alone:
         # DistributionNotFoundError - A requested distribution was not found
@@ -43,8 +42,9 @@ class EntrypointPluginManager(AbstractPluginManager):
                                                 entrypoint=plugin,
                                                 req=exc.args[0])
             except pkg_resources.VersionConflict, exc:
-                raise EntrypointVersionConflictError(entrypoint=plugin,
-                                                     *exc.args)
+                raise EntrypointVersionConflictError(group, name,
+                                                     entrypoint=plugin,
+                                                     req=exc.args[1])
             except Exception, exc:
                 LOG.exception("Exception when loading plugin")
                 raise PluginLoadError(group, name, exc)
@@ -86,10 +86,10 @@ class EntrypointVersionConflictError(PluginError):
     have different versions.
     """
 
-    def __init__(self, group, name, entrypoint, dist, req):
+    def __init__(self, group, name, entrypoint, req):
         PluginError.__init__(self, group, name, None)
         self.entrypoint = entrypoint
-        self.dist = dist
+        self.dist = entrypoint.dist
         self.req = req
 
     def __str__(self):
