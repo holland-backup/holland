@@ -91,7 +91,7 @@ class BackupStore(object):
             return os.stat(self.path).st_mtime
         except OSError:
             return 0
-    #XXX: python2.3 compatibility
+    #python2.3 compatibility
     timestamp = property(timestamp)
 
     def __eq__(self, other):
@@ -140,7 +140,6 @@ class BackupSpool(object):
             raise SpoolError("load_store() requested for %s which is not a "
                              "subdirectory of %s" % (path, self.root))
 
-        #XXX: check this is a backupset
         name = os.path.basename(os.path.dirname(path))
         return BackupStore(name, path, self)
 
@@ -156,7 +155,7 @@ class BackupSpool(object):
             store = BackupStore(name, backup_path, self)
             if store not in results:
                 results.append(store)
-        #XXX: python2.3 compatibility
+        #python2.3 compatibility
         results.sort()
         return results
 
@@ -167,7 +166,7 @@ class BackupSpool(object):
             path = os.path.join(self.root, name)
             if os.path.isdir(path):
                 results.append(name)
-        #XXX: python2.3 compatibility
+        #python2.3 compatibility
         results.sort()
         return results
 
