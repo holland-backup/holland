@@ -83,7 +83,7 @@ class Lexer(object):
 class CheckError(Exception):
     """Raise when an error is occured during a check"""
 
-class CheckParseError(Exception):
+class CheckParseError(CheckError):
     """Raised when an error is encountered during parsing a check string"""
 
 

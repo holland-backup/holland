@@ -51,10 +51,9 @@ class CheckFormatter(BaseFormatter):
         :returns: formatted value string
         """
         try:
-            check = Check.parse(self.configspec.get(key))
+            check = Check.parse(self.configspec.get(key, ''))
         except CheckError:
-            raise ConfigError("Cannot format due to invalid check: %s" %
-                              self.configspec[key])
+            return value
 
         try:
             validator = self.configspec.registry[check.name]
