@@ -104,7 +104,8 @@ put the following at the top of the backup set configuration file::
 
 **backups-to-keep** = #
 
-    Specifies the number of backups to keep for a backup-set.
+    Specifies the number of backups to keep for a backup-set. 
+    Defaults to retaining 1 backup.
     
 **estimated-size-factor** = #
 
@@ -113,6 +114,31 @@ put the following at the top of the backup set configuration file::
     is multiplied against what each individual plugin reports its 
     estimated backup size when Holland is verifying sufficient free
     space for the backupset.
+
+**auto-purge-failures** = yes | no
+
+    Specifies whether to keep a failed backup or to automatically remove
+    the backup directory.  By default this is on with the intention that
+    whatever process is calling holland will retry when a backup fails. 
+    This behavior can be disabled by setting auto-purge-failures = no when
+    partial backups might be useful or when troubleshooting a backup failure.
+
+**purge-policy** = manual | before-backup | after-backup
+
+    Specifies when to run the purge routine on a backupset.  By default this is
+    run after a new successful backup completes.  Up to ``backups-to-keep``
+    backups will be retained including the most recent.
+
+    ``purge-policy`` = ``before-backup`` will run the purge routine just before
+    a new backup starts.  This will retain up to ``backups-to-keep`` backups
+    before the new backup is even started allowing purging all previous
+    backups if ``backups-to-keep`` is set to 0.  This behavior is useful if
+    some other process is retaining backups off-server and disk space is at a
+    premium.
+
+    ``purge-policy`` = manual will never run the purge routine automatically.
+    Either ``holland purge`` must be run externally or an explicit removal of
+    desired backup directories can be done at some later time.
 
 Backup-Set files are defined in the "backupsets" directory which is,
 by default, ``/etc/holland/backupsets``. The name of the backup-set is 
