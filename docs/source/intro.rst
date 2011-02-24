@@ -19,6 +19,7 @@ remotely modern Linux distribution):
 * `python-setuptools <http://packages.python.org/distribute/>`_
 
 MySQL based plugins additional require the MySQLdb python connector:
+
 * `MySQLdb <http://mysql-python.sourceforge.net/>`_
 
 For Red-Hat Enterprise Linux 5, all dependencies are available directly from
