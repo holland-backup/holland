@@ -113,6 +113,7 @@ class CheckForSpaceHook(BackupHook):
         estimate_scale_factor = main_config['estimated-size-factor']
         estimate_method = main_config['estimation-method'].strip()
 
+        # XXX: must capture errors from each of these methods
         if estimate_method.startswith('const:'):
             # skip initial 'const:' string
             estimated_bytes = parse_bytes(estimate_method[len('const:'):])
