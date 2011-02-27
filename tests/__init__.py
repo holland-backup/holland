@@ -9,3 +9,10 @@ def setup():
     dists, errors = working_set.find_plugins(env)
     for dist in dists:
         working_set.add(dist)
+
+    # setup logging
+    import logging
+    class NullHandler(logging.Handler):
+            def emit(self, record):
+                pass
+    logging.getLogger("holland").addHandler(NullHandler())

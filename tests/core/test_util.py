@@ -58,8 +58,10 @@ def test_run_command():
     f = misc.run_command
 
     assert_equals(f('echo "today"'), ('today\n', ''))
-    assert_equals(f("foo/bar/baz"),
-                  ('', '/bin/sh: foo/bar/baz: No such file or directory\n'))
+    # stdout should be empty here
+    assert_equals(f("foo/bar/baz")[0], '')
+    # the actual message depends on the shell version
+    ok_(f("foo/bar/baz")[1].startswith('/bin/sh: foo/bar/baz:'))
 
 # path tests
 
