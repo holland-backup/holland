@@ -6,7 +6,8 @@ from datetime import datetime
 from holland.core.config import Config
 from holland.core.hooks import BaseHook, load_hooks_from_config
 from holland.core.backup.base import BackupError
-from holland.core.util.fmt import format_bytes
+from holland.core.util.fmt import format_bytes, parse_bytes
+from holland.core.util.misc import run_command
 
 LOG = logging.getLogger(__name__)
 
@@ -108,21 +109,48 @@ class CheckForSpaceHook(BackupHook):
         :raises: BackupError if estimated_space > available_space
         """
         LOG.info("+ Estimating backup size")
-        estimated_bytes = job.plugin.estimate()
+        main_config = job.config['holland:backup']
+        estimate_scale_factor = main_config['estimated-size-factor']
+        estimate_method = main_config['estimation-method'].strip()
+
+        if estimate_method.startswith('const:'):
+            # skip initial 'const:' string
+            estimated_bytes = parse_bytes(estimate_method[len('const:'):])
+            LOG.info(" * Using constant size %s", estimated_bytes)
+        elif estimate_method.startswith('dir:'):
+            estimated_bytes = directory_size(estimate_method[len('dir:'):])
+            LOG.info(" * Using size of directory %s: %s", estimate_method,
+                    format_bytes(estimated_bytes))
+        elif estimate_method.startswith('cmd:'):
+            cmd = estimate_method[len('cmd:'):]
+            stdout, stderr = run_command(cmd)
+            LOG.info(" - %s", cmd)
+            for line in stderr.splitlines():
+                LOG.info("  - %s", line.rstrip())
+            estimated_bytes = parse_bytes(stdout)
+            LOG.info(" * Using estimate from %r: %s",
+                     cmd,
+                     format_bytes(estimated_bytes))
+        elif estimate_method == 'plugin':
+            estimated_bytes = job.plugin.estimate()
+            LOG.info(" * Using plugin estimate %s",
+                    format_bytes(estimated_bytes))
+        else:
+            raise BackupError("Unknown estimation method %s" % estimate_method)
+
         available_bytes = job.store.spool_capacity()
-        estimate_factor = job.config['holland:backup']['estimated-size-factor']
 
         LOG.info("+ Plugin estimated backup size of %s",
                 format_bytes(estimated_bytes))
-        LOG.info("+ Adjusted plugin estimated by %.2f%% to %s",
-                 estimate_factor*100,
-                 format_bytes(estimated_bytes*estimate_factor))
+        LOG.info("+ Adjusted estimated size by %.2f%% to %s",
+                 estimate_scale_factor*100,
+                 format_bytes(estimated_bytes*estimate_scale_factor))
         LOG.info("+ Spool directory %s has %s available",
                  job.store.path, format_bytes(available_bytes))
 
         job_info = Config.read([os.path.join(job.store.path, 'job.info')])
         job_info['estimated-size'] = format_bytes(estimated_bytes)
-        if available_bytes < estimated_bytes*estimate_factor:
+        if available_bytes < estimated_bytes*estimate_scale_factor:
             raise BackupError("Insufficient space for backup")
 
 def setup_user_hooks(beacon, config):

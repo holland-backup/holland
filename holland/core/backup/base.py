@@ -72,6 +72,7 @@ class BackupPlugin(ConfigurablePlugin):
         backups-to-keep         = integer(default=1, aliasof="retention-count")
         retention-count         = integer(default=1)
         estimated-size-factor   = float(default=1.0)
+        estimation-method       = string(default="plugin")
         hooks                   = list(default=list())
         """).splitlines())
     configspec = classmethod(configspec)
