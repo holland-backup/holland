@@ -1,7 +1,7 @@
 """This module provides support for configs that validate other configs"""
 
 import logging
-from holland.core.config.config import Config, ConfigError, BaseFormatter
+from holland.core.config.config import Config, BaseFormatter
 from holland.core.config.check import Check, CheckError
 from holland.core.config.validation import default_validators, ValidationError
 from holland.core.config.util import missing

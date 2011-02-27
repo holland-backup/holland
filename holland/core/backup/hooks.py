@@ -6,8 +6,8 @@ from datetime import datetime
 from holland.core.config import Config
 from holland.core.hooks import BaseHook, load_hooks_from_config
 from holland.core.backup.base import BackupError
-from holland.core.util.fmt import format_bytes, parse_bytes
-from holland.core.util.misc import run_command
+from holland.core.util import format_bytes, parse_bytes, directory_size, \
+                              run_command
 
 LOG = logging.getLogger(__name__)
 

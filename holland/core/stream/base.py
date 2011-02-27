@@ -84,7 +84,7 @@ class RealFileLike(FileLike):
     def fileno(self):
         """Return the integer "file descriptor" that is used by the underlying
         implementation to request I/O operations from the operating system"""
-        raise NotImplementedError()
+        return -1
 
     def tell(self):
         """Return the file's current position"""
