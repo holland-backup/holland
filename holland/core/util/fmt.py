@@ -1,5 +1,6 @@
 "Formatting utility functions"
 
+import re
 from math import floor, log
 from time import strftime, localtime
 
@@ -44,3 +45,24 @@ def format_bytes(nbytes, precision=2):
     except IndexError:
         raise ArithmeticError("format_bytes() cannot format values beyond "
                               "yottabytes. Got: %d" % nbytes)
+
+def parse_bytes(size):
+    """Parse a size string to an integer number of bytes
+
+    >> parse_bytes('4G')
+    4294967296
+
+    :param size: size string
+    :returns: int bytes
+    """
+    size = str(size)
+    units = "bBkKmMgGtTpPeE"
+    match = re.match(r'^(\d+(?:[.]\d+)?)([%s])?$' % units, size)
+    if not match:
+        raise ValueError("Invalid constant size syntax %r" % size)
+    number, unit = match.groups()
+    if not unit:
+        unit = 'B'
+    unit = unit.upper()
+    exponent = "BKMGTPE".find(unit)
+    return int(float(number)*1024**exponent)
