@@ -1,4 +1,4 @@
-from holland.core.util import path, fmt, pycompat
+from holland.core.util import path, fmt, pycompat, misc
 from nose.tools import *
 
 # fmt tests
@@ -51,6 +51,15 @@ def test_parse_bytes():
     assert_equals(f('-1K'), -1024)
     assert_equals(f('4.5G'), int(4.5*1024**3))
     assert_raises(ValueError, f, 'foo bar baz')
+
+# misc tests
+
+def test_run_command():
+    f = misc.run_command
+
+    assert_equals(f('echo "today"'), ('today\n', ''))
+    assert_equals(f("foo/bar/baz"),
+                  ('', '/bin/sh: foo/bar/baz: No such file or directory\n'))
 
 # path tests
 
