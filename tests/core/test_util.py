@@ -40,6 +40,18 @@ def test_format_bytes():
     # really large values
     assert_raises(ArithmeticError, f, 1024**10)
 
+def test_parse_bytes():
+    f = fmt.parse_bytes
+
+    assert_equals(f('0'), 0)
+    assert_equals(f('1K'), 1024)
+    assert_equals(f('1M'), 1024*1024)
+    assert_equals(f('1G'), 1024*1024*1024)
+    assert_equals(f('-1'), -1)
+    assert_equals(f('-1K'), -1024)
+    assert_equals(f('4.5G'), int(4.5*1024**3))
+    assert_raises(ValueError, f, 'foo bar baz')
+
 # path tests
 
 def test_relpath():
