@@ -1,1 +1,1 @@
-from holland.backup.pgdump.interface import PgDump
+from holland.backup.pgdump.plugin import PgDump
