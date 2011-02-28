@@ -96,7 +96,7 @@ class SQLitePlugin(BackupPlugin):
                 dest = open('/dev/null', 'w')
             else:
                 LOG.info("Backing up SQLite database at [%s]" % path)
-                dest = os.path.join(self.target_directory, '%s.sql' % \
+                dest = os.path.join(self.store.path, '%s.sql' % \
                                     os.path.basename(path))
                 dest = open_stream(dest, 'w', *zopts)
 
