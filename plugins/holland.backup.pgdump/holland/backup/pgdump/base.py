@@ -13,11 +13,11 @@ import psycopg2 as dbapi
 import psycopg2.extensions
 
 # holland-core has a few nice utilities such as format_bytes
-from holland.core.util.fmt import format_bytes
+from holland.core.util import format_bytes
 # Holland general compression functions
-from holland.lib.compression import open_stream
+from holland.core import open_stream
 # holland-common safefilename encoding
-from holland.lib.safefilename import encode as encode_safe
+from holland.core.util.safefilename import encode as encode_safe
 
 LOG = logging.getLogger(__name__)
 
