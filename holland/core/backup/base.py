@@ -55,6 +55,22 @@ class BackupPlugin(ConfigurablePlugin):
     def post(self):
         """Run after a backup"""
 
+    def release(self):
+        """Release resources held by this plugin
+
+        If a backup plugin uses some resource as part of the backup
+        process this method give it a chance to free that resource.
+        This will be called prior to the backupstore being purged
+        during a purge operation or as part an explicit release
+        request as long as the backupstore plugin is loadable.
+
+        This method does nothing by default and generally does not
+        need to be overriden.  This exists primarily for snapshot
+        style plugins that may create a snapshot as the primary means
+        of backup and sometime later will be requested to release that
+        snapshot.
+        """
+
     #@classmethod
     def configspec(cls):
         """Provide standard backup configspec
