@@ -7,6 +7,8 @@ import logging
 DEFAULT_LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
 DEFAULT_LOG_LEVEL = logging.INFO
 
+LOG = logging.getLogger(__name__)
+
 def _clear_root_handlers():
     """Remove all pre-existing handlers on the root logger"""
     root = logging.getLogger()
@@ -86,7 +88,7 @@ def configure_logging(config):
                          fmt=config['format'],
                          level=config['level'])
     except IOError, exc:
-        logging.info("Failed to open log file: %s", exc)
-        logging.info("Skipping file logging.")
+        LOG.info("Failed to open log file: %s", exc)
+        LOG.info("Skipping file logging.")
 
     configure_warnings()
