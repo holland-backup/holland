@@ -9,7 +9,7 @@ import os
 import sys
 import logging
 from tempfile import NamedTemporaryFile
-from holland.core.exceptions import BackupError
+from holland.core import BackupError, BackupPlugin, Configspec
 from holland.backup.pgdump.base import backup_pgsql, dry_run, \
                                        PgError, \
                                        dbapi, \
@@ -44,31 +44,26 @@ hostname = string(default=None)
 port = integer(default=None)
 """.splitlines()
 
-class PgDump(object):
+class PgDump(BackupPlugin):
     """
     Postgres pg_dump backups
     """
 
-    def __init__(self, name, config, target_directory, dry_run=False):
+    def __init__(self, name):
         """Create a new PgDump instance
 
-        :param name: unique name of this backup (e.g. pg_dump/20100101_000000)
-        :param target_directory: where backup files should be stored
-        :param dry_run: boolean flag indicating whether we should only go
-                        through the motions of a backup without actually
-                        performing the heavy weight steps.
+        :param name: name this plugin was loaded by
         """
         self.name = name
-        self.config = config
-        self.target_directory = target_directory
-        self.dry_run = dry_run
-        self.config.validate_config(CONFIGSPEC)
+        self.dry_run = False
 
+
+    def pre(self):
         self.connection = get_connection(self.config)
         self.databases = pg_databases(self.config, self.connection)
         LOG.info("Found databases: %s", ','.join(self.databases))
 
-    def estimate_backup_size(self):
+    def estimate(self):
         """Estimate the size (in bytes) of the backup this plugin would
         produce, if run.
 
@@ -103,17 +98,9 @@ class PgDump(object):
         Start a backup.
         """
 
-        if self.dry_run:
-            # Very simply dry run information
-            # enough to know that:
-            # 1) We can connect to Postgres using pgpass data
-            # 2) The exact databases we would dump
-            dry_run(self.databases, self.config)
-            return
-
         # First run a pg_dumpall -g and save the globals
         # Then run a pg_dump for each database we find
-        backup_dir = os.path.join(self.target_directory, 'data')
+        backup_dir = os.path.join(self.store.path, 'data')
 
         # put everything in data/
         try:
@@ -128,17 +115,15 @@ class PgDump(object):
                           str(exc), exc_info=True)
             raise BackupError(str(exc))
 
-    def configspec(cls):
+    def dry_run(self):
+        # Very simply dry run information
+        # enough to know that:
+        # 1) We can connect to Postgres using pgpass data
+        # 2) The exact databases we would dump
+        dry_run(self.databases, self.config)
+
+    def configspec(self):
         """Provide a specification for the configuration dictionary this
         plugin accepts.
         """
-        return CONFIGSPEC
-    configspec = classmethod(configspec)
-
-    def info(self):
-        """Provide extra information about a backup
-
-        :returns: str. Descriptive text about the backup
-        """
-
-        return ""
+        return Configspec.parse(CONFIGSPEC)
