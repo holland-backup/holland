@@ -9,7 +9,7 @@ import logging
 from holland.core.backup.util import load_backup_plugin, validate_config
 from holland.core.backup.spool import BackupSpool, SpoolError, SpoolLockError
 from holland.core.backup.job import BackupJob
-from holland.core.backup.base import BackupError
+from holland.core.backup.error import BackupError
 from holland.core.config import Config
 
 LOG = logging.getLogger(__name__)

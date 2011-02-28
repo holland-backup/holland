@@ -3,7 +3,8 @@
 import logging
 from holland.core.plugin import load_plugin, PluginError
 from holland.core.dispatch import Signal
-from holland.core.backup.base import BackupError, BackupPlugin
+from holland.core.backup.plugin import BackupPlugin
+from holland.core.backup.error import BackupError
 
 LOG = logging.getLogger(__name__)
 
