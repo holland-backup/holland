@@ -121,3 +121,14 @@ class SQLitePlugin(BackupPlugin):
     def configspec(self):
         """Configspec that the sqlite plugin accepts"""
         return ConfigSpec.parse(CONFIGSPEC)
+
+    def plugin_info(self):
+        """Sqlite Plugin Metadata"""
+        return dict(
+                name='sqlite',
+                summary='Backup sqlite files',
+                description='''
+                ''',
+                version='1.1.0a1',
+                api_version='1.1.0a1',
+        )

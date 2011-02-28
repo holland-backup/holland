@@ -127,3 +127,14 @@ class PgDump(BackupPlugin):
         plugin accepts.
         """
         return Configspec.parse(CONFIGSPEC)
+
+    def plugin_info(self):
+        """PgDump Plugin Metadata"""
+        return dict(
+                name='pgdump',
+                summary='Backup Postgres databases with pg_dump commands',
+                description='''
+                ''',
+                version='1.1.0a1',
+                api_version='1.1.0a1',
+        )
