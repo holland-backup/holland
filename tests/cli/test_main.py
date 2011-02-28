@@ -85,7 +85,6 @@ def test_list_commands():
     assert_equals(ret, 0)
 
 def test_list_backups():
-    print >>sys.stderr, "holland list-backups"
     ret = main.holland(['-c', holland_config(), 'list-backups'])
     assert_equals(ret, 0)
 

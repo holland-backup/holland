@@ -15,4 +15,5 @@ def setup():
     class NullHandler(logging.Handler):
             def emit(self, record):
                 pass
+    logging.getLogger("holland").propagate = False
     logging.getLogger("holland").addHandler(NullHandler())
