@@ -19,7 +19,7 @@ class ListCommands(ArgparseCommand):
 
     def execute(self, namespace, parser):
         """Run list-commands"""
-        self.stderr("", fmt=())
+        self.stderr("")
         self.stderr("Available commands:")
         commands = list(iterate_plugins('holland.commands'))
         commands.sort()
