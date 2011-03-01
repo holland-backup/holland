@@ -2,8 +2,8 @@
 
 import os
 import logging
-from holland.core.util.path import directory_size
-from holland.core import BackupError, BackupPlugin
+from holland.core import BackupError, BackupPlugin, Configspec
+from holland.core.util import directory_size
 from holland.lib.lvm import LogicalVolume, CallbackFailuresError, \
                             LVMCommandError, relpath, getmount
 from holland.lib.mysql.client import MySQLError
@@ -68,7 +68,7 @@ socket = string(default=None)
 """.splitlines()
 
 class MysqlLVMBackup(BackupPlugin):
-    """A Holland Backup plugin suitable for performing LVM snapshots of a 
+    """A Holland Backup plugin suitable for performing LVM snapshots of a
     filesystem underlying a live MySQL instance.
 
     This plugin produces tar archives of a MySQL data directory.
@@ -91,11 +91,9 @@ class MysqlLVMBackup(BackupPlugin):
             raise BackupError("[%d] %s" % exc.args)
         return directory_size(datadir)
 
-    #@classmethod
-    def configspec(cls):
+    def configspec(self):
         """INI Spec for the configuration values this plugin supports"""
-        return Configspec.parse(CONFIGSPEC)
-    configspec = classmethod(configspec)
+        return Configspec.parse(self.CONFIGSPEC)
 
     def backup(self):
         """Run a backup by running through a LVM snapshot against the device
@@ -152,8 +150,7 @@ class MysqlLVMBackup(BackupPlugin):
              volume.vg_name,
              volume.lv_name)
 
-    #@classmethod
-    def plugin_info(cls):
+    def plugin_info(self):
         return dict(
             name='mysql-lvm',
             summary='LVM snapshot backups for MySQL',
@@ -161,4 +158,3 @@ class MysqlLVMBackup(BackupPlugin):
             version='1.1',
             api_version='1.1.0'
         )
-    plugin_info = classmethod(plugin_info)
