@@ -68,8 +68,10 @@ class HollandCli(ArgparseCommand):
             return 1
 
         if opts.log_level:
-            config['logging']['level'] = \
-            log_levels[opts.log_level.upper()]
+            try:
+                config['logging']['level'] = log_levels[opts.log_level.upper()]
+            except KeyError:
+                self.stderr("Invalid --log-level '%s'", opts.log_level)
         if config['holland']['umask'] is not None:
             os.umask(config['holland']['umask'])
         if config['holland']['tmpdir']:

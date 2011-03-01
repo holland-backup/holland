@@ -19,7 +19,7 @@ def configure_basic_logger():
     """Configure a simple console logger"""
     root = logging.getLogger()
 
-    if os.isatty(sys.stderr.fileno()):
+    if not os.isatty(sys.stderr.fileno()):
         class NullHandler(logging.Handler):
             """No-op log handler"""
             def emit(self, something):
@@ -79,7 +79,7 @@ def configure_logging(config):
     if os.isatty(sys.stderr.fileno()):
         configure_logger(logger=logging.getLogger(),
                          handler=logging.StreamHandler(),
-                         fmt='%(message)s',
+                         fmt=DEFAULT_LOG_FORMAT,
                          level=config['level'])
 
     try:
