@@ -3,7 +3,7 @@
 import os
 import tempfile
 import logging
-from holland.core import BackupPlugin, BackupError, Configspec
+from holland.core import BackupPlugin, BackupError, Configspec, load_plugin
 from holland.core.util import directory_size
 from holland.lib.lvm import LogicalVolume, CallbackFailuresError, \
                             LVMCommandError, relpath, getmount
@@ -11,7 +11,6 @@ from holland.lib.mysql.client import MySQLError
 from holland.backup.mysql_lvm.plugin.common import build_snapshot, \
                                                    connect_simple
 from holland.backup.mysql_lvm.plugin.mysqldump.util import setup_actions
-from holland.backup.mysqldump import MySQLDumpPlugin
 
 LOG = logging.getLogger(__name__)
 
@@ -58,7 +57,7 @@ class MysqlDumpLVMBackup(BackupPlugin):
 
     def pre(self):
         self.client = connect_simple(self.config['mysql:client'])
-        self.mysqldump_plugin = MySQLDumpPlugin(name)
+        self.mysqldump_plugin = load_plugin('holland.backup', 'mysqldump')
         self.mysqldump_plugin.configure(self.config)
         self.mysqldump_plugin.setup(self.store)
 
@@ -71,7 +70,7 @@ class MysqlDumpLVMBackup(BackupPlugin):
 
     def configspec(self):
         """INI Spec for the configuration values this plugin supports"""
-        spec = MySQLDumpPlugin('dummy').configspec()
+        spec = load_plugin('holland.backup', 'mysqldump').configspec()
         spec.merge(Configspec.parse(self.CONFIGSPEC))
         return spec
 
