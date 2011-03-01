@@ -60,6 +60,7 @@ class MysqlDumpLVMBackup(BackupPlugin):
         self.mysqldump_plugin = load_plugin('holland.backup', 'mysqldump')
         self.mysqldump_plugin.configure(self.config)
         self.mysqldump_plugin.setup(self.store)
+        self.mysqldump_plugin.pre()
 
     def estimate(self):
         """Estimate the backup size this plugin will produce
