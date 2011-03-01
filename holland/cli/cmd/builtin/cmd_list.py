@@ -19,7 +19,7 @@ class ListCommands(ArgparseCommand):
 
     def execute(self, namespace, parser):
         """Run list-commands"""
-        self.stderr("")
+        self.stderr("", fmt=())
         self.stderr("Available commands:")
         commands = list(iterate_plugins('holland.commands'))
         commands.sort()
@@ -60,7 +60,8 @@ class ListPlugins(ArgparseCommand):
     """
 
     def execute(self, namespace, parser):
-        self.stderr("Available plugins:")
+        self.stderr("%-12s %-14s %11s", 'Plugin Type', 'Name', 'Description')
+        self.stderr("%12s %14s %11s", "="*12, "="*14, "="*11)
         for group in ('backup', 'stream', 'hooks', 'commands'):
             plugin_list = list(iterate_plugins('holland.%s' % group))
             plugin_list.sort()
@@ -73,9 +74,14 @@ class ListPlugins(ArgparseCommand):
                     self.debug("Broken plugin %r - plugin_info() fails.",
                                plugin, exc_info=True)
                     continue
-                self.stderr("%-10s %-20s - %s", "[%s]" % group,
+                from textwrap import wrap
+                summary = wrap(info['summary'],
+                               initial_indent=' '*28,
+                               subsequent_indent=' '*28,
+                               width=79)
+                self.stderr("%-12s %-14s %s", group,
                             info['name'],
-                            info['summary'])
+                            '\n'.join(summary).lstrip())
         return 0
 
     #@classmethod
