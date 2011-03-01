@@ -25,7 +25,6 @@ class MySQLDumpDispatchAction(object):
         self.mysqld_config['socket'] = socket
         # patch up socket in plugin
         self.mysqldump_plugin.config['mysql:client']['socket'] = socket
-        self.mysqldump_plugin.mysql_config['client']['socket'] = socket
         # set pidfile (careful to not overwrite current one)
         self.mysqld_config['pid-file'] = os.path.join(datadir,
                                                       'holland_lvm.pid')
