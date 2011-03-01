@@ -95,8 +95,7 @@ class CheckParser(object):
     T_SYM       = 16
 
     # rule patterns
-    ident_re    = r'[a-zA-Z_][a-zA-Z0-9_]*'
-    name_re     = r'[a-zA-Z_-][a-zA-Z0-9_-]*'
+    name_re     = r'[0-9a-zA-Z_-][a-zA-Z0-9_-]*[a-zA-Z_-]'
     str_re      = (r"'([^'\\]*(?:\\.[^'\\]*)*)'"r'|"([^"\\]*(?:\\.[^"\\]*)*)"')
     float_re    = r'(?<!\.)\d+\.\d+'
     int_re      = r'\d+'
@@ -105,7 +104,7 @@ class CheckParser(object):
 
     # scanner
     scanner = Scanner([
-        (ident_re, create_token(T_ID)),
+        (name_re, create_token(T_ID)),
         (str_re, create_token(T_STR, unquote)),
         (float_re, create_token(T_NUM, float)),
         (int_re, create_token(T_NUM, int)),
