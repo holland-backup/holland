@@ -42,8 +42,22 @@ class HollandCli(ArgparseCommand):
     description = HOLLAND_BANNER
 
     arguments = [
-        argument('--config', '-c', default='/etc/holland/holland.conf'),
-        argument('--log-level', '-l'),
+        argument('--config', '-c', metavar='<file>',
+                 default='/etc/holland/holland.conf',
+                 help='Read configuration from the given file'),
+        argument('--log-level', '-l', metavar='<log-level>',
+                    choices=('debug', 'info', 'warning', 'error', 'fatal',
+                             'none'),
+                    help="Specify the log level."),
+        argument('--debug', '-d', action='store_const',
+                 dest='log_level', const='debug',
+                 help='Log debug output (alias for --log-level=debug)'),
+        argument('--verbose', '-v', action='store_const',
+                 dest='log_level', const='info',
+                 help='Log verbose output (alias for --log-level=info)'),
+        argument('--quiet', '-q', action='store_const',
+                 dest='log_level', const='none',
+                 help="Disable all output. (alias for --log-level=none)"),
         argument('subcommand', nargs='?'),
         argument('args', nargs='...'),
     ]
@@ -78,6 +92,7 @@ class HollandCli(ArgparseCommand):
             os.environ['TMPDIR'] = config['holland']['tmpdir']
         if config['holland']['path']:
             os.environ['PATH'] = config['holland']['path']
+        # XXX: handle --quiet/log_level=='none'
         holland_logging.configure_logging(config['logging'])
         signal.signal(signal.SIGTERM, terminate)
         signal.signal(signal.SIGQUIT, terminate)
@@ -114,4 +129,5 @@ class HollandCli(ArgparseCommand):
             version=__version__,
             api_version=__version__
         )
+
 holland = HollandCli('holland')
