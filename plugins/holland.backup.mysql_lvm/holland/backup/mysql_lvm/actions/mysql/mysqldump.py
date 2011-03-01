@@ -4,7 +4,8 @@ import os
 import time
 import signal
 import logging
-from holland.lib.mysql import connect, MySQLError, PassiveMySQLClient
+from holland.lib.mysql import connect, build_mysql_config, \
+                              MySQLError, PassiveMySQLClient
 from _mysqld import generate_server_config, MySQLServer, locate_mysqld_exe
 
 LOG = logging.getLogger(__name__)
@@ -40,7 +41,7 @@ class MySQLDumpDispatchAction(object):
         LOG.info("Waiting for %s to start", mysqld_exe)
 
         try:
-            wait_for_mysqld(self.mysqldump_plugin.mysql_config['client'])
+            wait_for_mysqld(self.mysqldump_plugin.config['mysql:client'])
             LOG.info("%s accepting connections on unix socket %s", mysqld_exe, socket)
             self.mysqldump_plugin.backup()
         finally:
@@ -48,6 +49,7 @@ class MySQLDumpDispatchAction(object):
             mysqld.stop() # we dont' really care about the exit code, if mysqldump ran smoothly :)
 
 def wait_for_mysqld(config):
+    config = build_mysql_config(config)['client']
     client = connect(config, PassiveMySQLClient)
     LOG.debug("connect via client %r", client)
     while True:
