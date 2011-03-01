@@ -36,16 +36,15 @@ setup(
     # Holland subcommands
     [holland.commands]
     help            = holland.cli.cmd:Help
-    list-plugins     = holland.cli.cmd:ListPlugins
-    list-commands    = holland.cli.cmd:ListCommands
-    list-backups     = holland.cli.cmd:ListBackups
+    list-plugins    = holland.cli.cmd:ListPlugins
+    list-commands   = holland.cli.cmd:ListCommands
+    list-backups    = holland.cli.cmd:ListBackups
     backup          = holland.cli.cmd:Backup
     mk-config       = holland.cli.cmd:MakeConfig
     purge           = holland.cli.cmd:Purge
 
     [paste.paster_create_template]
     holland:backup  = holland.devtools:HollandBackupTemplate
-    holland:stream  = holland.devtools:HollandStreamTemplate
     """,
     namespace_packages=[],
     **extra
