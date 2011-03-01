@@ -125,7 +125,7 @@ class MysqlLVMBackup(BackupPlugin):
                       config=self.config,
                       client=self.client,
                       snap_datadir=snap_datadir,
-                      spooldir=self.target_directory)
+                      spooldir=self.store.path)
 
         try:
             snapshot.start(volume)
