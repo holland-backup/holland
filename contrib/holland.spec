@@ -302,6 +302,7 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland/cli/
 # XXX: this should probably move to a dev package
 %{python_sitelib}/holland/devtools/
+%{python_sitelib}/holland/backup/__init__.py*
 %{python_sitelib}/holland-%{version}-*.egg-info
 %if %{with sphinxdocs}
 %{_mandir}/man1/holland.1*
