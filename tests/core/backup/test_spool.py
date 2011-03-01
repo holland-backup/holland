@@ -10,7 +10,10 @@ from holland.core.backup.spool import *
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b = tee(iterable)
-    next(b, None)
+    try:
+        b.next()
+    except StopIteration:
+        pass
     return izip(a, b)
 
 spooldir = None
