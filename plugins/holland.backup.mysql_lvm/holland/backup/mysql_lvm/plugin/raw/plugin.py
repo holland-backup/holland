@@ -115,9 +115,6 @@ class MysqlLVMBackup(BackupPlugin):
             raise BackupError("Failed to lookup logical volume for %s: %s" %
                               (datadir, str(exc)))
 
-        if self.dry_run:
-            return _dry_run(volume)
-
         # create a snapshot manager
         snapshot = build_snapshot(self.config['mysql-lvm'], volume)
         # calculate where the datadirectory on the snapshot will be located
