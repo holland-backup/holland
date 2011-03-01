@@ -66,7 +66,7 @@ class MysqlDumpLVMBackup(BackupPlugin):
 
         This returns the estimate from the mysqldump plugin
         """
-        return self.mysqldump_plugin.estimate_backup_size()
+        return self.mysqldump_plugin.estimate()
 
     def configspec(self):
         """INI Spec for the configuration values this plugin supports"""
