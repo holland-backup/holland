@@ -57,7 +57,7 @@ def parse_bytes(size):
     """
     size = str(size)
     units = "bBkKmMgGtTpPeE"
-    match = re.match(r'^([-+])?(\d+(?:[.]\d+)?)([%s])?$' % units, size)
+    match = re.match(r'^([-+])?(\d+(?:[.]\d+)?)([%s])?B?$' % units, size)
     if not match:
         raise ValueError("Invalid constant size syntax %r" % size)
     sign, number, unit = match.groups()
