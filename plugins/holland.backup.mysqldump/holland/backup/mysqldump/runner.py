@@ -141,9 +141,10 @@ class MySQLDump(object):
             raise ValueError("Incorrect API utilization - no pid assigned")
         return self.pid.poll()
 
-    @property
+    #@property
     def returncode(self):
         return self.pid.returncode
+    returncode = property(returncode)
 
     def __str__(self):
         return "MySQLDump([%d] %s)" % (self.pid.pid, list2cmdline(self.argv))
