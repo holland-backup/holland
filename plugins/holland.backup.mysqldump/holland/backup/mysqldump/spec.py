@@ -2,7 +2,7 @@
 
 CONFIGSPEC = """
 [mysqldump]
-extra-defaults     = boolean(default=no)
+extra-defaults     = boolean(default=yes)
 mysql-binpath      = force_list(default=list())
 
 lock-method        = option('flush-lock', 'lock-tables', 'single-transaction', 'auto-detect', 'none', default='auto-detect')

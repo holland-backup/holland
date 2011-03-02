@@ -427,7 +427,7 @@ class AutoMySQLClient(PassiveMySQLClient):
 
         return PassiveMySQLClient.__getattr__(self, key)
 
-def connect(config, client_class=AutoMySQLClient):
+def connect(config, client_class=AutoMySQLClient, **kwargs):
     """Create a MySQLClient object from a dict
 
     :param config: dict-like object containing zero or more of
@@ -472,5 +472,6 @@ def connect(config, client_class=AutoMySQLClient):
             args[cnf_to_mysqldb[key]] = value
         except KeyError:
             LOG.warn("Skipping unknown parameter %s", key)
+    args.update(kwargs)
     # also, always use utf8
     return client_class(charset='utf8', **args)

@@ -116,7 +116,8 @@ def client_from_config(config):
     try:
         config = build_mysql_config(config)
         LOG.debug("client_from_config => %r", config)
-        return connect(config['client'], client_class=PassiveMySQLClient)
+        return connect(config['client'], client_class=PassiveMySQLClient,
+                       read_default_group='client')
     except:
         # parse error of defaults-extra-files, for instance
         raise BackupError("Failed to create client")
