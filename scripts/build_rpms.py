@@ -98,7 +98,7 @@ def build_rpms(with_extra):
 
 def get_holland_version():
     version = None
-    dev_tag = None
+    dev_tag = ''
     version = Popen(['python', 'setup.py', '--version'], stdout=PIPE, cwd=
                     os.path.join(config['srcdir']))\
                     .communicate()[0].strip('\n')
@@ -106,7 +106,7 @@ def get_holland_version():
         if int(version.split('.')[-1])%2 != 0:
             dev_tag = 'dev'
     except ValueError:
-        dev_tag = None
+        pass
 
     if not version:
         raise Exception, "unable to determine holland version"
