@@ -45,9 +45,14 @@ def argv_from_config(defaults_file, config, mysqld_version):
     check_mysqldump_version(mysqldump, mysqld_version)
     mysqldump_options = mysqldump_options_from_config(config['mysqldump'],
                                                       mysqld_version)
+    if config['mysqldump']['extra-defaults']:
+        defaults_option = '--defaults-extra-file'
+    else:
+        defaults_option = '--defaults-file'
+
     return [
         mysqldump,
-        '--defaults-file=' + defaults_file,
+        defaults_option + '=' + defaults_file,
     ] + mysqldump_options
 
 def mysqldump_options_from_config(config, server_version):
