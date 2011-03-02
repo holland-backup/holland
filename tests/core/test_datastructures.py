@@ -221,7 +221,7 @@ class MergeDictTests(DatastructuresTestCase):
                           [('key1', 'value1'), ('key2', 'value3'),
                            ('key4', 'value6')])
 
-        self.assertEquals([(k,mm.getlist(k)) for k in sorted(mm)],
+        self.assertEquals([(k,mm.getlist(k)) for k in sorted(mm.keys())],
                           [('key1', ['value1']),
                            ('key2', ['value2', 'value3']),
                            ('key4', ['value5', 'value6'])])
