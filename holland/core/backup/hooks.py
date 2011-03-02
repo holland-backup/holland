@@ -106,6 +106,8 @@ class BackupInfoHook(BackupHook):
 
 class CheckForSpaceHook(BackupHook):
     """Check for available space before starting a backup"""
+    initialized = False
+
     def execute(self, job):
         """Estimate the available space from the plugin and abort if
         there does not appear to be enought to successfully complete this
@@ -113,6 +115,12 @@ class CheckForSpaceHook(BackupHook):
 
         :raises: BackupError if estimated_space > available_space
         """
+        if self.initialized:
+            LOG.info("+ Final backup size %s", format_bytes(job.store.size()))
+            LOG.info("+ %.2f%% of estimated size %s",
+                     job.store.size() / parse_bytes(self.job_info['estimated-size']))
+            return
+
         LOG.info("+ Estimating backup size")
         main_config = job.config['holland:backup']
         estimate_scale_factor = main_config['estimated-size-factor']
@@ -156,8 +164,11 @@ class CheckForSpaceHook(BackupHook):
 
         job_info = Config.read([os.path.join(job.store.path, 'job.info')])
         job_info['estimated-size'] = format_bytes(estimated_bytes)
+        self.job_info = job_info
         if available_bytes < estimated_bytes*estimate_scale_factor:
             raise BackupError("Insufficient space for backup")
+
+        self.initialized = True
 
 def setup_user_hooks(beacon, config):
     """Initialize hooks based on the job config"""
@@ -175,6 +186,7 @@ def setup_builtin_hooks(beacon, config):
     beacon.before_backup.connect(config_writer, weak=False)
 
     beacon.after_backup.connect(backup_info, weak=False)
+    beacon.after_backup.connect(estimation, weak=False)
     beacon.after_backup.connect(config_writer, weak=False)
 
     config = config['holland:backup']
