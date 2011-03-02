@@ -80,7 +80,7 @@ class MySQLBackup(object):
             raise BackupError("No databases to backup")
         if parallelism > 1:
             databases = list(databases)
-            databases.sort(cmp=lambda x,y: cmp(y.size, x.size))
+            databases.sort(lambda x,y: cmp(y.size, x.size))
         queue = ProcessQueue(parallelism)
         for database in databases:
             options = self.options[:]
