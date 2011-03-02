@@ -118,7 +118,9 @@ class CheckForSpaceHook(BackupHook):
         if self.initialized:
             LOG.info("+ Final backup size %s", format_bytes(job.store.size()))
             LOG.info("+ %.2f%% of estimated size %s",
-                     job.store.size() / parse_bytes(self.job_info['estimated-size']))
+                     100.0*job.store.size() / 
+                     parse_bytes(self.job_info['estimated-size']),
+                     self.job_info['estimated-size'])
             return
 
         LOG.info("+ Estimating backup size")
