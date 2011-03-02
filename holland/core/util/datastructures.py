@@ -4,6 +4,10 @@ From django.util.datastructures
 """
 from types import GeneratorType
 from copy import copy, deepcopy
+try:
+    set
+except NameError:
+    from sets import Set as set
 
 class MergeDict(object):
     """
@@ -97,7 +101,7 @@ class MergeDict(object):
 
         instead of generic "<object meta-data>" inherited from object.
         '''
-        dictreprs = ', '.join(repr(d) for d in self.dicts)
+        dictreprs = ', '.join([repr(d) for d in self.dicts])
         return '%s(%s)' % (self.__class__.__name__, dictreprs)
 
 class SortedDict(dict):

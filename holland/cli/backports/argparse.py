@@ -83,6 +83,11 @@ import textwrap as _textwrap
 
 from gettext import gettext as _
 
+try:
+    set
+except NameError:
+    from sets import Set as set
+
 
 def _callable(obj):
     return hasattr(obj, '__call__') or hasattr(obj, '__bases__')
@@ -119,7 +124,9 @@ class _AttributeHolder(object):
         return '%s(%s)' % (type_name, ', '.join(arg_strings))
 
     def _get_kwargs(self):
-        return sorted(self.__dict__.items())
+        items = self.__dict__.items()
+        items.sort()
+        return items
 
     def _get_args(self):
         return []
@@ -442,7 +449,10 @@ class HelpFormatter(object):
                 parts.append(part)
 
         # insert things at the necessary indices
-        for i in sorted(inserts, reverse=True):
+        _inserts = inserts.keys()
+        _inserts.sort()
+        _inserts.reverse()
+        for i in _inserts:
             parts[i:i] = [inserts[i]]
 
         # join all the action items with spaces

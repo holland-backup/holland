@@ -256,7 +256,9 @@ class Signal(object):
                 last_idx = len(self.receivers) - 1
                 # enumerate in reverse order so that indexes are valid even
                 # after we delete some items
-                for idx, (r_key, _) in enumerate(reversed(self.receivers)):
+                receivers = self.receivers[:]
+                receivers.reverse()
+                for idx, (r_key, _) in enumerate(receivers):
                     if r_key == key:
                         del self.receivers[last_idx-idx]
         finally:
