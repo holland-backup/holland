@@ -127,7 +127,6 @@ backup tool for InnoDB and XtraDB engines for MySQL
 
 %prep
 %setup -q
-find ./ -name setup.cfg -exec rm -f {} \;
 mv plugins/README README.plugins
 mv config/providers/README README.providers 
 
