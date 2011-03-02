@@ -62,7 +62,7 @@ def _build_spool():
     for name, numstores in backupsets.iteritems():
         for _ in xrange(numstores):
             spool.add_store(name)
-            time.sleep(1)
+            time.sleep(1.5)
         backups = spool.list_backups(name)
         bdir = os.path.dirname(backups[0].path)
         try:
