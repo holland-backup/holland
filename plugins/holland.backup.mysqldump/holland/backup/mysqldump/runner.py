@@ -131,7 +131,7 @@ class MySQLDump(object):
         LOG.info("* mysqldump(%s[%d]) complete", self.argv[-1], self.pid.pid)
         if status != 0:
             for line in self.pid.stderr:
-                LOG.error("mysqldump(%s[%d])::", self.argv[-1], self.pid.pid,
+                LOG.error("mysqldump(%s[%d]):: %s", self.argv[-1], self.pid.pid,
                           line.rstrip())
             raise ProcessError("mysqldump exited with non-zero status: %d" %
                                status)
