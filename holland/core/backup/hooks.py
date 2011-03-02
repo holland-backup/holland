@@ -2,12 +2,13 @@
 
 import os
 import logging
+import time
 from datetime import datetime
 from holland.core.config import Config
 from holland.core.hooks import BaseHook, load_hooks_from_config
 from holland.core.backup.error import BackupError
-from holland.core.util import format_bytes, parse_bytes, directory_size, \
-                              run_command
+from holland.core.util import format_bytes, format_interval, parse_bytes, \
+                              directory_size, run_command
 
 LOG = logging.getLogger(__name__)
 
@@ -93,11 +94,15 @@ class BackupInfoHook(BackupHook):
         if not self.initialized:
             self.initialized = True
             self.config['start-time'] = datetime.now().isoformat()
+            self.start_time = time.time()
             self.config.write(path)
         else:
             self.config['stop-time'] = datetime.now().isoformat()
             self.config['actual-size'] = job.store.size()
             self.config.write(path)
+            interval = time.time() - self.start_time
+            LOG.info("Backup job %s completed in %s",
+                     job.store.name, format_interval(interval))
 
 class CheckForSpaceHook(BackupHook):
     """Check for available space before starting a backup"""
