@@ -2,10 +2,37 @@ import sys
 import time
 import errno
 import tempfile
-from itertools import tee, izip
+from itertools import izip
 from nose.tools import *
 from holland.core.util.path import disk_free
 from holland.core.backup.spool import *
+
+try:
+    assert_true
+except NameError:
+    def assert_true(expr, message=''):
+        if not expr:
+            raise AssertionError(message)
+
+    def assert_false(expr, message=''):
+        if expr:
+            raise AssertionError(message)
+
+try:
+    from itertools import tee
+except ImportError:
+    # less efficient implementation for py2.3
+    def tee(iterable, n=2):
+        it = iter(iterable)
+        deques = [list() for i in range(n)]
+        def gen(mydeque):
+            while True:
+                if not mydeque:             # when the local deque is empty
+                    newval = it.next()      # fetch a new value and
+                    for d in deques:        # load it to all the deques
+                        d.append(newval)
+                yield mydeque.pop(0)
+        return tuple([gen(d) for d in deques])
 
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."

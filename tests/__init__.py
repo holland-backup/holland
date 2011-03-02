@@ -1,6 +1,10 @@
 #
-import os
+import os, sys
 from pkg_resources import *
+import nose.tools
+import holland.cli.backports.subprocess as subprocess
+
+sys.modules['subprocess'] = subprocess
 
 def setup():
     """Pull in the main holland egg into pkg_resources"""
@@ -17,3 +21,4 @@ def setup():
                 pass
     logging.getLogger("holland").propagate = False
     logging.getLogger("holland").addHandler(NullHandler())
+

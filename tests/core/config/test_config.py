@@ -17,7 +17,7 @@ def test_basic():
     assert_equals(len(cfg), 1)
     assert_equals(cfg['section'], { 'name' : 'value' })
     assert_equals(cfg['section']['name'], 'value')
-    assert_true(isinstance(cfg, dict))
+    ok_(isinstance(cfg, dict))
 
 def test_meld():
     input1 = dedent("""
@@ -116,5 +116,4 @@ def test_write_fileobj():
     output = StringIO()
     cfg = Config.parse(input1.splitlines())
     cfg.write(output)
-    print output.getvalue()
     Config.parse(output.getvalue().splitlines())

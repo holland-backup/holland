@@ -7,6 +7,13 @@ import unittest
 from copy import copy, deepcopy
 from holland.core.util.datastructures import *
 
+try:
+    sorted
+except NameError:
+    def sorted(l):
+        newlist = l[:]
+        newlist.sort()
+        return newlist
 
 class DatastructuresTestCase(unittest.TestCase):
     def assertRaisesErrorWithMessage(self, error, message, callable,
@@ -133,7 +140,7 @@ class SortedDictTests(DatastructuresTestCase):
         self.assertEquals(l - len(self.d1), 1)
 
     def test_dict_equality(self):
-        d = SortedDict((i, i) for i in xrange(3))
+        d = SortedDict([(i, i) for i in xrange(3)])
         self.assertEquals(d, {0: 0, 1: 1, 2: 2})
 
     def test_tuple_init(self):
@@ -179,8 +186,8 @@ class MergeDictTests(DatastructuresTestCase):
         self.assertEquals(md.get('chris2'), 'cool2')
         self.assertEquals(md.get('chris4', 'cool4'), 'cool4')
 
-        self.assertTrue(md.has_key('chris3'))
-        self.assertFalse(md.has_key('twoofme3'))
+        self.failUnless(md.has_key('chris3'))
+        self.failIf(md.has_key('twoofme3'))
 
         md2 = md.copy()
         self.assertEquals(md2['chris'], 'cool')
@@ -208,9 +215,9 @@ class MergeDictTests(DatastructuresTestCase):
         self.assertEquals(sorted(mm.keys()), ['key1', 'key2', 'key4'])
         self.assertEquals(len(mm.values()), 3)
 
-        self.assertTrue('value1' in mm.values())
+        self.failUnless('value1' in mm.values())
 
-        self.assertEquals(sorted(mm.items(), key=lambda k: k[0]),
+        self.assertEquals(sorted(mm.items()),
                           [('key1', 'value1'), ('key2', 'value3'),
                            ('key4', 'value6')])
 

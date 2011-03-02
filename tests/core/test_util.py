@@ -112,7 +112,7 @@ def test_scanner():
         (r"\s+", None),
     ])
     results, remainder = scanner.scan("sum = 3*foo + 312.50 + bar")
-    assert_false(remainder)
+    ok_(not remainder)
     assert_equals(results, ['sum', 'op=', 3, 'op*', 'foo', 'op+', 312.50, 'op+', 'bar'])
 
     results, remainder = scanner.scan('sum = foo + ,foo,bar,baz')

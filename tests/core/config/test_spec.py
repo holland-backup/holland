@@ -19,7 +19,7 @@ def test_validate_missing():
                         'data',
                         'mysqldump.spec')
     cfg = Config()
-    assert_false(cfg.keys())
+    ok_(not cfg.keys())
 
     spec = Configspec.read([path])
     spec.validate(cfg)
