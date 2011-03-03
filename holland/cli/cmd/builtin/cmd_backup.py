@@ -61,6 +61,7 @@ class Backup(ArgparseCommand):
                 raise
             except IOError, exc:
                 self.stderr("Could not open config file. %s", exc)
+                break
             except (ConfigError, BackupError), exc:
                 self.stderr("Backup '%s' failed: %s", name, exc)
                 break
