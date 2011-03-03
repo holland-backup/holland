@@ -1,53 +1,92 @@
-import time
+import errno
+import select
 import logging
 from subprocess import Popen, PIPE, list2cmdline
-from holland.core import BackupError
 
 LOG = logging.getLogger(__name__)
 
 class ProcessError(Exception):
-    pass
+    """Base error class for process execution"""
 
 class ProcessQueue(object):
+    """Manage a queue of processes"""
+
     def __init__(self, max=1):
-        self.queue = []
+        self.queue = {}
+        self.poller = select.poll()
         self.max = max
 
-    def _wait_free(self):
-        for proc in self.queue[:]:
-            if proc.poll() is not None:
-                self._handle(proc)
-        time.sleep(0.5)
+    def wait(self):
+        """Wait for at least one process to finish
 
-    def _handle(self, proc):
-        self.queue.remove(proc)
-        LOG.debug("removed %s from queue", proc)
+        This queue uses multiplexed IO via select.poll()
+        on the stdin of each subprocess to detect when a
+        process is ripe for collecting.
+        """
+        LOG.debug("Waiting for at least one process to complete")
+        while True:
+            try:
+                count = 0
+                for fd, event in self.poller.poll():
+                    LOG.debug("fd=%d seems to have completed", fd)
+                    try:
+                        process = self.queue.pop(fd)
+                    except KeyError:
+                        LOG.error("Internal error. Attempted to dequeue a fd we were not tracking: %d", fd)
+                        continue
+                    yield self.dequeue(process)
+                    assert process.poll() is not None
+                    count += 1
+                if not count:
+                    LOG.error("No processes dequeued")
+                break
+            except select.error, exc:
+                # retry after EINTR
+                if exc[0] == errno.EINTR:
+                    LOG.debug("Resuming from EINTR")
+                    continue
+                raise
+
+    def dequeue(self, proc):
+        """Remove a process from the queue"""
+        LOG.debug("dequeing process %r", proc)
+        self.poller.unregister(proc.stdin.fileno())
+        LOG.debug("unregistered fd %d", proc.stdin.fileno())
         proc.wait()
+        return proc
 
     def add(self, process):
+        """Add a new process to this queue"""
+        LOG.debug("process = %r", process)
         while len(self.queue) >= self.max:
             # wait for process to die
             LOG.debug("Waiting for a free process slot")
-            self._wait_free()
+            for child in self.wait():
+                yield child
         LOG.debug("OK len(self.queue) = %d", len(self.queue))
-        self.queue.append(process)
+        LOG.debug("process = %r", process)
+        process.start()
+        self.queue[process.stdin.fileno()] = process
+        LOG.debug("registering process with fileno %d", process.stdin.fileno())
+        self.poller.register(process.stdin.fileno(), select.POLLIN)
+        LOG.debug("%d : %r", process.stdin.fileno(), process)
 
-    def wait(self):
-        # wait on all processes in the queue
+    def waitall(self):
+        """Wait for all remaining processes in the queue to finish"""
+        LOG.debug("Waiting for all processes")
         queue = self.queue
         while queue:
-            pid = queue.pop()
-            pid.wait()
-            if pid.returncode != 0:
-                self.terminate()
-                raise BackupError("mysqldump exited with non-zero status: %d" %
-                                  pid.returncode)
+            for process in self.wait():
+                LOG.debug("Yielding %r", process)
+                yield process
 
     def terminate(self):
+        """Send SIGTERM to all processes in the queue"""
         # termiante all queued processes
         queue = self.queue
         while queue:
             pid = queue.pop()
+            self.poller.unregister(pid.pid)
             os.kill(pid.pid, signal.SIGTERM)
             pid.wait()
 
@@ -77,7 +116,7 @@ class MySQLBackup(object):
     def run_each(self, databases, parallelism=1):
         databases = [db for db in databases if not db.excluded]
         if not databases:
-            raise BackupError("No databases to backup")
+            raise ProcessError("No databases to backup")
         if parallelism > 1:
             databases = list(databases)
             databases.sort(lambda x,y: cmp(y.size, x.size))
@@ -90,24 +129,31 @@ class MySQLBackup(object):
             ]
             fileobj = self.open_sql_file(database.name, 'w')
             mysqldump = MySQLDump(options, fileobj)
-            queue.add(mysqldump)
-            mysqldump.run_async()
-        queue.wait()
+            for process in queue.add(mysqldump):
+                if process.returncode != 0:
+                    LOG.error("mysqldump[%d] exited with non-zero status",
+                              process.pid)
+                    LOG.info("Terminating remaining processes")
+                    queue.terminate()
+        for process in queue.waitall():
+            LOG.info("mysqldump[%d] exited with status %d",
+                     process.pid, process.returncode)
 
 class MySQLDump(object):
     def __init__(self, argv, fileobj):
         self.argv = argv
         self.fileobj = fileobj
-        self.pid = None
+        self.process = None
 
-    def _start(self):
-        if self.pid:
+    def start(self):
+        if self.process:
             raise ValueError("Already started this mysqldump")
-        self.pid = Popen([arg.encode('utf8') for arg in self.argv],
-                         stdout=self.fileobj.fileno(),
-                         stderr=PIPE,
-                         close_fds=True)
-        LOG.info("mysqldump(%s[%d])::", self.argv[-1], self.pid.pid)
+        self.process = Popen([arg.encode('utf8') for arg in self.argv],
+                             stdin=PIPE,
+                             stdout=self.fileobj.fileno(),
+                             stderr=PIPE,
+                             close_fds=True)
+        LOG.info("mysqldump(%s[%d])::", self.argv[-1], self.process.pid)
         LOG.info("  %s", list2cmdline(self.argv))
 
     def run(self):
@@ -115,36 +161,43 @@ class MySQLDump(object):
         self._start()
         return self.wait()
 
-
-    def run_async(self):
-        # fork and return immediately
-        # must poll() or wait() on object
-        self._start()
-
     def wait(self):
-        LOG.debug("Waiting on %s", self)
-        status = self.pid.wait()
+        LOG.debug("Waiting on --->%s<---", self)
+        self.stdin.close()
+        status = self.process.wait()
         LOG.debug("OKAY %s finished with status %d", self, status)
         LOG.debug("closing fileobj")
         self.fileobj.close()
         LOG.debug("okay fileobj closed")
-        LOG.info("* mysqldump(%s[%d]) complete", self.argv[-1], self.pid.pid)
+        LOG.info("* mysqldump(%s[%d]) complete", self.argv[-1], self.process.pid)
         if status != 0:
-            for line in self.pid.stderr:
-                LOG.error("mysqldump(%s[%d]):: %s", self.argv[-1], self.pid.pid,
+            for line in self.process.stderr:
+                LOG.error("mysqldump(%s[%d]):: %s", self.argv[-1], self.process.pid,
                           line.rstrip())
             raise ProcessError("mysqldump exited with non-zero status: %d" %
                                status)
 
     def poll(self):
-        if self.pid is None:
-            raise ValueError("Incorrect API utilization - no pid assigned")
-        return self.pid.poll()
+        if self.process is None:
+            raise ValueError("Incorrect API utilization - no process active")
+        return self.process.poll()
+
+    #@property
+    def pid(self):
+        if not self.process:
+            return -1
+        return self.process.pid
+    pid = property(pid)
 
     #@property
     def returncode(self):
-        return self.pid.returncode
+        return self.process.returncode
     returncode = property(returncode)
 
-    def __str__(self):
-        return "MySQLDump([%d] %s)" % (self.pid.pid, list2cmdline(self.argv))
+    #@property
+    def stdin(self):
+        return self.process.stdin
+    stdin = property(stdin)
+
+    def __repr__(self):
+        return "MySQLDump([%d] %s)" % (self.pid, list2cmdline(self.argv))

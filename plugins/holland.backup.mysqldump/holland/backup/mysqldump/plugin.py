@@ -5,7 +5,7 @@ import logging
 from holland.core import BackupError, BackupPlugin, Configspec
 from holland.backup.mysqldump.mock import MockEnvironment
 from holland.backup.mysqldump.util import *
-from holland.backup.mysqldump.runner import MySQLBackup
+from holland.backup.mysqldump.runner import MySQLBackup, ProcessError
 from holland.backup.mysqldump.spec import CONFIGSPEC
 
 LOG = logging.getLogger(__name__)
@@ -76,10 +76,8 @@ class MySQLDumpPlugin(BackupPlugin):
                     backup.run_each(self._schema.databases, parallelism)
                 else:
                     backup.run_all(self._schema.databases)
-            except KeyboardInterrupt:
-                raise BackupError("Interrupted")
-            except SystemExit:
-                raise BackupError("Terminated")
+            except (KeyboardInterrupt, SystemExit):
+                raise
             except:
                 LOG.debug("Failure(exception)", exc_info=True)
                 raise BackupError("Backup failed", sys.exc_info()[1])
