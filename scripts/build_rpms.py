@@ -4,7 +4,11 @@ import sys, os
 import shutil
 import re
 import tarfile
-from subprocess import Popen, PIPE
+try:
+    from subprocess import Popen, PIPE
+except ImportError:
+    from _subprocess import Popen, PIPE
+
 from optparse import OptionParser, IndentedHelpFormatter
 
 VERSION='0.3'
