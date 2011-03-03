@@ -5,13 +5,13 @@ import logging
 from holland.core import BackupError, BackupPlugin, Configspec
 from holland.backup.mysqldump.mock import MockEnvironment
 from holland.backup.mysqldump.util import *
-from holland.backup.mysqldump.runner import MySQLBackup, ProcessError
+from holland.backup.mysqldump.runner import MySQLBackup
 from holland.backup.mysqldump.spec import CONFIGSPEC
 
 LOG = logging.getLogger(__name__)
 
 class MySQLDumpPlugin(BackupPlugin):
-    name = 'mysqldump'
+    """Backup Plugin for MySQL using mysqldump"""
 
     def __init__(self, name):
         self.name = name
@@ -24,9 +24,18 @@ class MySQLDumpPlugin(BackupPlugin):
     def pre(self):
         self._schema = schema_from_config(self.config['mysqldump'])
         self._client = client_from_config(self.config['mysql:client'])
-        self._client.connect()
+        try:
+            self._client.connect()
+            LOG.info(" + Connected to MySQL")
+        except MySQLError, exc:
+            LOG.error(" + Connection to MySQL failed")
+            raise BackupError("[%d] %s" % exc.args)
         log_host_info(self._client)
-        refresh_schema(self._schema, self._client)
+        try:
+            LOG.info(" + Evaluating schema")
+            refresh_schema(self._schema, self._client)
+        except MySQLError, exc:
+            raise BackupError("[%d] %s" % exc.args)
 
     def estimate(self):
         LOG.info("Estimating backup size")

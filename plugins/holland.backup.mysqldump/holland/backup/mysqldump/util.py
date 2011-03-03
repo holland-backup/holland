@@ -1,6 +1,7 @@
 import os
 import codecs
 import logging
+from holland.lib.mysql import MySQLError
 
 LOG = logging.getLogger(__name__)
 
@@ -20,7 +21,6 @@ def schema_from_config(config):
     schema = MySQLSchema()
     schema.add_database_filter(include_glob(*config['databases']))
     schema.add_database_filter(exclude_glob(*config['exclude-databases']))
-    LOG.info("+ Excluding: %s", ','.join(config['exclude-databases']))
     schema.add_table_filter(include_glob_qualified(*config['tables']))
     schema.add_table_filter(exclude_glob_qualified(*config['exclude-tables']))
     schema.add_engine_filter(include_glob(*config['engines']))
