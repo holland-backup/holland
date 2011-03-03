@@ -1,3 +1,5 @@
+"""Run mysqldump, Run"""
+
 import errno
 import select
 import logging
@@ -6,10 +8,10 @@ from subprocess import Popen, PIPE, list2cmdline
 LOG = logging.getLogger(__name__)
 
 class ProcessError(Exception):
-    """Base error class for process execution"""
+    """Raised after an error during process execution"""
 
 class ProcessQueue(object):
-    """Manage a queue of processes"""
+    """Manage a queue of running processes"""
 
     def __init__(self, max=1):
         self.queue = {}
