@@ -11,10 +11,10 @@ LOG = logging.getLogger(__name__)
 class ConfigError(Exception):
     """General error when processing config"""
 
-class ConfigFileError(ConfigError, IOError):
+class ConfigFileError(IOError, ConfigError):
     """I/O error when reading config file"""
 
-class ConfigSyntaxError(ConfigError, SyntaxError):
+class ConfigSyntaxError(SyntaxError, ConfigError):
     """Syntax error when processing config"""
 
 class BaseFormatter(object):
@@ -131,8 +131,8 @@ class Config(OrderedDict):
         for path in filenames:
             try:
                 fileobj = codecs.open(path, 'r', encoding=encoding)
-            except:
-                raise ConfigFileError(*sys.exc_info()[1].args)
+            except IOError, exc:
+                raise ConfigFileError(exc.errno, exc.strerror, exc.filename)
             try:
                 cfg = cls.parse(fileobj)
             finally:
