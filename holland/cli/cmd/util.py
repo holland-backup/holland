@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 class ArgparseError(Exception):
     """Raise when Argparse runs into an error"""
     def __init__(self, message, status=0):
-        Exception.__init__(message)
+        Exception.__init__(self, message)
         self.message = message
         self.status = status
 
