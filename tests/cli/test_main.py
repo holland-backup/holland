@@ -109,4 +109,4 @@ def test_holland_backup():
     ok_(ret != 0)
 
     ret = main.holland(['-c', holland_config(), 'backup', 'default'])
-    ok_(ret != 0)
+    ok_(ret != 0, "expected holland backup to fail but it did not")
