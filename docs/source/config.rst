@@ -196,9 +196,12 @@ put the following at the top of the backup set configuration file::
     This is required in order for the backup-set to function.
 
 **backups-to-keep** = #
+**retention-count** = #
 
     Specifies the number of backups to keep for a backup-set.
-    
+ 
+    :since 1.1.0: ``retention-count`` is now an alias for backups-to-keep
+   
 **estimated-size-factor** = #
 
     Specifies the scale factor when Holland decides if there is enough
@@ -206,6 +209,19 @@ put the following at the top of the backup set configuration file::
     is multiplied against what each individual plugin reports its 
     estimated backup size when Holland is verifying sufficient free
     space for the backupset.
+
+**estimation-method** = plugin | dir:<path> | const:<size> | cmd:<path>
+
+    Specifies the way holland should check for available space before
+    proceeding with a backup.
+
+    :since 1.1.0:
+
+**hooks** = [hook][, hook...]
+
+    Specify hooks actions that should be run at various stages in the backup.
+    Each hook name maps to a new section in the config file which defines
+    the configuration for that hooks.  See `hooks` for more information.
 
 Backup-Set files are defined in the "backupsets" directory which is,
 by default, ``/etc/holland/backupsets``. The name of the backup-set is 
