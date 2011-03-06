@@ -200,7 +200,7 @@ put the following at the top of the backup set configuration file::
 
     Specifies the number of backups to keep for a backup-set.
  
-    :since 1.1.0: ``retention-count`` is now an alias for backups-to-keep
+    :since: 1.1.0 ``retention-count`` is now an alias for backups-to-keep
    
 **estimated-size-factor** = #
 
@@ -215,7 +215,7 @@ put the following at the top of the backup set configuration file::
     Specifies the way holland should check for available space before
     proceeding with a backup.
 
-    :since 1.1.0:
+    :since: 1.1.0
 
 **hooks** = [hook][, hook...]
 

@@ -14,3 +14,4 @@ Contents:
    intro
    config
    commands
+   hooks
