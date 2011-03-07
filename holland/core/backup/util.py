@@ -2,7 +2,6 @@
 
 import logging
 from holland.core.plugin import load_plugin, PluginError
-from holland.core.dispatch import Signal
 from holland.core.backup.plugin import BackupPlugin
 from holland.core.backup.error import BackupError
 
@@ -44,34 +43,3 @@ def validate_config(config):
         section.merge(plugin.configspec())
     configspec.validate(config)
 
-class Beacon(dict):
-    """Simple Signal container"""
-    def __init__(self, names):
-        dict.__init__(self)
-        for name in names:
-            self[name] = Signal()
-
-    def notify(self, name, robust=True, **kwargs):
-        """Send notifications to the named signal in this SignalGroup
-
-        If ``robust`` is True then use send_robust and raise an exception
-        at the end if necessary.
-
-        ``**kwargs`` wil be send to each registered receiver for the signal
-        """
-        signal = self[name]
-        if robust:
-            for receiver, result in signal.send_robust(sender=None, **kwargs):
-                if isinstance(result, Exception):
-                    LOG.debug("Received (%r) raised an exception: %r",
-                            receiver, result)
-                    raise result
-        else:
-            signal.send(sender=None, **kwargs)
-
-    def __getattr__(self, key):
-        try:
-            return self[key.replace('_', '-')]
-        except KeyError:
-            raise AttributeError('%r object has no attribute %r' %
-                                 (self.__class__.__name__, key))

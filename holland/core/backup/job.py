@@ -1,7 +1,7 @@
 """Run a backup job"""
 
 import logging
-from holland.core.backup.util import Beacon
+from holland.core.util.signal import SignalGroup
 from holland.core.backup.hooks import setup_user_hooks, setup_builtin_hooks, \
                                       setup_dryrun_hooks
 
@@ -18,8 +18,8 @@ class BackupJob(object):
 
     def run(self, dry_run=False):
         """Run through a backup lifecycle"""
-        beacon = Beacon(['setup-backup', 'before-backup',
-                         'after-backup', 'backup-failure'])
+        beacon = SignalGroup(['setup-backup', 'before-backup',
+                              'after-backup', 'backup-failure'])
         if not dry_run:
             if self.hooks():
                 setup_user_hooks(beacon, self.config)
@@ -29,7 +29,7 @@ class BackupJob(object):
 
         try:
             LOG.info("+ Running setup-backup hooks")
-            beacon.notify('setup-backup', job=self, robust=False)
+            beacon.notify('setup-backup', job=self)
             control = self.config.pop('holland:backup')
             self.plugin.configure(self.config)
             self.config.insert(0, 'holland:backup', control)
@@ -40,7 +40,7 @@ class BackupJob(object):
             LOG.info("+ Ran plugin pre")
             # allow before-backup hooks to abort immediately
             LOG.info("+ Running before-backup hooks")
-            beacon.notify('before-backup', job=self, robust=False)
+            beacon.notify('before-backup', job=self)
             try:
                 LOG.info("Running backup")
                 if dry_run:
@@ -56,10 +56,10 @@ class BackupJob(object):
                     LOG.warning("  Please see the trace log")
         except:
             LOG.info("+ Running backup failure hooks")
-            beacon.notify('backup-failure', job=self)
+            beacon.notify_safe('backup-failure', job=self)
             raise
         LOG.info("+ Running after-backup hooks")
-        beacon.notify('after-backup', job=self)
+        beacon.notify_all('after-backup', job=self)
 
     def hooks(self):
         """Extract hooks from the global config"""
