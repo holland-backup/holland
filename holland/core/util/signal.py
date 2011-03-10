@@ -22,7 +22,9 @@ class SignalGroup(dict):
         :returns: iterable of results
         """
         signal = self[name]
-        for receiver, result in signal.send_robust(sender=None, **kwargs):
+        for receiver, result in signal.send_robust(sender=None,
+                                                   event=name,
+                                                   **kwargs):
             yield result
 
     def notify_all(self, name, **kwargs):
@@ -45,7 +47,7 @@ class SignalGroup(dict):
 
         This method may not send the signal to all registered receivers.
         """
-        self[name].send(sender=None, **kwargs)
+        self[name].send(sender=None, event=name, **kwargs)
 
     def __getattr__(self, key):
         try:

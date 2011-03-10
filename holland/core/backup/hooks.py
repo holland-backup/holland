@@ -15,7 +15,7 @@ LOG = logging.getLogger(__name__)
 class BackupHook(BaseHook):
     """Generic BackupHook"""
 
-    def execute(self, job):
+    def execute(self, job, event):
         """Process a backup job event"""
         raise NotImplementedError()
 
@@ -28,7 +28,7 @@ class BackupHook(BaseHook):
 class AutoPurgeFailuresHook(BackupHook):
     """Purge failed backups immediately"""
 
-    def execute(self, job):
+    def execute(self, job, event):
         """Purge failed backup"""
         LOG.info("+++ Running %s", job.store.path)
         job.store.purge()
@@ -37,7 +37,7 @@ class AutoPurgeFailuresHook(BackupHook):
 class DryRunPurgeHook(BackupHook):
     """Purge staging directory after a dry-run is complete"""
 
-    def execute(self, job):
+    def execute(self, job, event):
         """Purge backup directory for dry-run backup"""
         job.store.purge()
         LOG.info("+ Purged %s after dry-run", job.store.path)
@@ -45,7 +45,7 @@ class DryRunPurgeHook(BackupHook):
 class RotateBackupsHook(BackupHook):
     """Purge old backups when run"""
 
-    def execute(self, job):
+    def execute(self, job, event):
         """Process the automated purge policy
 
         If this runs before starting a new backup it is important to preserve
@@ -67,7 +67,7 @@ class RotateBackupsHook(BackupHook):
 class WriteConfigHook(BackupHook):
     """Write config to backup store when called"""
 
-    def execute(self, job):
+    def execute(self, job, event):
         """Write a copy of the job config to the backup directory
 
         This preserves the exact group of settings that were used
@@ -85,14 +85,12 @@ class BackupInfoHook(BackupHook):
     """
     def __init__(self, name):
         super(BackupInfoHook, self).__init__(name)
-        self.initialized = False
         self.config = Config()
 
-    def execute(self, job):
+    def execute(self, job, event):
         """Record job info"""
         path = os.path.join(job.store.path, 'job.info')
-        if not self.initialized:
-            self.initialized = True
+        if event == 'after-backup':
             self.config['start-time'] = datetime.now().isoformat()
             self.start_time = time.time()
             self.config.write(path)
@@ -106,19 +104,18 @@ class BackupInfoHook(BackupHook):
 
 class CheckForSpaceHook(BackupHook):
     """Check for available space before starting a backup"""
-    initialized = False
 
-    def execute(self, job):
+    def execute(self, job, event):
         """Estimate the available space from the plugin and abort if
         there does not appear to be enought to successfully complete this
         backup based on the estimate.
 
         :raises: BackupError if estimated_space > available_space
         """
-        if self.initialized:
+        if event == 'after-backup':
             LOG.info("+ Final backup size %s", format_bytes(job.store.size()))
             LOG.info("+ %.2f%% of estimated size %s",
-                     100.0*job.store.size() / 
+                     100.0*job.store.size() /
                      parse_bytes(self.job_info['estimated-size']),
                      self.job_info['estimated-size'])
             return
@@ -170,7 +167,6 @@ class CheckForSpaceHook(BackupHook):
         if available_bytes < estimated_bytes*estimate_scale_factor:
             raise BackupError("Insufficient space for backup")
 
-        self.initialized = True
 
 def setup_user_hooks(beacon, config):
     """Initialize hooks based on the job config"""
