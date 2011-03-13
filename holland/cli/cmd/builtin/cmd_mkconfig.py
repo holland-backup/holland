@@ -1,7 +1,6 @@
 """Generate backupset configuration files"""
 
 import sys
-from textwrap import dedent
 from holland.cli.cmd.base import ArgparseCommand, argument
 from holland.core import Config, load_plugin, BackupPlugin, PluginError
 
@@ -31,10 +30,10 @@ class MakeConfig(ArgparseCommand):
             self.stderr("%s", exc)
             return 1
 
-        config = Config.parse(dedent("""
+        config = Config.from_string("""
         [holland:backup]
         plugin = %s
-        """ % namespace.plugin).strip().splitlines())
+        """.strip() % namespace.plugin)
         config = BackupPlugin.configspec().validate(config)
 
         plugin.configspec().validate(config)

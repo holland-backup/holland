@@ -1,7 +1,6 @@
 """Standard Holland Backup API classes"""
 
 import logging
-from textwrap import dedent
 from holland.core.plugin import ConfigurablePlugin
 from holland.core.config import Configspec
 
@@ -60,7 +59,7 @@ class BackupPlugin(ConfigurablePlugin):
 
         :returns: Configspec instance
         """
-        return Configspec.parse(dedent("""
+        return Configspec.from_string("""
         [holland:backup]
         plugin                  = string
         auto-purge-failures     = boolean(default=yes)
@@ -73,5 +72,5 @@ class BackupPlugin(ConfigurablePlugin):
         estimated-size-factor   = float(default=1.0)
         estimation-method       = string(default="plugin")
         hooks                   = list(default=list())
-        """).splitlines())
+        """)
     configspec = classmethod(configspec)

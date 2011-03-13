@@ -3,6 +3,7 @@
 import os, sys
 import re
 import codecs
+import textwrap
 import logging
 from holland.core.util.datastructures import SortedDict as OrderedDict
 
@@ -61,7 +62,7 @@ class Config(OrderedDict):
         self.name = 'root'
 
     #@classmethod
-    def parse(cls, iterable):
+    def from_iterable(cls, iterable):
         """Parse a sequence of lines and return a ``Config`` instance.
 
         :param iterable: any iterable object that yield lines of text
@@ -117,7 +118,12 @@ class Config(OrderedDict):
                                      lineno,
                                      line))
         return cfg
-    parse = classmethod(parse)
+    from_iterable = classmethod(from_iterable)
+
+    #@classmethod
+    def from_string(cls, configstr):
+        return cls.from_iterable(textwrap.dedent(configstr).splitlines(True))
+    from_string = classmethod(from_string)
 
     #@classmethod
     def read(cls, filenames, encoding='utf8'):
@@ -134,7 +140,7 @@ class Config(OrderedDict):
             except IOError, exc:
                 raise ConfigFileError(exc.errno, exc.strerror, exc.filename)
             try:
-                cfg = cls.parse(fileobj)
+                cfg = cls.from_iterable(fileobj)
             finally:
                 fileobj.close()
             main.merge(cfg)

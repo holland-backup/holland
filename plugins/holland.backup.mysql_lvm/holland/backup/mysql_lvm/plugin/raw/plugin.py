@@ -65,7 +65,7 @@ host = string(default=None)
 port = integer(default=None)
 # default: none
 socket = string(default=None)
-""".splitlines()
+"""
 
 class MysqlLVMBackup(BackupPlugin):
     """A Holland Backup plugin suitable for performing LVM snapshots of a
@@ -93,7 +93,7 @@ class MysqlLVMBackup(BackupPlugin):
 
     def configspec(self):
         """INI Spec for the configuration values this plugin supports"""
-        return Configspec.parse(self.CONFIGSPEC)
+        return Configspec.from_string(self.CONFIGSPEC)
 
     def backup(self):
         """Run a backup by running through a LVM snapshot against the device

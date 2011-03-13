@@ -39,7 +39,7 @@ innodb-buffer-pool-size = string(default=128M)
 key-buffer-size         = string(default=16M)
 tmpdir                  = string(default=None)
 
-""".splitlines()
+"""
 
 class MysqlDumpLVMBackup(BackupPlugin):
     """A Holland Backup plugin suitable for performing LVM snapshots of a
@@ -72,7 +72,7 @@ class MysqlDumpLVMBackup(BackupPlugin):
     def configspec(self):
         """INI Spec for the configuration values this plugin supports"""
         spec = load_plugin('holland.backup', 'mysqldump').configspec()
-        spec.merge(Configspec.parse(self.CONFIGSPEC))
+        spec.merge(Configspec.from_string(self.CONFIGSPEC))
         return spec
 
     def backup(self):

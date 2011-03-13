@@ -42,7 +42,7 @@ username = string(default=None)
 password = string(default=None)
 hostname = string(default=None)
 port = integer(default=None)
-""".splitlines()
+"""
 
 class PgDump(BackupPlugin):
     """

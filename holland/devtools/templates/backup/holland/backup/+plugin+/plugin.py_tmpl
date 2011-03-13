@@ -5,7 +5,7 @@ from holland.core import BackupPlugin, Configspec
 CONFIGSPEC = """\
 [${plugin}]
 # your configuration here
-""".splitlines()
+"""
 
 class NewPlugin(BackupPlugin):
     """Backup Plugin interface for ${plugin}"""
@@ -64,7 +64,7 @@ class NewPlugin(BackupPlugin):
 
         This method should return a holland.core.config.Configspec instance
         """
-        return Configspec.parse(
+        return Configspec.from_string(
             CONFIGSPEC
         )
     configspec = classmethod(configspec)

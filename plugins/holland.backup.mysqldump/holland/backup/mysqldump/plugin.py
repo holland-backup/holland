@@ -104,7 +104,7 @@ class MySQLDumpPlugin(BackupPlugin):
 
     #@classmethod
     def configspec(cls):
-        return Configspec.parse(CONFIGSPEC)
+        return Configspec.from_string(CONFIGSPEC)
     configspec = classmethod(configspec)
 
     #@classmethod

@@ -66,11 +66,9 @@ class MySQLSelectHook(BackupHook):
         return None
 
     def configspec(self):
-        from textwrap import dedent
-        return Configspec.parse(dedent("""
+        return Configspec.from_string("""
         hosts = list()
-        """).splitlines()
-        )
+        """)
 
     def plugin_info(self):
         return dict(

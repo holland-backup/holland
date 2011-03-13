@@ -5,7 +5,7 @@ from holland.core import Config, Configspec, ConfigError, BackupPlugin
 
 LOG = logging.getLogger(__name__)
 
-cli_configspec = Configspec.parse("""
+cli_configspec = Configspec.from_string("""
 [holland]
 backup-directory = string(default=None)
 backupsets       = force_list(default=list())
@@ -17,7 +17,7 @@ tmpdir           = string(default=None)
 filename         = string(default='/var/log/holland/holland.log')
 format           = string(default='[%(levelname)s] %(message)s')
 level            = log_level(default="info")
-""".splitlines())
+""")
 
 class GlobalHollandConfig(Config):
     """Config for the global holland.conf
