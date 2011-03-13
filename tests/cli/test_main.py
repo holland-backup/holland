@@ -22,13 +22,12 @@ class MySQLDumpPlugin:
         """This configspec has no relation to the real mysqldump
         this is for testing mk-config only
         """
-        from textwrap import dedent
-        return Configspec.parse(dedent("""
+        return Configspec.from_string("""
         [mysqldump]
         databases = list(default=list('*'))
         port = integer(default=3306)
         pi = float(default=3.14159)
-        """).splitlines())
+        """)
 
 def setup():
     global staging_dir

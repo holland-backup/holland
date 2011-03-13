@@ -11,9 +11,9 @@ def test_basic():
     data = dedent("""
     [section]
     name = value
-    """).splitlines()
+    """)
 
-    cfg = Config.parse(data)
+    cfg = Config.from_string(data)
     assert_equals(len(cfg), 1)
     assert_equals(cfg['section'], { 'name' : 'value' })
     assert_equals(cfg['section']['name'], 'value')
@@ -43,8 +43,8 @@ def test_meld():
             'key1' : 'value1'
         }
     }
-    cfg1 = Config.parse(input1.splitlines())
-    cfg2 = Config.parse(input2.splitlines())
+    cfg1 = Config.from_string(input1)
+    cfg2 = Config.from_string(input2)
     cfg1.merge(cfg2)
     assert_equals(cfg1, expected)
 
@@ -72,8 +72,8 @@ def test_meld():
             'key1' : 'value1'
         }
     }
-    cfg1 = Config.parse(input1.splitlines())
-    cfg2 = Config.parse(input2.splitlines())
+    cfg1 = Config.from_string(input1)
+    cfg2 = Config.from_string(input2)
     cfg1.meld(cfg2)
     assert_equals(cfg1, expected)
 
@@ -88,12 +88,12 @@ def test_read():
         Config.read([name])
 
 def test_str():
-    data = dedent("""
+    data = ("""
     [section]
     name = value
-    """).lstrip()
+    """)
 
-    cfg = Config.parse(data.splitlines())
+    cfg = Config.from_string(data)
     assert_equals(str(cfg), data)
 
 
@@ -114,6 +114,6 @@ def test_write_fileobj():
     key2 = value2
     """)
     output = StringIO()
-    cfg = Config.parse(input1.splitlines())
+    cfg = Config.from_string(input1)
     cfg.write(output)
-    Config.parse(output.getvalue().splitlines())
+    Config.from_string(output.getvalue())

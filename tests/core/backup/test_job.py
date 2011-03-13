@@ -63,10 +63,10 @@ class FakeStore(object):
         shutil.rmtree(self.path)
         self.purged = True
 
-test_config = Config.parse("""
+test_config = Config.from_string("""
 [holland:backup]
 plugin = foo
-""".splitlines())
+""")
 
 def setup():
     # ensure our backup plugin pkg 'backup_plugin' is importable

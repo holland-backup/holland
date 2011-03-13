@@ -3,7 +3,6 @@
 import sys
 from mocker import *
 from nose.tools import *
-from textwrap import dedent
 from holland.core import PluginError
 from holland.core import Config
 from holland.core.dispatch import Signal
@@ -49,7 +48,7 @@ def teardown():
     mock.restore()
 
 def test_load_hooks_from_config():
-    cfg = Config.parse(dedent("""
+    cfg = Config.from_string("""
     [foo]
     plugin = example
     setting = foo-a-bar
@@ -61,7 +60,7 @@ def test_load_hooks_from_config():
     [baz]
     plugin = baz
     option = foo-a-baz
-    """).splitlines())
+    """)
 
     sg = FauxSignalGroup()
 

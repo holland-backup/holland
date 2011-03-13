@@ -29,10 +29,10 @@ class MockMetadata(FileMetadata):
             """
         raise KeyError("MockMetadata: %s" % name)
 
-test_config = Config.parse("""
+test_config = Config.from_string("""
 [holland:backup]
 plugin = foo
-""".splitlines())
+""")
 
 spool = None
 

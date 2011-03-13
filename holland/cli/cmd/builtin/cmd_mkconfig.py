@@ -33,7 +33,7 @@ class MakeConfig(ArgparseCommand):
         config = Config.from_string("""
         [holland:backup]
         plugin = %s
-        """.strip() % namespace.plugin)
+        """ % namespace.plugin)
         config = BackupPlugin.configspec().validate(config)
 
         plugin.configspec().validate(config)
