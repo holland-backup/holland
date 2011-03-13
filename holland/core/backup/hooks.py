@@ -90,7 +90,7 @@ class BackupInfoHook(BackupHook):
     def execute(self, job, event):
         """Record job info"""
         path = os.path.join(job.store.path, 'job.info')
-        if event == 'after-backup':
+        if event == 'before-backup':
             self.config['start-time'] = datetime.now().isoformat()
             self.start_time = time.time()
             self.config.write(path)
