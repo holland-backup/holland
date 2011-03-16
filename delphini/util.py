@@ -11,6 +11,12 @@ LOG = logging.getLogger(__name__)
 class ClusterError(Exception):
     """Raised when an error is encountered while backing up a MySQL Cluster"""
 
+class ClusterCommandError(ClusterError):
+    def __init__(self, message, status):
+        ClusterError.__init__(self, message)
+        self.message = message
+        self.status = status
+
 def run_command(args, stdout=PIPE, stderr=PIPE):
     """Run a command and returns its stdout, stderr and exit status
 
@@ -76,8 +82,9 @@ def ssh(hostname, command, keyfile=None, ssh='ssh', **kwargs):
     )
 
     if status != 0:
-        raise ClusterError("%s exited with non-zero status %d" %
-                          (list2cmdline(args), status))
+        raise ClusterCommandError("%s exited with non-zero status %d" %
+                                  (list2cmdline(args), status),
+                                  status=status)
 
     return stdout, stderr
 
@@ -106,7 +113,9 @@ def query_ndb(dsn, query, query_type='ndbd', ndb_config='ndb_config'):
 
     Query = namedtuple('Query', ' '.join(query))
     if status != 0:
-        raise ClusterError("ndb_config exited with non-zero status %d" % status)
+        raise ClusterCommandError("ndb_config exited with non-zero status %d" %
+                                  status,
+                                  status=status)
 
     nodes = {}
     for line in stdout.splitlines():
@@ -120,7 +129,9 @@ def run_cluster_backup(dsn):
     stdout, stderr, status = run_command(['ndb_mgm', '-c', dsn, '-e', 'START BACKUP WAIT COMPLETED'])
 
     if status != 0:
-        raise ClusterError("START BACKUP exited with non-zero status %d" % status)
+        raise ClusterCommandError("ndb_mgm -e 'START BACKUP' exited with "
+                                  "status %d" % status,
+                                  status=status)
 
     # In case we abort without exiting non-zero?
     check_for_abort(stdout)
@@ -168,17 +179,25 @@ def archive_data_nodes(dsn,
 
     :raises: ClusterError on failure
     """
-    nodes = query_ndb(dsn, query=['backupdatadir'])
-
+    nodes = query_ndb(dsn, query=['nodegroup', 'nodeid', 'backupdatadir'])
+    results = []
     for node in nodes:
         query = nodes[node]
         host = '%s@%s' % (ssh_user, node)
         remote_path = os.path.join(query.backupdatadir,
                                    'BACKUP',
                                    'BACKUP-%d' % backup_id)
-        stdout, stderr = ssh(host,
-                             'ls -lah ' + list2cmdline([remote_path]),
-                             keyfile=keyfile)
+        try:
+            stdout, stderr = ssh(host,
+                                 'ls -lah ' + list2cmdline([remote_path]),
+                                 keyfile=keyfile)
+        except ClusterCommandError, exc:
+            if exc.status != 255:
+                LOG.error("Error when checking Backup path. "
+                          "Skipping backups for node %d", query.nodeid)
+                continue
+            # status == 255 errors are probably fatal
+            raise
 
         # XXX: compression for tar command
         ssh(host,
@@ -187,6 +206,21 @@ def archive_data_nodes(dsn,
             stdout=open_file("backup_%s_%d.tar" % (node, backup_id), 'w')
         )
         LOG.info("Archived node %s with backup id %d", node, backup_id)
+        results.append(query)
+
+    groups = set([query.nodegroup for query in nodes.values()])
+    # verify node groups
+    for node in results:
+        if node.nodegroup in groups:
+            groups.remove(node.nodegroup)
+    if groups:
+        for group in groups:
+            LOG.error("Node group %s does not have backup coverage", group)
+        raise ClusterError("Failed to backup one or more node groups")
+
+    if len(nodes) != len(results):
+        LOG.warning("One or more nodes appears to be down but all node "
+                    "groups had a successful backup")
 
 def purge_backup(dsn, backup_id, ssh_user, keyfile):
     """Purge backups for a particular backup-id"""
