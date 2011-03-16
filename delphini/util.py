@@ -235,6 +235,14 @@ def purge_backup(dsn, backup_id, ssh_user, keyfile):
             'rm -fr %s' % list2cmdline([remote_path]),
             keyfile=keyfile)
 
+def log_stop_gcp(fileobj, stop_gcp):
+    """Log the StopGCP value from START BACKUP to a file
+    in the backup directory
+    """
+    fileobj.write("stop_gcp = %s" % stop_gcp)
+    fileobj.write(os.linesep)
+    fileobj.close()
+
 def backup(dsn, ssh_user, ssh_keyfile, open_file):
     """Backup a MySQL cluster"""
     backup_id, stop_gcp = run_cluster_backup(dsn=dsn)
@@ -243,5 +251,6 @@ def backup(dsn, ssh_user, ssh_keyfile, open_file):
                        ssh_user=ssh_user,
                        keyfile=ssh_keyfile,
                        open_file=open_file)
+    log_stop_gcp(open_file('replication.info', 'w'))
     purge_backup(dsn, backup_id, ssh_user, ssh_keyfile)
     return backup_id, stop_gcp
