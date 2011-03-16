@@ -20,7 +20,7 @@ setup(
     zip_safe=False,
     entry_points="""
     [holland.backup]
-    mysql-cluster = delphini.plugin:Delphini
-    jones = delphini.plugin:Delphini
+    mysql-cluster   = delphini:DelphiniPlugin
+    delphini        = delphini:DelphiniPlugin
     """
 )
