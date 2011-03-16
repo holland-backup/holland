@@ -15,7 +15,8 @@ BuildArch:      noarch
 BuildRequires:  python-devel
 
 %description
-Delphini is a plugin for the Holland backup framework to generate backups of a MySQL cluster.
+Delphini is a plugin for the Holland backup framework to generate backups of
+a MySQL cluster.
 
 %prep
 %setup -q
@@ -41,3 +42,5 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Tue Mar 15 2011 Andrew Garner <muzazzi@gmail.com> 1.0-1
+- initial holland-delphini spec file
