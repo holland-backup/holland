@@ -1,14 +1,14 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name:           holland-delphini
-Version:        1.0
+Version:        1.0.1
 Release:        1%{?dist}
 Summary:        MySQL Cluster backup plugin for Holland
 
 Group:          Development/Languages
 License:        GPLv2
 URL:            https://github.com/abg/holland-delphini
-Source0:        holland-delphini-1.0.tar.gz
+Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
@@ -42,5 +42,8 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Tue Mar 16 2011 Andrew Garner <muzazzi@gmail.com> 1.0.1-1
+- holland-delphini 1.0.1 release
+
 * Tue Mar 15 2011 Andrew Garner <muzazzi@gmail.com> 1.0-1
 - initial holland-delphini spec file
