@@ -1,7 +1,9 @@
 """Plugin manager API"""
 
 import logging
+import pkgutil
 import pkg_resources
+from holland.core.plugin.util import import_module
 from holland.core.plugin.error import PluginError, PluginLoadError, \
                                       PluginNotFoundError
 
@@ -17,6 +19,24 @@ class AbstractPluginManager(object):
     def iterate(self, group):
         """Iterate over plugins for the given name"""
         return []
+
+class ImportPluginManager(AbstractPluginManager):
+    """Plugin manager that uses __import__ to load a plugin"""
+
+    def load(self, group, name):
+        module = import_module('.'.join(group, name))
+        try:
+            return module.getattr(name, module)
+        except AttributeError:
+            raise PluginNotFoundError("No such plugin %s.%s" % (group, name))
+
+    def iterate(self, group):
+        module = import_module(group)
+        for importer, name in pkgutil.walk_packages(module.__path__):
+            submodule = import_module(group + '.' + name)
+            plugin = getattr(submodule, name)
+            if isinstance(plugin, BasePlugin):
+                yield plugin(name)
 
 class EntrypointPluginManager(AbstractPluginManager):
     """Plugin manager that uses setuptools entrypoints"""
