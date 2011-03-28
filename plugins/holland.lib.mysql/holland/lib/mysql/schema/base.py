@@ -189,7 +189,9 @@ class Database(object):
         :returns: int. sum of all data and indexes of tables that are not
                   excluded from this database
         """
-        return sum([table.size for table in self.tables if not table.excluded])
+        return sum([table.size for table in self.tables
+                    if not table.excluded
+                        and not table.engine in 'mrg_myisam' ])
     size = property(size)
 
     def __str__(self):
