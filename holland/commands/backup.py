@@ -132,7 +132,7 @@ def call_hooks(event, entry):
                         backupset=entry.backupset,
                         backupdir=entry.path
             )
-            LOG.info("Calling: %s", cmd)
+            LOG.info("Calling: %s", hook, cmd)
             process = Popen(cmd,
                             shell=True,
                             stdin=open("/dev/null", "r"),
@@ -147,9 +147,9 @@ def call_hooks(event, entry):
             LOG.error(" ! %s", line)
         for line in output.splitlines():
             LOG.info(" + %s", line)
-
-    else:
-        return 0
+        if process.returncode != 0:
+            raise BackupError("%s command failed" % hook)
+    return 0
 
 class PurgeManager(object):
     def __call__(self, event, entry):
