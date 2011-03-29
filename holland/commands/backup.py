@@ -1,5 +1,5 @@
 import os, sys
-import subprocess, shlex
+from subprocess import Popen, PIPE
 import time
 import errno
 import fcntl
@@ -12,6 +12,7 @@ from holland.core.spool import spool
 from holland.core.util.fmt import format_interval, format_bytes
 from holland.core.util.path import disk_free, disk_capacity, getmount
 from holland.core.util.lock import Lock, LockError
+from holland.core.util.pycompat import Template
 
 LOG = logging.getLogger(__name__)
 
@@ -124,17 +125,29 @@ def call_hooks(event, entry):
     hook = event + "-hook"
 
     if entry.config['holland:backup'][hook] is not None:
-        cmd = [entry.config['holland:backup'][hook]]
+        cmd = entry.config['holland:backup'][hook]
         try:
-            cmd.append(hook)
-            cmd.append(entry.backupset)
-            cmd.append(entry.path)
-            LOG.info("Calling: " + " ".join(cmd))
-            output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
-        except subprocess.CalledProcessError, exc:
-            LOG.error(output)
-            return exc.returncode
-        LOG.info(output)
+            cmd = Template(cmd).safe_substitute(
+                        hook=hook,
+                        backupset=entry.backupset,
+                        backupdir=entry.path
+            )
+            LOG.info("Calling: %s", cmd)
+            process = Popen(cmd,
+                            shell=True,
+                            stdin=open("/dev/null", "r"),
+                            stdout=PIPE,
+                            stderr=PIPE,
+                            close_fds=True)
+            output, errors = process.communicate()
+        except OSError, exc:
+            raise BackupError("%s", exc)
+
+        for line in errors.splitlines():
+            LOG.error(" ! %s", line)
+        for line in output.splitlines():
+            LOG.info(" + %s", line)
+
     else:
         return 0
 
