@@ -1,4 +1,5 @@
 import os, sys
+import subprocess, shlex
 import time
 import errno
 import fcntl
@@ -68,6 +69,10 @@ class Backup(Command):
 
         runner.register_cb('post-backup', report_low_space)
 
+        runner.register_cb('pre-backup', call_hooks)
+        runner.register_cb('post-backup', call_hooks)
+        runner.register_cb('backup-failure', call_hooks)
+
         error = 1
         LOG.info("--- Starting %s run ---", opts.dry_run and 'dry' or 'backup')
         for name in backupsets:
@@ -114,6 +119,24 @@ def purge_backup(event, entry):
         LOG.info("Purged failed backup: %s", entry.name)
     else:
         LOG.info("auto-purge-failures not enabled. Failed backup not purged.")
+
+def call_hooks(event, entry):
+    hook = event + "-hook"
+
+    if entry.config['holland:backup'][hook] is not None:
+        cmd = [entry.config['holland:backup'][hook]]
+        try:
+            cmd.append(hook)
+            cmd.append(entry.backupset)
+            cmd.append(entry.path)
+            LOG.info("Calling: " + " ".join(cmd))
+            output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+        except subprocess.CalledProcessError, exc:
+            LOG.error(output)
+            return exc.returncode
+        LOG.info(output)
+    else:
+        return 0
 
 class PurgeManager(object):
     def __call__(self, event, entry):

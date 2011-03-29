@@ -219,9 +219,12 @@ failed-backup           = boolean(default=no)
 estimated-size          = float(default=0)
 on-disk-size            = float(default=0)
 estimated-size-factor   = float(default=1.0)
-backups-to-keep          = integer(min=0, default=1)
+backups-to-keep         = integer(min=0, default=1)
 auto-purge-failures     = boolean(default=yes)
 purge-policy            = option(manual, before-backup, after-backup, default='after-backup')
+post-backup-hook        = string(default=None)
+pre-backup-hook         = string(default=None)
+backup-failure-hook     = string(default=None)
 """.splitlines()
 
 class Backup(object):

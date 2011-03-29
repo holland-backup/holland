@@ -35,14 +35,14 @@ Description: A pluggable backup utility
 Package: holland-common
 Architecture: all
 Depends: holland (>= ${source:Version}), python-mysqldb (>= 1.2)
-Recommends: mysql-client (>= 4.1)
+Recommends: mysql-client
 Description: Holland Common Library Plugins
  This package provides the common holland plugins that are generally used by
  other plugins.
 
 Package: holland-mysqldump
 Architecture: all
-Depends: holland (>= ${source:Version}), holland-common(>= ${source:Version}), mysql-client (>= 4.1)
+Depends: holland (>= ${source:Version}), holland-common(>= ${source:Version}), mysql-client
 Description: Holland MySQL Dump Backup Provider Plugin
  This package provides the holland mysqldump plugin. 
  
@@ -73,7 +73,7 @@ Description: Holland MySQL Hot Copy Backup Provider Plugin
 
 Package: holland-xtrabackup
 Architecture: all
-Depends: holland (>= ${source:Version}), holland-common (>= ${source:Version}), mysql-client (>= 4.1)
+Depends: holland (>= ${source:Version}), holland-common (>= ${source:Version}), mysql-client
 Description: Holland xtrabackup Backup plugin
  This package provides the holland xtrabackup plugin.
  

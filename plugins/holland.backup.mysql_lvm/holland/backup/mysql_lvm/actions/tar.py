@@ -41,6 +41,8 @@ class TarArchiveAction(object):
                 os.kill(process.pid, signal.SIGKILL)
             time.sleep(0.5)
 
+        self.archive_stream.close()
+
         if signal.SIGINT in snapshot_fsm.sigmgr.pending:
             raise KeyboardInterrupt("Interrupted")
 
