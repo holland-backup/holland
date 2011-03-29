@@ -132,7 +132,7 @@ def call_hooks(event, entry):
                         backupset=entry.backupset,
                         backupdir=entry.path
             )
-            LOG.info("Calling: %s", hook, cmd)
+            LOG.info(" [%s]> %s", hook, cmd)
             process = Popen(cmd,
                             shell=True,
                             stdin=open("/dev/null", "r"),
