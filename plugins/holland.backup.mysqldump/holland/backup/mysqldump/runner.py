@@ -112,12 +112,15 @@ class MySQLBackup(object):
             self._lock_method(databases),
         ]
 
-        databases = [db for db in databases if not db.excluded]
-        if not databases:
+        _databases = [db for db in databases if not db.excluded]
+        if not _databases:
             raise ProcessError("No databases to backup")
-        if len(databases) > 1:
-            options.append("--databases")
-        options.extend([ db.name for db in databases if not db.excluded ])
+        if _databases == databases:
+            options.append('--all-databases')
+        else:
+            if len(_databases) > 1:
+                options.append("--databases")
+            options.extend([ db.name for db in _databases ])
         fileobj = self.open_sql_file('all_databases.sql', 'w')
         MySQLDump(options, fileobj).run()
 
