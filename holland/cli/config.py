@@ -7,6 +7,7 @@ LOG = logging.getLogger(__name__)
 
 cli_configspec = Configspec.from_string("""
 [holland]
+plugin-dirs      = list(default=list())
 backup-directory = string(default=None)
 backupsets       = force_list(default=list())
 umask            = integer(default='0007', base=8)
