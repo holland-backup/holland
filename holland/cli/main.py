@@ -105,6 +105,10 @@ class HollandCli(ArgparseCommand):
         self.configure(config)
         try:
             return self.chain(opts.subcommand, opts.args)
+        except KeyboardInterrupt:
+            self.stderr("Interrupted")
+        except SystemExit:
+            self.stderr("Terminated")
         except CommandNotFoundError, exc:
             self.stderr("'%s' is not a valid holland command. "
                         "See holland help for valid commands.", exc.name)
