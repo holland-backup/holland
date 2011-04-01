@@ -112,6 +112,9 @@ class MySQLBackup(object):
             self._lock_method(databases),
         ]
 
+        databases = [db for db in databases if not db.excluded]
+        if not databases:
+            raise ProcessError("No databases to backup")
         if len(databases) > 1:
             options.append("--databases")
         options.extend([ db.name for db in databases if not db.excluded ])
