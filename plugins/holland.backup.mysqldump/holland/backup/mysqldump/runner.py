@@ -102,16 +102,19 @@ class MySQLBackup(object):
         if self.lock_method:
             return self.lock_method
         else:
-            if databases.is_transactional:
+            if all([db.is_transactional for db in databases]):
                 return '--single-transaction'
             else:
                 return '--lock-tables'
 
     def run_all(self, databases):
         options = self.options + [
-            self._lock_method(databases)
-        ] + [ db.name for db in databases if not db.excluded ]
+            self._lock_method(databases),
+        ]
 
+        if len(databases) > 1:
+            options.append("--databases")
+        options.extend([ db.name for db in databases if not db.excluded ])
         fileobj = self.open_sql_file('all_databases.sql', 'w')
         MySQLDump(options, fileobj).run()
 
@@ -160,12 +163,12 @@ class MySQLDump(object):
 
     def run(self):
         # run and wait for a result
-        self._start()
+        self.start()
         return self.wait()
 
     def wait(self):
         LOG.debug("Waiting on --->%s<---", self)
-        self.stdin.close()
+        self.process.stdin.close()
         status = self.process.wait()
         LOG.debug("OKAY %s finished with status %d", self, status)
         LOG.debug("closing fileobj")
