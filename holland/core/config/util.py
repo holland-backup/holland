@@ -1,3 +1,13 @@
+"""
+    holland.core.config.util
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Utility methods used by holland.core.config
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
+
 """Config utility methods"""
 
 import re

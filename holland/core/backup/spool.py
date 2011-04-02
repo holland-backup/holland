@@ -1,4 +1,12 @@
-"""Management of a directory of backups"""
+"""
+    holland.core.backup.spool
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This module provides support for managing a spool directory of backups
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 import os
 import time

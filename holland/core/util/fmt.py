@@ -1,3 +1,13 @@
+"""
+    holland.core.util.fmt
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Formatting utility functions
+
+    :copyright: 2008-2010 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
+
 "Formatting utility functions"
 
 import re
@@ -5,7 +15,11 @@ from math import floor, log
 from time import strftime, localtime
 
 def format_interval(seconds):
-    "Format an integer number of seconds to a human readable string."
+    """Format an integer number of seconds to a human readable string.
+
+    :param seconds: integer number of seconds to format into a string interval
+    :returns: str describing the integer seconds in a human readable string
+    """
     units = [
         (('week', 'weeks'), 604800),
         (('day', 'days'), 86400),
@@ -25,11 +39,28 @@ def format_interval(seconds):
     return ', '.join(result)
 
 def format_datetime(epoch, fmt="%a %b %d %Y %I:%M:%S%p"):
-    "Format a datetime from an integer epoch"
+    """Format a datetime from an integer epoch
+
+    This is currently a thin wrapper around ``strftime()``
+
+    :param epoch: seconds since the epoch
+    :param fmt: strftime format
+    :returns: date string converted from the seconds since the epoch
+    """
     return strftime(fmt, localtime(epoch))
 
 def format_bytes(nbytes, precision=2):
-    "Format an integer number of bytes to a human readable string."
+    """Format an integer number of bytes to a human readable string.
+
+    Example::
+    >> format_bytes(1024, 4)
+    '1.0000KB'
+
+    :param nbytes: integer number of bytes to format into a human readable string
+    :param precision: precision to use for the formatted bytes
+
+    :returns: str of formatted bytes
+    """
 
     if nbytes != 0:
         exponent = floor(log(abs(nbytes), 1024))

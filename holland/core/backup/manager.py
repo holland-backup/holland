@@ -1,7 +1,11 @@
-"""primary backup api
+"""
+    holland.core.backup.manager
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
->>> mgr = BackupManager('/var/spool/holland')
->>> mgr.backup('/etc/holland/backupsets/foo.conf', dry_run=True)
+    Public API for running a backup via a BackupManager
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
 """
 
 import os

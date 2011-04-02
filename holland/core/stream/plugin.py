@@ -1,4 +1,12 @@
-"""Generic support for loading file-like objects"""
+"""
+    holland.core.stream.plugin
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This module provides the basic methods for the stream API
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 try:
     _set = set

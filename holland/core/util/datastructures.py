@@ -1,7 +1,15 @@
 """
-From django.util.datastructures
+    holland.core.util.datastructures
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    Datastructure implementations used by holland-core
+
+    :copyright: 2008-2011 by Andrew Garner
+    :license: BSD, see LICENSE.rst for details
 """
+
+# These dict implementations are taken from django.utils.datastructures
+
 from types import GeneratorType
 from copy import copy, deepcopy
 try:

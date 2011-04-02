@@ -1,4 +1,13 @@
-"""Standard Holland Backup API classes"""
+"""
+    holland.core.backup.plugin
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    The Holland BackupPlugin base class that all backup plugins should derive
+    from.
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 import logging
 from holland.core.plugin import ConfigurablePlugin
@@ -56,6 +65,13 @@ class BackupPlugin(ConfigurablePlugin):
     #@classmethod
     def configspec(cls):
         """Provide standard backup configspec
+
+        The base class defines the standard configspec that all
+        backup configs will contain.
+
+        This method should be overriden by a subclass and provide the
+        configspec for that plugin, not including the [holland:backup]
+        section.
 
         :returns: Configspec instance
         """

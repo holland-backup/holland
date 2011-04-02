@@ -1,4 +1,12 @@
-"""Backup hooks"""
+"""
+    holland.core.backup.hooks
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This module implements the hooks for various standard backup actions
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 import os
 import logging

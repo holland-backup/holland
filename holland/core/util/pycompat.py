@@ -1,8 +1,28 @@
-"""This module provides backports for older python releases"""
+"""
+    holland.core.util.pycompat
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Methods and classes backported from more recent versions of python to
+    provide support for older python versions
+
+    Presently this module should be compatible back to python2.3
+
+    Two components are currently backported here:
+        * re.Scanner from python2.6 - useful for regex based tokenizers
+        * string.Template from python2.4 - simple string interpolation
+
+    :license: PSF, see LICENSE.rst for details
+"""
+
 
 import re
 
 class Scanner(object):
+    """A simple regular expression based scanner
+
+    This class can be used to tokenize a string based on a series of regular
+    expression rules.
+    """
     def __init__(self, lexicon, flags=0):
         import sre_parse
         import sre_compile
@@ -19,7 +39,13 @@ class Scanner(object):
         s.groups = len(p)+1
         p = sre_parse.SubPattern(s, [(BRANCH, (None, p))])
         self.scanner = sre_compile.compile(p)
+
     def scan(self, string):
+        """Scan string and return a list of tokens
+
+        :returns: 2-tuple: list of tokens, str of remainder of string that
+                  could not be scanned
+        """
         result = []
         append = result.append
         match = self.scanner.scanner(string).match

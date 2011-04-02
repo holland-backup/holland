@@ -1,6 +1,11 @@
-"""Version comparison support.
+"""
+    holland.core.plugin.version
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Taken from distutils2
+    Version parsing and validation methods used by the Holland plugin API.
+    This module was taken from the distutils2 project under the PSF license.
+
+    :license: PSF, see LICENSE.rst for details
 """
 
 import re

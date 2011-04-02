@@ -1,4 +1,12 @@
-"""Standard Holland Backup exceptions"""
+"""
+    holland.core.backup.error
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Standard exceptions raised by the Holland Backup API
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 class BackupError(Exception):
     """Raised when an error is encountered during a backup

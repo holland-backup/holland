@@ -1,12 +1,27 @@
-"""filename codec for sanitizing random unicode to a known good filename
+"""
+    holland.core.util.safefilename
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Based on the identically named codec from the bobcat project
+    Encoding/Decoding methods for encoding a string into a safe filename.
+    This is useful when a string may contain characters that are not safe for
+    for a normal filename as they may contain ``os.sep`` ('/') or various unicode
+    characters
+
+    This code was adapted from the encoding of the same name from the bobcat
+    project:
+        `<http://bobcat.origo.ethz.ch/>_`
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
 """
 
 from holland.core.util.pycompat import Scanner
 
 def decode(filename):
-    """Decode a filename to the original filename"""
+    """Decode a ``safefilename`` encoded filename to the original filename
+
+    :returns: original string
+    """
     scanner = Scanner([
         ("[a-z0-9-+!$%&\'@~#.,^]+", lambda s, t: t.decode('ascii')),
         ("_", lambda s, t: ' '),
@@ -19,7 +34,7 @@ def decode(filename):
     if remaining:
         raise ValueError("Failed to decode %s" % filename)
 
-    return ''.join(filename), len(remaining)
+    return ''.join(filename)
 
 def encode(filename):
     """Encode the unicode string into a filename"""
@@ -36,4 +51,4 @@ def encode(filename):
     if remaining:
         raise ValueError("Failed to decode %s" % filename)
 
-    return ''.encode('ascii').join(filename), len(remaining)
+    return ''.encode('ascii').join(filename)

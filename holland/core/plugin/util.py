@@ -1,4 +1,14 @@
-"""Backport of importlib.import_module from 3.x."""
+"""
+    holland.core.plugin.util
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Utility methods used by the holland plugin api
+
+    :copyright: 2008-2011 Rackspace US, Inc.
+    :license: BSD, PSF see LICENSE.rst for details
+"""
+
+# Backport of importlib.import_module from 3.x.
 # While not critical (and in no way guaranteed!), it would be nice to keep this
 # code compatible with Python 2.3.
 import sys

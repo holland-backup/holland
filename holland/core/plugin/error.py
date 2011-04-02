@@ -1,10 +1,21 @@
-"Standard exceptions raised by the holland.core.plugin API"
+"""
+    holland.core.plugin.error
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Standard exceptions raised by the Holland plugin API
+
+    :copyright: 2008-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 class PluginError(Exception):
     """Base plugin error exception"""
 
 class PluginLoadError(PluginError):
     """Failure to load a plugin
+
+    Raised by a PluginManager when a plugin is found but an error is
+    encountered when importing or instantiating a plugin class
 
     :attr group: plugin group
     :attr name:  plugin name
@@ -17,7 +28,14 @@ class PluginLoadError(PluginError):
         self.exc = exc
 
 class PluginNotFoundError(PluginError):
-    """Raise when a plugin could not be found"""
+    """Failure to find a plugin
+
+    This error is raised by a PluginManager when a plugin could not
+    be found for the given group and name combination.
+
+    :attr group: plugin group
+    :attr name:  plugin name
+    """
     def __init__(self, group, name):
         PluginError.__init__(self, group, name)
         self.group = group

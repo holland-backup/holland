@@ -1,4 +1,12 @@
-"""utility functions"""
+"""
+    holland.core.util.signal
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Signal container to group signal instances from holland.core.dispatch
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 import logging
 from holland.core.dispatch import Signal

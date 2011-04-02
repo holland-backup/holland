@@ -1,8 +1,16 @@
-"""Simple hook implementation
+"""
+    holland.core.hooks
+    ~~~~~~~~~~~~~~~~~~
 
-This module provides a convenience wrapper around dispatcher Signals
-and provides the basis for a Hook plugin used in other places in the
-holland backup framework
+    Simple callback implementation that performs some action at
+    different hook points.
+
+    This module provides a convenience wrapper around dispatcher Signals
+    and provides the basis for a Hook plugin used in other places in the
+    holland backup framework
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
 """
 
 import logging

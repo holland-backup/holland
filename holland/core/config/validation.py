@@ -1,4 +1,16 @@
-"""This module contains standard checks for Configspec values"""
+"""
+    holland.core.config.validation
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Validation implementations for Configspec checks
+
+    This module implementations individual validation for
+    various datatype and checks that can be defined in a
+    ``holland.core.config.Configspec``
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 import csv
 import logging

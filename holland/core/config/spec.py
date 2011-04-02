@@ -1,4 +1,13 @@
-"""This module provides support for configs that validate other configs"""
+"""
+    holland.core.config.spec
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Support for defining valid config parameters and values and validating
+    candidate configs
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 import logging
 from holland.core.config.config import Config, BaseFormatter

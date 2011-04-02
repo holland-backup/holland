@@ -1,4 +1,15 @@
-"""Parse configspec checks"""
+"""
+    holland.core.config.check
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    DSL parser for parsing configspec checks.
+
+    This implementation was heavily derived from the ideas and implementation
+    in `ConfigObj <http://www.voidspace.org.uk/python/configobj.html>_`
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 from holland.core.config.util import unquote, missing
 from holland.core.util.pycompat import Scanner

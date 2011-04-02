@@ -1,4 +1,16 @@
-"""Run a backup job"""
+"""
+    holland.core.backup.job
+    ~~~~~~~~~~~~~~~~~~~~~~~
+
+    This module implements a basic unit of work to run a backup for a single
+    plugin given a config and backup store.
+
+    This module is responsible for running through the backup lifecycle and
+    calling hooks at the appropriate points within that lifecycle.
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 import logging
 from holland.core.util.signal import SignalGroup

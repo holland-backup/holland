@@ -1,4 +1,12 @@
-"""Process config files"""
+"""
+    holland.core.config.config
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Config parsing support for a simple ini-like config format.
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 import os, sys
 import re

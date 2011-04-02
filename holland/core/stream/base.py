@@ -1,4 +1,13 @@
-"""Generic support for loading file-like objects"""
+"""
+    holland.core.stream.base
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Base file-like objects that may be returned by various stream api
+    implementations.
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 import os
 import logging

@@ -1,4 +1,12 @@
-"""utility functions"""
+"""
+    holland.core.backup.util
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Utility methods used by holland.core.backup
+
+    :copyright: 2010-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 import logging
 from holland.core.plugin import load_plugin, PluginError

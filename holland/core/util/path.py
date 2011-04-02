@@ -1,7 +1,14 @@
-"""Utility functions for manipulating paths """
+"""
+    holland.core.util.path
+    ~~~~~~~~~~~~~~~~~~~~~~
+
+    Path mantipulation utlity methods
+
+    :copyright: 2008-2010 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 # Functions added here should really be as portable as possible
-# and generally useful.
 
 import os
 
