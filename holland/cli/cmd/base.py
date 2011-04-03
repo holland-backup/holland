@@ -1,4 +1,12 @@
-"""Base command classes"""
+"""
+    holland.cli.cmd.base
+    ~~~~~~~~~~~~~~~~~~~~
+
+    Holland CLI Command API
+
+    :copyright: 2008-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 import logging
 from textwrap import dedent
@@ -10,7 +18,12 @@ from holland.cli.cmd.error import CommandNotFoundError
 LOG = logging.getLogger(__name__)
 
 class BaseCommand(BasePlugin):
-    """Basic command support"""
+    """Base Command class for the Holland CLI
+
+    A ``BaseCommand`` instance is callable and will be called with a list of
+    command line args.  Subclasses should override ``__call__(args)`` and
+    implement the actual command
+    """
 
     #: Name of this command
     #: :type: str
@@ -24,7 +37,7 @@ class BaseCommand(BasePlugin):
     #: :type: str
     description = ''
 
-    # name aliases this command is also known by
+    #: name aliases this command is also known by
     aliases = ()
 
     def __init__(self, name):
@@ -44,6 +57,9 @@ class BaseCommand(BasePlugin):
 
         This logs via the python logging module
         at INFO verbosity
+
+        :param fmt:  message format
+        :param args: message arguments
         """
         LOG.info(fmt, *args)
     stderr = classmethod(stderr)
@@ -61,7 +77,10 @@ class BaseCommand(BasePlugin):
     def setup(self, parent):
         """Link this command with its parent command
 
-        Only called on a subcommand
+        Only called on a subcommand - not the parent
+        HollandCli instance.
+
+        :param parent: parent ``BaseCommand`` instance
         """
         self.parent = parent
 
@@ -70,6 +89,8 @@ class BaseCommand(BasePlugin):
 
         This provides this command with the global
         config
+
+        :param config: global holland.conf config
         """
         self.config = config
 
@@ -78,7 +99,12 @@ class BaseCommand(BasePlugin):
         raise NotImplementedError()
 
     def load(self, name):
-        """Load a command by name"""
+        """Load a command by name
+
+        :param name: name of the command to load
+        :returns: BaseCommand instance
+        :raises: CommandNotFoundError
+        """
         for cmd in list(iterate_plugins('holland.commands')):
             if cmd.matches(name):
                 cmd.setup(self)
@@ -87,11 +113,20 @@ class BaseCommand(BasePlugin):
         raise CommandNotFoundError(name)
 
     def chain(self, name, args):
-        """Chain to another command using the given arguments"""
+        """Dispatch to another command
+
+        :param name: name of the command to dispatch to
+        :param args: command line args to pass to cmd
+        :returns: int -- exit status of command
+        """
         cmd = self.load(name)
         return cmd(args)
 
     def __call__(self, args):
+        """Run this command
+
+        This method must be overriden in a subclass
+        """
         raise NotImplementedError()
 
     def __cmp__(self, other):
@@ -109,13 +144,15 @@ class BaseCommand(BasePlugin):
 
         This method should return a dictionary listing a minimum of the
         following attributes:
-        * name          - short one word name of this command
-        * summary       - one line summary of this command
-        * description   - longer description of this command
-        * author        - author of this command in name [<email>] format
-        * version       - version of this command
-        * api_version   - version of holland this command is intended to work
-                          with
+
+          * name          - short one word name of this command
+          * summary       - one line summary of this command
+          * description   - longer description of this command
+          * author        - author of this command in name [<email>] format
+          * version       - version of this command
+          * api_version   - version of holland this command is intended to work
+                            with
+
         :returns: dict
         """
         raise NotImplementedError()
@@ -125,13 +162,19 @@ def argument(*args, **kwargs):
     return (args, kwargs)
 
 class ArgparseCommand(BaseCommand):
-    """Command implementation that parses arguments with argparse"""
+    """Command implementation that parses arguments with argparse
 
-    # list of arguments to ArgumentParser.add_argument
+    Subclasses of ``ArgparseCommand`` should override the
+    ``execute(namespace, parser)`` method.  ``namespace`` will be
+    an argparse ``Namespace`` instance and parser will be the original
+    ``ArgumentParser`` instance used by this command.
+    """
+
+    #: list of arguments to ArgumentParser.add_argument
     arguments = [
     ]
 
-    # optional epilog - passed to ArgumentParser() constructor
+    #: optional epilog - passed to ArgumentParser() constructor
     epilog = None
 
     _add_help = True
@@ -142,8 +185,9 @@ class ArgparseCommand(BaseCommand):
     def create_parser(self):
         """Build the ArgparseParser used by this command
 
-        By default this creates an instance of ``SafeArgumentParser`` -
-        an ArgumentParser that raises an excepton on error rather than
+        By default this creates an instance of
+        ``holland.cli.cmd.util.SafeArgumentParser`` -
+        an ArgumentParser that raises an exception on error rather than
         calling sys.exit()
 
         :returns: ArgumentParser instance
@@ -192,13 +236,15 @@ class ArgparseCommand(BaseCommand):
 
         This method should return a dictionary listing a minimum of the
         following attributes:
-        * name          - short one word name of this command
-        * summary       - one line summary of this command
-        * description   - longer description of this command
-        * author        - author of this command in name [<email>] format
-        * version       - version of this command
-        * api_version   - version of holland this command is intended to work
-                          with
+
+          * name          - short one word name of this command
+          * summary       - one line summary of this command
+          * description   - longer description of this command
+          * author        - author of this command in name [<email>] format
+          * version       - version of this command
+          * api_version   - version of holland this command is intended to work
+                            with
+
         :returns: dict
         """
         raise NotImplementedError()

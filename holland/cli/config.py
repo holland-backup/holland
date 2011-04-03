@@ -1,4 +1,16 @@
-"""Load a holland.conf config file"""
+"""
+    holland.cli.config
+    ~~~~~~~~~~~~~~~~~~
+
+    This module is responsible for loading config files
+    for the holland cli. This module supports loading
+    both the global holland.conf as well as
+    backupset configs
+
+    :copyright: 2008-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
+
 import os
 import logging
 from holland.core import Config, Configspec, ConfigError, BackupPlugin

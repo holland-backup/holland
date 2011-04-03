@@ -31,7 +31,16 @@ class SpoolLockError(SpoolError):
 
 
 class BackupStore(object):
-    """Manage the storage space of a backup"""
+    """An instance of a Backup directory under a Holland BackupSpool
+
+    :attr name: name of this BackupStore; This is the name of the backupset
+                this store is saved under (e.g. 'mysql-lvm')
+    :attr path: directory for this BackupStore; This is the absolute
+                path to the BackupStore (e.g.
+                /var/spool/holland/mysql-lvm/20110101_000000.XXXXX)
+    :attr spool: ``BackupSpool`` instance this store is associated with
+    """
+
     def __init__(self, name, path, spool=None):
         self.name = name
         self.path = path
@@ -42,7 +51,14 @@ class BackupStore(object):
         self._lock = None
 
     def latest(self, name=None):
-        """Find the latest backup by a backupset name"""
+        """Find the latest backup by a backupset name
+
+        This method is used to find the most recent backup for given
+        backupset. If ``name`` is not specified, this will search the
+        backupset associated wit this ``BackupStore`` instance.
+
+        :returns: ``BackupStore`` instance which may be identical to ``self``
+        """
         if not self.spool:
             return None
         if name is None:
@@ -54,7 +70,15 @@ class BackupStore(object):
             return None
 
     def previous(self):
-        """Find the backup store temporally preceding this one"""
+        """Find the backup store temporally preceding this one
+
+        This method is used to find the location on disk of the
+        last backup made (if one is available)
+
+        :returns: ``BackupStore`` instance if there is a previous backup in the
+                  same backupset as this instance, or None if no previous
+                  backups are available.
+        """
         if not self.spool:
             return None
         backups = self.spool.list_backups(self.name)
@@ -70,7 +94,7 @@ class BackupStore(object):
         shutil.rmtree(self.path)
 
     def size(self):
-        """Find the size on disk occupied by this backup store
+        """Calculate the size on disk occupied by this backup store
 
         :returns: bytes occupied by this backup store
         """
@@ -82,19 +106,25 @@ class BackupStore(object):
         return self._size
 
     def spool_capacity(self):
-        """Find the available space in bytes on this store"""
+        """Calculate the available space for the underlying storage device
+        this BackupStore resides on
+
+        :returns: int number of bytes available
+        """
         return disk_free(self.path)
 
     def check_space(self, required_bytes):
-        """Check that sufficient space exists for this
-        backupstore
+        """Verify that at least ``required_bytes`` of space are available on
+        the underlying storage device for this BackupStore
+
+        :raises: SpoolError is unsufficient space is available
         """
         if self.spool_capacity() < required_bytes:
             raise SpoolError("Insufficient space")
 
     #@property
     def timestamp(self):
-        """Timestamp of the backup store"""
+        """Timestamp of last modification for the backup store directory"""
         try:
             return os.stat(self.path).st_mtime
         except OSError:
@@ -127,7 +157,28 @@ class BackupSpool(object):
         self.root = os.path.abspath(root)
 
     def add_store(self, name, storename=None):
-        """Add a new backup store under this spool"""
+        """Add a new backup store under this spool
+
+        This creates a new entry under this spool suitable for storing
+        data from a backup run. This is stored in a hierchical fashion of::
+
+           $root/
+                $backupset/
+                          $backup_store/
+
+        Using standard holland paths for a backupset name 'mysqldump' this
+        would look like:
+
+        /var/spool/holland/mysqldump/20110101_00000.XXXXX
+
+        Unlike Holland-1.0, tempfile.mkdtemp() is used to generate the backup
+        store directory and a random suffix is added.
+
+        :param name: Name of the backupset (e.g. mysql-lvm)
+        :param storename: Name of the store directory. If storename is not
+                          specified defaults to current timestamp
+        :returns: ``BackupStore`` instance
+        """
         if storename is None:
             storename = '%s' % time.strftime('%Y%m%d_%H%M%S')
 
@@ -142,8 +193,12 @@ class BackupSpool(object):
         return BackupStore(name, backupstore_path, self)
 
     def load_store(self, path):
-        """Load an existing backup store"""
-        # just check we're not loading a store that's not a child of this spool
+        """Load an existing backup store given a full directory path
+
+        :param path: path to the backup store
+        :returns: ``BackupStore`` instance
+        """
+        # check that we're not loading a store that's not a child of this spool
         if os.path.commonprefix([self.root, path]) != self.root:
             raise SpoolError("load_store() requested for %s which is not a "
                              "subdirectory of %s" % (path, self.root))
@@ -152,7 +207,11 @@ class BackupSpool(object):
         return BackupStore(name, path, self)
 
     def list_backups(self, name):
-        """List backups for a backupset in temporal order"""
+        """List backups for a backupset in order by time
+
+        :returns: list of ``BackupStore`` instances for the backupset
+                  referenced by ``name``
+        """
         path = os.path.join(self.root, name)
         results = []
         for store_path in os.listdir(path):
@@ -168,7 +227,10 @@ class BackupSpool(object):
         return results
 
     def list_backupsets(self):
-        """List all backupsets"""
+        """List all backupsets
+
+        :returns: list of strings of backupset names
+        """
         results = []
         for name in os.listdir(self.root):
             path = os.path.join(self.root, name)
@@ -179,10 +241,22 @@ class BackupSpool(object):
         return results
 
     def lock(self, name):
-        """Lock a backupset
+        """Lock the backupset called ``name`` under this spool
 
         A lock will be checked prior to performing any critical operation such
-        as purging or allocating new backup sets.
+        as purging or allocating new backup stores.
+
+        This method flocks a '.holland' file under the ``name`` backupset
+        directory under this spool.  (e.g.
+        /var/spool/holland/default/.holland).  Such a lock is used to serialize
+        access to a single backupset and avoid concurrent purge+backup
+        operations from interfering with each other in undefined ways.
+
+        It is the callers responsibility to hold a reference to the open
+        .holland lock and close it to release the lock.
+
+        :param name: name of the backupset to lock
+        :returns: open file-object associated with this lock
         """
         try:
             os.makedirs(os.path.join(self.root, name))
@@ -214,6 +288,12 @@ class BackupSpool(object):
     def purge(self, backupset, retention_count=0, dry_run=False):
         """Purge backups in a backupset
 
+        :param backupset: backupset to purge
+        :param retention_count: number of backups within the backupset to
+                                retain
+        :param dry_run: whether to actually run the purge or only return
+                        the ``BackupStore`` lists that would be affected
+                        (default: False - do a real purge)
         :returns: tuple of backup sublists
                   (all_backups, sublist_kept, sublist_purged)
         """

@@ -1,3 +1,13 @@
+"""
+    holland.cli.cmd.util
+    ~~~~~~~~~~~~~~~~~~~~
+
+    Utility classes used by holland.cli.cmd
+
+    :copyright: 2008-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
+
 """Basic utilities for commands"""
 
 from argparse import ArgumentParser

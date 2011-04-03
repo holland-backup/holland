@@ -9,7 +9,7 @@
 """
 
 from holland.core.plugin.base import BasePlugin, ConfigurablePlugin
-from holland.core.plugin.manager import EntrypointPluginManager
+from holland.core.plugin.manager import AbstractPluginManager, EntrypointPluginManager
 from holland.core.plugin.error import PluginError
 
 #: The default PluginManager.  This defaults to an instance of
@@ -23,3 +23,14 @@ iterate_plugins = default_pluginmgr.iterate
 
 #: Convenience method to load a plugin via the default plugin manager
 load_plugin = default_pluginmgr.load
+
+__all__ = [
+    'BasePlugin',
+    'ConfigurablePlugin',
+    'AbstractPluginManager',
+    'EntrypointPluginManager',
+    'PluginError',
+    'default_pluginmgr',
+    'iterate_plugins',
+    'load_plugin',
+]

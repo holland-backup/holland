@@ -1,4 +1,12 @@
-"""Log utility functions"""
+"""
+    holland.cli.log
+    ~~~~~~~~~~~~~~~~
+
+    Log utility functions for holland cli
+
+    :copyright: 2008-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 import os, sys
 import warnings
@@ -74,6 +82,10 @@ def configure_logging(config):
     * format - the log output format
     * filename - what file to log to (if any)
     """
+    # Initially holland adds a simple console logger
+    # This removes that to configure a new logger with
+    # a message format potentially defined by the configuration
+    # as well as adding additional file loggers
     _clear_root_handlers()
 
     if os.isatty(sys.stderr.fileno()):

@@ -20,13 +20,14 @@ class BasePlugin(object):
 
     Plugins should override the plugin_info() method
     and provide a dict with the following attributes:
-        * name          - canonical name of this plugin
-        * author        - plugin author's name
-        * summary       - one-line (<80 char) short description of this plugin
-        * description   - multi-line text blurb describing this plugin
-        * version       - the version of this plugin (e.g. '0.1a1')
-        * api_version   - the version of the holland api this plugin is
-                          designed to work with (e.g. '1.1')
+
+      * name          - canonical name of this plugin
+      * author        - plugin author's name
+      * summary       - one-line (<80 char) short description of this plugin
+      * description   - multi-line text blurb describing this plugin
+      * version       - the version of this plugin (e.g. '0.1a1')
+      * api_version   - the version of the holland api this plugin is
+                        designed to work with (e.g. '1.1')
     """
     #: name of this plugin
     name = None

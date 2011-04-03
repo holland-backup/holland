@@ -1,3 +1,13 @@
+"""
+    holland.cli.main
+    ~~~~~~~~~~~~~~~~~~~
+
+    Main holland cli script
+
+    :copyright: 2008-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
+
 """Main holland command"""
 
 import os
@@ -12,7 +22,7 @@ from holland.cli.cmd import ArgparseCommand, argument, CommandNotFoundError
 
 HOLLAND_BANNER = """
 Holland Backup v%s
-Copyright (c) 2008-2010 Rackspace US, Inc.
+Copyright (c) 2008-2011 Rackspace US, Inc.
 More info available at http://hollandbackup.org
 
 [[[[[[[]]]]]]] [[[[[[[]]]]]]]

@@ -1,4 +1,12 @@
-"""Holland core API"""
+"""
+    holland.core
+    ~~~~~~~~~~~~
+
+    Holland Core
+
+    :copyright: 2008-2011 Rackspace US, Inc.
+    :license: BSD, see LICENSE.rst for details
+"""
 
 from holland.core.plugin import load_plugin, iterate_plugins
 from holland.core.plugin import BasePlugin, PluginError

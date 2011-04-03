@@ -11,3 +11,11 @@
 from holland.core.config.config import Config, ConfigError
 from holland.core.config.spec import Configspec, ValidateError
 from holland.core.config.check import CheckParser
+
+__all__ = [
+    'Config',
+    'ConfigError',
+    'Configspec',
+    'ValidateError',
+    'CheckParser'
+]

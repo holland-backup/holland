@@ -31,7 +31,7 @@ class BaseHook(ConfigurablePlugin):
     configure()).  For plugin functionality an implementation can either
     override the ___call__ method or simply provide an execute method.
 
-    execute(**kwargs) will be called by default and is useful if you don't
+    ``execute(**kwargs)`` will be called by default and is useful if you don't
     really care what sender or signal is involved in the hook.
     """
     def configure(self, config):
