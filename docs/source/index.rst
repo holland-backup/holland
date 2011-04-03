@@ -15,7 +15,6 @@ Contents:
    config
    commands
    hooks
-   user/cli
 
    developer/core
    developer/cli
