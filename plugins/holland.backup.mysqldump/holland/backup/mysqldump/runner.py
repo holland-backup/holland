@@ -135,7 +135,7 @@ class MySQLBackup(object):
         for database in databases:
             options = self.options[:]
             options += [
-                self._lock_method(database),
+                self._lock_method([database]),
                 database.name
             ]
             fileobj = self.open_sql_file(database.name, 'w')
