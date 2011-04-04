@@ -14,7 +14,7 @@ profile=no
 # path. You may set this option multiple times.
 
 # ignore 3rd party modules we reuse
-ignore=CVS,backports,version.py,datastructures.py,dispatch,pycompat.py
+ignore=CVS,backports,version.py,datastructures.py,dispatch,pycompat.py,devtools
 
 # Pickle collected data for later comparisons.
 persistent=yes
