@@ -8,8 +8,6 @@
     :license: BSD, see LICENSE.rst for details
 """
 
-"Formatting utility functions"
-
 import re
 from math import floor, log
 from time import strftime, localtime

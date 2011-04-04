@@ -8,8 +8,6 @@
     :license: BSD, see LICENSE.rst for details
 """
 
-"""Basic utilities for commands"""
-
 from argparse import ArgumentParser
 
 class ArgparseError(Exception):

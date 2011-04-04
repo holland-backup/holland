@@ -8,8 +8,6 @@
     :license: BSD, see LICENSE.rst for details
 """
 
-"""Config utility methods"""
-
 import re
 
 def unquote(value):
