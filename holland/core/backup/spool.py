@@ -37,7 +37,7 @@ class BackupStore(object):
                 this store is saved under (e.g. 'mysql-lvm')
     :attr path: directory for this BackupStore; This is the absolute
                 path to the BackupStore (e.g.
-                /var/spool/holland/mysql-lvm/20110101_000000.XXXXX)
+                /var/spool/holland/mysql-lvm/20110101_000000.abcdf)
     :attr spool: ``BackupSpool`` instance this store is associated with
     """
 
@@ -169,7 +169,7 @@ class BackupSpool(object):
         Using standard holland paths for a backupset name 'mysqldump' this
         would look like:
 
-        /var/spool/holland/mysqldump/20110101_00000.XXXXX
+        /var/spool/holland/mysqldump/20110101_00000.abcdf
 
         Unlike Holland-1.0, tempfile.mkdtemp() is used to generate the backup
         store directory and a random suffix is added.
