@@ -5,7 +5,7 @@ set -x
 python setup.py egg_info
 
 export PYLINTRC=$PWD/.pylintrc
-nosetests -v --with-xunit tests
+nosetests --with-coverage --cover-erase -v --with-xunit tests
 which coverage > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
