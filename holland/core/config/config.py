@@ -8,7 +8,7 @@
     :license: BSD, see LICENSE.rst for details
 """
 
-import os, sys
+import os
 import re
 import codecs
 import textwrap
@@ -74,6 +74,7 @@ class Config(OrderedDict):
         """Parse a sequence of lines and return a ``Config`` instance.
 
         :param iterable: any iterable object that yield lines of text
+        :raises: ConfigError
         :returns: new ``Config`` instance
         """
         cfg = cls()
@@ -130,6 +131,16 @@ class Config(OrderedDict):
 
     #@classmethod
     def from_string(cls, configstr):
+        """Parse a string and generate a config instance
+
+        This method will dedent ``configstr`` so leading whitespace to avoid
+        issues with leading whitespace.  Otherwise this method is identical to
+        str.splitlines()
+
+        :param configstr: str -- string to parse as a config
+        :raises: ConfigError
+        :returns: ``Config`` (or subclass)
+        """
         return cls.from_iterable(textwrap.dedent(configstr).splitlines(True))
     from_string = classmethod(from_string)
 
