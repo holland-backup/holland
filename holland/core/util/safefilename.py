@@ -4,8 +4,8 @@
 
     Encoding/Decoding methods for encoding a string into a safe filename.
     This is useful when a string may contain characters that are not safe for
-    for a normal filename as they may contain ``os.sep`` ('/') or various unicode
-    characters
+    for a normal filename as they may contain ``os.sep`` ('/') or various
+    unicode characters
 
     This code was adapted from the encoding of the same name from the bobcat
     project:
