@@ -30,9 +30,9 @@ class SignalGroup(dict):
         :returns: iterable of results
         """
         signal = self[name]
-        for receiver, result in signal.send_robust(sender=None,
-                                                   event=name,
-                                                   **kwargs):
+        for _, result in signal.send_robust(sender=None,
+                                            event=name,
+                                            **kwargs):
             yield result
 
     def notify_all(self, name, **kwargs):
@@ -41,7 +41,10 @@ class SignalGroup(dict):
         This sends the notification to all listeners in the group.  If any
         raises an exception then an exception will be raised at the end.
         """
-        for result in self.notify_safe(name, **kwargs):
+        signal = self[name]
+        for receiver, result in signal.send_robust(sender=None,
+                                                   event=name,
+                                                   **kwargs):
             if isinstance(result, Exception):
                 LOG.debug("Received (%r) raised an exception: %r",
                           receiver, result)
