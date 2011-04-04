@@ -94,6 +94,7 @@ class BackupInfoHook(BackupHook):
     def __init__(self, name):
         super(BackupInfoHook, self).__init__(name)
         self.config = Config()
+        self.start_time = None
 
     def execute(self, job, event):
         """Record job info"""
@@ -112,6 +113,7 @@ class BackupInfoHook(BackupHook):
 
 class CheckForSpaceHook(BackupHook):
     """Check for available space before starting a backup"""
+    job_info = None
 
     def execute(self, job, event):
         """Estimate the available space from the plugin and abort if
@@ -149,7 +151,7 @@ class CheckForSpaceHook(BackupHook):
             cmd = estimate_method[len('cmd:'):]
             stdout, stderr = run_command(cmd)
             LOG.info(" - %s", cmd)
-            for line in stderr.splitlines():
+            for line in str(stderr).splitlines():
                 LOG.info("  - %s", line.rstrip())
             estimated_bytes = parse_bytes(stdout)
             LOG.info(" * Using estimate from %r: %s",
