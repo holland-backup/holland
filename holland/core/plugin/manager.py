@@ -13,6 +13,7 @@ import pkg_resources
 from holland.core.plugin.util import import_module
 from holland.core.plugin.error import PluginError, PluginLoadError, \
                                       PluginNotFoundError
+from holland.core.plugin.base import BasePlugin
 
 LOG = logging.getLogger(__name__)
 
@@ -43,7 +44,8 @@ class AbstractPluginManager(object):
 
         The default behavior returns an empty list.
         """
-        return []
+        if group or not group:
+            return []
 
 class ImportPluginManager(AbstractPluginManager):
     """Plugin manager that uses __import__ to load a plugin
@@ -85,7 +87,7 @@ class ImportPluginManager(AbstractPluginManager):
         """
         import pkgutil
         module = import_module(group)
-        for importer, name in pkgutil.walk_packages(module.__path__):
+        for _, name in pkgutil.walk_packages(module.__path__):
             submodule = import_module(group + '.' + name)
             plugin = getattr(submodule, name)
             if isinstance(plugin, BasePlugin):
