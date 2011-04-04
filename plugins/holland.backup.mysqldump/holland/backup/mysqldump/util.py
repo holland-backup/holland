@@ -37,7 +37,7 @@ def check_mysqldump_version(mysqldump, mysqld_version):
         LOG.warning("%s is over a major version behind the mysql server %s",
                     version, mysqld_version)
     elif version != mysqld_version:
-        LOG.warning("verson mismatch: mysqldump %s != mysqld %s",
+        LOG.warning("version mismatch: mysqldump %s != mysqld %s",
                     version, mysqld_version)
 
 def argv_from_config(defaults_file, config, mysqld_version):
