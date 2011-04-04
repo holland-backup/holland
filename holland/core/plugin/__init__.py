@@ -9,7 +9,8 @@
 """
 
 from holland.core.plugin.base import BasePlugin, ConfigurablePlugin
-from holland.core.plugin.manager import AbstractPluginManager, EntrypointPluginManager
+from holland.core.plugin.manager import AbstractPluginManager, \
+                                        EntrypointPluginManager
 from holland.core.plugin.error import PluginError
 
 #: The default PluginManager.  This defaults to an instance of
