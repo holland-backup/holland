@@ -8,6 +8,7 @@
     :license: BSD, see LICENSE.rst for details
 """
 
+import pkgutil
 import logging
 import pkg_resources
 from holland.core.plugin.util import import_module
@@ -85,7 +86,6 @@ class ImportPluginManager(AbstractPluginManager):
         namespace named by the ``group`` argument and yields any subclasses of
         ``BasePlugin`` found in that package.
         """
-        import pkgutil
         module = import_module(group)
         for _, name in pkgutil.walk_packages(module.__path__):
             submodule = import_module(group + '.' + name)

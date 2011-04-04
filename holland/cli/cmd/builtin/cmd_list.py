@@ -1,5 +1,6 @@
 """Various list-* commands for holland.cli"""
 
+import textwrap
 import logging
 from holland.core import BackupSpool, iterate_plugins
 from holland.cli.cmd.base import ArgparseCommand, argument
@@ -74,7 +75,7 @@ class ListPlugins(ArgparseCommand):
                     self.debug("Broken plugin %r - plugin_info() fails.",
                                plugin, exc_info=True)
                     continue
-                from textwrap import wrap
+                wrap = textwrap.wrap
                 summary = wrap(info['summary'],
                                initial_indent=' '*28,
                                subsequent_indent=' '*28,
