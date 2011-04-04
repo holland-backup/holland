@@ -8,8 +8,6 @@
     :license: BSD, see LICENSE.rst for details
 """
 
-"""Main holland command"""
-
 import os
 import signal
 import traceback
