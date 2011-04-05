@@ -140,6 +140,54 @@ put the following at the top of the backup set configuration file::
     Either ``holland purge`` must be run externally or an explicit removal of
     desired backup directories can be done at some later time.
 
+**pre-backup-hook** = string
+
+    Run a shell command before a backup starts.  This allows some command to 
+    perform some action before the backup starts such as setting up an
+    iptables rule (taking a mysql slave out of a load balancer) or aborting 
+    the backup based on some external condition. 
+    
+    The backup will fail if this command exits with a non-zero status.
+
+.. versionadded:: 1.0.7
+
+**post-backup-hook** = string
+
+    Run a shell command before a backup starts.  This allows some command to 
+    perform some action when a backup completes successfully such as sending
+    out a success notification.
+    
+    The backup will fail if this command exits with a non-zero status.
+
+.. versionadded:: 1.0.7
+
+**backup-failure-hook** = string
+
+    Run a shell command before a backup starts.  This allows some command to 
+    perform some action when a backup fails such as sending out a failure
+    notification.  The backup will fail if this command exits with a non-zero
+    status.
+
+.. versionadded:: 1.0.7
+
+For all hook commands, Holland will perform simple text substitution substitution 
+on the three parameters:
+
+  * hook
+  * backupdir
+  * backupset
+
+For example::
+    
+    [holland:backup]
+    plugin = mysqldump
+    pre-backup-hook = /usr/local/bin/my-custom-script --hook ${hook} --backupset ${backupset} --backupdir ${backupdir}
+    post-backup-hook = echo ${backupset} completed successfully.  Files are in ${backupdir}
+    
+    [mysqldump]
+    ...
+
+
 Backup-Set files are defined in the "backupsets" directory which is,
 by default, ``/etc/holland/backupsets``. The name of the backup-set is 
 defined by its configuration filename and can really be most anything. That

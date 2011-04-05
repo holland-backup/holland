@@ -1,4 +1,5 @@
 import os, sys
+from subprocess import Popen, PIPE
 import time
 import errno
 import fcntl
@@ -11,6 +12,7 @@ from holland.core.spool import spool
 from holland.core.util.fmt import format_interval, format_bytes
 from holland.core.util.path import disk_free, disk_capacity, getmount
 from holland.core.util.lock import Lock, LockError
+from holland.core.util.pycompat import Template
 
 LOG = logging.getLogger(__name__)
 
@@ -68,6 +70,10 @@ class Backup(Command):
 
         runner.register_cb('post-backup', report_low_space)
 
+        runner.register_cb('pre-backup', call_hooks)
+        runner.register_cb('post-backup', call_hooks)
+        runner.register_cb('backup-failure', call_hooks)
+
         error = 1
         LOG.info("--- Starting %s run ---", opts.dry_run and 'dry' or 'backup')
         for name in backupsets:
@@ -114,6 +120,36 @@ def purge_backup(event, entry):
         LOG.info("Purged failed backup: %s", entry.name)
     else:
         LOG.info("auto-purge-failures not enabled. Failed backup not purged.")
+
+def call_hooks(event, entry):
+    hook = event + "-hook"
+
+    if entry.config['holland:backup'][hook] is not None:
+        cmd = entry.config['holland:backup'][hook]
+        try:
+            cmd = Template(cmd).safe_substitute(
+                        hook=hook,
+                        backupset=entry.backupset,
+                        backupdir=entry.path
+            )
+            LOG.info(" [%s]> %s", hook, cmd)
+            process = Popen(cmd,
+                            shell=True,
+                            stdin=open("/dev/null", "r"),
+                            stdout=PIPE,
+                            stderr=PIPE,
+                            close_fds=True)
+            output, errors = process.communicate()
+        except OSError, exc:
+            raise BackupError("%s", exc)
+
+        for line in errors.splitlines():
+            LOG.error(" ! %s", line)
+        for line in output.splitlines():
+            LOG.info(" + %s", line)
+        if process.returncode != 0:
+            raise BackupError("%s command failed" % hook)
+    return 0
 
 class PurgeManager(object):
     def __call__(self, event, entry):
