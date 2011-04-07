@@ -80,7 +80,7 @@ def test_getmount():
         assert_equals(path.getmount(test_path), "/proc")
     else:
         # maybe add more here later
-        raise SkipTest, "Unsupported platform %s" % platform.system()
+        raise SkipTest, "Test unsupported on %s" % platform.system()
 
 #XXX: df output isn't 100% portable
 #XXX: race condition between running df and disk_free()
@@ -93,7 +93,7 @@ def test_diskfree():
     if platform.system() == 'Darwin':
         real_cmd = "diskutil info / | grep 'Volume Free Space' | awk {' print $6 '} | sed 's/(//'"
     else: 
-        raise SkipTest, "Unsupported platform %s" % platform.system()
+        raise SkipTest, "Test unsupported on %s" % platform.system()
 
     actual_bytes = int(commands.getoutput(real_cmd).strip())
     assert_equals(path.disk_free("/"), actual_bytes)
@@ -108,7 +108,7 @@ def test_directory_size():
     if platform.system() == 'Linux':
         cmd = "du -sb . | awk '{ print $1; }'"
     else:
-        raise SkipTest, "Unsupported platform %s" % platform.system()
+        raise SkipTest, "Test unsupported on %s" % platform.system()
 
     expected_bytes = int(commands.getoutput(cmd).strip())
     assert_equals(path.directory_size('.'), expected_bytes)
