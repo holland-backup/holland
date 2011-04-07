@@ -51,7 +51,7 @@ class HollandCli(ArgparseCommand):
 
     arguments = [
         argument('--config', '-c', metavar='<file>',
-                 default='/etc/holland/holland.conf',
+                 default=os.environ.get('HOLLAND_CONFIG', '/etc/holland/holland.conf'),
                  help='Read configuration from the given file'),
         argument('--log-level', '-l', metavar='<log-level>',
                     choices=('debug', 'info', 'warning', 'error', 'fatal',
