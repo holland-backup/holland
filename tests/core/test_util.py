@@ -1,4 +1,5 @@
 from holland.core.util import path, fmt, pycompat, misc
+from nose import SkipTest
 from nose.tools import *
 
 # fmt tests
@@ -72,22 +73,43 @@ def test_relpath():
 
 #XXX: linux specific
 def test_getmount():
-    test_path = "/proc/self/cmdline"
-    assert_equals(path.getmount(test_path), "/proc")
+    import platform
+
+    if platform.system() == 'Linux':
+        test_path = "/proc/self/cmdline"
+        assert_equals(path.getmount(test_path), "/proc")
+    else:
+        # maybe add more here later
+        raise SkipTest, "Unsupported platform %s" % platform.system()
 
 #XXX: df output isn't 100% portable
 #XXX: race condition between running df and disk_free()
 def test_diskfree():
     import commands
-    real_cmd = "df -B1 / | tail -n +2 | awk '{ print $4; }'"
+    import platform
+
+    if platform.system() == 'Linux':
+        real_cmd = "df -B1 -P / | tail -n +2 | awk '{ print $4; }'"
+    if platform.system() == 'Darwin':
+        real_cmd = "diskutil info / | grep 'Volume Free Space' | awk {' print $6 '} | sed 's/(//'"
+    else: 
+        raise SkipTest, "Unsupported platform %s" % platform.system()
+
     actual_bytes = int(commands.getoutput(real_cmd).strip())
     assert_equals(path.disk_free("/"), actual_bytes)
 
+#XXX: linux specific
 def test_directory_size():
     # must test that this equals du -sb
     # test symlinks and weird crap too
     import commands
-    cmd = "du -sb . | awk '{ print $1; }'"
+    import platform
+    
+    if platform.system() == 'Linux':
+        cmd = "du -sb . | awk '{ print $1; }'"
+    else:
+        raise SkipTest, "Unsupported platform %s" % platform.system()
+
     expected_bytes = int(commands.getoutput(cmd).strip())
     assert_equals(path.directory_size('.'), expected_bytes)
     # test handling OSError as well - perhaps have an unreadable directory
