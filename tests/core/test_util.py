@@ -90,7 +90,7 @@ def test_diskfree():
 
     if platform.system() == 'Linux':
         real_cmd = "df -B1 -P / | tail -n +2 | awk '{ print $4; }'"
-    if platform.system() == 'Darwin':
+    elif platform.system() == 'Darwin':
         real_cmd = "diskutil info / | grep 'Volume Free Space' | awk {' print $6 '} | sed 's/(//'"
     else: 
         raise SkipTest, "Test unsupported on %s" % platform.system()
