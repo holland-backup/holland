@@ -147,6 +147,22 @@ def install_configs(env_root):
     shutil.copytree(join(HOLLAND_ROOT, 'config'),
                     join(env_root, 'etc', 'holland'))
 
+    try:
+        os.mkdir(os.path.join(env_root, 'logs'))
+    except OSError:
+        pass
+
+    try:
+        os.mkdir(os.path.join(env_root, 'backups'))
+    except OSError:
+        pass
+
+    from holland.core import Config
+    cfg = Config.read([os.path.join(holland_etc, 'holland.conf')])
+    cfg['holland']['backup-directory'] = os.path.join(env_root, 'backups')
+    cfg['logging']['filename'] = os.path.join(env_root, 'logs', 'holland.log')
+    cfg.write(os.path.join(holland_etc, 'holland.conf'))
+
 def find_egg_env(path):
     from pkg_resources import Environment
     return Environment([path])
