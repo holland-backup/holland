@@ -94,6 +94,10 @@ class XtrabackupPlugin(object):
                            stdout=compression_stream,
                            stderr=error_log,
                            close_fds=True)
+            except OSError, exc:
+                LOG.info("Command not found: %s", args[0])
+                raise BackupError("%s not found. Is xtrabackup installed?" %
+                                  args[0])
             except CalledProcessError, exc:
                 LOG.info("%s failed", list2cmdline(exc.cmd))
                 for line in open(error_log_path, 'r'):
@@ -103,7 +107,12 @@ class XtrabackupPlugin(object):
                 raise BackupError("%s failed" % exc.cmd[0])
         finally:
             error_log.close()
-            compression_stream.close()
+            exc_info = sys.exc_info()[1]
+            try:
+                compression_stream.close()
+            except IOError, exc:
+                if not exc_info:
+                    raise BackupError(str(exc))
 
     def info(self):
         """Provide information about the backup this plugin produced"""
