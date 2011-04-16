@@ -19,7 +19,7 @@ def locate_mysqld_exe(config):
         else:
             path = None # use environ[PATH]
         try:
-            LOG.debug("Searching for %s on path %s", 
+            LOG.debug("Searching for %s on path %s",
                       candidate, path or os.environ['PATH'])
             return which(candidate, path)
         except WhichError:
@@ -42,7 +42,7 @@ class MySQLServer(object):
             args += ['--bootstrap']
         self.returncode = None
         LOG.info("Starting %s", list2cmdline(args))
-        self.process = Popen(args, 
+        self.process = Popen(args,
                              preexec_fn=os.setsid,
                              stdin=open('/dev/null', 'r'),
                              stdout=open('/dev/null', 'w'),
@@ -75,34 +75,35 @@ class MySQLServer(object):
         self.stop()
         self.start()
 
-def generate_server_config(config, path): 
-    conf_data = StringIO() 
-    valid_params = [ 
-        'innodb-buffer-pool-size',  
+def generate_server_config(config, path):
+    conf_data = StringIO()
+    valid_params = [
+        'innodb-buffer-pool-size',
         'innodb-log-file-size',
+        'innodb-fast-shutdown',
         'open-files-limit',
-        'key-buffer-size',  
-        'tmpdir',  
-        'user',  
-        'datadir', 
-        'log-error', 
+        'key-buffer-size',
+        'tmpdir',
+        'user',
+        'datadir',
+        'log-error',
         'socket',
         'pid-file',
         'port',
-    ] 
-    print >>conf_data, "[mysqld]" 
-    for key, value in config.iteritems(): 
-        if key.replace('_', '-') not in valid_params: 
-            LOG.warning("Ignoring mysqld config parameter %s", key) 
-            continue 
-        print >>conf_data, "%s = %s" % (key, value) 
-    print >>conf_data, "# not used for --bootstrap but here for completeness" 
-    print >>conf_data, "port = 3307" 
-    print >>conf_data, "loose-skip-ndbcluster" 
+    ]
+    print >>conf_data, "[mysqld]"
+    for key, value in config.iteritems():
+        if key.replace('_', '-') not in valid_params:
+            LOG.warning("Ignoring mysqld config parameter %s", key)
+            continue
+        print >>conf_data, "%s = %s" % (key, value)
+    print >>conf_data, "# not used for --bootstrap but here for completeness"
+    print >>conf_data, "port = 3307"
+    print >>conf_data, "loose-skip-ndbcluster"
     print >>conf_data, "skip-networking"
-    print >>conf_data, "skip-slave-start" 
-    print >>conf_data, "skip-log-bin" 
-    text = conf_data.getvalue() 
+    print >>conf_data, "skip-slave-start"
+    print >>conf_data, "skip-log-bin"
+    text = conf_data.getvalue()
     LOG.debug("Generating config: %s", text)
-    open(path, 'w').write(text) 
+    open(path, 'w').write(text)
     return path
