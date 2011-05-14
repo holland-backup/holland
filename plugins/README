@@ -30,14 +30,6 @@ holland.backup.example      - A trivial example plugin that does nothing at all
                               backup plugin
 holland.backup.mysqldump    - A mysqldump based backup plugin for MySQL
                               Depends: [holland.lib.common, holland.lib.mysql]
-holland.backup.mysqlhotcopy - A raw file copy for MySQL, only loosely based on
-                              the 'mysqlhotcopy' command
-                              Depends: [holland.lib.common, holland.lib.mysql]
-holland.backup.maatkit      - A wrapper around mk-parallel-dump.  Not really 
-                              recommended for production quality backups. See
-                              http://www.maatkit.org for more information on
-                              the underlying mk-parallel-dump script.
-                              Depends: [holland.lib.mysql]
 holland.backup.mysql_lvm    - A LVM snapshot based backup plugin for MySQL
                               Depends: [holland.lib.common, holland.lib.mysql,
                                         holland.lib.lvm]
