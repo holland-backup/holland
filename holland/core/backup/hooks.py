@@ -123,14 +123,20 @@ class CheckForSpaceHook(BackupHook):
         :raises: BackupError if estimated_space > available_space
         """
         if event == 'after-backup':
+            percent_size = 0
+            suggested_size = 0
+            if parse_bytes(self.job_info['estimated-size']) > 0:
+                percent_size = (100.0*job.store.size() /
+                               parse_bytes(self.job_info['estimated-size']))
+                suggested_size = (float(job.store.size()) /
+                                 parse_bytes(self.job_info['estimated-size']))
+                     
             LOG.info("+ Final backup size %s", format_bytes(job.store.size()))
-            LOG.info("+ %.2f%% of estimated size %s ",
-                     100.0*job.store.size() /
-                     parse_bytes(self.job_info['estimated-size']),
+            LOG.info("+ %.2f%% of estimated size %s ", 
+                     percent_size,
                      self.job_info['estimated-size'])
             LOG.info("+ Suggested estimated-size-factor = %.2f",
-                     float(job.store.size()) /
-                     parse_bytes(self.job_info['estimated-size']))
+                     suggested_size)
             return
 
         LOG.info("+ Estimating backup size")
