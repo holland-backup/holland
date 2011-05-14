@@ -2,7 +2,10 @@
 
 """Setup a python virtual environment to test holland"""
 
-import sys, os
+import os
+import sys
+sys.path.insert(0, os.path.abspath('.'))
+
 import signal
 import shutil
 import logging
@@ -16,6 +19,8 @@ except ImportError:
     curses = None
 
 from _virtualenv import create_environment
+
+
 
 HOLLAND_ROOT = abspath(join(dirname(__file__), '..'))
 
@@ -141,6 +146,7 @@ def install_configs(env_root):
         logging.info("An existing config already exists in %s. Not installing test configs.",
                         holland_etc)
         return
+
     # copytree doesn't create all dirs on python 2.4
     if not os.path.exists(join(env_root, 'etc')):
         os.makedirs(join(env_root, 'etc'))
@@ -162,7 +168,8 @@ def install_configs(env_root):
     cfg['holland']['backup-directory'] = os.path.join(env_root, 'backups')
     cfg['logging']['filename'] = os.path.join(env_root, 'logs', 'holland.log')
     cfg.write(os.path.join(holland_etc, 'holland.conf'))
-
+    logging.info("Installed config %s" % os.path.join(holland_etc, 'holland.conf'))
+    
 def find_egg_env(path):
     from pkg_resources import Environment
     return Environment([path])
@@ -207,6 +214,7 @@ def main(args=None):
 
     install_configs(home_dir)
     result = start_shell(virtualenv)
+    
     logging.info("Exiting virtual environment[%d]", result)
     return result
 
