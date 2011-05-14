@@ -91,6 +91,8 @@ mysql-global-auth.conf::
   socket = /tmp/custom_socket_location.sock
 
 
+.. _holland-main-config:
+
 holland.conf - main config
 --------------------------
 
