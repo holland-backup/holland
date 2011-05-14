@@ -94,7 +94,7 @@ def test_str():
     """)
 
     cfg = Config.from_string(data)
-    assert_equals(str(cfg), dedent(data).lstrip())
+    assert_equals(str(cfg).strip(), dedent(data).strip())
 
 
 def test_write():
