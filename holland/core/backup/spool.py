@@ -253,7 +253,7 @@ class BackupSpool(object):
         operations from interfering with each other in undefined ways.
 
         It is the callers responsibility to hold a reference to the open
-        .holland lock and close it to release the lock.
+        lock file and close it to release the lock.
 
         :param name: name of the backupset to lock
         :returns: open file-object associated with this lock
