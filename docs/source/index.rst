@@ -15,6 +15,7 @@ Contents:
    config
    commands
    hooks
+   backup-sets
 
    developer/core
    developer/cli
