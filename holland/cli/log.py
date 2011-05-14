@@ -95,7 +95,8 @@ def configure_logging(config):
                          level=config['level'])
     try:
         configure_logger(logger=logging.getLogger(),
-                         handler=logging.FileHandler(config['filename'], encoding='utf8'),
+                         handler=logging.FileHandler(config['filename'],
+                                                     encoding='utf8'),
                          fmt=config['format'],
                          level=config['level'])
     except IOError, exc:
