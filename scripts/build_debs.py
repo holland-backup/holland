@@ -38,6 +38,7 @@ def make_debs(dst_dir):
         for src_path in glob.glob(os.path.join(staging.staging_dir, '*.deb')):
             dst_path = os.path.join(dst_dir, os.path.basename(src_path))
             shutil.copyfile(src_path, dst_path)
+	return dst_dir
     finally:
         try:
             staging.cleanup()
