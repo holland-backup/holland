@@ -77,12 +77,17 @@ class MySQLDumpPlugin(BackupPlugin):
                 if self.config['mysqldump']['stop-slave']:
                     status = stop_slave(self._client)
                     record_slave_status(self.config)
+                if self.config['mysqldump']['lockless-only']:
+                    check_transactional(self._schema.databases)
                 if self.config['mysqldump']['file-per-database']:
                     parallelism = self.config['mysqldump']['parallelism']
+                    explicit_tables = self.config['mysqldump']['explicit-tables']
                     LOG.info("+ file-per-database")
                     LOG.info("+ parallelism=%d", parallelism)
                     generate_manifest(self.path, self._schema, self.config)
-                    backup.run_each(self._schema.databases, parallelism)
+                    backup.run_each(self._schema.databases,
+                                    explicit_tables=explicit_tables,
+                                    parallelism=parallelism)
                 else:
                     backup.run_all(self._schema.databases)
             except (KeyboardInterrupt, SystemExit):

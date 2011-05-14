@@ -1,6 +1,7 @@
 import os
 import codecs
 import logging
+from holland.core import BackupError
 from holland.lib.mysql import MySQLError
 
 LOG = logging.getLogger(__name__)
@@ -25,7 +26,26 @@ def schema_from_config(config):
     schema.add_table_filter(exclude_glob_qualified(*config['exclude-tables']))
     schema.add_engine_filter(include_glob(*config['engines']))
     schema.add_engine_filter(exclude_glob(*config['exclude-engines']))
+    schema.add_transactional_engines(config['transactional-engines-override'])
+    schema.add_transactional_databases(config['transactional-databases-override'])
+    schema.add_transactional_tables(config['transactional-tables-override'])
     return schema
+
+def check_transactional(databases):
+    non_txn_dbs = [db for db in databases
+                   if not db.is_transactional and not database.excluded]
+
+    if non_txn_dbs:
+        for db in non_txn_dbs:
+            LOG.error("Database '%s' has one or more non-transactional tables:",
+                      db.name)
+            for table in db.tables:
+                LOG.error("  * %s.%s is non-transactional (engine=%s)",
+                          db.name, table.name, table.engine)
+        raise BackupError("One or more databases had non-transactional tables "
+                          "that would result in a locking backup but "
+                          "lockless-only was requested.  Aborting backup.")
+
 
 def check_mysqldump_version(mysqldump, mysqld_version):
     from subprocess import Popen, PIPE, STDOUT

@@ -12,7 +12,7 @@ from holland.core.plugin import load_plugin, iterate_plugins
 from holland.core.plugin import BasePlugin, PluginError
 from holland.core.config import Config, ConfigError, Configspec
 from holland.core.hooks import BaseHook
-from holland.core.stream import open_stream
+from holland.core.stream import open_stream, open_stream_wrapper
 # spool management
 from holland.core.backup import BackupSpool, BackupStore
 # backup plugin base classes

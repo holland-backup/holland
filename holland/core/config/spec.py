@@ -168,11 +168,15 @@ class Configspec(Config):
             check = Check.parse(checkstr)
         except CheckError:
             raise ValidationError("Internal Error.  Failed to parse a "
-                                  "validation check '%s'" % checkstr)
+                                  "validation check '%s'" % checkstr, checkstr)
 
         validator = self.registry[check.name](check.args, check.kwargs)
         value = self._resolve_value(key, check, config)
-        value = validator.validate(value)
+        try:
+            value = validator.validate(value)
+        except ValidationError, exc:
+            raise ValidationError("%s.%s : %s" % (config.name, key, exc), exc.value)
+            
         config[key] = value
         if check.aliasof is not missing:
             config.rename(key, check.aliasof)

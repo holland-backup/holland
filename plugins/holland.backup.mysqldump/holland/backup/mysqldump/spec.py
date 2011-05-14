@@ -3,9 +3,18 @@
 CONFIGSPEC = """
 [mysqldump]
 extra-defaults     = boolean(default=yes)
+explicit-tables    = boolean(default=yes)
 mysql-binpath      = force_list(default=list())
 
-lock-method        = option('flush-lock', 'lock-tables', 'single-transaction', 'auto-detect', 'none', default='auto-detect')
+lock-method                    = option('flush-lock', 'lock-tables',
+                                        'single-transaction',
+                                        'auto-detect',
+                                        'none',
+                                        default='auto-detect')
+transactional-engines-override = list(default=list())
+transactional-databases-override = list(default=list())
+transactional-tables-override = list(default=list())
+lockless-only      = boolean(default=no)
 
 databases          = force_list(default=list('*'))
 exclude-databases  = force_list(default=list())

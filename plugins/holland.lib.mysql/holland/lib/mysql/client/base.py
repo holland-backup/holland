@@ -4,7 +4,6 @@ import sys
 import re
 import logging
 import MySQLdb
-import MySQLdb.connections
 
 MySQLError = MySQLdb.MySQLError
 ProgrammingError = MySQLdb.ProgrammingError
@@ -414,7 +413,6 @@ class AutoMySQLClient(PassiveMySQLClient):
 
     def __getattr__(self, key):
         if self._connection is None:
-            getattr(MySQLdb.connections.Connection, key)
             LOG.info("Initiating connection to MySQL")
             self.connect()
 

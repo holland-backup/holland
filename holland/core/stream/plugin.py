@@ -8,6 +8,7 @@
     :license: BSD, see LICENSE.rst for details
 """
 
+import os
 try:
     _set = set
 except NameError: #pragma: no cover
@@ -31,6 +32,22 @@ def available_methods():
         results.append(plugin.name)
         results.extend(plugin.aliases)
     return results
+
+def open_stream_wrapper(basedir, *args, **kwargs):
+    """A wrapper to open all file relative to some base path and dispatch to
+    ``open_stream``
+
+    :returns: function
+    """
+    def dispatch(filename, mode='r'):
+        """Dispatch to open_stream with the args/kwargs provided to the
+        open_stream_wrapper method.
+
+        :returns: File-like object from open-stream
+        """
+        filename = os.path.join(basedir, filename)
+        return open_stream(filename, mode, *args, **kwargs)
+    return dispatch
 
 def open_stream(filename, mode='r', method=None, *args, **kwargs):
     """Open a stream with the provided method

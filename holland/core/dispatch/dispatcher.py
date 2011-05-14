@@ -9,7 +9,7 @@ except NameError:
 
 import saferef
 
-DEBUG = True
+DEBUG = False
 
 WEAKREF_TYPES = (weakref.ReferenceType, saferef.BoundMethodWeakref)
 
