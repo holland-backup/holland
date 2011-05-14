@@ -28,7 +28,8 @@ class Purge(ArgparseCommand):
     def create_parser(self):
         parser = ArgparseCommand.create_parser(self)
         parser.set_defaults(
-            backup_directory=self.config['holland']['backup-directory']
+            backup_directory=self.config['holland']['backup-directory'],
+            backups=self.config['holland']['backupsets'],
         )
         return parser
 
