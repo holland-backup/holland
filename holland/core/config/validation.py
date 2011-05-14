@@ -72,6 +72,8 @@ class BaseValidator(object):
 
         :returns: value formatted to a string
         """
+        if value is None:
+            return value
         return str(value)
     format = classmethod(format)
 
@@ -80,6 +82,7 @@ class ValidationError(ValueError):
     def __init__(self, message, value):
         ValueError.__init__(self, message)
         self.value = value
+        self.message = message
 
     def __str__(self):
         return self.message
@@ -146,13 +149,13 @@ class IntValidator(BaseValidator):
                 raise ValidationError("Invalid format for integer %s" % value,
                                       value)
 
-        if self.kwargs.get('min') and value < self.kwargs.get('min'):
+        if self.kwargs.get('min') is not None and value < self.kwargs.get('min'):
             raise ValidationError("Integer value must be > %d" %
-            self.kwargs['min'])
+                                  self.kwargs['min'], value)
 
         if self.kwargs.get('max') and value > self.kwargs.get('max'):
             raise ValidationError("Integer value exceeds maximum %d" %
-                    self.kwargs['max'])
+                                  self.kwargs['max'], value)
 
         return value
 
@@ -168,7 +171,7 @@ class OptionValidator(BaseValidator):
         """Ensure value is one of the available options"""
         if value in self.args:
             return value
-        raise ValidationError("invalid option %r" % value, value)
+        raise ValidationError("invalid option '%s' - choose from: %s" % (value, ','.join(self.args)), value)
 
 
 class ListValidator(BaseValidator):
