@@ -1,3 +1,12 @@
+holland (1.1.0-2) unstable; urgency=low
+
+  * Added libjs-jquery dependency for sphinx documentation
+  * Added separate holland-doc package
+  * Fix bug in holland lvm package to address the new plugin structure
+    in holland-1.1
+
+ -- Andrew Garner <andrew.garner@rackspace.com>  Mon, 25 Apr 2011 15:08:25 -0500
+
 holland (1.1.0-1) unstable; urgency=low
 
   * New upstream release

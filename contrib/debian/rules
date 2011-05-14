@@ -36,6 +36,7 @@ clean:
 	do cd $$PLUGIN ; \
 	    $(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) clean; \
 	done
+	find $(CURDIR) -name '*\.py[co]' -delete
 	dh_clean 
 
 install: build 
@@ -44,7 +45,8 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	cd docs && make text
+	# remove sphinx's jquery.js as we will symlink debian's
+	rm -f docs/html/_static/jquery.js*
 	@for ADDON in $(HOLLAND_CORE); \
 	do cd $$ADDON ; \
 		$(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) install \
@@ -89,6 +91,8 @@ binary-indep: install
 	dh_installman
 	dh_pysupport
 	dh_link
+	dh_link usr/share/javascript/jquery/jquery.js \
+		usr/share/doc/holland-doc/html/_static/jquery.js
 	dh_strip
 	dh_compress
 	dh_fixperms -X etc/holland/backupsets -X var/log/holland
