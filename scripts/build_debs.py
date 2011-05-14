@@ -1,121 +1,54 @@
-#!/usr/bin/env python
-
-import sys, os
-import time
+import os, sys
+import glob
 import shutil
+import tarfile
 import logging
-import subprocess
-from os.path import join, dirname, abspath
+from build_release import make_release, run
 
-config = {}
-config['srcdir'] = abspath(join(dirname(__file__), '..'))
-config['debian'] = join(config['srcdir'], 'contrib', 'debian')
+def make_debs(dst_dir):
+    # Make debian source tarball holland_%{version}.orig.tar.gz
+    staging = make_release()
+    name = os.path.basename(staging.release_dir)
+    try:
+        archive = tarfile.open(os.path.join(staging.staging_dir,
+                                            name.replace('-', '_') +
+                                            '.orig.tar.gz'),
+                               mode='w:gz')
+        logging.info("Creating %s from %s",
+                     os.path.join(name + '.tar.gz'),
+                     staging.release_dir)
+        logging.info("archive.add(%s)", staging.release_dir)
+        archive.add(staging.release_dir, name)
+        archive.close()
 
-def holland_version():
-    holland_core_dir = join(config['srcdir'])
-    args = ['python', 'setup.py', '--version']
-    return subprocess.Popen(args, stdout=subprocess.PIPE, cwd=holland_core_dir).communicate()[0].strip()
+        # copy contrib/debian/ to ${release_dir}/debian/
+        logging.info("Setting up %s/debian/", staging.release_dir)
+        shutil.copytree(os.path.join(staging.release_dir, 'contrib', 'debian'),
+                        os.path.join(staging.release_dir, 'debian'))
 
-def changelog_time():
-    time_str = time.strftime('%a, %d %b %Y %H:%M:%S ')
-    offset = ('-','+')[time.altzone > 0]
-    offset += '%04d' % time.altzone
-    return time_str + offset
+        # update changelog
+        run('cd %s && dch --local .$(date +%%Y%%m%%d%%H%%M%%S) "Local build"' %
+            staging.release_dir)
 
-def update_changelog():
-    format = """\
-holland (%(version)s-local-%(today)s) unstable; urgency=low
-
-  * Non-maintainer upload
-
- -- %(name)s <%(email)s>  %(date)s
-"""
-    version = holland_version()
-    entry = format % { 'version' : version,
-                       'name' : 'Unknown',
-                       'email': 'example@foo.com',
-                       'today': time.strftime('%Y%M%d%H%M'),
-                       'date' : changelog_time()
-                     }
-    src = join(config['debian'], 'changelog')
-    changelog = open(src + '.new', 'w')
-    print >>changelog, entry,
-    shutil.copyfileobj(open(src), changelog)
-    changelog.close()
-    os.rename(src + '.new', src)
-    logging.info("Updated %s with NMU changelog", src)
-                        
-def check_prereq():
-    control_file = join(config['debian'], 'control')
-    assert os.path.exists('/usr/bin/dpkg-checkbuilddeps'), \
-        "dpkg-dev required to build the Holland debian packages"
-    assert os.path.exists('/usr/bin/debuild'), \
-        "devscripts required to build the Holland debian packages"
-
-    args = ['dpkg-checkbuilddeps', control_file]
-    logging.info("Checking prereqs. Running %s", subprocess.list2cmdline(args))
-    ret = subprocess.call(args)
-    return ret
-
-def prep_tree():
-    src = config['debian']
-    dst = join(config['srcdir'], 'debian')
-    
-    if os.path.exists(dst):
-        if os.path.islink(dst):
-            os.unlink(dst)
-        else:
-            shutil.rmtree(dst)
- 
-    shutil.copytree(src, dst)
-    logging.info("Copied %s to %s", src, dst)
-    update_changelog()
-
-def build_deb():
-    args = [
-        'debuild',
-        '--no-tgz-check',
-        '-rfakeroot',
-        '-us',
-        '-uc',
-    ]
-    logging.info("Running %s", subprocess.list2cmdline(args))
-    return subprocess.call(args)
-
-def cleanup_tree():
-    args = [
-        'debuild',
-        'clean'
-    ]
-    logging.info("Running %s", subprocess.list2cmdline(args))
-    subprocess.call(args)
-    src = config['debian']
-    dst = join(config['srcdir'], 'debian')
-    if os.path.samefile(src, dst):
-        os.unlink(dst)
-        logging.info("Unlinked %s", dst)
-
-def config_logging():
-    logger = logging.getLogger()
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.INFO)
-    formatter = logging.Formatter("%(levelname)s: %(message)s")
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+        # run debuild
+        logging.info("Building debian packages.")
+        run("cd %s && debuild -us -uc" % (staging.release_dir))
+        dst_dir = os.path.expanduser(dst_dir)
+        logging.info("Copying debs to %s", dst_dir)
+        for src_path in glob.glob(os.path.join(staging.staging_dir, '*.deb')):
+            dst_path = os.path.join(dst_dir, os.path.basename(src_path))
+            shutil.copyfile(src_path, dst_path)
+    finally:
+        try:
+            staging.cleanup()
+        except:
+            pass
 
 def main():
-    config_logging()
-    if check_prereq() != 0:
-        return 1
-    try:
-        try:
-            prep_tree()
-            return build_deb()
-        except AssertionError, exc:
-            logging.fatal("%s", exc)
-            return 1
-    finally:
-        cleanup_tree()
-    
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s [%(levelname)s] %(message)s')
+    logging.info("Debs can be found here: %s", make_debs(dst_dir='..'))
+    return 0
 if __name__ == '__main__':
     sys.exit(main())
+
