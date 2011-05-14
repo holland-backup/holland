@@ -28,7 +28,7 @@ tmpdir           = string(default=None)
 
 [logging]
 filename         = string(default='/var/log/holland/holland.log')
-format           = string(default='[%(levelname)s] %(message)s')
+format           = string(default='%(asctime)s [%(levelname)s] %(message)s')
 level            = log_level(default="info")
 """)
 

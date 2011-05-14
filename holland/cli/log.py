@@ -12,7 +12,7 @@ import os, sys
 import warnings
 import logging
 
-DEFAULT_LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
+DEFAULT_LOG_FORMAT = '[%(levelname)s] %(message)s'
 DEFAULT_LOG_LEVEL = logging.INFO
 
 LOG = logging.getLogger(__name__)
@@ -93,10 +93,9 @@ def configure_logging(config):
                          handler=logging.StreamHandler(),
                          fmt=DEFAULT_LOG_FORMAT,
                          level=config['level'])
-
     try:
         configure_logger(logger=logging.getLogger(),
-                         handler=logging.FileHandler(config['filename']),
+                         handler=logging.FileHandler(config['filename'], encoding='utf8'),
                          fmt=config['format'],
                          level=config['level'])
     except IOError, exc:
