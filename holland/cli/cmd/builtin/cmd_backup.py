@@ -59,7 +59,7 @@ class Backup(ArgparseCommand):
                                 dry_run=dry_run)
             except (KeyboardInterrupt, SystemExit):
                 raise
-            except IOError, exc:
+            except (IOError, ValueError), exc:
                 self.stderr("Could not open config file. %s", exc)
                 break
             except (ConfigError, BackupError), exc:
