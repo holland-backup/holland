@@ -205,8 +205,8 @@ def main(args=None):
         install_holland(virtualenv)
     install_plugins(virtualenv, egg_env)
 
-    install_configs(home_dir)
     result = start_shell(virtualenv)
+    install_configs(home_dir)
     logging.info("Exiting virtual environment[%d]", result)
     return result
 
