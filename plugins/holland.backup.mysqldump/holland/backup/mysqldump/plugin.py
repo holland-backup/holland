@@ -42,8 +42,8 @@ class MySQLDumpPlugin(BackupPlugin):
         LOG.info("----------------------")
         if self.config['mysqldump']['estimate-method'].startswith('const:'):
             return parse_size(self.config['mysqldump']['estimate-method'])
-        return sum([db.size for db in self._schema.databases])
-
+        return ([db.size for db in self._schema.databases])
+        
     def _setup(self):
         os.makedirs(os.path.join(self.path, 'backup_data'))
         LOG.info("+ mkdir %s", os.path.join(self.path, 'backup_data'))
