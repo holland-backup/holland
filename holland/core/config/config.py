@@ -193,6 +193,7 @@ class Config(OrderedDict):
             else:
                 self[key] = value
         self.source.update(src_config.source)
+        return self
 
     def meld(self, config):
         """Meld another config instance with this one.
@@ -225,7 +226,8 @@ class Config(OrderedDict):
                 except KeyError:
                     # only add the value if it does not already exist
                     self[key] = value
-                    self.source[key] = value
+                    self.source[key] = config.source[key]
+        return self
 
     def write(self, path, encoding='utf8'):
         """Write a representaton of the config to the specified filename.
@@ -302,7 +304,10 @@ class Config(OrderedDict):
                 value = self.formatter.format(key, value)
                 if value is not None:
                     lines.append("%s = %s" % (key, value))
+        if lines and lines[-1] != '':
+            lines.append('')
         return os.linesep.join(lines)
+    __unicode__ = __str__
 
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__,
