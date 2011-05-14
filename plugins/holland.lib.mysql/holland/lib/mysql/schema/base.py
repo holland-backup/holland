@@ -14,6 +14,9 @@ class MySQLSchema(object):
         self._database_filters = []
         self._table_filters = []
         self._engine_filters = []
+        self._transactional_engines = []
+        self._transactional_databases = []
+        self._transactional_tables = []
         self.timestamp = None
 
     def excluded_tables(self):
@@ -57,6 +60,15 @@ class MySQLSchema(object):
         :type filterobj: callable, such as `IncludeFilter` or `ExcludeFilter`
         """
         self._engine_filters.append(filterobj)
+
+    def add_transactional_engines(self, engines):
+        self._transactional_engines.extend(engines)
+
+    def add_transactional_databases(self, databases):
+        self._transactional_databases.extend(databases)
+
+    def add_transactional_tables(self, tables):
+        self._transactional_tables.extend(tables)
 
     def is_db_filtered(self, name):
         """Check if the database name is filtered by any database filters
@@ -108,8 +120,8 @@ class MySQLSchema(object):
                          database name. This iterator must yield `Table`
                          instances from the requested database.
 
-        :param fast_iterate: Optional. Skips table iteration when there are no 
-                             useful filters - include pattern = *, 
+        :param fast_iterate: Optional. Skips table iteration when there are no
+                             useful filters - include pattern = *,
                              exclude pattern = ''
         """
         for database in db_iter():
@@ -137,13 +149,22 @@ class MySQLSchema(object):
                         table.excluded = True
                     if self.is_engine_filtered(table.engine):
                         table.excluded = True
+                    if table.engine.lower() in self._transactional_engines:
+                        table.is_transactional = True
+                    if (database.name + '.' + table.name) in self._transactional_tables:
+                        table.is_transactional = True
                     database.add_table(table)
             except MySQLError, exc:
-                # mimic mysqldump behavior here and skip any databases that 
+                # mimic mysqldump behavior here and skip any databases that
                 # are not readable
                 if exc.args[0] == 1018:
                     continue
                 raise
+
+            if database.name in self._transactional_databases:
+                for table in database.tables:
+                    table.is_transactional = True
+
         self.timestamp = time.time()
 
 
@@ -175,13 +196,18 @@ class Database(object):
             if tableobj.excluded:
                 yield tableobj
 
+    #@property
     def is_transactional(self):
         """Check if this database is safe to dump in --single-transaction
         mode
         """
         for tableobj in self.tables:
-            if not tableobj.is_transactional:
+            # if a table is not excluded and it is not transactional then
+            # this database will not be transactional
+            if not tableobj.excluded and not tableobj.is_transactional:
                 return False
+        return True
+    is_transactional = property(is_transactional)
 
     def size(self):
         """Size of all non-excluded objects in this database
