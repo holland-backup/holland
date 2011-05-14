@@ -145,7 +145,7 @@ class MySQLBackup(object):
             ]
 
             if explicit_tables and database.name != 'mysql':
-                options.extend([tbl.name.encode('utf8')
+                options.extend([tbl.name
                                 for tbl in database.tables
                                 if not tbl.excluded])
 
