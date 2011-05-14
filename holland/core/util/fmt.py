@@ -12,7 +12,7 @@ import re
 from math import floor, log
 from time import strftime, localtime
 
-def format_interval(seconds):
+def format_interval(seconds, precision=2):
     """Format an integer number of seconds to a human readable string.
 
     :param seconds: integer number of seconds to format into a string interval
@@ -32,8 +32,9 @@ def format_interval(seconds):
             plural = bool(quotient > 1)
             result.append('%d %s' % (quotient, names[plural]))
     if seconds:
-        result.append("%.2f %s" %
-                      (seconds, ['second', 'seconds'][seconds != 1.0]))
+        result.append("%.*f %s" %
+                      (precision, seconds,
+                       ['second', 'seconds'][seconds != 1.0]))
     return ', '.join(result)
 
 def format_datetime(epoch, fmt="%a %b %d %Y %I:%M:%S%p"):
