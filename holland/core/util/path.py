@@ -2,7 +2,7 @@
     holland.core.util.path
     ~~~~~~~~~~~~~~~~~~~~~~
 
-    Path mantipulation utlity methods
+    Path manipulation utlity methods
 
     :copyright: 2008-2010 Rackspace US, Inc.
     :license: BSD, see LICENSE.rst for details
@@ -11,6 +11,7 @@
 # Functions added here should really be as portable as possible
 
 import os
+import errno
 
 def relpath(origin, dest):
     """
@@ -88,3 +89,18 @@ def directory_size(path):
             except OSError:
                 pass
     return total_size
+
+def ensure_directory(path):
+    """Ensure a directory path exists
+
+    :raises: OSError if an error is encountered.  If the path already exists,
+             we silently swallow the EEXIST notification
+    :returns: True if a directory was created, false otherwise
+    """
+    try:
+        os.makedirs(path)
+        return True
+    except OSError, exc:
+        if exc.errno != errno.EEXIST:
+            raise
+    return False
