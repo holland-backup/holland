@@ -1,5 +1,6 @@
 """Run mysqldump, Run"""
 
+import os
 import errno
 import select
 import logging
@@ -51,7 +52,7 @@ class ProcessQueue(object):
 
     def dequeue(self, proc):
         """Remove a process from the queue"""
-        LOG.debug("dequeing process %r", proc)
+        LOG.debug("dequeing process %s", proc)
         self.poller.unregister(proc.stdin.fileno())
         LOG.debug("unregistered fd %d", proc.stdin.fileno())
         proc.wait()
@@ -65,13 +66,12 @@ class ProcessQueue(object):
             LOG.debug("Waiting for a free process slot")
             for child in self.wait():
                 yield child
-        LOG.debug("OK len(self.queue) = %d", len(self.queue))
-        LOG.debug("process = %r", process)
+        LOG.debug("Process queue length: %d", len(self.queue))
+        LOG.debug("New process: %r", process)
         process.start()
         self.queue[process.stdin.fileno()] = process
-        LOG.debug("registering process with fileno %d", process.stdin.fileno())
+        LOG.debug("Registering new process stdin fd=%d", process.stdin.fileno())
         self.poller.register(process.stdin.fileno(), select.POLLIN)
-        LOG.debug("%d : %r", process.stdin.fileno(), process)
 
     def waitall(self):
         """Wait for all remaining processes in the queue to finish"""
@@ -79,7 +79,6 @@ class ProcessQueue(object):
         queue = self.queue
         while queue:
             for process in self.wait():
-                LOG.debug("Yielding %r", process)
                 yield process
 
     def terminate(self):
@@ -91,6 +90,12 @@ class ProcessQueue(object):
             self.poller.unregister(pid.pid)
             os.kill(pid.pid, signal.SIGTERM)
             pid.wait()
+
+def all(iterable):
+    for element in iterable:
+        if not element:
+            return False
+    return True
 
 class MySQLBackup(object):
     def __init__(self, options, open_sql_file, lock_method=None):
@@ -124,7 +129,7 @@ class MySQLBackup(object):
         fileobj = self.open_sql_file('all_databases.sql', 'w')
         MySQLDump(options, fileobj).run()
 
-    def run_each(self, databases, parallelism=1):
+    def run_each(self, databases, explicit_tables=False, parallelism=1):
         databases = [db for db in databases if not db.excluded]
         if not databases:
             raise ProcessError("No databases to backup")
@@ -138,6 +143,15 @@ class MySQLBackup(object):
                 self._lock_method([database]),
                 database.name
             ]
+
+            if explicit_tables and database.name != 'mysql':
+                options.extend([tbl.name.encode('utf8')
+                                for tbl in database.tables
+                                if not tbl.excluded])
+
+            if database.name != 'mysql' and '--flush-privileges' in options:
+                options.remove('--flush-privileges')
+
             fileobj = self.open_sql_file(database.name, 'w')
             mysqldump = MySQLDump(options, fileobj)
             for process in queue.add(mysqldump):
@@ -146,6 +160,7 @@ class MySQLBackup(object):
                               process.pid)
                     LOG.info("Terminating remaining processes")
                     queue.terminate()
+
         for process in queue.waitall():
             LOG.info("mysqldump[%d] exited with status %d",
                      process.pid, process.returncode)
@@ -159,13 +174,16 @@ class MySQLDump(object):
     def start(self):
         if self.process:
             raise ValueError("Already started this mysqldump")
+        environ = os.environ.copy()
+        environ['HOME'] = '/dev/null'
         self.process = Popen([arg.encode('utf8') for arg in self.argv],
                              stdin=PIPE,
                              stdout=self.fileobj.fileno(),
                              stderr=PIPE,
+                             env=environ,
                              close_fds=True)
         LOG.info("mysqldump(%s[%d])::", self.argv[-1], self.process.pid)
-        LOG.info("  %s", list2cmdline(self.argv))
+        LOG.info(" %s", list2cmdline(self.argv))
 
     def run(self):
         # run and wait for a result
@@ -176,10 +194,13 @@ class MySQLDump(object):
         LOG.debug("Waiting on --->%s<---", self)
         self.process.stdin.close()
         status = self.process.wait()
-        LOG.debug("OKAY %s finished with status %d", self, status)
-        LOG.debug("closing fileobj")
-        self.fileobj.close()
-        LOG.debug("okay fileobj closed")
+        LOG.debug("%s finished with status %d", self, status)
+        try:
+            self.fileobj.close()
+        except IOError, exc:
+            if status == 0:
+                raise ProcessError(str(exc))
+            # otherwise fall through and raise mysqldump error
         LOG.info("* mysqldump(%s[%d]) complete", self.argv[-1], self.process.pid)
         if status != 0:
             for line in self.process.stderr:
@@ -210,5 +231,5 @@ class MySQLDump(object):
         return self.process.stdin
     stdin = property(stdin)
 
-    def __repr__(self):
-        return "MySQLDump([%d] %s)" % (self.pid, list2cmdline(self.argv))
+    def __unicode__(self):
+        return u"MySQLDump([%d] %s)" % (self.pid, list2cmdline(self.argv))
