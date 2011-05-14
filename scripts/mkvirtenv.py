@@ -2,10 +2,10 @@
 
 """Setup a python virtual environment to test holland"""
 
-import sys
-sys.path.insert(0, '.')
-
 import os
+import sys
+sys.path.insert(0, os.path.abspath('.'))
+
 import signal
 import shutil
 import logging
