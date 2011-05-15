@@ -133,3 +133,18 @@ class BackupPlugin(ConfigurablePlugin):
         hooks                   = list(default=list())
         """)
     configspec = classmethod(configspec)
+
+class NoopBackupPlugin(BackupPlugin):
+
+    def plugin_info(self):
+        return dict(
+            name='noop',
+            summary='A plugin that does nothing',
+            description='''
+            A simple plugin that does nothing and servers only as an example
+            and a useful test foil.
+            ''',
+            author='Holland Core team',
+            version='1.1.0',
+            api_version='1.1.0',
+        )
