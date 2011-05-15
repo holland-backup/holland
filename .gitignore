@@ -3,3 +3,11 @@
 *egg*
 build/
 staging/
+coverage.xml
+coverage_html_report/
+env/
+holland.log
+nosetests.xml
+plugins/holland.backup.sqlite/htmlcov/
+pylint.txt
+tests/holland.log

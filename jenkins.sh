@@ -3,7 +3,7 @@ set -u
 set -x
 
 export TESTDIRS="tests/ \
-                 plugins/holland.backup.random/ \
+                 plugins/holland.backup.random/tests/ \
                  plugins/holland.backup.sqlite/tests/"
 python setup.py egg_info
 
