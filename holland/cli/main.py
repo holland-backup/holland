@@ -64,7 +64,7 @@ class HollandCli(ArgparseCommand):
                  dest='log_level', const='info',
                  help='Log verbose output (alias for --log-level=info)'),
         argument('--quiet', '-q', action='store_true',
-                 help="Disable all console output. (alias for --log-level=none)"),
+                 help="Disable all console output."),
         argument('subcommand', nargs='?'),
         argument('args', nargs='...'),
     ]
