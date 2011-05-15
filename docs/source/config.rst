@@ -1,3 +1,5 @@
+.. _config:
+
 Holland Config Files
 ====================
 
@@ -91,6 +93,8 @@ mysql-global-auth.conf::
   socket = /tmp/custom_socket_location.sock
 
 
+.. _holland-main-config:
+
 holland.conf - main config
 --------------------------
 
@@ -177,6 +181,8 @@ global providers config files will be under /etc/holland/providers/.
 This functionality is largely deprecated as of Holland 1.1 and it is recommended
 that you use %include functionality to achieve the same effect in a more flexible
 way.
+
+.. _backupsetconfigs:
 
 Backup-Set Configs
 ------------------

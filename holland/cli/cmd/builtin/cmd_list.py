@@ -3,6 +3,7 @@
 import textwrap
 import logging
 from holland.core import BackupSpool, iterate_plugins
+from holland.core.util import format_bytes, format_datetime
 from holland.cli.cmd.base import ArgparseCommand, argument
 
 LOG = logging.getLogger(__name__)
@@ -76,7 +77,7 @@ class ListPlugins(ArgparseCommand):
                                plugin, exc_info=True)
                     continue
                 wrap = textwrap.wrap
-                summary = wrap(info['summary'],
+                summary = wrap(info.get('summary', ''),
                                initial_indent=' '*28,
                                subsequent_indent=' '*28,
                                width=79)
@@ -126,8 +127,15 @@ class ListBackups(ArgparseCommand):
             return 1
 
         spool = BackupSpool(backup_directory)
+        backupsets = spool.list_backupsets() or ['']
+        padding = max([len(name) for name in backupsets]) + 1
+        self.stderr("%36s %*s %10s %5s",
+                    "Created", padding, "Backupset", "Size", "Path")
+        self.stderr("%36s %s %10s %s", "-"*36, "-"*padding, "-"*10, "-"*5)
         for backup in spool:
-            self.stderr("%-12s: %s", backup.name, backup.path)
+            self.stderr("<Created %s> %*s %10s %s",
+                        format_datetime(backup.timestamp), padding, backup.name,
+                        "[%s]" % format_bytes(backup.size()), backup.path)
         return 0
 
     #@classmethod

@@ -1,6 +1,11 @@
 This directory contains various utility scripts 
 used in Holland development.
 
+build_debs.py
+=============
+Builds .DEB package files. Must be run from
+Holland source root (scripts/build_debs.py)
+
 quick_virtinstall.sh
 ====================
 Setups up a virtual python environment using

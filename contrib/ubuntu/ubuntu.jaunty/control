@@ -46,18 +46,6 @@ Depends: holland (>= ${source:Version})
 Description: Holland Example Backup Provider Plugin 
  This package provides the holland example plugin. 
 
-Package: holland-maatkit
-Architecture: any
-Depends: holland (>= ${source:Version}), maatkit, holland-common
-Description: Holland Maatkit Library Plugins
- This package provides the holland maatkit plugin. 
-
-Package: holland-mysqlhotcopy
-Architecture: any
-Depends: holland (>= ${source:Version}), holland-common, libmysqlclient15off
-Description: Holland MySQL Hot Copy Backup Provider Plugin 
- This package provides the holland mysql hotcopy plugin. 
-
 Package: holland-mysqlcmds
 Architecture: any
 Depends: holland (>= ${source:Version}), holland-mysqldump
