@@ -21,15 +21,15 @@ class ListCommands(ArgparseCommand):
 
     def execute(self, namespace, parser):
         """Run list-commands"""
-        self.stderr("")
-        self.stderr("Available commands:")
+        self.stdout("")
+        self.stdout("Available commands:")
         commands = list(iterate_plugins('holland.commands'))
         commands.sort()
         for cmd in commands:
             aliases = ''
             if cmd.aliases:
                 aliases = " (%s)" % ','.join(cmd.aliases)
-            self.stderr("%-15s%-5s %s", cmd.name, aliases, cmd.summary)
+            self.stdout("%-15s%-5s %s", cmd.name, aliases, cmd.summary)
         return 0
 
     #@classmethod
@@ -62,8 +62,8 @@ class ListPlugins(ArgparseCommand):
     """
 
     def execute(self, namespace, parser):
-        self.stderr("%-12s %-14s %11s", 'Plugin Type', 'Name', 'Description')
-        self.stderr("%12s %14s %11s", "="*12, "="*14, "="*11)
+        self.stdout("%-12s %-14s %11s", 'Plugin Type', 'Name', 'Description')
+        self.stdout("%12s %14s %11s", "="*12, "="*14, "="*11)
         for group in ('backup', 'stream', 'hooks', 'commands'):
             plugin_list = list(iterate_plugins('holland.%s' % group))
             plugin_list.sort()
@@ -81,7 +81,7 @@ class ListPlugins(ArgparseCommand):
                                initial_indent=' '*28,
                                subsequent_indent=' '*28,
                                width=79)
-                self.stderr("%-12s %-14s %s", group,
+                self.stdout("%-12s %-14s %s", group,
                             info['name'],
                             '\n'.join(summary).lstrip())
         return 0
@@ -129,11 +129,11 @@ class ListBackups(ArgparseCommand):
         spool = BackupSpool(backup_directory)
         backupsets = spool.list_backupsets() or ['']
         padding = max([len(name) for name in backupsets]) + 1
-        self.stderr("%36s %*s %10s %5s",
+        self.stdout("%36s %*s %10s %5s",
                     "Created", padding, "Backupset", "Size", "Path")
-        self.stderr("%36s %s %10s %s", "-"*36, "-"*padding, "-"*10, "-"*5)
+        self.stdout("%36s %s %10s %s", "-"*36, "-"*padding, "-"*10, "-"*5)
         for backup in spool:
-            self.stderr("<Created %s> %*s %10s %s",
+            self.stdout("<Created %s> %*s %10s %s",
                         format_datetime(backup.timestamp), padding, backup.name,
                         "[%s]" % format_bytes(backup.size()), backup.path)
         return 0

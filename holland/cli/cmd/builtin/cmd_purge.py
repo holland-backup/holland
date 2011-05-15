@@ -48,24 +48,24 @@ class Purge(ArgparseCommand):
         for name in namespace.backups:
             if '/' in name:
                 backup = mgr.purge_backup(name, dry_run=namespace.dry_run)
-                self.stderr("- Purged %s [%s]", backup.path,
+                self.stdout("- Purged %s [%s]", backup.path,
                             format_bytes(backup.size()))
             else:
                 retention_count = namespace.retention_count
                 if retention_count is None:
                     retention_count = self._retention_count(name)
-                self.stderr("Retention count: %r", retention_count)
+                self.stdout("Retention count: %r", retention_count)
                 backups, kept, purged = mgr.purge_backupset(name,
                                                             retention_count,
                                                             namespace.dry_run)
-                self.stderr("Total backups:  %d", len(backups))
-                self.stderr("Kept backups:   %d", len(kept))
-                self.stderr("Purged backups: %d", len(purged))
+                self.stdout("Total backups:  %d", len(backups))
+                self.stdout("Kept backups:   %d", len(kept))
+                self.stdout("Purged backups: %d", len(purged))
                 for backup in kept:
-                    self.stderr("  + %s [%s]", backup.path,
+                    self.stdout("  + %s [%s]", backup.path,
                                 format_bytes(backup.size()))
                 for backup in purged:
-                    self.stderr("  - %s [%s]", backup.path,
+                    self.stdout("  - %s [%s]", backup.path,
                                 format_bytes(backup.size()))
         return 0
 

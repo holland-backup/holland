@@ -44,7 +44,7 @@ class Help(ArgparseCommand):
         else:
             cmd = self
 
-        self.stderr("%s", cmd.help())
+        self.stdout("%s", cmd.help())
         return 0
 
     def plugin_info(self):
