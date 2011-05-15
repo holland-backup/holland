@@ -120,11 +120,14 @@ class Configspec(Config):
             # missing section in config that we are validating
             cfgsect = config.setdefault(key, config.__class__())
             cfgsect.name = key
+            if key not in config.source:
+                config.source[key] = self[key]
 
         # ensure we are always validating a Config instance
         if not isinstance(cfgsect, Config):
             cfgsect = config.__class__(cfgsect)
             config[key] = cfgsect
+            config.source[key] = self.source[key]
 
         check = self[key]
         # handle raw dict objects as configspec input
@@ -170,14 +173,21 @@ class Configspec(Config):
             raise ValidationError("Internal Error.  Failed to parse a "
                                   "validation check '%s'" % checkstr, checkstr)
 
-        validator = self.registry[check.name](check.args, check.kwargs)
+        try:
+            validator_cls = self.registry[check.name]
+        except KeyError:
+            raise ValidationError("Unknown validation check '%s'" % check.name, checkstr)
+
+        validator = validator_cls(check.args, check.kwargs)
         value = self._resolve_value(key, check, config)
         try:
             value = validator.validate(value)
         except ValidationError, exc:
             raise ValidationError("%s.%s : %s" % (config.name, key, exc), exc.value)
-            
+
         config[key] = value
+        if key not in config.source:
+            config.source[key] = self.source[key]
         if check.aliasof is not missing:
             config.rename(key, check.aliasof)
 
