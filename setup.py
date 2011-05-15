@@ -33,6 +33,10 @@ setup(
     [console_scripts]
     holland = holland.cli.main:holland
 
+    # Holland backup plugins exposed by holland-core
+    [holland.backup]
+    noop            = holland.core.backup.plugin:NoopBackupPlugin
+
     # Holland subcommands
     [holland.commands]
     help            = holland.cli.cmd:Help
@@ -46,6 +50,6 @@ setup(
     [paste.paster_create_template]
     holland:backup  = holland.devtools:HollandBackupTemplate
     """,
-    namespace_packages=[],
+    namespace_packages=['holland', 'holland.backup', 'holland.commands'],
     **extra
 )
