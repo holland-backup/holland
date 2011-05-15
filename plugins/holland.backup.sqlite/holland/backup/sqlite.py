@@ -141,8 +141,9 @@ class SQLitePlugin(BackupPlugin):
         """Sqlite Plugin Metadata"""
         return dict(
                 name='sqlite',
-                summary='Backup SQLite Files',
+                summary='Holland Backup Plugin for SQLite Databases',
                 description='''
+                Holland Backup Plugin for SQLite Databases.
                 ''',
                 version='1.1.0a1',
                 api_version='1.1.0a1',
