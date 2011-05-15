@@ -135,8 +135,14 @@ class BackupPlugin(ConfigurablePlugin):
     configspec = classmethod(configspec)
 
 class NoopBackupPlugin(BackupPlugin):
+    """Backup plugin implementation that does nothing
 
+    This plugin is used when a backup should perform no actions
+    but otherwise should be successful.  This is also useful for
+    certain unit tests used by holland.core.
+    """
     def plugin_info(self):
+        """Basic plugin info for the noop plugin"""
         return dict(
             name='noop',
             summary='A plugin that does nothing',

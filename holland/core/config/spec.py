@@ -176,14 +176,16 @@ class Configspec(Config):
         try:
             validator_cls = self.registry[check.name]
         except KeyError:
-            raise ValidationError("Unknown validation check '%s'" % check.name, checkstr)
+            raise ValidationError("Unknown validation check '%s'" % check.name,
+                                  checkstr)
 
         validator = validator_cls(check.args, check.kwargs)
         value = self._resolve_value(key, check, config)
         try:
             value = validator.validate(value)
         except ValidationError, exc:
-            raise ValidationError("%s.%s : %s" % (config.name, key, exc), exc.value)
+            raise ValidationError("%s.%s : %s" % (config.name, key, exc),
+                                  exc.value)
 
         config[key] = value
         if key not in config.source:

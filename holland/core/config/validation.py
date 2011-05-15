@@ -149,7 +149,8 @@ class IntValidator(BaseValidator):
                 raise ValidationError("Invalid format for integer %s" % value,
                                       value)
 
-        if self.kwargs.get('min') is not None and value < self.kwargs.get('min'):
+        if self.kwargs.get('min') is not None and \
+                value < self.kwargs.get('min'):
             raise ValidationError("Integer value must be > %d" %
                                   self.kwargs['min'], value)
 
@@ -171,7 +172,9 @@ class OptionValidator(BaseValidator):
         """Ensure value is one of the available options"""
         if value in self.args:
             return value
-        raise ValidationError("invalid option '%s' - choose from: %s" % (value, ','.join(self.args)), value)
+        raise ValidationError("invalid option '%s' - choose from: %s" %
+                              (value, ','.join(self.args)),
+                              value)
 
 
 class ListValidator(BaseValidator):

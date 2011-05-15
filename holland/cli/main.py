@@ -55,8 +55,7 @@ class HollandCli(ArgparseCommand):
                                         '/etc/holland/holland.conf'),
                  help='Read configuration from the given file'),
         argument('--log-level', '-l', metavar='<log-level>',
-                    choices=('debug', 'info', 'warning', 'error', 'fatal',
-                             'none'),
+                    choices=('debug', 'info', 'warning', 'error', 'fatal'),
                     help="Specify the log level."),
         argument('--debug', '-d', action='store_const',
                  dest='log_level', const='debug',
@@ -64,9 +63,8 @@ class HollandCli(ArgparseCommand):
         argument('--verbose', '-v', action='store_const',
                  dest='log_level', const='info',
                  help='Log verbose output (alias for --log-level=info)'),
-        argument('--quiet', '-q', action='store_const',
-                 dest='log_level', const='none',
-                 help="Disable all output. (alias for --log-level=none)"),
+        argument('--quiet', '-q', action='store_true',
+                 help="Disable all console output."),
         argument('subcommand', nargs='?'),
         argument('args', nargs='...'),
     ]
@@ -101,8 +99,7 @@ class HollandCli(ArgparseCommand):
             os.environ['TMPDIR'] = config['holland']['tmpdir']
         if config['holland']['path']:
             os.environ['PATH'] = config['holland']['path']
-        # XXX: handle --quiet/log_level=='none'
-        holland_logging.configure_logging(config['logging'])
+        holland_logging.configure_logging(config['logging'], quiet=opts.quiet)
         signal.signal(signal.SIGTERM, terminate)
         signal.signal(signal.SIGQUIT, terminate)
         signal.signal(signal.SIGHUP, signal.SIG_IGN)
