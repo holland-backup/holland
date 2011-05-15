@@ -3,6 +3,7 @@ import os
 import time
 import shutil
 import tempfile
+import copy
 from nose.tools import ok_, assert_equals, with_setup, raises
 
 from holland.core import load_plugin, BackupError
@@ -67,7 +68,7 @@ level = 1
 
 test_config = spec.validate(test_config)
 test_config['holland:backup']['hooks'] = []
-test_config['sqlite']['databases'] = [database]
+test_config['sqlite']['databases'] = ['', database,]
 test_config['hooks'] = None
 
 
@@ -120,17 +121,59 @@ def teardown_func():
     
 @with_setup(setup_func, teardown_func)    
 def test_sqlite_dry_run():
-    name = 'sqlite/' + time.strftime('%Y%m%d_%H%M%S')
     plugin = load_plugin('holland.backup', 'sqlite')
-    #plugin = SQLitePlugin(name)
     plugin.configure(test_config)
     
     job = BackupJob(plugin, test_config, FakeStore())
     job.run(dry_run=True)
 
+@raises(BackupError)
+@with_setup(setup_func, teardown_func)    
+def test_sqlite_bad_binary():
+    plugin = load_plugin('holland.backup', 'sqlite')
+    new_config = copy.deepcopy(test_config)
+    new_config['sqlite']['binary'] = '/usr/bin/sqlite-doesnt-exist'
+    plugin.configure(new_config)
+    job = BackupJob(plugin, new_config, FakeStore())
+    job.run(dry_run=True)
+
+@with_setup(setup_func, teardown_func)    
+def test_sqlite_bad_databases():
+    try:
+        plugin = load_plugin('holland.backup', 'sqlite')
+        new_config = copy.deepcopy(test_config)
+        new_config['sqlite']['databases'] = ['', '/path/to/some/bogus/db']
+        plugin.configure(new_config)
+        plugin.pre()
+        plugin.estimate()
+        job = BackupJob(plugin, new_config, FakeStore())
+        job.run(dry_run=False)
+    except BackupError, e:
+        pass
+        
+    try:
+        new_config = copy.deepcopy(test_config)
+        new_config['sqlite']['databases'] = [database, '/path/to/some/bogus/db']
+        plugin.configure(new_config)
+        plugin.pre()
+        plugin.estimate()
+        job = BackupJob(plugin, new_config, FakeStore())
+        job.run(dry_run=False)
+    except BackupError, e:
+        pass
+        
+@raises(BackupError)
+@with_setup(setup_func, teardown_func)    
+def test_sqlite_no_databases():
+    plugin = load_plugin('holland.backup', 'sqlite')
+    new_config = copy.deepcopy(test_config)
+    new_config['sqlite']['databases'] = []
+    plugin.configure(new_config)
+    job = BackupJob(plugin, new_config, FakeStore())
+    job.run(dry_run=False)
+    
 @with_setup(setup_func, teardown_func)
 def test_sqlite_estimate():
-    name = 'sqlite/' + time.strftime('%Y%m%d_%H%M%S')
     dry_run = False
     plugin = load_plugin('holland.backup', 'sqlite')
     plugin.configure(test_config)
@@ -139,7 +182,6 @@ def test_sqlite_estimate():
     
 @with_setup(setup_func, teardown_func)
 def test_sqlite_backup():
-    name = 'sqlite/' + time.strftime('%Y%m%d_%H%M%S')
     plugin = load_plugin('holland.backup', 'sqlite')
     plugin.configure(test_config)
     job = BackupJob(plugin, test_config, FakeStore())
@@ -147,8 +189,6 @@ def test_sqlite_backup():
 
 @with_setup(setup_func, teardown_func)
 def test_sqlite_bad_backup():
-    name = 'sqlite/' + time.strftime('%Y%m%d_%H%M%S')
-    
     plugin = load_plugin('holland.backup', 'sqlite')
     plugin.configure(test_config)    
     job = BackupJob(plugin, test_config, FakeStore())
@@ -158,10 +198,15 @@ def test_sqlite_bad_backup():
         job.run()
     except IOError, e:
         pass
+
+@with_setup(setup_func, teardown_func)
+def test_sqlite_configspec():
+    plugin = load_plugin('holland.backup', 'sqlite')
+    plugin.configure(test_config)    
+    ok_(plugin.configspec())
     
 @with_setup(setup_func, teardown_func)
 def test_sqlite_info():
-    name = 'sqlite/' + time.strftime('%Y%m%d_%H%M%S')
     dry_run = False
     plugin = load_plugin('holland.backup', 'sqlite')
     plugin.configure(test_config)
