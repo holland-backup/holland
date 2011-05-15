@@ -54,9 +54,6 @@ setup(
     [paste.paster_create_template]
     holland:backup  = holland.devtools:HollandBackupTemplate
     """,
-    namespace_packages=['holland',
-                        'holland.backup',
-                        'holland.commands',
-                        'holland.lib'],
+    namespace_packages=[],
     **extra
 )
