@@ -74,7 +74,7 @@ def configure_warnings():
     warnings.showwarning = log_warning
 
 
-def configure_logging(config):
+def configure_logging(config, quiet=False):
     """Configure CLI logging based on config
 
     config must be a dict-like object that has 3 paramters:
@@ -88,7 +88,7 @@ def configure_logging(config):
     # as well as adding additional file loggers
     _clear_root_handlers()
 
-    if os.isatty(sys.stderr.fileno()):
+    if not quiet and os.isatty(sys.stderr.fileno()):
         configure_logger(logger=logging.getLogger(),
                          handler=logging.StreamHandler(),
                          fmt=DEFAULT_LOG_FORMAT,
