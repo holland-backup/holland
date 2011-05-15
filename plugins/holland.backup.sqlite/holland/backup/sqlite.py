@@ -11,18 +11,18 @@ LOG = logging.getLogger(__name__)
 CONFIGSPEC="""
 [sqlite]
 databases = force_list(default=list())
-binary = string(default=/usr/bin/sqlite3)
+binary = string(default="/usr/bin/sqlite3")
 
 [compression]
 method = option('none', 'gzip', 'pigz', 'bzip2', 'lzop', default='gzip')
 inline = boolean(default=yes)
 level = integer(min=0, max=9, default=1)
-""".splitlines()
+"""
 
 class SQLitePlugin(BackupPlugin):
     def __init__(self, name):
         self.name = name
-        self.dry_run = False
+        self.dry_run_only = False
         self.invalid_databases = []
         self.databases = []
 
@@ -91,15 +91,19 @@ class SQLitePlugin(BackupPlugin):
                 LOG.warn("Skipping invalid SQLite database at [%s]" % path)
                 continue
 
-            if self.dry_run:
+            if self.dry_run_only:
                 LOG.info("Backing up SQLite database at [%s] (dry run)" % path)
                 dest = open('/dev/null', 'w')
             else:
                 LOG.info("Backing up SQLite database at [%s]" % path)
                 dest = os.path.join(self.store.path, '%s.sql' % \
                                     os.path.basename(path))
-                dest = open_stream(dest, 'w', *zopts)
-
+                try:
+                    dest = open_stream(dest, 'w', *zopts)
+                except IOError, e:
+                    raise BackupError, "SQLite IOError %s %s" \
+                        % (e.args[1], dest)     
+                
             process = Popen([self.sqlite_bin, path, '.dump'],
                             stdin=open('/dev/null', 'r'), stdout=dest,
                             stderr=PIPE)
@@ -107,26 +111,26 @@ class SQLitePlugin(BackupPlugin):
             dest.close()
 
             if process.returncode != 0:
-              LOG.error(stderroutput)
-              raise BackupError("SQLite '.dump' of [%s] failed" % path)
+                LOG.error(stderroutput)
+                raise BackupError("SQLite '.dump' of [%s] failed" % path)
 
         # Raise for invalid databases after we successfully backup the others
         if len(self.invalid_databases) > 0:
             raise BackupError, "Invalid database(s): %s" % self.invalid_databases
 
-    def dry_run(self):
-        self.dry_run = True
+    def dryrun(self):
+        self.dry_run_only = True
         self.backup()
 
     def configspec(self):
         """Configspec that the sqlite plugin accepts"""
-        return ConfigSpec.parse(CONFIGSPEC)
+        return Configspec.from_string(CONFIGSPEC)
 
     def plugin_info(self):
         """Sqlite Plugin Metadata"""
         return dict(
                 name='sqlite',
-                summary='Backup sqlite files',
+                summary='Backup SQLite Files',
                 description='''
                 ''',
                 version='1.1.0a1',
