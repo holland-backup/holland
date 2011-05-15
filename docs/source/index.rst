@@ -6,6 +6,13 @@
 Welcome to Holland's documentation!
 ===================================
 
+Holland is an Open Source backup framework originally developed at Rackspace 
+and written in Python. 
+
+  * Website: http://www.hollandbackup.org/
+  * Source: https://github.com/holland-backup/holland
+  * Bugs: https://launchpad.net/holland-backup
+
 Contents:
 
 .. toctree::
@@ -15,7 +22,7 @@ Contents:
    config
    commands
    hooks
-
+   backup-sets/index
    developer/core
    developer/cli
    developer/plugins
