@@ -30,7 +30,7 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        1%{?dist}
+Release:        3%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD 
@@ -301,8 +301,10 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland/cli/
 # XXX: this should probably move to a dev package
 %{python_sitelib}/holland/devtools/
+%{python_sitelib}/holland/test/
 %{python_sitelib}/holland/backup/__init__.py*
 %{python_sitelib}/holland/lib/__init__.py*
+%{python_sitelib}/holland/commands/__init__.py*
 %{python_sitelib}/holland-%{version}-*.egg-info
 %if %{with sphinxdocs}
 %{_mandir}/man1/holland.1*
@@ -378,6 +380,10 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
+* Sun May 15 2011 Andrew Garner <andrew.garner@rackspace.com> - 1.1.0-3
+- Include holland/test/ and holland/commands/ in holland package
+- Include holland/lib/mysqldump in holland-mysqldump to pull in hooks
+
 * Sun Feb 06 2011 Andrew Garner <andrew.garner@rackspace.com> - 1.1.0-2
 - Run holland test suite by default (disable with --without tests)
 
