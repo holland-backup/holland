@@ -74,7 +74,7 @@ class Backup(ArgparseCommand):
         config = self.config.load_backupset(name)
         if skip_hooks:
             try:
-                config['holland:backup']['hooks'] = 'no'
+                config['holland:backup']['hooks'] = []
             except KeyError:
                 # ignore bad configs - this gets caught by the
                 # BackupManager during config validation
