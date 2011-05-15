@@ -56,7 +56,7 @@ def open_stream(filename, mode='r', method=None, *args, **kwargs):
     object
     """
     if method is None:
-        method = 'file'
+        method = 'builtin'
     try:
         stream = load_stream_plugin(method)
     except PluginError, exc:
@@ -68,11 +68,8 @@ class StreamPlugin(BasePlugin):
     name = ''
     aliases = ()
 
-    def open(self, name, mode, method, *args, **kwargs):
+    def open(self, name, mode, *args, **kwargs):
         """Open a stream and return a FileLike instance"""
-        if method is not None:
-            raise StreamError("Invalid stream method '%s' for default Stream" %
-                              method)
         return open(name, mode, *args, **kwargs)
 
     def stream_info(self, name, method, *args, **kwargs):

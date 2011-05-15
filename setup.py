@@ -36,6 +36,10 @@ setup(
     # Holland backup plugins exposed by holland-core
     [holland.backup]
     noop            = holland.core.backup.plugin:NoopBackupPlugin
+    backup-test     = holland.test:TestBackupPlugin
+
+    [holland.stream]
+    builtin         = holland.core.stream:StreamPlugin
 
     # Holland subcommands
     [holland.commands]
