@@ -10,7 +10,7 @@
 
 try:
     from subprocess import Popen, PIPE
-except ImportError:
+except ImportError: #pragma: no cover
     Popen = None
     PIPE = None
 
@@ -28,7 +28,7 @@ def run_command(cmd):
     :param cmd: string command
     :returns: 2-tuple (stdout_string, stderr_string)
     """
-    if Popen is None:
+    if Popen is None: #pragma: no cover
         raise EnvironmentError("subprocess is not available")
     process = Popen(cmd,
                     shell=True,
