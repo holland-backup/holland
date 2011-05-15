@@ -60,13 +60,16 @@ class RotateBackupsHook(BackupHook):
         the existing backup directory or the plugin will have no where to
         store data.
         """
+        if job.store.spool is None:
+            LOG.info("No backup spool detected. Skipping backup rotation.")
+            return
         retention_count = job.config['holland:backup']['retention-count']
         LOG.info("+ Keep %d backups", retention_count)
         if retention_count == 0:
             LOG.debug("Increasing retention-count to maintain new backup")
             retention_count += 1
         _, kept, purged = job.store.spool.purge(job.store.name,
-                                                      retention_count)
+                                                retention_count)
         for backup in purged:
             LOG.info("+ Purged old backup %s", backup.path)
         for backup in kept:
