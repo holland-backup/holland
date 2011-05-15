@@ -1,7 +1,23 @@
-.. _config-mysql-lvm:
+.. _mysql-lvm:
 
-MySQL LVM Provider Configuration [mysql-lvm]
-============================================
+mysql-lvm
+=========
+
+mysql-lvm uses LVM snapshots to create safe binary-based backups of MySQL with
+minimal locking involved. In many cases, mysql-lvm offers supperior performance 
+to  :ref:`mysqldmp` but with less configurability. If logical backups are 
+required, consider using the :ref:`mysqldump-lvm` provider to get the best of
+both worlds.
+
+Note that MySQL must be running on an LVM volume with sufficient free space
+for snapshots. Also note that while this provider only requires short locks
+in most cases, there is a write-penalty caused by the copy-on-write nature
+of LVM snapshots. In InnoDB-centric solutions, :ref:`xtrabackup` may be a
+worth alternative to reduce the write penalty incurred while performing
+a backup.
+
+[mysql-lvm]
+***********
 
 **snapshot-size** = <size-in-MB>
 
@@ -24,7 +40,7 @@ MySQL LVM Provider Configuration [mysql-lvm]
 
     Whether or not to run an InnoDB recovery operation. This avoids needing 
     to do so during a restore, though will make the backup process itself 
-    take longer.
+    take longer. The default is to skip recovery.
 
 **lock-tables** = yes | no
     
@@ -32,24 +48,23 @@ MySQL LVM Provider Configuration [mysql-lvm]
     bits of information (such as the binary log name and position). Disabling
     this requires that binary logging is disabled and InnoDB is being used
     exclusively. Otherwise, it is possible that the backup could contain
-    crashed tables.
+    crashed tables. The default is to lock tables.
     
 **extra-flush-tables** = yes | no
     
     Whether or not to run a FLUSH TABLES before running the full 
     FLUSH TABLES WITH READ LOCK. Should make the FLUSH TABLES WITH READ LOCK
-    operation a bit faster.
+    operation a bit faster. The default is run run a FLUSH TABLES.
 
-[compression]
--------------
-.. toctree::
-    :maxdepth: 1
+[tar]
+*****
 
-    compression
+**exclude** = list
 
-[mysql:client]
---------------
-.. toctree::
-    :maxdepth: 1
+    A list of exclusions from the resulting tarball backup. If undefined, 
+    ``mysql.sock`` will be excluded.
 
-    mysqlconfig
+.. include:: mysqld.rst
+
+.. include:: mysqlclient.rst
+

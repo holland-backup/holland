@@ -9,6 +9,9 @@ fully transactional and can automatically enable semi-lockless backups as
 a result. Below is an exhaustive list of all options available with the
 provider:
 
+[mysqldump]
+***********
+
 **extra-defaults** = yes | no
 
     Whether or not to use ``--defaults-file`` or ``--defaults-extra-file``

@@ -1,5 +1,5 @@
-Holland Backup-Sets
-===================
+Backup-Sets & Providers
+=======================
 
 Backup-Sets are the means with which backups are performed in Holland. They
 make use of one (sometimes more) providers and plugins to execute a backup
@@ -30,8 +30,8 @@ directory under the Holland backup-set directory (by default,
 ``/etc/holland/backupsets``)
 
   * :ref:`mysqldump`
-  * :ref:`mysqldump-lvm`
   * :ref:`mysql-lvm`
+  * :ref:`mysqldump-lvm`
   * :ref:`Xtrabackup`
   * :ref:`sqlite`
   * :ref:`pgdump`
