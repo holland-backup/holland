@@ -20,8 +20,6 @@ except ImportError:
 
 from _virtualenv import create_environment
 
-
-
 HOLLAND_ROOT = abspath(join(dirname(__file__), '..'))
 
 def make_env(virtual_env_root):
