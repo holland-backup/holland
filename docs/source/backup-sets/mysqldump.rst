@@ -155,3 +155,5 @@ provider:
 .. include:: databasefiltering.rst
 
 .. include:: mysqlclient.rst
+
+.. include:: compression.rst

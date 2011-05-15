@@ -68,3 +68,5 @@ a backup.
 
 .. include:: mysqlclient.rst
 
+.. include:: compression.rst
+

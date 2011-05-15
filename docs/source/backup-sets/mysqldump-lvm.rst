@@ -28,3 +28,6 @@ Finally, a ``[mysqld]`` section can be defined to configure the bootstrapped
 instance with various settings which are as follows:
 
 .. include:: mysqld.rst
+
+.. include:: compression.rst
+
