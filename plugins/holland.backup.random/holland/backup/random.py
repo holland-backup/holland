@@ -54,6 +54,7 @@ class RandomPlugin(BackupPlugin):
 
     def plugin_info(self):
         return dict(
+            name='random',
             author='Rackspace',
             summary='A plugin that backups up /dev/random',
             description='''
