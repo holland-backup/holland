@@ -20,7 +20,7 @@ class TestBackupPlugin(BackupPlugin):
     die_please = False
 
     def __init__(self, name):
-        self.name = name
+        super(TestBackupPlugin, self).__init__(name)
         self.events = []
 
     def setup(self, backupstore):
