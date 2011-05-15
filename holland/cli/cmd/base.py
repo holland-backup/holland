@@ -8,6 +8,7 @@
     :license: BSD, see LICENSE.rst for details
 """
 
+import os, sys
 import logging
 from textwrap import dedent
 from argparse import RawDescriptionHelpFormatter
@@ -61,7 +62,7 @@ class BaseCommand(BasePlugin):
         :param fmt:  message format
         :param args: message arguments
         """
-        LOG.info(fmt, *args)
+        print >>sys.stderr, fmt % args
     stderr = classmethod(stderr)
 
     #@classmethod
@@ -71,7 +72,7 @@ class BaseCommand(BasePlugin):
         This logs via the python logging module
         at INFO verbosity
         """
-        LOG.info(fmt, *args)
+        print >>sys.stdout, fmt % args
     stdout = classmethod(stdout)
 
     def setup(self, parent):
