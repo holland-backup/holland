@@ -1,32 +1,27 @@
-import logging
+"""
+holland.backup.random
+~~~~~~~~~~~~~~~~~~~~~
+
+Backup bytes from /dev/random
+
+This plugin is an example of how to write a holland backup plugin
+
+"""
+
 import os
+import logging
+from holland.core import Configspec, BackupPlugin, BackupError
 LOG = logging.getLogger(__name__)
 
-CONFIGSPEC="""
-[random]
-bytes = integer(default=50)
-""".splitlines()
-
-class RandomPlugin(object):
+class RandomPlugin(BackupPlugin):
     """Back up randomness"""
 
-    def __init__(self, name, config, target_directory, dry_run=False):
-        """Create new RandomPlugin instance"""
-
-        self.name = name
-        self.config = config
-        self.target_directory = target_directory
-        self.dry_run = dry_run
-        LOG.info("Validating Config")
-        self.config.validate_config(CONFIGSPEC)
-        self.bytes = self.config['random']['bytes']
-
-    def estimate_backup_size(self):
-        return self.bytes
+    def estimate(self):
+        return self.config['random']['bytes']
 
     def backup(self):
         rand = open("/dev/random", "r")
-        bytesleft = self.bytes
+        bytesleft = self.config['random']['bytes']
         data = ''
         while bytesleft > 0:
             r = rand.read(bytesleft)
@@ -34,9 +29,41 @@ class RandomPlugin(object):
             bytesleft -= len(r)
             LOG.info("Read %d bytes from /dev/random" % len(r))
 
-        outfile = os.path.join(self.target_directory, 'random_data')
-	f = open(outfile, "w")
-	f.write(data)
-        f.close()
-        LOG.info("Wrote to "+outfile)
+        # backup_directory is automatically configured for us by
+        # the holland backup API
+        outfile = os.path.join(self.backup_directory, 'random_data')
 
+        # be sure to catch errors and raise a BackupErrora
+        try:
+            f = open(outfile, "w")
+            f.write(data)
+            f.close()
+            LOG.info("Wrote to "+outfile)
+        except IOError, exc:
+            raise BackupError("Failed to backup /dev/random: %s" % exc)
+
+    def dryrun(self):
+        LOG.info(" * Would read %d bytes from /dev/random",
+                 self.config['random']['bytes'])
+
+    def configspec(self):
+        return Configspec.from_string('''
+        [random]
+        bytes = integer(default=50)
+        ''')
+
+    def plugin_info(self):
+        return dict(
+            author='Rackspace',
+            summary='A plugin that backups up /dev/random',
+            description='''
+            This plugin reads a defined number of bytes from /dev/random and
+            saves these to a backup file called 'random_data' in the
+            backup directory.
+
+            This is just an example to demonstrate the structure and functionality
+            of a holland backup plugin.
+            ''',
+            version='1.1',
+            api_version='1.1.0'
+        )
