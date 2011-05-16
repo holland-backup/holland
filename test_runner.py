@@ -184,9 +184,18 @@ class TestRunner(object):
             f.close()
         
     def _collect_coverage_reports(self):
+        ok = True
         logging.info("Combining coverage reports...")
         os.chdir(SRC_ROOT)
         args = [self.coverage, 'combine']
+        (ret, stdout, stderr) = exec_command(args)
+        if ret:
+            logging.error(stderr)
+        else:
+            if not self.quiet:
+                print stdout
+        
+        args = [self.coverage, 'xml']
         (ret, stdout, stderr) = exec_command(args)
         if ret:
             logging.error(stderr)
