@@ -20,9 +20,9 @@ Contents:
 
    intro
    config
+   backup-sets/index
    commands
    hooks
-   backup-sets/index
    developer/core
    developer/cli
    developer/plugins
