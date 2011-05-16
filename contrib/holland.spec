@@ -280,7 +280,7 @@ EOF
 
 %if %{with tests}
 %check
-%{__python} test_runner.py 
+%{__python} test_runner.py --quiet 
 %endif
 
 %clean
