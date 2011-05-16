@@ -280,7 +280,7 @@ EOF
 
 %if %{with tests}
 %check
-%{__python} setup.py nosetests
+%{__python} test_runner.py --quiet 
 %endif
 
 %clean
@@ -383,6 +383,7 @@ rm -rf %{buildroot}
 * Sun May 15 2011 Andrew Garner <andrew.garner@rackspace.com> - 1.1.0-3
 - Include holland/test/ and holland/commands/ in holland package
 - Include holland/lib/mysqldump in holland-mysqldump to pull in hooks
+- Use new test_runner.py for running tests.
 
 * Sun Feb 06 2011 Andrew Garner <andrew.garner@rackspace.com> - 1.1.0-2
 - Run holland test suite by default (disable with --without tests)
