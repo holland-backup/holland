@@ -92,6 +92,7 @@ class TestRunner(object):
         python_path.append(os.path.join(SRC_ROOT, 'plugins', 'holland.lib.common'))
         self.python_path = ':'.join(python_path)
         os.environ['PYTHONPATH'] = self.python_path
+        return True
         
     def _check_paths(self):
         ok = True
@@ -116,6 +117,7 @@ class TestRunner(object):
         return ok
         
     def _run_tests(self):
+        ok = True
         for path in self.paths:
             logging.info("Testing: %s" % path)
             os.chdir(path)
@@ -143,6 +145,7 @@ class TestRunner(object):
             if ret:
                 logging.fatal("FAIL: %s" % path)
                 print stderr
+                ok = False
             else:
                 if not self.quiet:
                     print stderr
@@ -152,6 +155,7 @@ class TestRunner(object):
                                     ".coverage.%s" % os.path.basename(path))
                 logging.debug("Adding coverage report %s" % dest)
                 os.rename('.coverage', dest)    
+        return ok
                 
     def _run_pylint(self):
         logging.info("Running PyLint across project...")
@@ -185,8 +189,12 @@ class TestRunner(object):
         if not self._check_paths():
             logging.fatal("Unable to continue.  See errors above.")
             sys.exit(1)
-        self._setup_python_path()
-        self._run_tests()        
+        if not self._setup_python_path():
+            logging.fatal("Unable to continue.  See errors above.")
+            sys.exit(1)
+        if not self._run_tests():
+            logging.fatal("Unable to continue.  See errors above.")
+            sys.exit(1)
         if self.report:
             self._run_pylint()
             self._collect_coverage_reports()
