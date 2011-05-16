@@ -103,9 +103,15 @@ class TestRunner(object):
                 logging.error("%s does not exist" % path)
                 ok = False
         if self.report:
-            for path in [self.pylint, self.coverage]:
-                if not os.path.exists(path):
-                    logging.error("%s does not exist" % path)
+            if not os.path.exists(self.pylint):
+                logging.error("%s does not exist" % self.pylint)
+                ok = False
+            if not os.path.exists(self.coverage):
+                alt_path = os.path.join(self.prefix, 'bin', 'python-coverage')
+                if os.path.exists(alt_path):
+                    self.coverage = alt_path
+                else:
+                    logging.error("%s nor %s exist" % (self.coverage, alt_path))
                     ok = False
         return ok
         
