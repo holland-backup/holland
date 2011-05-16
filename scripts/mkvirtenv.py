@@ -12,14 +12,14 @@ import logging
 import subprocess
 from optparse import OptionParser
 from os.path import abspath, join, dirname, basename, expanduser
+from _virtualenv import create_environment
+
 try:
     import curses
     curses.setupterm()
 except ImportError:
     curses = None
-
-from _virtualenv import create_environment
-
+        
 HOLLAND_ROOT = abspath(join(dirname(__file__), '..'))
 
 def make_env(virtual_env_root):
@@ -196,6 +196,7 @@ def main(args=None):
 
     setup_logging(opts.debug)
     home_dir = os.environ.get('HOLLAND_HOME', expanduser('~/holland-test'))
+    os.environ['HOLLAND_HOME'] = home_dir
     if home_dir in sys.executable:
         logging.error("Please exit your current virtual environment before trying to create another")
         return 1

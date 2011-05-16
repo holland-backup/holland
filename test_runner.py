@@ -7,8 +7,11 @@ from optparse import OptionParser
 from subprocess import Popen, PIPE
 
 try:
-    import curses
-    curses.setupterm()
+    if os.isatty(sys.stdout.fileno()):
+        import curses
+        curses.setupterm()
+    else:
+        curses = None
 except ImportError:
     curses = None
     
@@ -78,7 +81,7 @@ class TestRunner(object):
         self.python_path = None
         self.quiet = quiet
         
-        self.nosetests = os.path.join(self.prefix, 'bin', 'nosetests')
+        self.python = os.path.join(self.prefix, 'bin', 'python')
         self.pylint = os.path.join(self.prefix, 'bin', 'pylint')
         self.coverage = os.path.join(self.prefix, 'bin', 'coverage')
         
@@ -92,8 +95,8 @@ class TestRunner(object):
         
     def _check_paths(self):
         ok = True
-        if not os.path.exists(self.nosetests):
-            logging.error("%s does not exist" % self.nosetests)
+        if not os.path.exists(self.python):
+            logging.error("%s does not exist" % self.python)
             ok = False
         for path in self.paths:
             if not os.path.exists(path):
@@ -112,18 +115,20 @@ class TestRunner(object):
             os.chdir(path)
             if self.report:
                 args = [
-                    self.nosetests, 
+                    self.python,
+                    'setup.py',
+                    'nosetests', 
                     '--with-coverage', 
                     '--cover-erase', 
-                    '-v', 
+                    '--verbosity=3',
                     '--with-xunit',
-                    os.path.join(path, 'tests'),
                     ]
             else:
                 args = [
-                    self.nosetests, 
-                    '-v', 
-                    os.path.join(path, 'tests'),
+                    self.python,
+                    'setup.py',
+                    'nosetests', 
+                    '--verbosity=3', 
                     ]
                 
             (ret, stdout, stderr) = exec_command(args)
@@ -181,6 +186,7 @@ class TestRunner(object):
         
 def main(args=None):
     """Main script entry point"""
+
     oparser = OptionParser()
     oparser.add_option('--report', action='store_true',
                        default=False,
