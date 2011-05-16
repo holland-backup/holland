@@ -14,14 +14,15 @@ from holland.backup.sqlite import SQLitePlugin
 from holland.lib.which import which, WhichError
 
 
-try:
-    binary = which('sqlite')    
-except WhichError, e:
+binary = None
+for name in ['sqlite', 'sqlite2', 'sqlite3']:
     try:
-        binary = which('sqlite3')
+        binary = which(name)    
     except WhichError, e:
-        raise Exception, "Unable to find sqlite binary"
-
+        pass
+if not binary:
+    raise SkipTest, "Unable to find sqlite binary"
+        
 database = os.path.join(os.path.dirname(__file__), 'example.db')        
 
 spec = Configspec.from_string("""
