@@ -128,6 +128,7 @@ class TestRunner(object):
                     '--cover-erase', 
                     '--verbosity=3',
                     '--with-xunit',
+                    '--cover-tests',
                     ]
             else:
                 args = [
@@ -135,6 +136,7 @@ class TestRunner(object):
                     'setup.py',
                     'nosetests', 
                     '--verbosity=3', 
+                    '--cover-tests',
                     ]
                 
             (ret, stdout, stderr) = exec_command(args)
