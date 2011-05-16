@@ -11,3 +11,4 @@ nosetests.xml
 plugins/holland.backup.sqlite/htmlcov/
 pylint.txt
 tests/holland.log
+plugins/holland.backup.sqlite/tests/example_data.db

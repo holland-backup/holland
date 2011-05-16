@@ -109,7 +109,7 @@ class SQLitePlugin(BackupPlugin):
                     dest = open_stream(dest, 'w', *zopts)
                 except IOError, error:
                     raise BackupError, "SQLite IOError %s %s" \
-                        % (error.args[1], dest)     
+                        % (error.args, dest)     
                 
             process = Popen([self.config['sqlite']['binary'], path, '.dump'],
                             stdin=open('/dev/null', 'r'), stdout=dest,
