@@ -2,7 +2,7 @@
 holland.backup.random
 ~~~~~~~~~~~~~~~~~~~~~
 
-Backup bytes from /dev/random
+Backup bytes from /dev/urandom
 
 This plugin is an example of how to write a holland backup plugin
 
@@ -20,14 +20,14 @@ class RandomPlugin(BackupPlugin):
         return self.config['random']['bytes']
 
     def backup(self):
-        rand = open("/dev/random", "r")
+        rand = open("/dev/urandom", "r")
         bytesleft = self.config['random']['bytes']
         data = ''
         while bytesleft > 0:
             r = rand.read(bytesleft)
             data += r
             bytesleft -= len(r)
-            LOG.info("Read %d bytes from /dev/random" % len(r))
+            LOG.info("Read %d bytes from /dev/urandom" % len(r))
 
         # backup_directory is automatically configured for us by
         # the holland backup API
@@ -40,10 +40,10 @@ class RandomPlugin(BackupPlugin):
             f.close()
             LOG.info("Wrote to "+outfile)
         except IOError, exc:
-            raise BackupError("Failed to backup /dev/random: %s" % exc)
+            raise BackupError("Failed to backup /dev/urandom: %s" % exc)
 
     def dryrun(self):
-        LOG.info(" * Would read %d bytes from /dev/random",
+        LOG.info(" * Would read %d bytes from /dev/urandom",
                  self.config['random']['bytes'])
 
     def configspec(self):
@@ -56,9 +56,9 @@ class RandomPlugin(BackupPlugin):
         return dict(
             name='random',
             author='Rackspace',
-            summary='A plugin that backups up /dev/random',
+            summary='A plugin that backups up /dev/urandom',
             description='''
-            This plugin reads a defined number of bytes from /dev/random and
+            This plugin reads a defined number of bytes from /dev/urandom and
             saves these to a backup file called 'random_data' in the
             backup directory.
 
