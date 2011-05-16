@@ -11,7 +11,7 @@ setup(name='holland.backup.sqlite',
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='sqlite backup',
       author='Rackspace',
-      author_email='holland-devel@googlegroups.com',
+      author_email='holland-discuss@lists.launchpad.net',
       url='http://www.hollandbackup.org/',
       license='GPLv2',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests',

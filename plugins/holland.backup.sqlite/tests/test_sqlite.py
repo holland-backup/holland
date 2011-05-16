@@ -4,6 +4,7 @@ import time
 import shutil
 import tempfile
 import copy
+from nose import SkipTest
 from nose.tools import ok_, assert_equals, with_setup, raises
 
 from holland.core import load_plugin, BackupError
@@ -193,11 +194,13 @@ def test_sqlite_bad_backup():
     plugin.configure(test_config)    
     job = BackupJob(plugin, test_config, FakeStore())
     job.run(dry_run=False)
-    job.plugin.config['sqlite']['binary'] = '/usr/bin/false'
     try:
+        job.plugin.config['sqlite']['binary'] = which('false')
         job.run()
     except IOError, e:
         pass
+    except WhichError, e:
+        raise SkipTest, e
 
 @with_setup(setup_func, teardown_func)
 def test_sqlite_configspec():
