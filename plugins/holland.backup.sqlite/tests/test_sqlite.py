@@ -23,7 +23,11 @@ for name in ['sqlite', 'sqlite2', 'sqlite3']:
 if not binary:
     raise SkipTest, "Unable to find sqlite binary"
         
-database = os.path.join(os.path.dirname(__file__), 'example.db')        
+sql = os.path.join(os.path.dirname(__file__), 'example_data.sql')        
+database = os.path.join(os.path.dirname(__file__), 'example_data.db')  
+      
+# create the database when running to ensure sqlite version/data compat
+os.system("%s %s '.read %s'" % (binary, database, sql))
 
 spec = Configspec.from_string("""
 [holland:backup]
