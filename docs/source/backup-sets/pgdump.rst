@@ -3,7 +3,8 @@
 pgdump
 ======
 
-pgdump uses 
+The pgdump provider is a front-end to the PostgreSQL pgdump utility and can
+backup databases into logical (SQL) and binary-based backups.
 
 Configuration
 -------------
