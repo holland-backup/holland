@@ -29,6 +29,6 @@ Holland distribution. 3rd party plugins are possible, but are not documented her
   * :ref:`mysqldump-lvm`
   * :ref:`Xtrabackup`
   * :ref:`pgdump`
-  * :ref:`sqlite` (BROKEN IN 1.1)
-  * :ref:`random` (BROKEN IN 1.1)
+  * :ref:`sqlite`
+  * :ref:`random` 
 
