@@ -17,15 +17,23 @@ of LVM.
 
 To use this plugin, set the ``plugin`` variable the 
 :ref:`[holland:backup] <backupsetconfigs>` section of the backup-set
-configuration file to ``mysqldump-lvm``. If desired, a ``[mysqldump]``
-section can be defined with all the same features of the :ref:`mysqldump`
-provider (though some settings are no longer totally relevant). A
-``[mysqldump-lvm]`` section can also be defined whose options are identical
-to the :ref:`mysql-lvm` plugin with the exception of ``innodb-recovery`` since
-this happens when the additional instance of MySQL is started.
+configuration file to ``mysqldump-lvm``. 
 
-Finally, a ``[mysqld]`` section can be defined to configure the bootstrapped
-instance with various settings which are as follows:
+Configuration
+-------------
+
+[mysqldump]
+***********
+
+Same options as the [mysqldump] section of the :ref:`mysqldump` plugin,
+though some settings such as ``lock-method`` are less relevant.
+
+[mysqldump-lvm]
+***************
+
+Same options as the [mysqldump-lvm] section of the :ref:`mysql-lvm` plugin
+with the exception of ``innodb-recoveriy`` since that is performend when
+the additional instance of MySQL is started (it cannot be disabled).
 
 .. include:: mysqld.rst
 
