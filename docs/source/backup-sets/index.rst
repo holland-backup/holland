@@ -22,7 +22,8 @@ directory under the Holland backup-set directory (by default,
 ``/etc/holland/backupsets``)
 
 As of Holland 1.1, the following plugins are currently available in the main
-Holland distribution. 3rd party plugins are possible, but are not documented here.
+Holland distribution. Unless otherwise specified, all are licensed until the GPLv2.
+3rd party plugins may be available, but are not documented here.
 
   * :ref:`mysqldump`
   * :ref:`mysql-lvm`
@@ -31,4 +32,3 @@ Holland distribution. 3rd party plugins are possible, but are not documented her
   * :ref:`pgdump`
   * :ref:`sqlite`
   * :ref:`random` 
-
