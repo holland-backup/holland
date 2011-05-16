@@ -16,6 +16,9 @@ of LVM snapshots. In InnoDB-centric solutions, :ref:`xtrabackup` may be a
 worth alternative to reduce the write penalty incurred while performing
 a backup.
 
+Configuration
+-------------
+
 [mysql-lvm]
 ***********
 

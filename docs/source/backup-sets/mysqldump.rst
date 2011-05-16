@@ -6,8 +6,10 @@ mysqldump
 The mysqldump plugin is an intelligent front-end to the ``mysqldump`` 
 command-ine tool. It is able to determine, for example, if a database is
 fully transactional and can automatically enable semi-lockless backups as
-a result. Below is an exhaustive list of all options available with the
-provider:
+a result. 
+
+Configuration
+-------------
 
 [mysqldump]
 ***********
