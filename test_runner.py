@@ -88,10 +88,20 @@ class TestRunner(object):
     def _setup_python_path(self):
         python_path = []
         python_path.append('.')
-        python_path.append(os.path.join(SRC_ROOT))
+        python_path.append(SRC_ROOT)
         python_path.append(os.path.join(SRC_ROOT, 'plugins', 'holland.lib.common'))
         self.python_path = ':'.join(python_path)
         os.environ['PYTHONPATH'] = self.python_path
+        
+        # also build egg info
+        logging.info("Building egg info for holland.core")
+        os.chdir(SRC_ROOT)
+        (ret, stdout, stderr) = exec_command([self.python, 'setup.py', 'egg_info'])
+
+        logging.info("Building egg info for holland.lib.common")
+        os.chdir(os.path.join(SRC_ROOT, 'plugins', 'holland.lib.common'))
+        (ret, stdout, stderr) = exec_command([self.python, 'setup.py', 'egg_info'])
+        
         return True
         
     def _check_paths(self):
@@ -143,7 +153,7 @@ class TestRunner(object):
                 
             (ret, stdout, stderr) = exec_command(args)
             if ret:
-                logging.fatal("FAIL: %s" % path)
+                logging.fatal("Failed executing command: %s" % args)
                 print stderr
                 ok = False
             else:
@@ -179,7 +189,7 @@ class TestRunner(object):
         args = [self.coverage, 'combine']
         (ret, stdout, stderr) = exec_command(args)
         if ret:
-            print stderr
+            logging.error(stderr)
         else:
             if not self.quiet:
                 print stdout
