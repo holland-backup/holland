@@ -3,7 +3,7 @@ import sys, os
 
 version = '1.0.7a1'
 
-setup(name='holland-script',
+setup(name='holland.backup.script',
       version=version,
       description="Perform backups with simple shell commands",
       long_description="""
