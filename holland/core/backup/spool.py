@@ -126,8 +126,13 @@ class BackupStore(object):
     def timestamp(self):
         """Timestamp of last modification for the backup store directory"""
         try:
+            return float(open(os.path.join(self.path, '.timestamp')).read())
+        except (ValueError, IOError):
+            pass
+
+        try:
             return os.stat(self.path).st_mtime
-        except OSError:
+        except OSError, exc:
             return 0
     #python2.3 compatibility
     timestamp = property(timestamp)
@@ -190,6 +195,12 @@ class BackupSpool(object):
 
         backupstore_path = tempfile.mkdtemp(prefix=storename + '.',
                                             dir=os.path.join(self.root, name))
+
+        try:
+            open(os.path.join(backupstore_path, '.timestamp'),
+                 'w').write('%.5f' % time.time())
+        except OSError, exc:
+            raise
         return BackupStore(name, backupstore_path, self)
 
     def load_store(self, path):
