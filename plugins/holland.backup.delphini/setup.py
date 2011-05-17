@@ -22,6 +22,6 @@ setup(
     [holland.backup]
     mysql-cluster   = delphini:DelphiniPlugin
     delphini        = delphini:DelphiniPlugin
-    """
+    """,
     namespace_packages=['holland', 'holland.backup'],
 )
