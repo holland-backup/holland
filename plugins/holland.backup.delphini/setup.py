@@ -11,7 +11,7 @@ setup(
     A mysql cluster backup plugin for holland
     """,
     keywords='',
-    author='Rackspace',
+    author='Holland Core Development Team',
     author_email='holland-core@launchpad.net',
     url='http://www.hollandbackup.org/',
     license='BSD',
