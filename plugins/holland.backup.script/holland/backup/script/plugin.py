@@ -24,15 +24,11 @@ class ScriptPlugin(BackupPlugin):
         return 0
 
     def backup(self):
-        if self.dry_run:
-            return self._dry_run()
-
         config = self.config['script']
         cmd_tpl = Template(config['cmd'])
         cmd = cmd_tpl.safe_substitute(backupdir=self.backup_directory)
 
         LOG.info("+ %s", cmd)
-        LOG.info("::")
         try:
             pid = Popen([
                         config['shell'],
@@ -44,8 +40,14 @@ class ScriptPlugin(BackupPlugin):
                     stderr=STDOUT,
                     close_fds=True
                 )
-            for line in pid.stdout:
+            paragraph = False
+            line = pid.stdout.readline()
+            while line != '':
+                if not paragraph:
+                    LOG.info(":: ")
+                    paragraph = True
                 LOG.info("+ %s", line.rstrip())
+                line = pid.stdout.readline()
             pid.wait()
             if pid.returncode != 0:
                 raise CalledProcessError("script with exited non-zero status")
@@ -82,3 +84,4 @@ class ScriptPlugin(BackupPlugin):
         shell = string(default="/bin/sh")
         cmd = string(default="/bin/true")
         """)
+        )
