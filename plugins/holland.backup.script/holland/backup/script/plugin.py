@@ -75,10 +75,10 @@ class ScriptPlugin(BackupPlugin):
             api_version='1.1.0',
         )
 
-    def configspec(cls):
-        from textwrap import dedent
-        return (dedent("""
+    def configspec(self):
+        spec = super(ScriptPlugin, self).configspec()
+        return spec.merge(spec.from_string("""
         [script]
         shell = string(default="/bin/sh")
-        cmd = string
-        """).strip().splitlines())
+        cmd = string(default="/bin/true")
+        """)
