@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 version = '1.0'
 
 setup(
-    name='Delphini',
+    name='holland.backup.delphini',
     version=version,
     description="A mysql cluster backup plugin for holland",
     long_description="""
