@@ -17,7 +17,6 @@ setup(name='holland.lib.mysql',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests', 'tests.*']),
       include_package_data=True,
       zip_safe=True,
-      tests_require=['mocker==0.10.1', 'coverage==2.85'],
       test_suite='tests',
       entry_points="""
       # -*- Entry points: -*-

@@ -2,7 +2,6 @@ import shutil
 from nose.tools import *
 from tempfile import mkdtemp
 
-from holland.core.exceptions import ArgumentError
 from holland.lib.mysql.cli import MyCmdParser
 
 global tmpdir
