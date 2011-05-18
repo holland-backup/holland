@@ -1,23 +1,25 @@
 import shutil
 from nose.tools import *
 from tempfile import mkdtemp
-
+from subprocess import call, STDOUT
 from holland.lib.mysql.cli import MyCmdParser
 
-global tmpdir
+mysqld = None
 
-def setup_func():
-    global tmpdir
-    tmpdir = mkdtemp()
+def setup():
+    global mysqld
 
-def teardown_func():
-    global tmpdir
-    shutil.rmtree(tmpdir)
+    for name in ('/usr/sbin/mysqld', '/usr/libexec/mysqld'):
+        try:
+            call([name, '--no-defaults', '--user=mysql', '--help'],
+                 stdout=open('/dev/null', 'w'),
+                 stderr=STDOUT,
+                 close_fds=True)
+            mysqld = name
+        except OSError:
+            continue
 
-@with_setup(setup_func, teardown_func)
 def test_mysqlcmdparser():
-    global tmpdir
-
     cli = MyCmdParser('mysqldump')
     ok_(isinstance(cli.cli_version, tuple))
     ok_(cli.cli_options)
@@ -25,19 +27,11 @@ def test_mysqlcmdparser():
     ok_(cli.has_key('opt'))
     ok_(cli.has_key('single-transaction'))
 
-@raises(IOError)
-@with_setup(setup_func, teardown_func)
 def test_mysqlcmdparser_bad_command():
-    global tmpdir
+    assert_raises(IOError, MyCmdParser, '_doesnt_exist_mysqldumb')
 
-    cli = MyCmdParser('_doesnt_exist_mysqldumb')
-    ok_(isinstance(cli.cli_version, tuple))
-
-@with_setup(setup_func, teardown_func)
 def test_parse_mysqld():
-    global tmpdir
-
-    cli = MyCmdParser('/usr/libexec/mysqld')
+    cli = MyCmdParser(mysqld)
     ok_(isinstance(cli.cli_version, tuple))
     ok_(cli.cli_options)
     ok_(cli.cli_defaults)
