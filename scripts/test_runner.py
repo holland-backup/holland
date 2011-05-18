@@ -8,7 +8,7 @@ import tempfile
 import logging
 from distutils.sysconfig import get_python_lib
 from optparse import OptionParser
-from subprocess import Popen, PIPE, STDOUT, list2cmdline
+from subprocess import call, Popen, PIPE, STDOUT, list2cmdline
 
 PREFIX = os.environ.get('HOLLAND_HOME', '/usr')
 SRC_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -165,6 +165,18 @@ class TestRunner(object):
             raise OSError("Unable to continue.  See errors above.")
         self._run_pylint(paths)
 
+def _find_coverage():
+    for name in ('coverage', 'python-coverage'):
+        try:
+            call([name, '--help'],
+                 stdout=open('/dev/null', 'w'),
+                 stderr=STDOUT,
+                 close_fds=True)
+            return name
+        except OSError:
+            continue
+    else:
+        return 'coverage'
 
 def main(args=None):
     """Main script entry point"""
@@ -178,7 +190,7 @@ def main(args=None):
                        help='limit output')
     oparser.add_option('--python', default='python')
     oparser.add_option('--pylint', default='pylint')
-    oparser.add_option('--coverage', default='coverage')
+    oparser.add_option('--coverage', default=_find_coverage())
     oparser.add_option('--include', action='append', dest='include',
                        metavar="PATH", help='directories to include in tests')
     oparser.add_option('--debug', action='store_true')
