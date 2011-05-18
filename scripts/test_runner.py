@@ -6,6 +6,7 @@ import glob
 import shutil
 import tempfile
 import logging
+from distutils.sysconfig import get_python_lib
 from optparse import OptionParser
 from subprocess import Popen, PIPE, STDOUT, list2cmdline
 
@@ -137,6 +138,7 @@ class TestRunner(object):
                 '--single-version-externally-managed',
             ]
             for path in paths:
+                logging.info(" * Installing from %s", path)
                 exec_command('python setup.py install --root=' + staging + ' --single-version-externally-managed',
                              stdout=open('/dev/null', 'w'),
                              stderr=STDOUT,
@@ -149,7 +151,7 @@ class TestRunner(object):
             exec_command([self.pylint, '-f', 'parseable', 'holland'],
                          stdout=open(os.path.join(SRC_ROOT, 'pylint.txt'), 'w'),
                          cwd=os.path.join(staging,
-                                          'usr/lib/python2.7/site-packages/'),
+                                          get_python_lib()),
                          close_fds=True)
         finally:
             shutil.rmtree(staging)
