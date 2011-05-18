@@ -1,0 +1,207 @@
+"""Test helper for running holland unit tests."""
+
+import os
+import sys
+import glob
+import shutil
+import tempfile
+import logging
+from optparse import OptionParser
+from subprocess import Popen, PIPE, STDOUT, list2cmdline
+
+PREFIX = os.environ.get('HOLLAND_HOME', '/usr')
+SRC_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+
+def exec_command(argv, *args, **kwargs):
+    """
+    Quick wrapper around subprocess to exec shell command.
+
+    Required Arguments:
+
+        cmd_args
+            The args to pass to subprocess.
+
+    """
+    if isinstance(argv, basestring):
+        logging.info("+ /bin/sh -c '%s'", argv)
+    else:
+        logging.info("+ %s", list2cmdline(argv))
+
+    proc = Popen(argv, *args, **kwargs)
+    (stdout, stderr) = proc.communicate()
+    ret = proc.wait()
+    return (ret, stdout, stderr)
+
+class TestRunner(object):
+    def __init__(self,
+                 python='python',
+                 pylint='pylint',
+                 coverage='coverage',
+                 report=False,
+                 quiet=True):
+        self.python = python
+        self.pylint = pylint
+        self.coverage = coverage
+        self.report = report
+        self.quiet = quiet
+
+    def _setup_python_path(self, paths):
+        python_path = []
+        for path in paths:
+            logging.info("Check %s", path)
+            if os.path.isdir(path):
+                python_path.append(os.path.abspath(path))
+                exec_command('python setup.py egg_info',
+                             stdout=open('/dev/null', 'w'),
+                             stderr=open('/dev/null', 'w'),
+                             shell=True,
+                             cwd=os.path.abspath(path))
+        os.environ['PYTHONPATH'] = ':'.join(python_path)
+
+        return True
+
+    def _check_paths(self):
+        ok = True
+
+        for name in (self.python, self.pylint, self.coverage):
+            try:
+                exec_command([name, '--help'],
+                             stdout=open('/dev/null', 'w'),
+                             stderr=STDOUT,
+                             close_fds=True)
+            except OSError, exc:
+                logging.error("%s is not runnable: %s", name, exc)
+                break
+        else:
+            return True
+
+        return False
+
+    def _run_tests(self, paths):
+        args = [
+            self.python,
+            'setup.py',
+            'nosetests',
+            '--verbosity=3',
+        ]
+
+        if self.report:
+            args.extend([
+                '--with-coverage',
+                '--cover-erase',
+                '--with-xunit',
+                '--cover-tests',
+            ])
+
+        for path in paths:
+            logging.info("Testing: %s", path)
+            ret, stdout, stderr = exec_command(args,
+                                               stdout=open('/dev/null', 'w'),
+                                               stderr=STDOUT,
+                                               cwd=os.path.abspath(path),
+                                               close_fds=True)
+            if ret != 0:
+                logging.warning(" * Test exited with failure status %d", ret)
+
+            if self.report:
+                coverage_file = os.path.join(path, '.coverage')
+                dst_file = '.coverage.' + os.path.basename(path)
+                try:
+                    logging.info(" + mv %s %s", coverage_file, dst_file)
+                    os.rename(coverage_file, dst_file)
+                except OSError, exc:
+                    logging.error(" ! No coverage information in %s", path)
+
+        exec_command(['coverage', 'combine'])
+        exec_command(['coverage', 'xml'])
+
+        return True
+
+    def _run_pylint(self, paths):
+        logging.info("Running PyLint across project...")
+        args = [
+            self.pylint,
+            '-f',
+            'parseable',
+            'holland',
+        ]
+        staging = tempfile.mkdtemp()
+
+        try:
+            stage_args = [
+                'python',
+                'setup.py',
+                'install',
+                '--root=' + staging,
+                '--single-version-externally-managed',
+            ]
+            for path in paths:
+                exec_command('python setup.py install --root=' + staging + ' --single-version-externally-managed',
+                             stdout=open('/dev/null', 'w'),
+                             stderr=STDOUT,
+                             shell=True,
+                             cwd=path,
+                             close_fds=True)
+
+            os.environ['PYLINTRC'] = os.path.abspath('.pylintrc')
+            exec_command([self.pylint, '-f', 'parseable', 'holland'],
+                         stdout=open('pylint.txt', 'w'),
+                         cwd=os.path.join(staging,
+                                          'usr/lib/python2.7/site-packages/'),
+                         close_fds=True)
+        finally:
+            shutil.rmtree(staging)
+
+    def run(self, paths):
+        if not self._check_paths():
+            raise OSError("Unable to continue.  See errors above.")
+        if not self._setup_python_path(paths):
+            raise OSError("Unable to continue.  See errors above.")
+        if not self._run_tests(paths):
+            raise OSError("Unable to continue.  See errors above.")
+        self._run_pylint(paths)
+
+
+def main(args=None):
+    """Main script entry point"""
+
+    oparser = OptionParser()
+    oparser.add_option('--report', action='store_true',
+                       default=False,
+                       help='create report data')
+    oparser.add_option('--quiet', action='store_true',
+                       default=False,
+                       help='limit output')
+    oparser.add_option('--python', default='python')
+    oparser.add_option('--pylint', default='pylint')
+    oparser.add_option('--coverage', default='coverage')
+    oparser.add_option('--include', action='append', dest='include',
+                       metavar="PATH", help='directories to include in tests')
+    oparser.add_option('--debug', action='store_true')
+    opts, args = oparser.parse_args(args)
+
+    logging.basicConfig(level=opts.debug and logging.DEBUG or logging.INFO,
+                        format='[%(levelname)s] %(message)s')
+
+    # list of directories to test in
+    if opts.include and len(opts.include) > 0:
+        paths = []
+        for path in opts.include:
+            paths.append(os.path.abspath(path))
+    else:
+        paths = [
+                os.path.abspath(path)
+                for path in ['.'] + glob.glob('plugins/*')
+                if os.path.isdir(path)
+        ]
+
+    runner = TestRunner(python=opts.python,
+                        pylint=opts.pylint,
+                        coverage=opts.coverage,
+                        report=opts.report,
+                        quiet=opts.quiet)
+    runner.run(paths)
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
