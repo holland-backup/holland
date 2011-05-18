@@ -1,6 +1,5 @@
 import locale
 from holland.backup.mysqldump.mock.env import MockEnvironment
-from holland.backup.mysqldump.core import start
 
 __test__ = False
 

@@ -1,4 +1,4 @@
-from holland.backup.mysqldump.mysql.dump import *
+from holland.backup.mysqldump.util import *
 from nose.tools import assert_equals, assert_raises
 
 __test__ = False
