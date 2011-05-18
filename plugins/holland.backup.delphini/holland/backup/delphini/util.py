@@ -14,8 +14,8 @@ import os
 import re
 import logging
 from subprocess import Popen, PIPE, list2cmdline
-from delphini.error import ClusterError, ClusterCommandError
-from delphini.pycompat import namedtuple
+from holland.backup.delphini.error import ClusterError, ClusterCommandError
+from holland.backup.delphini.pycompat import namedtuple
 
 LOG = logging.getLogger(__name__)
 
