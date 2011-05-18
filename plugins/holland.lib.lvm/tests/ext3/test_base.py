@@ -5,6 +5,8 @@ from holland.lib.lvm.base import *
 from holland.lib.lvm.util import getdevice
 from tests.constants import *
 
+__test__ = False
+
 def test_basevolume():
     assert_raises(NotImplementedError, Volume)
 

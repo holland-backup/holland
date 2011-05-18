@@ -6,6 +6,8 @@ from nose.tools import *
 from holland.lib.lvm.raw import *
 from tests.constants import *
 
+__test__ = False
+
 def test_pvs():
     pvs(LOOP_DEV)
 

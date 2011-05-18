@@ -4,13 +4,15 @@ from holland.lib.lvm import LogicalVolume
 from holland.lib.lvm.snapshot import *
 from tests.constants import *
 
+__test__ = False
+
 class TestSnapshot(object):
     def setup(self):
         self.tmpdir = tempfile.mkdtemp()
 
     def teardown(self):
         shutil.rmtree(self.tmpdir)
- 
+
     def test_snapshot_fsm(self):
         lv = LogicalVolume.lookup('%s/%s' % (TEST_VG, TEST_LV))
         name = lv.lv_name + '_snapshot'

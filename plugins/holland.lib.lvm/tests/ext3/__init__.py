@@ -7,8 +7,12 @@ from nose.tools import *
 from holland.lib.lvm.raw import *
 from tests.constants import *
 
+__test__ = False
+
 def setup():
     """Setup a simple LVM device to use"""
+    if not __test__:
+        return
     os.environ['PATH'] = '/sbin:/usr/sbin:' + os.environ['PATH']
     size = IMG_SIZE / 512
     img_path = os.path.join(MNT_DIR, 'test.img')
@@ -35,6 +39,8 @@ def setup():
 
 def teardown():
     """Remove the previously setup LVM"""
+    if not __test__:
+        return
     subprocess.call("umount %s" % MNT_DIR, shell=True)
     subprocess.call("vgremove -f %s" % TEST_VG, shell=True)
     subprocess.call('losetup -d %s' % LOOP_DEV, shell=True)

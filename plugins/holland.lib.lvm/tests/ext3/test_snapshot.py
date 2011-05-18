@@ -4,6 +4,8 @@ from holland.lib.lvm import LogicalVolume
 from holland.lib.lvm.snapshot import *
 from tests.constants import *
 
+__test__ = False
+
 class TestSnapshot(object):
     def setup(self):
         self.tmpdir = tempfile.mkdtemp()

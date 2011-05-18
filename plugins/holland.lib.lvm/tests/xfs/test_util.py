@@ -37,6 +37,5 @@ def test_parsebytes():
     assert_equals(bytes, 1024**3)
     # this should not be bytes
     ok_(bytes > 1024)
-   
     bytes = parse_bytes('1024G')
     assert_equals(bytes, 1024**4)

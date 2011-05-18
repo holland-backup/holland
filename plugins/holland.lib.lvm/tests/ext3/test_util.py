@@ -3,6 +3,8 @@ import signal
 from nose.tools import *
 from holland.lib.lvm.util import *
 
+__test__ = False
+
 def test_format_bytes():
     assert_equals(format_bytes(1024), '1.00KB')
     assert_equals(format_bytes(0), '0.00Bytes')
@@ -37,6 +39,5 @@ def test_parsebytes():
     assert_equals(bytes, 1024**3)
     # this should not be bytes
     ok_(bytes > 1024)
-   
     bytes = parse_bytes('1024G')
     assert_equals(bytes, 1024**4)
