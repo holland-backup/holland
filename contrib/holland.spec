@@ -27,10 +27,12 @@
 %bcond_without  pgdump
 %bcond_without  sqlite
 %bcond_without  xtrabackup
+%bcond_without  script
+%bcond_with     delphini
 
 Name:           holland
 Version:        %{holland_version}
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD 
@@ -125,6 +127,32 @@ This package provides a Holland plugin for the Percona Xtrabackup
 backup tool for InnoDB and XtraDB engines for MySQL
 %endif
 
+%if %{with script}
+%package script
+Summary: Shell script plugin for Holland
+License: GPLv2
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
+
+%description script
+This package provides a Holland plugin that performs backups by
+running a user supplied shell script command.
+%endif
+
+%if %{with delphini}
+%package delphini
+Summary: MySQL-Cluster plugin for Holland
+License: GPLv2
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
+
+%description delphini
+This package provides a Holland plugin for MySQL-Cluster
+in order to aggregate native backups from multiple data nodes.
+%endif
+
 %prep
 %setup -q
 mv plugins/README README.plugins
@@ -194,6 +222,19 @@ cd plugins/holland.backup.xtrabackup
 cd -
 %endif
 
+%if %{with script}
+cd plugins/holland.backup.script
+%{__python} setup.py build
+cd -
+%endif
+
+%if %{with delphini}
+cd plugins/holland.backup.delphini
+%{__python} setup.py build
+cd -
+%endif
+
+
 %install
 rm -rf %{buildroot}
 
@@ -261,6 +302,22 @@ cd plugins/holland.backup.xtrabackup
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 cd -
 install -m 0640 config/providers/xtrabackup.conf %{buildroot}%{_sysconfdir}/holland/providers/
+%endif
+
+%if %{with script}
+# plugin : holland.backup.script
+cd plugins/holland.backup.script
+%{__python} setup.py install -O1 --skip-build --root %{buildroot}
+cd -
+install -m 0640 config/providers/script.conf %{buildroot}%{_sysconfdir}/holland/providers/
+%endif
+
+%if %{with delphini}
+# plugin : holland.backup.delphini
+cd plugins/holland.backup.delphini
+%{__python} setup.py install -O1 --skip-build --root %{buildroot}
+cd -
+install -m 0640 config/providers/delphini.conf %{buildroot}%{_sysconfdir}/holland/providers/
 %endif
 
 # ensure we have no .pth files
@@ -379,7 +436,30 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/holland/providers/xtrabackup.conf
 %endif
 
+%if %{with script}
+%files script
+%defattr(-,root,root,-)
+%doc plugins/holland.backup.script/{README,LICENSE}
+%{python_sitelib}/holland/backup/script/
+%{python_sitelib}/holland.backup.script*.egg-info
+%config(noreplace) %{_sysconfdir}/holland/providers/script.conf
+%endif
+
+%if %{with delphini}
+%files delphini
+%defattr(-,root,root,-)
+%doc plugins/holland.backup.delphini/{README,LICENSE}
+%{python_sitelib}/holland/backup/delphini/
+%{python_sitelib}/holland.backup.delphini*.egg-info
+%config(noreplace) %{_sysconfdir}/holland/providers/delphini.conf
+%endif
+
+
 %changelog
+* Tue May 17 2011 Andrew Garner <andrew.garner@rackspace.com> - 1.1.0-4
+- Include delphini backup plugin (conditionally built and off by default)
+- Include script backup plugin
+
 * Sun May 15 2011 Andrew Garner <andrew.garner@rackspace.com> - 1.1.0-3
 - Include holland/test/ and holland/commands/ in holland package
 - Include holland/lib/mysqldump in holland-mysqldump to pull in hooks
