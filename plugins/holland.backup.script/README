@@ -1,0 +1,26 @@
+A very simple backup plugin for holland that allows executing arbitrary scripts
+
+This replaces a single variable called ${backupdir} with the actual
+holland backup directory.
+
+A command is considered as failed if it exits with non-zero status.
+
+Example configuration:
+
+[holland:backup]
+plugin = script
+
+[script]
+shell = /bin/sh
+cmd = innobackupex-1.5.1 --stream=tar4ibd --slave-info /tmp > ${backupdir}/xtrabackup.tar.gz
+
+More complex:
+
+[holland:backup]
+plugin = script
+
+[script]
+shell = /bin/bash
+# exit with mysqldump exit status rather than gzip's
+cmd = mysqldump --all-databases | gzip --fast > ${backupdir}/all_databases.sql.gz; exit ${PIPESTATUS[0]}
+

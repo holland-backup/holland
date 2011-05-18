@@ -36,12 +36,12 @@ def holland_version():
 class ReleaseStaging(tuple):
     __slots__ = ()
 
-    staging_dir = property(itemgetter(0))
-    env_dir = property(itemgetter(1))
-    env_bindir = property(itemgetter(2))
-    release_dir = property(itemgetter(3))
-    doc_dir = property(itemgetter(4))
-    doc_build_dir = property(itemgetter(5))
+    staging_dir     = property(itemgetter(0))
+    env_dir         = property(itemgetter(1))
+    env_bindir      = property(itemgetter(2))
+    release_dir     = property(itemgetter(3))
+    doc_dir         = property(itemgetter(4))
+    doc_build_dir   = property(itemgetter(5))
 
     def cleanup(self):
         return shutil.rmtree(self.staging_dir)
