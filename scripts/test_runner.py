@@ -105,7 +105,7 @@ class TestRunner(object):
                 logging.warning(" * Test exited with failure status %d", ret)
 
             if self.report:
-                coverage_file = os.path.join(SRC_ROOT, '.coverage')
+                coverage_file = os.path.join(path, '.coverage')
                 dst_file = os.path.join(SRC_ROOT,
                                         '.coverage.' + os.path.basename(path))
                 try:
