@@ -97,7 +97,7 @@ class TestRunner(object):
         for path in paths:
             logging.info("Testing: %s", path)
             ret, stdout, stderr = exec_command(args,
-                                               stdout=open('/dev/null', 'w'),
+                                               #stdout=open('/dev/null', 'w'),
                                                stderr=STDOUT,
                                                cwd=path,
                                                close_fds=True)
