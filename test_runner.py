@@ -14,7 +14,7 @@ try:
         curses = None
 except ImportError:
     curses = None
-    
+
 PREFIX = os.environ.get('HOLLAND_HOME', '/usr')
 SRC_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
@@ -29,9 +29,9 @@ if curses:
         elif(levelno>=30):
             color = COLORS['YELLOW'] # yellow
         elif(levelno>=20):
-            color = COLORS['GREEN'] # green 
+            color = COLORS['GREEN'] # green
         elif(levelno>=10):
-            color = COLORS['MAGENTA'] 
+            color = COLORS['MAGENTA']
         else:
             color = RESET # normal
         color = curses.tparm(curses.tigetstr('setaf'), color)
@@ -55,11 +55,11 @@ def exec_command(cmd_args):
     (stdout, stderr) = proc.communicate()
     ret = proc.wait()
     return (ret, stdout, stderr)
-    
+
 class ColorFormatter(logging.Formatter):
     def format(self, record):
         return logging.Formatter.format(self, colorize(record))
-        
+
 class ColorFormatter(logging.Formatter):
     def format(self, record):
         return logging.Formatter.format(self, colorize(record))
@@ -80,11 +80,11 @@ class TestRunner(object):
         self.report = report
         self.python_path = None
         self.quiet = quiet
-        
+
         self.python = os.path.join(self.prefix, 'bin', 'python')
         self.pylint = os.path.join(self.prefix, 'bin', 'pylint')
         self.coverage = os.path.join(self.prefix, 'bin', 'coverage')
-        
+
     def _setup_python_path(self):
         python_path = []
         python_path.append('.')
@@ -93,7 +93,7 @@ class TestRunner(object):
         self.python_path = ':'.join(python_path)
         os.environ['PYTHONPATH'] = self.python_path
         return True
-        
+
     def _check_paths(self):
         ok = True
         if not os.path.exists(self.python):
@@ -115,7 +115,7 @@ class TestRunner(object):
                     logging.error("%s nor %s exist" % (self.coverage, alt_path))
                     ok = False
         return ok
-        
+
     def _run_tests(self):
         ok = True
         for path in self.paths:
@@ -125,9 +125,9 @@ class TestRunner(object):
                 args = [
                     self.python,
                     'setup.py',
-                    'nosetests', 
-                    '--with-coverage', 
-                    '--cover-erase', 
+                    'nosetests',
+                    '--with-coverage',
+                    '--cover-erase',
                     '--verbosity=3',
                     '--with-xunit',
                     '--cover-tests',
@@ -136,11 +136,11 @@ class TestRunner(object):
                 args = [
                     self.python,
                     'setup.py',
-                    'nosetests', 
-                    '--verbosity=3', 
+                    'nosetests',
+                    '--verbosity=3',
                     '--cover-tests',
                     ]
-                
+
             (ret, stdout, stderr) = exec_command(args)
             if ret:
                 logging.fatal("FAIL: %s" % path)
@@ -149,21 +149,21 @@ class TestRunner(object):
             else:
                 if not self.quiet:
                     print stderr
-                    
+
             if self.report and os.path.exists('.coverage'):
-                dest = os.path.join(SRC_ROOT, 
+                dest = os.path.join(SRC_ROOT,
                                     ".coverage.%s" % os.path.basename(path))
                 logging.debug("Adding coverage report %s" % dest)
-                os.rename('.coverage', dest)    
+                os.rename('.coverage', dest)
         return ok
-                
+
     def _run_pylint(self):
         logging.info("Running PyLint across project...")
         args = [
             self.pylint,
-            '-f', 
-            'parseable', 
-            'holland', 
+            '-f',
+            'parseable',
+            'holland',
             ]
         (ret, stdout, stderr) = exec_command(args)
         if ret:
@@ -172,7 +172,7 @@ class TestRunner(object):
             f = open(os.path.join(SRC_ROOT, 'pylint.txt'), 'w')
             f.write(stdout)
             f.close()
-        
+
     def _collect_coverage_reports(self):
         logging.info("Combining coverage reports...")
         os.chdir(SRC_ROOT)
@@ -183,7 +183,7 @@ class TestRunner(object):
         else:
             if not self.quiet:
                 print stdout
-                
+
     def run(self):
         logging.info("Verifying paths...")
         if not self._check_paths():
@@ -198,8 +198,8 @@ class TestRunner(object):
         if self.report:
             self._run_pylint()
             self._collect_coverage_reports()
-            
-        
+
+
 def main(args=None):
     """Main script entry point"""
 
@@ -213,13 +213,13 @@ def main(args=None):
     oparser.add_option('--prefix', action='store',
                        default=PREFIX,
                        help='prefix for binary paths')
-    oparser.add_option('--include', action='append', dest='include', 
+    oparser.add_option('--include', action='append', dest='include',
                        metavar="PATH", help='directories to include in tests')
     oparser.add_option('--debug', action='store_true')
     opts, args = oparser.parse_args(args)
 
     setup_logging(opts.debug)
-    
+
     # list of directories to test in
     if opts.include and len(opts.include) > 0:
         paths = []
@@ -234,6 +234,6 @@ def main(args=None):
 
     runner = TestRunner(opts.prefix, paths, opts.report, opts.quiet)
     runner.run()
-    
+
 if __name__ == '__main__':
     main(sys.argv)
