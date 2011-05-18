@@ -10,7 +10,7 @@ from optparse import OptionParser
 from subprocess import Popen, PIPE, STDOUT, list2cmdline
 
 PREFIX = os.environ.get('HOLLAND_HOME', '/usr')
-SRC_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+SRC_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 def exec_command(argv, *args, **kwargs):
     """
@@ -50,12 +50,12 @@ class TestRunner(object):
         for path in paths:
             logging.info("Check %s", path)
             if os.path.isdir(path):
-                python_path.append(os.path.abspath(path))
+                python_path.append(path)
                 exec_command('python setup.py egg_info',
                              stdout=open('/dev/null', 'w'),
                              stderr=open('/dev/null', 'w'),
                              shell=True,
-                             cwd=os.path.abspath(path))
+                             cwd=path)
         os.environ['PYTHONPATH'] = ':'.join(python_path)
 
         return True
@@ -98,14 +98,15 @@ class TestRunner(object):
             ret, stdout, stderr = exec_command(args,
                                                stdout=open('/dev/null', 'w'),
                                                stderr=STDOUT,
-                                               cwd=os.path.abspath(path),
+                                               cwd=path,
                                                close_fds=True)
             if ret != 0:
                 logging.warning(" * Test exited with failure status %d", ret)
 
             if self.report:
-                coverage_file = os.path.join(path, '.coverage')
-                dst_file = '.coverage.' + os.path.basename(path)
+                coverage_file = os.path.join(SRC_ROOT, '.coverage')
+                dst_file = os.path.join(SRC_ROOT,
+                                        '.coverage.' + os.path.basename(path))
                 try:
                     logging.info(" + mv %s %s", coverage_file, dst_file)
                     os.rename(coverage_file, dst_file)
@@ -143,9 +144,10 @@ class TestRunner(object):
                              cwd=path,
                              close_fds=True)
 
-            os.environ['PYLINTRC'] = os.path.abspath('.pylintrc')
+            os.environ['PYLINTRC'] = os.path.join(SRC_ROOT,
+                                                  os.path.abspath('.pylintrc'))
             exec_command([self.pylint, '-f', 'parseable', 'holland'],
-                         stdout=open('pylint.txt', 'w'),
+                         stdout=open(os.path.join(SRC_ROOT, 'pylint.txt'), 'w'),
                          cwd=os.path.join(staging,
                                           'usr/lib/python2.7/site-packages/'),
                          close_fds=True)
@@ -191,7 +193,7 @@ def main(args=None):
     else:
         paths = [
                 os.path.abspath(path)
-                for path in ['.'] + glob.glob('plugins/*')
+                for path in [SRC_ROOT] + glob.glob('plugins/*')
                 if os.path.isdir(path)
         ]
 
