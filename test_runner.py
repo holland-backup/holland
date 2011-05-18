@@ -2,45 +2,17 @@
 
 import os
 import sys
+import glob
+import shutil
+import tempfile
 import logging
 from optparse import OptionParser
-from subprocess import Popen, PIPE
-
-try:
-    if os.isatty(sys.stdout.fileno()):
-        import curses
-        curses.setupterm()
-    else:
-        curses = None
-except ImportError:
-    curses = None
+from subprocess import Popen, PIPE, STDOUT, list2cmdline
 
 PREFIX = os.environ.get('HOLLAND_HOME', '/usr')
 SRC_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
-if curses:
-    COLOR_NAMES = "BLACK RED GREEN YELLOW BLUE MAGENTA CYAN WHITE"
-    COLORS = dict(zip(COLOR_NAMES.split(), xrange(8)))
-    RESET = curses.tigetstr('sgr0')
-    def colorize(record):
-        levelno = record.levelno
-        if(levelno>=40):
-            color = COLORS['RED'] # red
-        elif(levelno>=30):
-            color = COLORS['YELLOW'] # yellow
-        elif(levelno>=20):
-            color = COLORS['GREEN'] # green
-        elif(levelno>=10):
-            color = COLORS['MAGENTA']
-        else:
-            color = RESET # normal
-        color = curses.tparm(curses.tigetstr('setaf'), color)
-        record.levelname = color + record.levelname + RESET
-        return record
-else:
-    colorize = lambda record: record
-
-def exec_command(cmd_args):
+def exec_command(argv, *args, **kwargs):
     """
     Quick wrapper around subprocess to exec shell command.
 
@@ -50,173 +22,144 @@ def exec_command(cmd_args):
             The args to pass to subprocess.
 
     """
-    logging.debug("exec_command: %s" % cmd_args)
-    proc = Popen(cmd_args, stdout=PIPE, stderr=PIPE)
+    if isinstance(argv, basestring):
+        logging.info("+ /bin/sh -c '%s'", argv)
+    else:
+        logging.info("+ %s", list2cmdline(argv))
+
+    proc = Popen(argv, *args, **kwargs)
     (stdout, stderr) = proc.communicate()
     ret = proc.wait()
     return (ret, stdout, stderr)
 
-class ColorFormatter(logging.Formatter):
-    def format(self, record):
-        return logging.Formatter.format(self, colorize(record))
-
-class ColorFormatter(logging.Formatter):
-    def format(self, record):
-        return logging.Formatter.format(self, colorize(record))
-
-def setup_logging(debug):
-    """Setup basic console logging"""
-    root = logging.getLogger()
-    root.setLevel(debug and logging.DEBUG or logging.INFO)
-    handler = logging.StreamHandler()
-    formatter = ColorFormatter(fmt='[%(levelname)s] %(message)s')
-    handler.setFormatter(formatter)
-    root.addHandler(handler)
-
 class TestRunner(object):
-    def __init__(self, prefix='/usr', paths=[], report=False, quiet=True):
-        self.prefix = prefix
-        self.paths = paths
+    def __init__(self,
+                 python='python',
+                 pylint='pylint',
+                 coverage='coverage',
+                 report=False,
+                 quiet=True):
+        self.python = python
+        self.pylint = pylint
+        self.coverage = coverage
         self.report = report
-        self.python_path = None
         self.quiet = quiet
 
-        self.python = os.path.join(self.prefix, 'bin', 'python')
-        self.pylint = os.path.join(self.prefix, 'bin', 'pylint')
-        self.coverage = os.path.join(self.prefix, 'bin', 'coverage')
-
-    def _setup_python_path(self):
+    def _setup_python_path(self, paths):
         python_path = []
-        python_path.append('.')
-        python_path.append(SRC_ROOT)
-        python_path.append(os.path.join(SRC_ROOT, 'plugins', 'holland.lib.common'))
-        self.python_path = ':'.join(python_path)
-        os.environ['PYTHONPATH'] = self.python_path
-        
-        # also build egg info
-        logging.info("Building egg info for holland.core")
-        os.chdir(SRC_ROOT)
-        (ret, stdout, stderr) = exec_command([self.python, 'setup.py', 'egg_info'])
+        for path in paths:
+            logging.info("Check %s", path)
+            if os.path.isdir(path):
+                python_path.append(os.path.abspath(path))
+                exec_command('python setup.py egg_info',
+                             stdout=open('/dev/null', 'w'),
+                             stderr=open('/dev/null', 'w'),
+                             shell=True,
+                             cwd=os.path.abspath(path))
+        os.environ['PYTHONPATH'] = ':'.join(python_path)
 
-        logging.info("Building egg info for holland.lib.common")
-        os.chdir(os.path.join(SRC_ROOT, 'plugins', 'holland.lib.common'))
-        (ret, stdout, stderr) = exec_command([self.python, 'setup.py', 'egg_info'])
-        
         return True
 
     def _check_paths(self):
         ok = True
-        if not os.path.exists(self.python):
-            logging.error("%s does not exist" % self.python)
-            ok = False
-        for path in self.paths:
-            if not os.path.exists(path):
-                logging.error("%s does not exist" % path)
-                ok = False
+
+        for name in (self.python, self.pylint, self.coverage):
+            try:
+                exec_command([name, '--help'],
+                             stdout=open('/dev/null', 'w'),
+                             stderr=STDOUT,
+                             close_fds=True)
+            except OSError, exc:
+                logging.error("%s is not runnable: %s", name, exc)
+                break
+        else:
+            return True
+
+        return False
+
+    def _run_tests(self, paths):
+        args = [
+            self.python,
+            'setup.py',
+            'nosetests',
+            '--verbosity=3',
+        ]
+
         if self.report:
-            if not os.path.exists(self.pylint):
-                logging.error("%s does not exist" % self.pylint)
-                ok = False
-            if not os.path.exists(self.coverage):
-                alt_path = os.path.join(self.prefix, 'bin', 'python-coverage')
-                if os.path.exists(alt_path):
-                    self.coverage = alt_path
-                else:
-                    logging.error("%s nor %s exist" % (self.coverage, alt_path))
-                    ok = False
-        return ok
+            args.extend([
+                '--with-coverage',
+                '--cover-erase',
+                '--with-xunit',
+                '--cover-tests',
+            ])
 
-    def _run_tests(self):
-        ok = True
-        for path in self.paths:
-            logging.info("Testing: %s" % path)
-            os.chdir(path)
+        for path in paths:
+            logging.info("Testing: %s", path)
+            ret, stdout, stderr = exec_command(args,
+                                               stdout=open('/dev/null', 'w'),
+                                               stderr=STDOUT,
+                                               cwd=os.path.abspath(path),
+                                               close_fds=True)
+            if ret != 0:
+                logging.warning(" * Test exited with failure status %d", ret)
+
             if self.report:
-                args = [
-                    self.python,
-                    'setup.py',
-                    'nosetests',
-                    '--with-coverage',
-                    '--cover-erase',
-                    '--verbosity=3',
-                    '--with-xunit',
-                    '--cover-tests',
-                    ]
-            else:
-                args = [
-                    self.python,
-                    'setup.py',
-                    'nosetests',
-                    '--verbosity=3',
-                    '--cover-tests',
-                    ]
+                coverage_file = os.path.join(path, '.coverage')
+                dst_file = '.coverage.' + os.path.basename(path)
+                try:
+                    logging.info(" + mv %s %s", coverage_file, dst_file)
+                    os.rename(coverage_file, dst_file)
+                except OSError, exc:
+                    logging.error(" ! No coverage information in %s", path)
 
-            (ret, stdout, stderr) = exec_command(args)
-            if ret:
-                logging.fatal("Failed executing command: %s" % args)
-                print stderr
-                ok = False
-            else:
-                if not self.quiet:
-                    print stderr
+        exec_command(['coverage', 'combine'])
+        exec_command(['coverage', 'xml'])
 
-            if self.report and os.path.exists('.coverage'):
-                dest = os.path.join(SRC_ROOT,
-                                    ".coverage.%s" % os.path.basename(path))
-                logging.debug("Adding coverage report %s" % dest)
-                os.rename('.coverage', dest)
-        return ok
+        return True
 
-    def _run_pylint(self):
+    def _run_pylint(self, paths):
         logging.info("Running PyLint across project...")
         args = [
             self.pylint,
             '-f',
             'parseable',
             'holland',
+        ]
+        staging = tempfile.mkdtemp()
+
+        try:
+            stage_args = [
+                'python',
+                'setup.py',
+                'install',
+                '--root=' + staging,
+                '--single-version-externally-managed',
             ]
-        (ret, stdout, stderr) = exec_command(args)
-        if ret:
-            logging.warn("PyLint command exited with code '%s'" % ret)
-        else:
-            f = open(os.path.join(SRC_ROOT, 'pylint.txt'), 'w')
-            f.write(stdout)
-            f.close()
+            for path in paths:
+                exec_command('python setup.py install --root=' + staging + ' --single-version-externally-managed',
+                             stdout=open('/dev/null', 'w'),
+                             stderr=STDOUT,
+                             shell=True,
+                             cwd=path,
+                             close_fds=True)
 
-    def _collect_coverage_reports(self):
-        ok = True
-        logging.info("Combining coverage reports...")
-        os.chdir(SRC_ROOT)
-        args = [self.coverage, 'combine']
-        (ret, stdout, stderr) = exec_command(args)
-        if ret:
-            logging.error(stderr)
-        else:
-            if not self.quiet:
-                print stdout
-        
-        args = [self.coverage, 'xml']
-        (ret, stdout, stderr) = exec_command(args)
-        if ret:
-            logging.error(stderr)
-        else:
-            if not self.quiet:
-                print stdout
+            os.environ['PYLINTRC'] = os.path.abspath('.pylintrc')
+            exec_command([self.pylint, '-f', 'parseable', 'holland'],
+                         stdout=open('pylint.txt', 'w'),
+                         cwd=os.path.join(staging,
+                                          'usr/lib/python2.7/site-packages/'),
+                         close_fds=True)
+        finally:
+            shutil.rmtree(staging)
 
-    def run(self):
-        logging.info("Verifying paths...")
+    def run(self, paths):
         if not self._check_paths():
-            logging.fatal("Unable to continue.  See errors above.")
-            sys.exit(1)
-        if not self._setup_python_path():
-            logging.fatal("Unable to continue.  See errors above.")
-            sys.exit(1)
-        if not self._run_tests():
-            logging.fatal("Unable to continue.  See errors above.")
-            sys.exit(1)
-        if self.report:
-            self._run_pylint()
-            self._collect_coverage_reports()
+            raise OSError("Unable to continue.  See errors above.")
+        if not self._setup_python_path(paths):
+            raise OSError("Unable to continue.  See errors above.")
+        if not self._run_tests(paths):
+            raise OSError("Unable to continue.  See errors above.")
+        self._run_pylint(paths)
 
 
 def main(args=None):
@@ -229,15 +172,16 @@ def main(args=None):
     oparser.add_option('--quiet', action='store_true',
                        default=False,
                        help='limit output')
-    oparser.add_option('--prefix', action='store',
-                       default=PREFIX,
-                       help='prefix for binary paths')
+    oparser.add_option('--python', default='python')
+    oparser.add_option('--pylint', default='pylint')
+    oparser.add_option('--coverage', default='coverage')
     oparser.add_option('--include', action='append', dest='include',
                        metavar="PATH", help='directories to include in tests')
     oparser.add_option('--debug', action='store_true')
     opts, args = oparser.parse_args(args)
 
-    setup_logging(opts.debug)
+    logging.basicConfig(level=opts.debug and logging.DEBUG or logging.INFO,
+                        format='[%(levelname)s] %(message)s')
 
     # list of directories to test in
     if opts.include and len(opts.include) > 0:
@@ -246,13 +190,18 @@ def main(args=None):
             paths.append(os.path.abspath(path))
     else:
         paths = [
-            os.path.join(SRC_ROOT),
-            os.path.join(SRC_ROOT, 'plugins', 'holland.backup.random'),
-            os.path.join(SRC_ROOT, 'plugins', 'holland.backup.sqlite'),
-            ]
+                os.path.abspath(path)
+                for path in ['.'] + glob.glob('plugins/*')
+                if os.path.isdir(path)
+        ]
 
-    runner = TestRunner(opts.prefix, paths, opts.report, opts.quiet)
-    runner.run()
+    runner = TestRunner(python=opts.python,
+                        pylint=opts.pylint,
+                        coverage=opts.coverage,
+                        report=opts.report,
+                        quiet=opts.quiet)
+    runner.run(paths)
+    return 0
 
 if __name__ == '__main__':
-    main(sys.argv)
+    sys.exit(main(sys.argv))
