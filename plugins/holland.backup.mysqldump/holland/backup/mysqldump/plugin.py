@@ -3,6 +3,7 @@
 import os, sys
 import logging
 from holland.core import BackupError, BackupPlugin, Configspec
+from holland.core.util import parse_bytes
 from holland.backup.mysqldump.mock import MockEnvironment
 from holland.backup.mysqldump.util import *
 from holland.backup.mysqldump.runner import MySQLBackup
@@ -46,7 +47,7 @@ class MySQLDumpPlugin(BackupPlugin):
         LOG.info("Estimating backup size")
         LOG.info("----------------------")
         if self.config['mysqldump']['estimate-method'].startswith('const:'):
-            return parse_size(self.config['mysqldump']['estimate-method'])
+            return parse_bytes(self.config['mysqldump']['estimate-method'])
         return sum([db.size for db in self._schema.databases])
 
     def _setup(self):
