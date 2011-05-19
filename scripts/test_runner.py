@@ -141,7 +141,7 @@ class TestRunner(object):
                 stage_args.append('--install-layout=deb')
             for path in paths:
                 logging.info(" * Installing from %s", path)
-                exec_command('python setup.py install --root=' + staging + ' --single-version-externally-managed',
+                exec_command(stage_args,
                              stdout=open('/dev/null', 'w'),
                              stderr=STDOUT,
                              shell=True,
