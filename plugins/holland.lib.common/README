@@ -23,4 +23,3 @@ The current modules in holland.lib.common as of this writing are:
                       commands on a system path. Similar to the command 
                       'which', but also works on Windows and implemented in
                       pure python.
-* holland.lib.multidict - A simple Multivalued dictionary implementation.
