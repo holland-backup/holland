@@ -1,7 +1,6 @@
 import tempfile
 import sys
 from nose.tools import *
-from holland.lib.mysql.option.legacy import OptionFile
 from holland.lib.mysql.option.base import load_options, write_options
 
 def test_load_options():
