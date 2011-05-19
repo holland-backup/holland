@@ -105,17 +105,9 @@ class TestRunner(object):
                 logging.warning(" * Test exited with failure status %d", ret)
 
             if self.report:
-                coverage_file = os.path.join(path, '.coverage')
-                dst_file = os.path.join(SRC_ROOT,
-                                        '.coverage.' + os.path.basename(path))
-                try:
-                    logging.info(" + mv %s %s", coverage_file, dst_file)
-                    os.rename(coverage_file, dst_file)
-                except OSError, exc:
-                    logging.error(" ! No coverage information in %s", path)
-
-        exec_command(['coverage', 'combine'])
-        exec_command(['coverage', 'xml'])
+                exec_command(['coverage', 'xml'],
+                             cwd=path,
+                             close_fds=True)
 
         return True
 
