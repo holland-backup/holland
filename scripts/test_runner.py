@@ -111,7 +111,7 @@ class TestRunner(object):
 
         exec_command([self.coverage, 'combine'])
         exec_command([self.coverage, 'xml',
-                     #'--include', 'holland/*',
+                     '--include', 'holland/*,plugins/*',
                      '--omit',
                      'tests,holland/cli/backports,/usr/'],
                      close_fds=True)
