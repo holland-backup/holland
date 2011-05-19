@@ -153,7 +153,7 @@ class TestRunner(object):
             exec_command([self.pylint, '-f', 'parseable', 'holland'],
                          stdout=open(os.path.join(SRC_ROOT, 'pylint.txt'), 'w'),
                          cwd=os.path.join(staging,
-                                          get_python_lib()),
+                                          get_python_lib()[1:]),
                          close_fds=True)
         finally:
             shutil.rmtree(staging)
