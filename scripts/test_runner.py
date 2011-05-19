@@ -114,7 +114,6 @@ class TestRunner(object):
                      #'--include', 'holland/*',
                      '--omit',
                      'tests,holland/cli/backports,/usr/'],
-                     cwd=path,
                      close_fds=True)
         return True
 
