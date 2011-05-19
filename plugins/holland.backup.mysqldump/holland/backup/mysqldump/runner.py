@@ -1,8 +1,14 @@
-"""Run mysqldump, Run"""
+"""
+holland.backup.mysqldump.runner
+
+Run mysqldump command lines
+
+"""
 
 import os
 import errno
 import select
+import signal
 import logging
 from subprocess import Popen, PIPE, list2cmdline
 
@@ -14,10 +20,10 @@ class ProcessError(Exception):
 class ProcessQueue(object):
     """Manage a queue of running processes"""
 
-    def __init__(self, max=1):
+    def __init__(self, max_processes=1):
         self.queue = {}
         self.poller = select.poll()
-        self.max = max
+        self.max_processes = max_processes
 
     def wait(self):
         """Wait for at least one process to finish
@@ -30,12 +36,13 @@ class ProcessQueue(object):
         while True:
             try:
                 count = 0
-                for fd, event in self.poller.poll():
-                    LOG.debug("fd=%d seems to have completed", fd)
+                for filed, _ in self.poller.poll():
+                    LOG.debug("fd=%d seems to have completed", filed)
                     try:
-                        process = self.queue.pop(fd)
+                        process = self.queue.pop(filed)
                     except KeyError:
-                        LOG.error("Internal error. Attempted to dequeue a fd we were not tracking: %d", fd)
+                        LOG.error("Internal error. Attempted to dequeue a fd "
+                                  "not being tracked: %d", filed)
                         continue
                     yield self.dequeue(process)
                     assert process.poll() is not None
@@ -61,7 +68,7 @@ class ProcessQueue(object):
     def add(self, process):
         """Add a new process to this queue"""
         LOG.debug("process = %r", process)
-        while len(self.queue) >= self.max:
+        while len(self.queue) >= self.max_processes:
             # wait for process to die
             LOG.debug("Waiting for a free process slot")
             for child in self.wait():
@@ -113,6 +120,11 @@ class MySQLBackup(object):
                 return '--lock-tables'
 
     def run_all(self, databases):
+        """Run a single mysqldump command to backup all the requested
+        databases
+
+        :raises: ProcessError on error
+        """
         options = self.options + [
             self._lock_method(databases),
         ]
@@ -130,6 +142,14 @@ class MySQLBackup(object):
         MySQLDump(options, fileobj).run()
 
     def run_each(self, databases, explicit_tables=False, parallelism=1):
+        """Run a separate mysqldump command for each of the requested databases
+
+        :param databases: list of databases to backup
+        :param explicit_tables: flag whether to list tables explicitly or to
+                                simply rely on --ignore-table options
+        :param parallelism: number of mysqldump processes to run in parallel
+        :raises: ProcessError on error
+        """
         databases = [db for db in databases if not db.excluded]
         if not databases:
             raise ProcessError("No databases to backup")
@@ -166,12 +186,18 @@ class MySQLBackup(object):
                      process.pid, process.returncode)
 
 class MySQLDump(object):
+    """Represents a single mysqldump process"""
     def __init__(self, argv, fileobj):
         self.argv = argv
         self.fileobj = fileobj
         self.process = None
 
     def start(self):
+        """Start the mysqldump process
+
+        This forks via subprocess.Popen and sets this instance's
+        process attribute to point to the Popen instance
+        """
         if self.process:
             raise ValueError("Already started this mysqldump")
         environ = os.environ.copy()
@@ -186,11 +212,18 @@ class MySQLDump(object):
         LOG.info(" %s", list2cmdline(self.argv))
 
     def run(self):
-        # run and wait for a result
+        """Run mysqldump and wait for the command to complete
+
+        This is equivalent to MySQDump.start() + MySQLDump.wait()
+        """
         self.start()
-        return self.wait()
+        self.wait()
 
     def wait(self):
+        """Wait for this mysqldump command to finish
+
+        :raises: ProcessError on error
+        """
         LOG.debug("Waiting on --->%s<---", self)
         self.process.stdin.close()
         status = self.process.wait()
@@ -210,6 +243,11 @@ class MySQLDump(object):
                                status)
 
     def poll(self):
+        """Poll whether this mysqldump command has completed asynchronously
+        
+        :returns: None if mysqldump is still running and the exit status
+                  otherwise
+        """
         if self.process is None:
             raise ValueError("Incorrect API utilization - no process active")
         return self.process.poll()
