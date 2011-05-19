@@ -9,8 +9,15 @@ Utility functions to support mysqldump backups
 import os
 import codecs
 import logging
+from subprocess import Popen, PIPE, STDOUT
 from holland.core import BackupError
-from holland.lib.mysql import MySQLError
+from holland.core.stream import open_stream, load_stream_plugin
+from holland.core.util.safefilename import encode
+from holland.lib.mysql import MySQLSchema, MySQLError
+from holland.lib.mysql import DatabaseIterator, MetadataTableIterator
+from holland.lib.mysql import include_glob, exclude_glob, \
+                              include_glob_qualified, \
+                              exclude_glob_qualified
 
 LOG = logging.getLogger(__name__)
 
@@ -26,7 +33,9 @@ def server_version(client):
     """
     try:
         client.connect()
-        return tuple(map(int, client.get_server_info().split('-', 1)[0].split('.')))
+        version = client.get_server_info()
+        return tuple([int(x)
+                      for x in version.split('-', 1)[0].split('.')])
     except MySQLError, exc:
         raise BackupError("[%d] %s" % exc.args)
 
@@ -37,10 +46,6 @@ def schema_from_config(config):
 
     :returns: holland.lib.mysql:MySQLSchema instance
     """
-    from holland.lib.mysql import MySQLSchema
-    from holland.lib.mysql import include_glob, exclude_glob
-    from holland.lib.mysql import include_glob_qualified, \
-                                  exclude_glob_qualified
     schema = MySQLSchema()
     schema.add_database_filter(include_glob(*config['databases']))
     schema.add_database_filter(exclude_glob(*config['exclude-databases']))
@@ -49,7 +54,9 @@ def schema_from_config(config):
     schema.add_engine_filter(include_glob(*config['engines']))
     schema.add_engine_filter(exclude_glob(*config['exclude-engines']))
     schema.add_transactional_engines(config['transactional-engines-override'])
-    schema.add_transactional_databases(config['transactional-databases-override'])
+    schema.add_transactional_databases(
+            config['transactional-databases-override']
+    )
     schema.add_transactional_tables(config['transactional-tables-override'])
     return schema
 
@@ -60,7 +67,7 @@ def check_transactional(databases):
     :raises: BackupError if one or more databases had non-transactional tables
     """
     non_txn_dbs = [db for db in databases
-                   if not db.is_transactional and not database.excluded]
+                   if not db.is_transactional and not db.excluded]
 
     if non_txn_dbs:
         for db in non_txn_dbs:
@@ -86,7 +93,6 @@ def check_mysqldump_version(mysqldump, mysqld_version):
     :param mysqldump: location of a mysqldump binary
     :param mysqld_version: tuple version of the mysql server
     """
-    from subprocess import Popen, PIPE, STDOUT
     stdout = Popen([mysqldump, '--version'],
                    stdout=PIPE, stderr=STDOUT,
                    close_fds=True).communicate()[0]
@@ -175,8 +181,6 @@ def generate_manifest(path, schema, config):
     such as '/' or for unicode usage.
 
     """
-    from holland.core.stream import load_stream_plugin
-    from holland.lib.safefilename import encode
     path = os.path.join(path, 'backup_data', 'MANIFEST.txt')
     method = config['compression']['method']
     level = config['compression']['level']
@@ -215,27 +219,8 @@ def client_from_config(config):
         # parse error of defaults-extra-files, for instance
         raise BackupError("Failed to create client")
 
-def parse_size(value):
-    """Parse a MySQL size into integer bytes
-    :param value: str value to parse
-    :returns: integer number of bytes
-    :rtype: int
-    """
-    units = "kKmMgGtTpPeE"
-    match = re.match(r'^(\d+(?:[.]\d+)?)([%s])$' % units, value)
-    if not match:
-        raise ValueError("Invalid constant size syntax %r" % value)
-    number, unit = match.groups()
-    unit = unit.upper()
-
-    exponent = "KMGTPE".find(unit)
-
-    return int(float(number) * 1024 ** (exponent + 1))
-
 def refresh_schema(schema, client):
     "Disregard performance. Acquire metadata."
-    from holland.lib.mysql import MySQLError
-    from holland.lib.mysql import DatabaseIterator, MetadataTableIterator
     try:
         client.connect()
         db_iter = DatabaseIterator(client)
@@ -334,9 +319,8 @@ def sql_open(base_path, config):
 
     :returns: open method
     """
-    from holland.core.stream import open_stream
-    from holland.lib.safefilename import encode
     def _open(name, mode):
+        """Delegate an open operation to holland's stream API"""
         name = encode(name)[0]
         real_path = os.path.join(base_path, name + '.sql')
         return open_stream(real_path, 'w',
@@ -352,7 +336,7 @@ def write_exclusions(path, schema):
     """
     fileobj = codecs.open(path, 'a', encoding='utf8')
     try:
-        print >>fileobj, "[mysqldump]"
+        print >> fileobj, "[mysqldump]"
         for table in schema.excluded_tables:
             print >> fileobj, "ignore-table=%s.%s" % \
                     (table.database, table.name)
