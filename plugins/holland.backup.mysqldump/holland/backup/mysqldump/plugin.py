@@ -69,7 +69,7 @@ class MySQLDumpPlugin(BackupPlugin):
             LOG.info("+ lock-method forced : %s", lock_method)
         return MySQLBackup(argv, dotsql_generator, lock_method)
 
-    def backup(self, dry_run=False):
+    def backup(self):
         """Backup via mysqldump"""
         LOG.info("mysqldump backup")
         LOG.info("----------------")
@@ -112,7 +112,7 @@ class MySQLDumpPlugin(BackupPlugin):
         mockenv = MockEnvironment()
         mockenv.replace_environment()
         try:
-            self.backup(dry_run=True)
+            self.backup()
         finally:
             mockenv.restore_environment()
 
