@@ -13,15 +13,8 @@ LOG = logging.getLogger(__name__)
 class MySQLDumpPlugin(BackupPlugin):
     """Backup Plugin for MySQL using mysqldump"""
 
-    def __init__(self, name):
-        self.name = name
-        self.config = None
-
-    def setup(self, backupstore):
-        self.backupstore = backupstore
-        self.path = backupstore.path
-
     def pre(self):
+        """Setup objects shared by estimate() and backup/dryrun()"""
         self._schema = schema_from_config(self.config['mysqldump'])
         self._client = client_from_config(self.config['mysql:client'])
         try:
@@ -38,23 +31,28 @@ class MySQLDumpPlugin(BackupPlugin):
             raise BackupError("[%d] %s" % exc.args)
 
     def estimate(self):
+        """Estimate the size of a mysqldump from MySQL metadata
+
+        :returns: estimated size in integer number of bytes
+        """
         LOG.info("Estimating backup size")
         LOG.info("----------------------")
         if self.config['mysqldump']['estimate-method'].startswith('const:'):
             return parse_size(self.config['mysqldump']['estimate-method'])
         return sum([db.size for db in self._schema.databases])
-        
+
     def _setup(self):
-        os.makedirs(os.path.join(self.path, 'backup_data'))
-        LOG.info("+ mkdir %s", os.path.join(self.path, 'backup_data'))
+        """Perform various setup bookkeeping"""
+        os.makedirs(os.path.join(self.backup_directory, 'backup_data'))
+        LOG.info("+ mkdir %s", os.path.join(self.backup_directory, 'backup_data'))
         defaults_file = defaults_from_config(self.config['mysql:client'],
-                                             self.path)
+                                             self.backup_directory)
         LOG.info("+ mkconfig %s", defaults_file)
         write_exclusions(defaults_file, self._schema)
         LOG.info("+ exclusions >> %s", defaults_file)
         mysqld_version = server_version(self._client)
         argv = argv_from_config(defaults_file, self.config, mysqld_version)
-        dotsql_generator = sql_open(os.path.join(self.path, 'backup_data'),
+        dotsql_generator = sql_open(os.path.join(self.backup_directory, 'backup_data'),
                                     self.config['compression'])
         lock_method = lock_method_from_config(self.config)
         if lock_method:
@@ -62,29 +60,29 @@ class MySQLDumpPlugin(BackupPlugin):
         return MySQLBackup(argv, dotsql_generator, lock_method)
 
     def backup(self, dry_run=False):
+        """Backup via mysqldump"""
         LOG.info("mysqldump backup")
         LOG.info("----------------")
         LOG.info(":databases: %s",
                  ','.join([db.name + (db.excluded and '(excluded)' or '')
                           for db in self._schema.databases]))
-
-        if dry_run:
-            mockenv = MockEnvironment()
-            mockenv.replace_environment()
         try:
             try:
                 backup = self._setup()
-                if self.config['mysqldump']['stop-slave']:
+                config = self.config['mysqldump']
+                if config['stop-slave']:
                     status = stop_slave(self._client)
                     record_slave_status(self.config)
-                if self.config['mysqldump']['lockless-only']:
+                if config['lockless-only']:
                     check_transactional(self._schema.databases)
-                if self.config['mysqldump']['file-per-database']:
-                    parallelism = self.config['mysqldump']['parallelism']
-                    explicit_tables = self.config['mysqldump']['explicit-tables']
+                if config['file-per-database']:
+                    parallelism = config['parallelism']
+                    explicit_tables = config['explicit-tables']
                     LOG.info("+ file-per-database")
                     LOG.info("+ parallelism=%d", parallelism)
-                    generate_manifest(self.path, self._schema, self.config)
+                    generate_manifest(self.backup_directory,
+                                      self._schema,
+                                      self.config)
                     backup.run_each(self._schema.databases,
                                     explicit_tables=explicit_tables,
                                     parallelism=parallelism)
@@ -96,32 +94,29 @@ class MySQLDumpPlugin(BackupPlugin):
                 LOG.debug("Failure(exception)", exc_info=True)
                 raise BackupError("Backup failed", sys.exc_info()[1])
         finally:
-            if dry_run:
-                mockenv.restore_environment()
             if self.config['mysqldump']['stop-slave']:
                 start_slave(self._client)
 
     def dryrun(self):
-        self.backup(dry_run=True)
+        """Perform a dryrun backup"""
+        mockenv = MockEnvironment()
+        mockenv.replace_environment()
+        try:
+            self.backup(dry_run=True)
+        finally:
+            mockenv.restore_environment()
 
-    def post(self):
-        pass
-
-    #@classmethod
     def configspec(cls):
+        """Generate the configspec for the mysqldump plugin"""
         return Configspec.from_string(CONFIGSPEC)
-    configspec = classmethod(configspec)
 
-    #@classmethod
     def plugin_info(cls):
         """Provide information about this plugin"""
         return dict(
             name='mysqldump',
             summary='Backup MySQL databases via the mysqldump command',
             description='''
-
             ''',
             version='1.1.0a1',
             api_version='1.1.0a1',
         )
-    plugin_info = classmethod(plugin_info)

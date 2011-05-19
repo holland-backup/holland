@@ -1,3 +1,11 @@
+"""
+holland.backup.mysqldump.util
+
+Utility functions to support mysqldump backups
+
+:copyright: 2008-2011 Rackspace US, Inc.
+:license: GPLv2, see LICENSE for details
+"""
 import os
 import codecs
 import logging
@@ -7,7 +15,15 @@ from holland.lib.mysql import MySQLError
 LOG = logging.getLogger(__name__)
 
 def server_version(client):
-    from holland.lib.mysql import MySQLError
+    """Retrieve the server version from a connection
+
+    >> client = MySQLClient(read_default_group='client')
+    >> client.server_version()
+    (5, 5, 11)
+
+    :param client: A holland.lib.mysql.client:Client instance
+    :returns: tuple of integers representing the server version
+    """
     try:
         client.connect()
         return tuple(map(int, client.get_server_info().split('-', 1)[0].split('.')))
@@ -15,6 +31,12 @@ def server_version(client):
         raise BackupError("[%d] %s" % exc.args)
 
 def schema_from_config(config):
+    """Build a MySQLSchema instance from a MySQLDumpBackupPlugin config
+
+    :param config: holland.core:Config instance
+
+    :returns: holland.lib.mysql:MySQLSchema instance
+    """
     from holland.lib.mysql import MySQLSchema
     from holland.lib.mysql import include_glob, exclude_glob
     from holland.lib.mysql import include_glob_qualified, \
@@ -32,6 +54,11 @@ def schema_from_config(config):
     return schema
 
 def check_transactional(databases):
+    """Check whether all of the given databases are transactional
+
+    :param databases: list of holland.lib.mysql:Database instances
+    :raises: BackupError if one or more databases had non-transactional tables
+    """
     non_txn_dbs = [db for db in databases
                    if not db.is_transactional and not database.excluded]
 
@@ -48,6 +75,17 @@ def check_transactional(databases):
 
 
 def check_mysqldump_version(mysqldump, mysqld_version):
+    """Check the version of a mysqldump binary compared to a mysql server
+    version
+
+    This runs mysqldump --version and parses out the version string
+    returning a tuple of integers representing that version
+
+    >> check_mysqldump_version('/usr/bin/mysqldump', (5,5,11))
+
+    :param mysqldump: location of a mysqldump binary
+    :param mysqld_version: tuple version of the mysql server
+    """
     from subprocess import Popen, PIPE, STDOUT
     stdout = Popen([mysqldump, '--version'],
                    stdout=PIPE, stderr=STDOUT,
@@ -61,6 +99,14 @@ def check_mysqldump_version(mysqldump, mysqld_version):
                     version, mysqld_version)
 
 def argv_from_config(defaults_file, config, mysqld_version):
+    """Generate a list of arguments to mysqldump from a MySQLDumpPlugin config
+
+    :param defaults_file: the my.cnf location to pass to mysqldump
+    :param config: a holland.core:Config instance containing the mysqldump
+                   configuration
+    :param mysqld_version: version of the mysql server
+    :returns: list of strings suitable for passing to subprocess.Popen
+    """
     mysqldump = locate_mysqldump(config['mysqldump']['mysql-binpath'])
     check_mysqldump_version(mysqldump, mysqld_version)
     mysqldump_options = mysqldump_options_from_config(config['mysqldump'],
@@ -75,7 +121,17 @@ def argv_from_config(defaults_file, config, mysqld_version):
         defaults_option + '=' + defaults_file,
     ] + mysqldump_options
 
+# XXX: this should be generated relative to the mysqldump version, not the
+# server
 def mysqldump_options_from_config(config, server_version):
+    """Generate a list of mysqldump options from a config
+
+    This adds options suitable to a particular version of mysqldump
+
+    :param config: mysqldump plugin config options
+    :param server_version: version of MySQL server being targetted
+    :returns: list of options
+    """
     LOG.info("- Adding mysqldump options")
     options = []
     if config['flush-logs']:
@@ -112,6 +168,13 @@ def mysqldump_options_from_config(config, server_version):
     return options
 
 def generate_manifest(path, schema, config):
+    """Generate a simple text file mapping database names to file names
+
+    This is used in case a database name was encoded to something not very
+    readable.  This can happen if a database has filename unfriendly characters
+    such as '/' or for unicode usage.
+
+    """
     from holland.core.stream import load_stream_plugin
     from holland.lib.safefilename import encode
     path = os.path.join(path, 'backup_data', 'MANIFEST.txt')
@@ -128,6 +191,7 @@ def generate_manifest(path, schema, config):
         fileobj.close()
 
 def log_host_info(client):
+    """Log information about how a connection is connected to MySQL"""
     host = client.get_host_info().lower()
     if 'socket' in host:
         host = '%s %s' % (host, client.show_variable('socket'))
@@ -137,6 +201,10 @@ def log_host_info(client):
     LOG.info("Connected to %s as %s", host, user)
 
 def client_from_config(config):
+    """Create a client connect to MySQL from a mysqldump plugin config
+
+    :returns: client instance
+    """
     from holland.lib.mysql import connect, build_mysql_config, PassiveMySQLClient
     try:
         config = build_mysql_config(config)
@@ -177,6 +245,10 @@ def refresh_schema(schema, client):
         raise BackupError("Failed to refresh schema: %s" % exc)
 
 def locate_mysqldump(search_path):
+    """Find a valid mysqldump binary from a given search path
+
+    :returns: string path to a mysqldump binary
+    """
     from holland.lib.which import which, WhichError
     if not search_path:
         try:
@@ -194,6 +266,10 @@ def locate_mysqldump(search_path):
         raise BackupError("mysqldump not found")
 
 def lock_method_from_config(config):
+    """Determine the correct mysqldump lock option from the config
+
+    :returns: lock option or None if it should be autodetected
+    """
     lock_method = config['mysqldump']['lock-method']
     if lock_method == 'auto-detect':
         return None # runner will determine this based on databases
@@ -209,6 +285,12 @@ def lock_method_from_config(config):
         raise ValueError("Invalid lock method '%s'" % lock_method)
 
 def defaults_from_config(config, path):
+    """Generate a my.cnf file from config options
+
+    :param config: mysql config options
+    :param path: path where the config should be written
+    :returns: path to config option
+    """
     from holland.lib.mysql import build_mysql_config, write_options
     path = os.path.join(path, 'holland.my.cnf')
     mysql_config = build_mysql_config(config)
@@ -216,6 +298,10 @@ def defaults_from_config(config, path):
     return path
 
 def stop_slave(client):
+    """Stop a MySQL slave
+
+    :returns: dictionary with values from SHOW SLAVE STATUS
+    """
     try:
         client.connect()
         client.stop_slave(sql_thread_only=True)
@@ -225,6 +311,7 @@ def stop_slave(client):
     return status
 
 def record_slave_status(status, config):
+    """Record slave status into a given config dictionary"""
     master_log_file = status['relay_master_log_file']
     master_log_pos  = status['exec_master_log_pos']
     section = config.setdefault('mysql:replication', {})
@@ -232,6 +319,7 @@ def record_slave_status(status, config):
     section['master-log-pos']  = master_log_pos
 
 def start_slave(client):
+    """Start a MySQL slave"""
     try:
         client.connect()
         client.start_slave()
@@ -239,6 +327,13 @@ def start_slave(client):
         client.disconnect()
 
 def sql_open(base_path, config):
+    """Create a function suitable for opening files relative to a given path
+
+    The provided method will encode the requested filename and open a file
+    object relative to some base path.
+
+    :returns: open method
+    """
     from holland.core.stream import open_stream
     from holland.lib.safefilename import encode
     def _open(name, mode):
@@ -250,6 +345,11 @@ def sql_open(base_path, config):
     return _open
 
 def write_exclusions(path, schema):
+    """Write excluded tables in a schema to a my.cnf file
+
+    These exclusions are written as --ignore-table options for
+    mysqldump in order to skip dumping particular tables.
+    """
     fileobj = codecs.open(path, 'a', encoding='utf8')
     try:
         print >>fileobj, "[mysqldump]"
