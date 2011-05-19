@@ -137,6 +137,8 @@ class TestRunner(object):
                 '--root=' + staging,
                 '--single-version-externally-managed',
             ]
+            if os.path.exists('/etc/debian_version'):
+                stage_args.append('--install-layout=deb')
             for path in paths:
                 logging.info(" * Installing from %s", path)
                 exec_command('python setup.py install --root=' + staging + ' --single-version-externally-managed',
