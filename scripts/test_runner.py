@@ -106,8 +106,9 @@ class TestRunner(object):
 
             if self.report:
                 exec_command(['coverage', 'xml',
+                              '--include', 'holland/*',
                               '--omit',
-                              'tests,holland/cli/backports,/usr/,/var/'],
+                              'tests,holland/cli/backports,/usr/'],
                              cwd=path,
                              close_fds=True)
 
