@@ -52,7 +52,8 @@ class MySQLDumpPlugin(BackupPlugin):
     def _setup(self):
         """Perform various setup bookkeeping"""
         os.makedirs(os.path.join(self.backup_directory, 'backup_data'))
-        LOG.info("+ mkdir %s", os.path.join(self.backup_directory, 'backup_data'))
+        LOG.info("+ mkdir %s", os.path.join(self.backup_directory,
+                                            'backup_data'))
         defaults_file = defaults_from_config(self.config['mysql:client'],
                                              self.backup_directory)
         LOG.info("+ mkconfig %s", defaults_file)
@@ -60,7 +61,8 @@ class MySQLDumpPlugin(BackupPlugin):
         LOG.info("+ exclusions >> %s", defaults_file)
         mysqld_version = server_version(self._client)
         argv = argv_from_config(defaults_file, self.config, mysqld_version)
-        dotsql_generator = sql_open(os.path.join(self.backup_directory, 'backup_data'),
+        dotsql_generator = sql_open(os.path.join(self.backup_directory,
+                                                 'backup_data'),
                                     self.config['compression'])
         lock_method = lock_method_from_config(self.config)
         if lock_method:
@@ -114,11 +116,11 @@ class MySQLDumpPlugin(BackupPlugin):
         finally:
             mockenv.restore_environment()
 
-    def configspec(cls):
+    def configspec(self):
         """Generate the configspec for the mysqldump plugin"""
         return Configspec.from_string(CONFIGSPEC)
 
-    def plugin_info(cls):
+    def plugin_info(self):
         """Provide information about this plugin"""
         return dict(
             name='mysqldump',
