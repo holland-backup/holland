@@ -105,7 +105,8 @@ class TestRunner(object):
                 logging.warning(" * Test exited with failure status %d", ret)
 
             if self.report:
-                exec_command(['coverage', 'xml'],
+                exec_command(['coverage', 'xml',
+                              '--omit', 'tests,holland/cli/backports,/usr/'],
                              cwd=path,
                              close_fds=True)
 
