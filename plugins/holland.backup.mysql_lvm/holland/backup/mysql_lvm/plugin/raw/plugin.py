@@ -133,14 +133,25 @@ class MysqlLVMBackup(BackupPlugin):
             # XXX: one of our actions failed.  Log this better
             for callback, error in exc.errors:
                 LOG.error("%s", error)
-            raise BackupError("Error occurred during snapshot process. Aborting.")
+            raise BackupError("Error occurred during snapshot process. "
+                              "Aborting.")
         except LVMCommandError, exc:
             # Something failed in the snapshot process
             raise BackupError(str(exc))
 
     def dryrun(self):
-        """Implement dry-run for LVM snapshots.  Not much to do here at the moment
-        """
+        """Implement dry-run for LVM snapshots."""
+        # connect to mysql and lookup what we're supposed to snapshot
+        try:
+            self.client.connect()
+            datadir = os.path.realpath(self.client.show_variable('datadir'))
+        except MySQLError, exc:
+            raise BackupError("[%d] %s" % exc.args)
+        try:
+            volume = LogicalVolume.lookup_from_fspath(datadir)
+        except LookupError, exc:
+            raise BackupError("Failed to lookup logical volume for %s: %s" %
+                              (datadir, str(exc)))
         LOG.info("[dry-run] Snapshotting %s/%s to %s/%s_snapshot",
              volume.vg_name,
              volume.lv_name,
