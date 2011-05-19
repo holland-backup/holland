@@ -13,6 +13,14 @@ LOG = logging.getLogger(__name__)
 class MySQLDumpPlugin(BackupPlugin):
     """Backup Plugin for MySQL using mysqldump"""
 
+    #: internal schema object where the mysqldump plugin tracks and caches
+    #: metadata about tables for a MySQL instance
+    _schema = None
+
+    #: A cached MySQLClient instance used for retrieving basic information
+    #: from a MySQL instance including metadata, replication info, etc.
+    _client = None
+
     def pre(self):
         """Setup objects shared by estimate() and backup/dryrun()"""
         self._schema = schema_from_config(self.config['mysqldump'])
