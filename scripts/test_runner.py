@@ -144,7 +144,6 @@ class TestRunner(object):
                 exec_command(stage_args,
                              stdout=open('/dev/null', 'w'),
                              stderr=STDOUT,
-                             shell=True,
                              cwd=path,
                              close_fds=True)
 
