@@ -148,6 +148,8 @@ class TestRunner(object):
 
             os.environ['PYLINTRC'] = os.path.join(SRC_ROOT,
                                                   os.path.abspath('.pylintrc'))
+            logging.info("Running pylint relative to %s",
+                         os.path.join(staging, get_python_lib()[1:]))
             exec_command([self.pylint, '-f', 'parseable', 'holland'],
                          stdout=open(os.path.join(SRC_ROOT, 'pylint.txt'), 'w'),
                          cwd=os.path.join(staging,
