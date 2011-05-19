@@ -82,7 +82,7 @@ class MySQLDumpPlugin(BackupPlugin):
                 config = self.config['mysqldump']
                 if config['stop-slave']:
                     status = stop_slave(self._client)
-                    record_slave_status(self.config)
+                    record_slave_status(status, self.config)
                 if config['lockless-only']:
                     check_transactional(self._schema.databases)
                 if config['file-per-database']:
