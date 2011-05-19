@@ -386,7 +386,6 @@ rm -rf %{buildroot}
 %{python_sitelib}/%{name}/lib/safefilename.py*
 %{python_sitelib}/%{name}/lib/hooks.py*
 %{python_sitelib}/%{name}/lib/which.py*
-%{python_sitelib}/%{name}/lib/multidict.py*
 %{python_sitelib}/%{name}/lib/mysql/
 %{python_sitelib}/holland.lib.common-%{version}-*.egg-info
 %{python_sitelib}/holland.lib.mysql-%{version}-*.egg-info
@@ -456,6 +455,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Thu May 18 2011 Andrew Garner <andrew.garner@rackspace.com> - 1.1.0-5
+- holland/lib/multidict.py no longer exists in the holland-common package
+
 * Tue May 17 2011 Andrew Garner <andrew.garner@rackspace.com> - 1.1.0-4
 - Include delphini backup plugin (conditionally built and off by default)
 - Include script backup plugin
