@@ -34,7 +34,7 @@ class DelphiniPlugin(BackupPlugin):
         dsn = config['connect-string']
         ssh_user = config['default-ssh-user']
         ssh_keyfile = config['default-ssh-keyfile']
-        target_path = os.path.join(self.target_directory, 'data')
+        target_path = os.path.join(self.backup_directory, 'data')
         try:
             os.mkdir(target_path)
         except OSError, exc:
@@ -48,7 +48,7 @@ class DelphiniPlugin(BackupPlugin):
         except ClusterError, exc:
             raise BackupError(exc)
 
-        cluster_info = os.path.join(self.target_directory,
+        cluster_info = os.path.join(self.backup_directory,
                                     'cluster_backup.info')
         try:
             fileobj = open(cluster_info, 'w')
@@ -68,7 +68,7 @@ class DelphiniPlugin(BackupPlugin):
         compression = self.config['compression']['method']
 
         if compression != 'none':
-            path = os.path.join(self.target_directory,
+            path = os.path.join(self.backup_directory,
                                 'BACKUP-%d' % backup_id,
                                 '*')
             args = [
@@ -84,7 +84,7 @@ class DelphiniPlugin(BackupPlugin):
 
     def configspec(self):
         """Provide the config specification for the delphini plugin"""
-        return super(DelphinPlugin, self).configspec().merge('''
+        return super(DelphiniPlugin, self).configspec().merge('''
         [mysql-cluster]
         connect-string      = string(default=localhost)
         default-ssh-user    = string(default=root)
