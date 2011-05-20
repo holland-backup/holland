@@ -97,6 +97,7 @@ def test_diskfree():
 
     actual_bytes = int(commands.getoutput(real_cmd).strip())
     assert_equals(path.disk_free("/"), actual_bytes)
+test_diskfree.__test__ = False
 
 #XXX: linux specific
 def test_directory_size():
