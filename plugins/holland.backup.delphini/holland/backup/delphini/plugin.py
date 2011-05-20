@@ -82,6 +82,17 @@ class DelphiniPlugin(BackupPlugin):
             for path in glob.glob(path):
                 run_command(args + [path])
 
+    def plugin_info(self):
+        return dict(
+            name='delphini',
+            author='Holland Core Team',
+            summary='MySQL Cluster backup plugin',
+            description='''
+            ''',
+            version='1.0',
+            api_version='1.1.0',
+        )
+
     def configspec(self):
         """Provide the config specification for the delphini plugin"""
         return super(DelphiniPlugin, self).configspec().merge('''
