@@ -105,16 +105,16 @@ class TestRunner(object):
                 logging.warning(" * Test exited with failure status %d", ret)
 
             if self.report:
-                os.rename(os.path.join(path, '.coverage'),
-                          os.path.join(SRC_ROOT, '.coverage.' +
-                              os.path.basename(path)))
+                #os.rename(os.path.join(path, '.coverage'),
+                #          os.path.join(SRC_ROOT, '.coverage.' +
+                #              os.path.basename(path)))
 
-        exec_command([self.coverage, 'combine'])
-        exec_command([self.coverage, 'xml',
-                     '--include', 'holland/*,plugins/*',
+                exec_command([self.coverage, 'xml',
+                     '--include', 'holland/*',
                      '--omit',
                      'tests,holland/cli/backports,/usr/'],
                      close_fds=True)
+
         return True
 
     def _run_pylint(self, paths):
