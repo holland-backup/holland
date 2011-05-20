@@ -20,8 +20,8 @@ setup(
     zip_safe=False,
     entry_points="""
     [holland.backup]
-    mysql-cluster   = delphini:DelphiniPlugin
-    delphini        = delphini:DelphiniPlugin
+    mysql-cluster   = holland.backup.delphini:DelphiniPlugin
+    delphini        = holland.backup.delphini:DelphiniPlugin
     """,
     namespace_packages=['holland', 'holland.backup'],
 )
