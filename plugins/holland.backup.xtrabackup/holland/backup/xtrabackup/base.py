@@ -1,6 +1,6 @@
 """holland backup plugin using xtrabackup"""
 
-import os, sys
+import os
 import shutil
 import logging
 import tempfile
@@ -32,12 +32,13 @@ password            = string(default=None)
 socket              = string(default=None)
 host                = string(default=None)
 port                = integer(min=0, default=None)
-""".splitlines()
+"""
 
 class XtrabackupPlugin(BackupPlugin):
     """This plugin provides support for backing up a MySQL database using
     xtrabackup from Percona
     """
+    dry_run = False
 
     def estimate(self):
         """Estimate the size of the backup this plugin will produce"""
@@ -52,7 +53,7 @@ class XtrabackupPlugin(BackupPlugin):
 
     def backup(self):
         """Run a database backup with xtrabackup"""
-        defaults_file = os.path.join(self.target_directory, 'my.xtrabackup.cnf')
+        defaults_file = os.path.join(self.backup_directory, 'my.xtrabackup.cnf')
         args = [
             self.config['xtrabackup']['innobackupex'],
             '--defaults-file=%s' % defaults_file,
@@ -72,13 +73,13 @@ class XtrabackupPlugin(BackupPlugin):
 
         config = build_mysql_config(self.config['mysql:client'])
         write_options(config, defaults_file)
-        shutil.copyfileobj(open(self.config['xtrabackup']['global-defaults'], 'r'),
+        shutil.copyfileobj(open(self.config['xtrabackup']['global-defaults']),
                            open(defaults_file, 'a'))
 
-        backup_path = os.path.join(self.target_directory, 'backup.tar')
+        backup_path = os.path.join(self.backup_directory, 'backup.tar')
         compression_stream = open_stream(backup_path, 'w',
                                          **self.config['compression'])
-        error_log_path = os.path.join(self.target_directory, 'xtrabackup.log')
+        error_log_path = os.path.join(self.backup_directory, 'xtrabackup.log')
         error_log = open(error_log_path, 'wb')
         try:
             try:
@@ -101,8 +102,7 @@ class XtrabackupPlugin(BackupPlugin):
         self.dry_run = True
         self.backup()
 
-    #@classmethod
-    def plugin_info(cls):
+    def plugin_info(self):
         """Provide information about the backup this plugin produced"""
         return dict(
             name='xtrabackup',
@@ -111,4 +111,3 @@ class XtrabackupPlugin(BackupPlugin):
             version='1.1',
             api_version='1.1.0',
         )
-    plugin_info = classmethod(plugin_info)
