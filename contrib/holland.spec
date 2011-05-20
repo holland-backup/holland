@@ -383,7 +383,6 @@ rm -rf %{buildroot}
 %doc plugins/holland.lib.common/{README,LICENSE}
 %{python_sitelib}/%{name}/lib/compression.py*
 %{python_sitelib}/%{name}/lib/archive/
-%{python_sitelib}/%{name}/lib/safefilename.py*
 %{python_sitelib}/%{name}/lib/hooks.py*
 %{python_sitelib}/%{name}/lib/which.py*
 %{python_sitelib}/%{name}/lib/mysql/
@@ -456,7 +455,8 @@ rm -rf %{buildroot}
 
 %changelog
 * Thu May 18 2011 Andrew Garner <andrew.garner@rackspace.com> - 1.1.0-5
-- holland/lib/multidict.py no longer exists in the holland-common package
+- holland/lib/multidict.py holland/lib/safefilename.py has been
+  removed from the holland-common package
 
 * Tue May 17 2011 Andrew Garner <andrew.garner@rackspace.com> - 1.1.0-4
 - Include delphini backup plugin (conditionally built and off by default)
