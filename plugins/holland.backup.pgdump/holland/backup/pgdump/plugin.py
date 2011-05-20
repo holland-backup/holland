@@ -6,9 +6,7 @@ and pg_dumpall
 """
 
 import os
-import sys
 import logging
-from tempfile import NamedTemporaryFile
 from holland.core import BackupError, BackupPlugin, Configspec
 from holland.backup.pgdump.base import backup_pgsql, dry_run, \
                                        PgError, \
@@ -48,15 +46,7 @@ class PgDump(BackupPlugin):
     """
     Postgres pg_dump backups
     """
-
-    def __init__(self, name):
-        """Create a new PgDump instance
-
-        :param name: name this plugin was loaded by
-        """
-        self.name = name
-        self.dry_run = False
-
+    connection = None
 
     def pre(self):
         self.connection = get_connection(self.config)
@@ -79,19 +69,8 @@ class PgDump(BackupPlugin):
                 if exc.pgcode != '42883': # 'missing function'
                     raise BackupError("Failed to estimate database size for "
                                       "%s: %s" % (db, exc))
-                totalestimate += self._estimate_legacy_size(db)
 
         return totalestimate
-
-    def _estimate_legacy_size(self, db):
-        try:
-            connection = get_connection(self.config, db)
-            size = legacy_get_db_size(db, connection)
-            connection.close()
-            return size
-        except dbapi.DatabaseError, exc:
-            raise BackupError("Failed to estimate database size for %s: %s" %
-                              (db, exc))
 
     def backup(self):
         """
@@ -115,7 +94,8 @@ class PgDump(BackupPlugin):
                           str(exc), exc_info=True)
             raise BackupError(str(exc))
 
-    def dry_run(self):
+    def dryrun(self):
+        """Perform a dry-run pg_dump"""
         # Very simply dry run information
         # enough to know that:
         # 1) We can connect to Postgres using pgpass data
@@ -126,12 +106,13 @@ class PgDump(BackupPlugin):
         """Provide a specification for the configuration dictionary this
         plugin accepts.
         """
-        return Configspec.parse(CONFIGSPEC)
+        return Configspec.from_string(CONFIGSPEC)
 
     def plugin_info(self):
         """PgDump Plugin Metadata"""
         return dict(
                 name='pgdump',
+                author='Holland Core Team',
                 summary='Backup Postgres databases with pg_dump commands',
                 description='''
                 ''',

@@ -18,7 +18,7 @@ whichall(command, path=None, verbose=0, exts=None)
 whichgen(command, path=None, verbose=0, exts=None)
     Return a generator which will yield full paths to all matches of the
     given command on the path.
-    
+
 By default the PATH environment variable is searched (as well as, on
 Windows, the AppPaths key in the registry), but a specific 'path' list
 to search may be specified as well.  On Windows, the PATHEXT environment
@@ -66,33 +66,37 @@ _cmdlnUsage = """
 
 __revision__ = "$Id: which.py 430 2005-08-20 03:11:58Z trentm $"
 __version_info__ = (1, 1, 0)
-__version__ = '.'.join(map(str, __version_info__))
+__version__ = '.'.join([str(digit) for digit in __version_info__])
 
 import os
 import sys
-import getopt
 import stat
 
 
 #---- exceptions
 
 class WhichError(Exception):
+    """Raised if an error occurs during command lookup"""
     pass
 
 
 
 #---- internal support stuff
 
-def _getRegisteredExecutable(exeName):
+def _get_registered_executable(exe_name):
     """Windows allow application paths to be registered in the registry."""
     registered = None
     if sys.platform.startswith('win'):
-        if os.path.splitext(exeName)[1].lower() != '.exe':
-            exeName += '.exe'
-        import _winreg
+        if os.path.splitext(exe_name)[1].lower() != '.exe':
+            exe_name += '.exe'
+        try:
+            import _winreg
+        except ImportError:
+            raise WhichError("_winreg is not available and is required to "
+                             "execute this method on Windows")
         try:
             key = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\" +\
-                  exeName
+                  exe_name
             value = _winreg.QueryValue(_winreg.HKEY_LOCAL_MACHINE, key)
             registered = (value, "from HKLM\\"+key)
         except _winreg.error:
@@ -102,6 +106,7 @@ def _getRegisteredExecutable(exeName):
     return registered
 
 def _samefile(fname1, fname2):
+    """Determine if two filenames refer to the same file"""
     if sys.platform.startswith('win'):
         return ( os.path.normpath(os.path.normcase(fname1)) ==\
             os.path.normpath(os.path.normcase(fname2)) )
@@ -133,12 +138,12 @@ def _cull(potential, matches, verbose=0):
             matches.append(potential)
             return potential
 
-        
+
 #---- module API
 
 def whichgen(command, path=None, verbose=0, exts=None):
     """Return a generator of full paths to the given command.
-    
+
     "command" is a the name of the executable to search for.
     "path" is an optional alternate path list to search. The default it
         to use the PATH environment variable.
@@ -213,7 +218,7 @@ def whichgen(command, path=None, verbose=0, exts=None):
                             yield match
                         else:
                             yield match[0]
-        match = _getRegisteredExecutable(command)
+        match = _get_registered_executable(command)
         if match is not None:
             match = _cull(match, matches, verbose)
             if match:
@@ -226,7 +231,7 @@ def whichgen(command, path=None, verbose=0, exts=None):
 def which(command, path=None, verbose=0, exts=None):
     """Return the full path to the first match of the given command on
     the path.
-    
+
     "command" is a the name of the executable to search for.
     "path" is an optional alternate path list to search. The default it
         to use the PATH environment variable.
@@ -250,7 +255,7 @@ def which(command, path=None, verbose=0, exts=None):
 
 def whichall(command, path=None, verbose=0, exts=None):
     """Return a list of full paths to all matches of the given command
-    on the path.  
+    on the path.
 
     "command" is a the name of the executable to search for.
     "path" is an optional alternate path list to search. The default it

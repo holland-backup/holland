@@ -9,7 +9,7 @@ import sys
 import logging
 from string import Template
 from subprocess import Popen, STDOUT, PIPE
-from holland.backup.script.util import cmd_from_config, size_to_bytes, cmd_to_size
+from holland.backup.script.util import size_to_bytes, cmd_to_size
 from holland.core import BackupPlugin, BackupError
 from holland.core.util import directory_size
 

@@ -1,3 +1,10 @@
+"""
+holland.lib.archive.tar_archive
+
+Archive implementation for generating tar archives
+
+"""
+
 import os
 import pwd
 import grp
@@ -10,6 +17,7 @@ except ImportError:
     from StringIO import StringIO
 
 def _make_tarinfo(name, size):
+    """Make a TarInfo instance from a filename"""
     tarinfo = tarfile.TarInfo(name=name)
     tarinfo.size = size
     tarinfo.mtime = time.time()
@@ -28,9 +36,9 @@ class TarArchive(object):
     def __init__(self, path, mode='w:gz'):
         """
         Initialize a TarArchive.
-        
+
         Arguments:
-        
+
         path -- Path to the archive file
         mode -- Archive mode.  Default: w:gz (write + gzip) (see tarfile)
         """
@@ -41,9 +49,9 @@ class TarArchive(object):
     def add_file(self, path, name):
         """
         Add a file to the archive.
-        
+
         Arguments:
-        
+
         path -- Path to file for which to add to archive.
         name -- Name of file (for tarinfo)
         """
@@ -56,9 +64,9 @@ class TarArchive(object):
     def add_string(self, string, name):
         """
         Add a string to the archive (fake file).
-        
+
         Arguments:
-        
+
         string  -- String to add to the archive.
         name    -- Name of the file to save string as.
         """
@@ -77,9 +85,9 @@ class TarArchive(object):
     def extract(self, name, dest):
         """
         Extract a member from an archive to 'dest' path.
-        
+
         Arguments:
-        
+
         name -- Name of the member in the archive to extract.
         dest -- Path to extract member to.
         """
