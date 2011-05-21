@@ -3,7 +3,7 @@
 # el4 also... which doesn't support it
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
-%{!?holland_version: %global holland_version 1.1.0}
+%{!?holland_version: %global holland_version 1.1.0a2}
 
 # default %%rhel to make things easier to build
 %{!?rhel: %global rhel %%(%{__sed} 's/^[^0-9]*\\([0-9]\\+\\).*/\\1/' /etc/redhat-release)}
@@ -386,8 +386,8 @@ rm -rf %{buildroot}
 %{python_sitelib}/%{name}/lib/hooks.py*
 %{python_sitelib}/%{name}/lib/which.py*
 %{python_sitelib}/%{name}/lib/mysql/
-%{python_sitelib}/holland.lib.common-%{version}-*.egg-info
-%{python_sitelib}/holland.lib.mysql-%{version}-*.egg-info
+%{python_sitelib}/holland.lib.common-*.egg-info
+%{python_sitelib}/holland.lib.mysql-*.egg-info
 
 %files mysqldump
 %defattr(-,root,root,-)
@@ -395,23 +395,23 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland/backup/mysqldump/
 # XXX: hooks for testing 1.1a1
 %{python_sitelib}/holland/lib/mysqldump/
-%{python_sitelib}/holland.backup.mysqldump-%{version}-*.egg-info
+%{python_sitelib}/holland.backup.mysqldump-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/mysqldump.conf
 
 %files mysqllvm
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.mysql_lvm/{README,LICENSE}
 %{python_sitelib}/holland/backup/mysql*_lvm/
-%{python_sitelib}/holland.backup.mysql*_lvm-%{version}-*.egg-info
+%{python_sitelib}/holland.backup.mysql*_lvm-*.egg-info
 %{python_sitelib}/%{name}/lib/lvm/
-%{python_sitelib}/holland.lib.lvm-%{version}-*.egg-info
+%{python_sitelib}/holland.lib.lvm-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/mysql-lvm.conf
 
 %if %{with pgdump}
 %files pgdump
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.pgdump/{README,LICENSE}
-%{python_sitelib}/holland.backup.pgdump-%{version}-*.egg-info
+%{python_sitelib}/holland.backup.pgdump-*.egg-info
 %{python_sitelib}/holland/backup/pgdump/
 %config(noreplace) %{_sysconfdir}/holland/providers/pgdump.conf
 %endif
@@ -421,7 +421,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.sqlite/{README,LICENSE}
 %{python_sitelib}/holland/backup/sqlite.py*
-%{python_sitelib}/holland.backup.sqlite-%{version}-*.egg-info
+%{python_sitelib}/holland.backup.sqlite-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/sqlite.conf
 %endif
 
@@ -430,7 +430,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.xtrabackup/{README,LICENSE}
 %{python_sitelib}/holland/backup/xtrabackup/
-%{python_sitelib}/holland.backup.xtrabackup-%{version}-*.egg-info
+%{python_sitelib}/holland.backup.xtrabackup-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/xtrabackup.conf
 %endif
 
