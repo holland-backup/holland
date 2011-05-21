@@ -34,7 +34,7 @@ def make_debs(dst_dir):
 
         # run debuild
         logging.info("Building debian packages.")
-        run("cd %s && debuild -us -uc" % (staging.release_dir))
+        run("cd %s && debuild --no-tgz-check -us -uc" % (staging.release_dir))
         dst_dir = os.path.expanduser(dst_dir)
         logging.info("Copying debs to %s", dst_dir)
         for src_path in glob.glob(os.path.join(staging.staging_dir, '*.deb')):
