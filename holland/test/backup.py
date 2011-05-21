@@ -62,6 +62,12 @@ class TestBackupPlugin(BackupPlugin):
         return dict(
             name='test',
             author='Holland Core Team',
+            summary='A test backup plugin',
+            description='''
+            This is a backup plugin used for testing.  When called it will
+            record the order of methods in a list in the plugin instance events
+            attribute.
+            ''',
             api_version='1.1.0',
             version='1.1.0'
         )
