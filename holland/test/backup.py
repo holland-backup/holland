@@ -34,6 +34,7 @@ class TestBackupPlugin(BackupPlugin):
 
     def estimate(self):
         """Estimate a backup size"""
+        self.events.append('estimate')
         return 42
 
     def pre(self):
@@ -56,6 +57,7 @@ class TestBackupPlugin(BackupPlugin):
 
     def release(self):
         """Release any resources held by this plugin"""
+        self.events.append('release')
 
     def plugin_info(self):
         "Sample Plugin info"
