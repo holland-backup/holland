@@ -62,12 +62,32 @@ class MySQLSchema(object):
         self._engine_filters.append(filterobj)
 
     def add_transactional_engines(self, engines):
+        """Add a list of storage engine names that should be treated as
+        transactional
+
+        When crawling the MySQL schemas any tables with an engine matching one
+        of the transactional engines will have its ``is_transactional``
+        property set to true.
+        """
         self._transactional_engines.extend(engines)
 
     def add_transactional_databases(self, databases):
+        """Add a list of databases that should be treated as fully
+        transactional
+
+        When crawling the MySQL schemas any tables with a database matching one
+        of the "transactional databases" will have its ``is_transactional``
+        property set to true.
+        """
         self._transactional_databases.extend(databases)
 
     def add_transactional_tables(self, tables):
+        """Add a list of table names that should be treated as transactional.
+
+        When crawling the MySQL schemas any table matching one of the provided
+        "transactional" table names will have its ``is_transactional`` property
+        set to true.
+        """
         self._transactional_tables.extend(tables)
 
     def is_db_filtered(self, name):
@@ -252,6 +272,13 @@ class Table(object):
         self.excluded = False
 
     def size(self):
+        """Calculate the total size of this table
+
+        This returns the sum of data_length + index_length from the MySQL
+        metadata
+
+        :returns: integer number of bytes
+        """
         return self.data_size + self.index_size
     size = property(size)
 
@@ -341,6 +368,15 @@ class SimpleTableIterator(MetadataTableIterator):
         self.record_engines = record_engines
 
     def _faster_mysql51_metadata(self, database):
+        """Skip slow metadata looks when querying the information schema.
+
+        In MySQL 5.1 table names and engine are fairly cheap to lookup as they
+        can be determined just from the .frm file.  However
+        data_length/index_length require querying the storage engine.  We skip
+        those to provide a faster metadata path.
+
+        :returns: list of tuples describing table metadata
+        """
         sql = ("SELECT TABLE_SCHEMA AS `database`, "
                "          TABLE_NAME AS `name`, "
                "          0 AS `data_size`, "
@@ -358,6 +394,10 @@ class SimpleTableIterator(MetadataTableIterator):
             cursor.close()
 
     def _lookup_engine(self, database, table):
+        """Lookup the engine for a table by checking SHOW CREATE TABLE
+
+        :returns: str name of storage engine used by a table
+        """
         ddl = self.client.show_create_table(database, table)
         match = self.ENGINE_PCRE.search(ddl)
         if match:
@@ -384,7 +424,8 @@ class SimpleTableIterator(MetadataTableIterator):
                     if self.record_engines:
                         engine = self._lookup_engine(database, table).lower()
                         metadata.append(('engine', engine))
-                        metadata.append(('is_transactional', engine == 'innodb'))
+                        metadata.append(('is_transactional',
+                                         engine == 'innodb'))
                     else:
                         metadata.append(('engine', ''))
                         metadata.append(('is_transactional', False))
