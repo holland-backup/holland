@@ -82,7 +82,7 @@ class ListPlugins(ArgparseCommand):
                                subsequent_indent=' '*28,
                                width=79)
                 self.stdout("%-12s %-14s %s", group,
-                            info['name'],
+                            plugin.name,
                             '\n'.join(summary).lstrip())
         return 0
 
