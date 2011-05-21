@@ -5,7 +5,7 @@ mysql-lvm
 
 mysql-lvm uses LVM snapshots to create safe binary-based backups of MySQL with
 minimal locking involved. In many cases, mysql-lvm offers supperior performance 
-to  :ref:`mysqldmp` but with less configurability. If logical backups are 
+to  :ref:`mysqldump` but with less configurability. If logical backups are 
 required, consider using the :ref:`mysqldump-lvm` provider to get the best of
 both worlds.
 
