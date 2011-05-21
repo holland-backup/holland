@@ -160,18 +160,19 @@ class MySQLSchema(object):
                 (len(self._engine_filters) == 2 and
                 self._engine_filters[0].patterns == ['.*$'] and
                 self._engine_filters[1].patterns == []):
-                    # optimize case where we have no table level filters
-                    continue
+                # optimize case where we have no table level filters
+                continue
 
             try:
                 for table in tbl_iter(database.name):
-                    if self.is_table_filtered(table.database + '.' + table.name):
+                    qualified_name = table.database + '.' + table.name
+                    if self.is_table_filtered(qualified_name):
                         table.excluded = True
                     if self.is_engine_filtered(table.engine):
                         table.excluded = True
                     if table.engine.lower() in self._transactional_engines:
                         table.is_transactional = True
-                    if (database.name + '.' + table.name) in self._transactional_tables:
+                    if (qualified_name) in self._transactional_tables:
                         table.is_transactional = True
                     database.add_table(table)
             except MySQLError, exc:
@@ -283,8 +284,8 @@ class Table(object):
     size = property(size)
 
     def __str__(self):
-        return "%sTable(name=%r, data_size=%s, " + \
-               "index_size=%s, engine=%s, txn=%s)" % \
+        return ("%sTable(name=%r, data_size=%s, " + \
+               "index_size=%s, engine=%s, txn=%s)") % \
                 (self.excluded and "[EXCL]" or "",
                  self.name,
                  "%.2fMB" % (self.data_size / 1024.0**2),
@@ -354,7 +355,7 @@ class SimpleTableIterator(MetadataTableIterator):
 
     SHOW CREATE TABLE is only used for engine lookup in MySQL 5.0.
     """
-    
+
     ENGINE_PCRE = re.compile(r'^[)].*ENGINE=(\S+)', re.M)
 
     def __init__(self, client, record_engines=False):
@@ -364,6 +365,7 @@ class SimpleTableIterator(MetadataTableIterator):
         :param client: `MySQLClient` instance to use to iterate over objects in
         the specified database
         """
+        MetadataTableIterator.__init__(self)
         self.client = client
         self.record_engines = record_engines
 
@@ -405,8 +407,8 @@ class SimpleTableIterator(MetadataTableIterator):
         raise ValueError("Failed to lookup storage engine")
 
     def __call__(self, database):
-        if self.client.server_version >= (5,1):
-            for metadata in self._faster_mysql51_metadata():
+        if self.client.server_version >= (5, 1):
+            for metadata in self._faster_mysql51_metadata(database):
                 yield Table(**metadata)
         else:
             for table, kind in self.client.show_tables(database, full=True):
