@@ -1,0 +1,3 @@
+usr/lib/python*.*/*-packages/holland.backup.delphini-*.egg-info
+usr/lib/python*.*/*-packages/holland/backup/delphini/
+etc/holland/providers/delphini.conf

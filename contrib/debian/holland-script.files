@@ -1,0 +1,3 @@
+usr/lib/python*.*/*-packages/holland.backup.script-*.egg-info
+usr/lib/python*.*/*-packages/holland/backup/script/
+etc/holland/providers/script.conf

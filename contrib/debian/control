@@ -54,20 +54,20 @@ Description: Holland Common Library Plugins
 Package: holland-mysqldump
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}, holland (>= ${source:Version}), holland-common(>= ${source:Version}), mysql-client (>= 4.1)
-Description: Holland MySQL Dump Backup Provider Plugin
+Description: Holland MySQL Dump Backup Plugin
  This package provides the holland mysqldump plugin. 
  
 Package: holland-mysqlhotcopy
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}, holland (>= ${source:Version}), holland-common (>= ${source:Version})
-Description: Holland MySQL Hot Copy Backup Provider Plugin 
+Description: Holland MySQL Hot Copy Backup Plugin 
  This package provides the Holland mysqlhotcopy plugin. 
 
 Package: holland-lvm
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}, holland (>= ${source:Version}), holland-common (>= ${source:Version})
 Replaces: holland-mysql-lvm, holland-mysqllvm
-Description: Holland MySQL Hot Copy Backup Provider Plugin 
+Description: Holland MySQL Hot Copy Backup Plugin 
  This package provides the Holland mysql-lvm plugin. 
 
 Package: holland-xtrabackup
@@ -79,6 +79,18 @@ Description: Holland xtrabackup Backup plugin
 Package: holland-pgdump
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}, holland (>= ${source:Version}), holland-common(>= ${source:Version})
-Description: Holland Postgres Backup Provider Plugin
+Description: Holland Postgres Backup Plugin
  This package provides the holland pgdump plugin. 
  
+Package: holland-script
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}, holland (>= ${source:Version}), holland-common(>= ${source:Version})
+Description: Holland Script Backup Plugin
+ This package provides the holland script plugin.
+ 
+#Package: holland-delphini
+#Architecture: all
+#Depends: ${misc:Depends}, ${python:Depends}, holland (>= ${source:Version}), holland-common(>= ${source:Version}),
+#  mysql-cluster-client (>= 5.1)
+#Description: Holland Delphini Backup Plugin
+# This package provides the holland delphini plugin.

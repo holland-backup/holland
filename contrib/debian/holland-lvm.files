@@ -1,4 +1,5 @@
-usr/lib/python*.*/*-packages/Holland_LVM-*.egg-info
+usr/lib/python*.*/*-packages/holland.backup.mysql_lvm-*.egg-info
+usr/lib/python*.*/*-packages/holland.lib.lvm-*.egg-info
 usr/lib/python*.*/*-packages/holland/backup/lvm/
 usr/lib/python*.*/*-packages/holland/lib/lvm/
 etc/holland/providers/mysql-lvm.conf
