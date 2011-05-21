@@ -32,17 +32,15 @@ class ListCommands(ArgparseCommand):
             self.stdout("%-15s%-5s %s", cmd.name, aliases, cmd.summary)
         return 0
 
-    #@classmethod
-    def plugin_info(cls):
+    def plugin_info(self):
         return dict(
-            name=cls.name,
-            summary=cls.summary,
-            description=cls.description,
+            name=self.name,
+            summary=self.summary,
+            description=self.description,
             author='Rackspace',
             version='1.1.0',
             holland_version='1.1.0'
         )
-    plugin_info = classmethod(plugin_info)
 
 class ListPlugins(ArgparseCommand):
     """List available plugins"""
@@ -86,17 +84,15 @@ class ListPlugins(ArgparseCommand):
                             '\n'.join(summary).lstrip())
         return 0
 
-    #@classmethod
-    def plugin_info(cls):
+    def plugin_info(self):
         return dict(
-            name=cls.name,
-            summary=cls.summary,
-            description=cls.description,
+            name=self.name,
+            summary=self.summary,
+            description=self.description,
             author='Rackspace',
             version='1.1.0',
             holland_version='1.1.0'
         )
-    plugin_info = classmethod(plugin_info)
 
 class ListBackups(ArgparseCommand):
     """List backups stored in the backup directory
@@ -138,14 +134,12 @@ class ListBackups(ArgparseCommand):
                         "[%s]" % format_bytes(backup.size()), backup.path)
         return 0
 
-    #@classmethod
-    def plugin_info(cls):
+    def plugin_info(self):
         return dict(
-            name=cls.name,
-            summary=cls.summary,
-            description=cls.description,
+            name=self.name,
+            summary=self.summary,
+            description=self.description,
             author='Rackspace',
             version='1.1.0',
             holland_version='1.1.0'
         )
-    plugin_info = classmethod(plugin_info)
