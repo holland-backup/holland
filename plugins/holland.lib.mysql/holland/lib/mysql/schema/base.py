@@ -191,7 +191,7 @@ class Database(object):
         """
         return sum([table.size for table in self.tables
                     if not table.excluded
-                        and table.engine != 'mrg_myisam' ])
+                        and table.engine not in ('mrg_myisam', 'federated') ])
     size = property(size)
 
     def __str__(self):
