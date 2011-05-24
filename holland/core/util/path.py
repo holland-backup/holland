@@ -8,6 +8,7 @@ Utility functions
 
 import os
 import sys
+import time
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -163,3 +164,75 @@ def directory_size(path):
             except OSError, exc:
                 pass
     return result
+
+def iterative_rmtree(path, ignore_errors=False, onerror=None):
+    """Recursively delete a directory tree.
+
+    If ignore_errors is set, errors are ignored; otherwise, if onerror
+    is set, it is called to handle the error with arguments (func,
+    path, exc_info) where func is os.listdir, os.remove, or os.rmdir;
+    path is the argument to that function that caused it to fail; and
+    exc_info is a tuple returned by sys.exc_info().  If ignore_errors
+    is false and onerror is None, an exception is raised.
+
+    """
+    if ignore_errors:
+        def onerror(*args):
+            pass
+    elif onerror is None:
+        def onerror(*args):
+            raise
+    try:
+        if os.path.islink(path):
+            # symlinks to directories are forbidden, see bug #1669
+            raise OSError("Cannot call rmtree on a symbolic link")
+    except OSError:
+        onerror(os.path.islink, path, sys.exc_info())
+        # can't continue even if onerror hook returns
+        return
+    names = []
+    try:
+        names = os.listdir(path)
+    except os.error, err:
+        onerror(os.listdir, path, sys.exc_info())
+    for name in names:
+        fullname = os.path.join(path, name)
+        try:
+            mode = os.lstat(fullname).st_mode
+        except os.error:
+            mode = 0
+        if stat.S_ISDIR(mode):
+            rmtree(fullname, ignore_errors, onerror)
+        else:
+            try:
+                truncate_and_unlink(fullname)
+            except os.error, err:
+                onerror(os.remove, fullname, sys.exc_info())
+    try:
+        os.rmdir(path)
+    except os.error:
+        onerror(os.rmdir, path, sys.exc_info())
+
+def truncate_and_unlink(path, increment=256*1024**2, delay=0.2):
+    """Truncate a file to zero bytes before unlinking
+
+    Truncation is done in ``increment`` bytes with a sleep delay
+    of ``delay`` seconds between each truncation step.
+
+    Once the file is zero bytes in size it will be removed/unlinked
+    from the filesystem.
+
+    :raises: OSError on error
+    """
+    fd = os.open(path, os.O_RDWR)
+
+    size = os.fstat(fd).st_size
+    while size > 0:
+        start = time.time()
+        length = size - increment
+        if length < 0:
+            length = 0
+        os.ftruncate(fd, length)
+        time.sleep(delay)
+        size = os.fstat(fd).st_size
+    os.unlink(path)

@@ -6,9 +6,9 @@ import os
 import sys
 import time
 import errno
-import shutil
 import logging
 import itertools
+from holland.core.util.path import iterative_rmtree
 from holland.core.config import BaseConfig
 
 LOGGER = logging.getLogger(__name__)
@@ -262,7 +262,7 @@ class Backup(object):
         assert(os.path.realpath(self.path) != '/')
         # purge the entire backup directory
         try:
-            shutil.rmtree(self.path)
+            iterative_rmtree(self.path)
         except OSError, exc:
             if exc.errno != errno.ENOENT:
                 raise
