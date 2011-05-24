@@ -8,10 +8,11 @@ Utility functions
 
 import os
 import sys
+import stat
 import time
 import logging
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 def ensure_dir(dir_path):
     """
@@ -21,12 +22,12 @@ def ensure_dir(dir_path):
     if not os.path.exists(dir_path):
         try:
             os.makedirs(dir_path)
-            LOGGER.debug("created directory %s" % dir_path)
+            LOG.debug("created directory %s" % dir_path)
             return True
         except OSError, e:
             # FIX ME: Need error codes/etc so this will exit(<code>) or raise
             # an appropriate holland exception
-            LOGGER.error("os.makedirs(%s): %s" % (dir_path, e))
+            LOG.error("os.makedirs(%s): %s" % (dir_path, e))
             raise
     return False
 
@@ -202,10 +203,13 @@ def iterative_rmtree(path, ignore_errors=False, onerror=None):
         except os.error:
             mode = 0
         if stat.S_ISDIR(mode):
-            rmtree(fullname, ignore_errors, onerror)
+            iterative_rmtree(fullname, ignore_errors, onerror)
         else:
             try:
-                truncate_and_unlink(fullname)
+                if stat.S_ISREG(mode):
+                    truncate_and_unlink(fullname)
+                else:
+                    os.remove(fullname)
             except os.error, err:
                 onerror(os.remove, fullname, sys.exc_info())
     try:
@@ -224,6 +228,8 @@ def truncate_and_unlink(path, increment=256*1024**2, delay=0.2):
 
     :raises: OSError on error
     """
+    LOG.debug("truncate_and_unlink(path=%r, increment=%r, delay=%.2fs)",
+              path, format_bytes(increment), delay)
     fd = os.open(path, os.O_RDWR)
 
     size = os.fstat(fd).st_size
@@ -233,6 +239,9 @@ def truncate_and_unlink(path, increment=256*1024**2, delay=0.2):
         if length < 0:
             length = 0
         os.ftruncate(fd, length)
+        LOG.debug("truncate(%s, length=%s) in %.2fs",
+                  path, format_bytes(length), time.time() - start)
         time.sleep(delay)
         size = os.fstat(fd).st_size
     os.unlink(path)
+    LOG.debug("unlink(%s)", path)
