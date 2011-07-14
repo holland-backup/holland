@@ -65,11 +65,14 @@ mysqldump Provider Configuration [mysqldump]
     
 **stop-slave** = yes | no
 
-    This is useful only when running Holland on a MySQL slave. Instructs
-    Holland to suspend slave services on the server prior to running
-    the backup. Suspending the slave does not change the backups, but does
-    prevent the slave from spooling up relay logs. The default is not
-    to suspend the slave (if applicable).
+    Stops the SQL_THREAD during the backup. This means that writes
+    from the master will continue to spool but will not be replayed.
+    This helps avoid lock wait timeouts among things while still
+    allowing data to be spooled from the master.
+
+    Note that previous versions of Holland prior to 1.0.6 simply
+    ran a STOP SLAVE instead, which suspends both replicaiton
+    threads.
 
 **bin-log-position** = yes | no
 
