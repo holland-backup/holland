@@ -93,14 +93,19 @@ class XtrabackupPlugin(object):
             args.extend(self.config['xtrabackup']['additional-options'])
         args.append(backup_directory)
 
-        LOG.info("%s", list2cmdline(args))
 
+        if self.config['xtrabackup']['pre-command']:
+            cmd = resolve_remplate(self.config['xtrabackup']['pre-command'],
+                                   backupdir=self.target_directory)
+            if self.dry_run:
+                LOG.info("Skipping pre-command in dry-run mode: %s", cmd)
+            else:
+                run_pre_command(cmd)
+
+        LOG.info("%s", list2cmdline(args))
         if self.dry_run:
             return
 
-        if self.config['xtrabackup']['pre-command']:
-            run_pre_command(self.config['xtrabackup']['pre-command'],
-                            self.target_directory)
 
         config = build_mysql_config(self.config['mysql:client'])
         write_options(config, defaults_file)
@@ -134,7 +139,7 @@ class XtrabackupPlugin(object):
                 for line in open(stderr_path, 'rb'):
                     if line.startswith('>>'):
                         continue
-                    LOG.info("%s", line.rstrip())
+                    LOG.error("%s", line.rstrip())
                 raise BackupError("%s failed" % exc.cmd[0])
         finally:
             exc_info = sys.exc_info()[1]

@@ -34,16 +34,16 @@ def get_stream_method(method):
     else:
         return 'xbstream'
 
-def run_pre_command(command, backupdir):
-    tpl = Template(command)
-    tpl.safe_substitute(backupdir=backupdir)
+def resolve_template(value, **kwargs):
+    return Template(value).safe_substitute(**kwargs)
 
+def run_pre_command(command):
     process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
-
-    LOG.info("Running pre-command %s", command)
-    stdout, _ = process.communicate()
-    for line in stdout.splitlines():
+    LOG.info("Running pre-command: %s", command)
+    for line in process.stdout:
         LOG.info("  %s", line)
     if process.returncode != 0:
-        LOG.warning("Pre-command exited with non-zero status: %d",
-                process.returncode)
+        raise BackupError("Pre-command %s exited with non-zero status %d" %
+                          (command, process.returncode))
+    else:
+        LOG.info("Pre-command exited successfully.")
