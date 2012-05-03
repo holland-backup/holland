@@ -23,6 +23,7 @@ innobackupex    = string(default='innobackupex-1.5.1')
 ibbackup        = string(default=None)
 stream          = option(yes,no,tar,xbstream,default=tar)
 slave-info      = boolean(default=no)
+safe-slave-backup = boolean(default=no)
 no-lock         = boolean(default=no)
 tmpdir          = string(default=None)
 additional-options = force_list(default=list())
@@ -87,6 +88,8 @@ class XtrabackupPlugin(object):
             args.append('--tmpdir')
         if self.config['xtrabackup']['slave-info']:
             args.append('--slave-info')
+        if self.config['xtrabackup']['safe-slave-backup']:
+            args.append('--safe-slave-backup')
         if self.config['xtrabackup']['no-lock']:
             args.append('--no-lock')
         if self.config['xtrabackup']['additional-options']:
