@@ -21,6 +21,7 @@ stream          = option(yes,no,tar,xbstream,default=tar)
 slave-info      = boolean(default=no)
 no-lock         = boolean(default=no)
 tmpdir          = string(default=None)
+additional-options = force_list(default=list())
 
 [compression]
 method          = option('none', 'gzip', 'pigz', 'bzip2', 'lzma', 'lzop', default='gzip')
@@ -84,6 +85,8 @@ class XtrabackupPlugin(object):
             args.append('--slave-info')
         if self.config['xtrabackup']['no-lock']:
             args.append('--no-lock')
+        if self.config['xtrabackup']['additional-options']:
+            args.extend(self.config['xtrabackup']['additional-options'])
         args.append(backup_directory)
 
         LOG.info("%s", list2cmdline(args))
