@@ -39,9 +39,9 @@ parser.add_option('-l', '--log-level', type='choice', metavar='<log-level>',
                   choices=['critical', 'error','warning','info', 'debug'],
                   help="Specify the log level. "
                        "One of: critical,error,warning,info,debug")
-parser.set_defaults(log_level='info',
+parser.set_defaults(log_level=None,
                     quiet=False,
-                    config_file=os.getenv('HOLLAND_CONFIG', 
+                    config_file=os.getenv('HOLLAND_CONFIG',
                                           '/etc/holland/holland.conf')
                    )
 parser.disable_interspersed_args()
