@@ -1,1 +1,1 @@
-from holland.backup.xtrabackup.base import XtrabackupPlugin
+from holland.backup.xtrabackup.plugin import XtrabackupPlugin
