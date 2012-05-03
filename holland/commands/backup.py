@@ -122,7 +122,7 @@ def purge_backup(event, entry):
         LOG.info("auto-purge-failures not enabled. Failed backup not purged.")
 
 def call_hooks(event, entry):
-    hook = event + "-hook"
+    hook = event + "-command"
 
     if entry.config['holland:backup'][hook] is not None:
         cmd = entry.config['holland:backup'][hook]
