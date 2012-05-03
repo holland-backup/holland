@@ -10,7 +10,7 @@ from holland.core.util.path import directory_size
 from holland.lib.compression import open_stream
 from holland.lib.mysql.option import build_mysql_config, write_options
 from holland.lib.mysql.client import connect, MySQLError
-from holland.backup.xtrabackup.util import get_xtrabackup_version, \
+from holland.backup.xtrabackup.util import xtrabackup_version, \
                                            get_stream_method, \
                                            run_pre_command
 
@@ -77,9 +77,9 @@ class XtrabackupPlugin(object):
             args.append('--ibbackup=' + self.config['xtrabackup']['ibbackup'])
 
         backup_directory = self.target_directory
-        stream = get_stream_method(self.config['xtrabackup']['stream'])
-        if stream:
-            args.append('--stream=' + stream)
+        stream_method = get_stream_method(self.config['xtrabackup']['stream'])
+        if stream_method:
+            args.append('--stream=' + stream_method)
         else:
             backup_directory = os.path.join(backup_directory, 'data')
             try:
@@ -114,19 +114,17 @@ class XtrabackupPlugin(object):
 
         if stream_method:
             stdout_path = os.path.join(self.target_directory, 'backup.tar')
-            stdout = open_stream(stdout_path, 'wb',
+            stdout = open_stream(stdout_path, 'w',
                                  **self.config['compression'])
             stderr_path = os.path.join(self.target_directory, 'xtrabackup.log')
-            stderr = open_stream(stderr_path, 'wb',
-                                 **self.config['compression'])
+            stderr = open(stderr_path, 'wb')
         else:
             stdout_path = os.path.join(self.target_directory, 'xtrabackup.log')
             stderr_path = stdout_path
-            stdout = open_stream(stdout_path, 'wb',
-                                 **self.config['compression'])
+            stdout = open(stdout_path, 'wb')
             stderr = STDOUT
 
-        try
+        try:
             try:
                 check_call(args,
                            stdout=stdout,
@@ -138,13 +136,12 @@ class XtrabackupPlugin(object):
                                   args[0])
             except CalledProcessError, exc:
                 LOG.info("%s failed", list2cmdline(exc.cmd))
-                for line in open_stream(stderr_path, 'rb', **self.config['compression']):
+                for line in open(stderr_path, 'rb'):
                     if line.startswith('>>'):
                         continue
                     LOG.info("%s", line.rstrip())
                 raise BackupError("%s failed" % exc.cmd[0])
         finally:
-            error_log.close()
             exc_info = sys.exc_info()[1]
             try:
                 stdout.close()

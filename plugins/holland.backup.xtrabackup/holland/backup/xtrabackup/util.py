@@ -1,7 +1,7 @@
 import re
 import logging
 from subprocess import Popen, PIPE, STDOUT, list2cmdline
-from holland.core import BackupError
+from holland.core.exceptions import BackupError
 from holland.core.util.template import Template
 
 LOG = logging.getLogger(__name__)
