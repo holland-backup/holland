@@ -20,6 +20,7 @@ innobackupex    = string(default='innobackupex-1.5.1')
 stream          = option(yes,no,tar,xbstream,default=tar)
 slave-info      = boolean(default=no)
 no-lock         = boolean(default=no)
+tmpdir          = string(default=None)
 
 [compression]
 method          = option('none', 'gzip', 'pigz', 'bzip2', 'lzma', 'lzop', default='gzip')
@@ -77,6 +78,8 @@ class XtrabackupPlugin(object):
                 raise BackupError("Failed to create backup directory %s: %s" %
                                   (backup_directory, exc))
             args.append('--no-timestamp')
+        if self.config['xtrabackup']['tmpdir']:
+            args.append('--tmpdir')
         if self.config['xtrabackup']['slave-info']:
             args.append('--slave-info')
         if self.config['xtrabackup']['no-lock']:
