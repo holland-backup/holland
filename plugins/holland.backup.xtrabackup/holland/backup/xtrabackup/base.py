@@ -23,6 +23,7 @@ slave-info      = boolean(default=no)
 no-lock         = boolean(default=no)
 tmpdir          = string(default=None)
 additional-options = force_list(default=list())
+pre-command     = string(default=None)
 
 [compression]
 method          = option('none', 'gzip', 'pigz', 'bzip2', 'lzma', 'lzop', default='gzip')
@@ -98,6 +99,10 @@ class XtrabackupPlugin(object):
 
         if self.dry_run:
             return
+
+        if self.config['xtrabackup']['pre-command']:
+            run_pre_command(self.config['xtrabackup']['pre-command'],
+                            self.target_directory)
 
         config = build_mysql_config(self.config['mysql:client'])
         write_options(config, defaults_file)
