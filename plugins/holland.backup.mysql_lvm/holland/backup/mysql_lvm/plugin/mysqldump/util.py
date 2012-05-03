@@ -42,6 +42,10 @@ def setup_actions(snapshot, config, client, datadir, spooldir, plugin):
     if ib_log_size:
         mysqld_config['innodb-log-file-size'] = ib_log_size
 
+    ib_data_file_path = client.show_variable('innodb_data_file_path')
+    if ib_data_file_path:
+        mysqld_config['innodb-data-file-path'] = ib_data_file_path
+
     act = MySQLDumpDispatchAction(plugin, mysqld_config)
     snapshot.register('post-mount', act, priority=100)
 

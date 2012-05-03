@@ -80,6 +80,7 @@ def generate_server_config(config, path):
     valid_params = [
         'innodb-buffer-pool-size',
         'innodb-log-file-size',
+        'innodb-data-file-path',
         'innodb-fast-shutdown',
         'open-files-limit',
         'key-buffer-size',
