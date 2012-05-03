@@ -17,3 +17,14 @@ def xtrabackup_version(binary):
     version_string = m.group('version')
     version_tuple = tuple(map(int, version_string.split('.')))
     return version_tuple
+
+def get_stream_method(method):
+    """Translate the backupset stream option to a valid argument
+    for innobackupex --stream
+    """
+    if method == 'no':
+        return None
+    elif method in ('yes', 'tar'):
+        return 'tar'
+    else:
+        return 'xbstream'

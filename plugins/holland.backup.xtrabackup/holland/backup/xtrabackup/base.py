@@ -64,14 +64,24 @@ class XtrabackupPlugin(object):
         args = [
             self.config['xtrabackup']['innobackupex'],
             '--defaults-file=%s' % defaults_file,
-            '--stream=tar4ibd',
-            tempfile.gettempdir(),
         ]
-
+        backup_directory = self.target_directory
+        stream = get_stream_method(self.config['xtrabackup']['stream'])
+        if stream:
+            args.append('--stream=' + stream)
+        else:
+            backup_directory = os.path.join(backup_directory, 'data')
+            try:
+                os.makedirs(backup_directory)
+            except OSError, exc:
+                raise BackupError("Failed to create backup directory %s: %s" %
+                                  (backup_directory, exc))
+            args.append('--no-timestamp')
         if self.config['xtrabackup']['slave-info']:
-            args.insert(3, '--slave-info')
+            args.append('--slave-info')
         if self.config['xtrabackup']['no-lock']:
-            args.insert(2, '--no-lock')
+            args.append('--no-lock')
+        args.append(backup_directory)
 
         LOG.info("%s", list2cmdline(args))
 
