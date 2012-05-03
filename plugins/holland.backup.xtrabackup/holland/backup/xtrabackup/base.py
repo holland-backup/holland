@@ -17,6 +17,7 @@ CONFIGSPEC = """
 [xtrabackup]
 global-defaults = string(default='/etc/my.cnf')
 innobackupex    = string(default='innobackupex-1.5.1')
+ibbackup        = string(default=None)
 stream          = option(yes,no,tar,xbstream,default=tar)
 slave-info      = boolean(default=no)
 no-lock         = boolean(default=no)
@@ -67,6 +68,10 @@ class XtrabackupPlugin(object):
             self.config['xtrabackup']['innobackupex'],
             '--defaults-file=%s' % defaults_file,
         ]
+
+        if self.config['xtrabackup']['ibbackup']:
+            args.append('--ibbackup=' + self.config['xtrabackup']['ibbackup'])
+
         backup_directory = self.target_directory
         stream = get_stream_method(self.config['xtrabackup']['stream'])
         if stream:
