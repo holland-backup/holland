@@ -12,6 +12,7 @@ from holland.lib.mysql.option import build_mysql_config, write_options
 from holland.lib.mysql.client import connect, MySQLError
 from holland.backup.xtrabackup.util import xtrabackup_version, \
                                            get_stream_method, \
+                                           resolve_template, \
                                            run_pre_command
 
 LOG = logging.getLogger(__name__)
@@ -98,7 +99,7 @@ class XtrabackupPlugin(object):
 
 
         if self.config['xtrabackup']['pre-command']:
-            cmd = resolve_remplate(self.config['xtrabackup']['pre-command'],
+            cmd = resolve_template(self.config['xtrabackup']['pre-command'],
                                    backupdir=self.target_directory)
             if self.dry_run:
                 LOG.info("Skipping pre-command in dry-run mode: %s", cmd)
