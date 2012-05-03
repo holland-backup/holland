@@ -82,11 +82,6 @@ class XtrabackupPlugin(object):
             args.append('--stream=' + stream_method)
         else:
             backup_directory = os.path.join(backup_directory, 'data')
-            try:
-                os.makedirs(backup_directory)
-            except OSError, exc:
-                raise BackupError("Failed to create backup directory %s: %s" %
-                                  (backup_directory, exc))
             args.append('--no-timestamp')
         if self.config['xtrabackup']['tmpdir']:
             args.append('--tmpdir')
