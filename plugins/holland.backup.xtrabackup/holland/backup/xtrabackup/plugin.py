@@ -121,6 +121,7 @@ class XtrabackupPlugin(object):
                                  **self.config['compression'])
         else:
             stdout_path = os.path.join(self.target_directory, 'xtrabackup.log')
+            stderr_path = stdout_path
             stdout = open_stream(stdout_path, 'wb',
                                  **self.config['compression'])
             stderr = STDOUT
@@ -137,7 +138,7 @@ class XtrabackupPlugin(object):
                                   args[0])
             except CalledProcessError, exc:
                 LOG.info("%s failed", list2cmdline(exc.cmd))
-                for line in open(error_log_path, 'r'):
+                for line in open_stream(stderr_path, 'rb', **self.config['compression']):
                     if line.startswith('>>'):
                         continue
                     LOG.info("%s", line.rstrip())
@@ -146,7 +147,9 @@ class XtrabackupPlugin(object):
             error_log.close()
             exc_info = sys.exc_info()[1]
             try:
-                compression_stream.close()
+                stdout.close()
+                if stderr != STDOUT:
+                    stderr.close()
             except IOError, exc:
                 if not exc_info:
                     raise BackupError(str(exc))
