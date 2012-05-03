@@ -10,6 +10,9 @@ from holland.core.util.path import directory_size
 from holland.lib.compression import open_stream
 from holland.lib.mysql.option import build_mysql_config, write_options
 from holland.lib.mysql.client import connect, MySQLError
+from holland.backup.xtrabackup.util import get_xtrabackup_version, \
+                                           get_stream_method, \
+                                           run_pre_command
 
 LOG = logging.getLogger(__name__)
 
@@ -109,16 +112,24 @@ class XtrabackupPlugin(object):
         shutil.copyfileobj(open(self.config['xtrabackup']['global-defaults'], 'r'),
                            open(defaults_file, 'a'))
 
-        backup_path = os.path.join(self.target_directory, 'backup.tar')
-        compression_stream = open_stream(backup_path, 'w',
-                                         **self.config['compression'])
-        error_log_path = os.path.join(self.target_directory, 'xtrabackup.log')
-        error_log = open(error_log_path, 'wb')
-        try:
+        if stream_method:
+            stdout_path = os.path.join(self.target_directory, 'backup.tar')
+            stdout = open_stream(stdout_path, 'wb',
+                                 **self.config['compression'])
+            stderr_path = os.path.join(self.target_directory, 'xtrabackup.log')
+            stderr = open_stream(stderr_path, 'wb',
+                                 **self.config['compression'])
+        else:
+            stdout_path = os.path.join(self.target_directory, 'xtrabackup.log')
+            stdout = open_stream(stdout_path, 'wb',
+                                 **self.config['compression'])
+            stderr = STDOUT
+
+        try
             try:
                 check_call(args,
-                           stdout=compression_stream,
-                           stderr=error_log,
+                           stdout=stdout,
+                           stderr=stderr,
                            close_fds=True)
             except OSError, exc:
                 LOG.info("Command not found: %s", args[0])
