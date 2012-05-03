@@ -4,7 +4,7 @@ import os, sys
 import shutil
 import logging
 import tempfile
-from subprocess import list2cmdline, check_call, CalledProcessError
+from subprocess import list2cmdline, check_call, CalledProcessError, STDOUT
 from holland.core.exceptions import BackupError
 from holland.core.util.path import directory_size
 from holland.lib.compression import open_stream
