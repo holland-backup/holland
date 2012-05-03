@@ -42,6 +42,7 @@ def run_pre_command(command):
     LOG.info("Running pre-command: %s", command)
     for line in process.stdout:
         LOG.info("  %s", line)
+    process.wait()
     if process.returncode != 0:
         raise BackupError("Pre-command %s exited with non-zero status %d" %
                           (command, process.returncode))
