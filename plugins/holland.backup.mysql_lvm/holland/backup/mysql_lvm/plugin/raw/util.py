@@ -8,7 +8,9 @@ from holland.backup.mysql_lvm.actions import FlushAndLockMySQLAction, \
                                              RecordMySQLReplicationAction, \
                                              InnodbRecoveryAction, \
                                              TarArchiveAction
-from holland.backup.mysql_lvm.plugin.common import log_final_snapshot_size
+from holland.backup.mysql_lvm.plugin.common import log_final_snapshot_size, \
+                                                   connect_simple
+from holland.backup.mysql_lvm.plugin.innodb import MySQLPathInfo, check_innodb
 
 LOG = logging.getLogger(__name__)
 
@@ -21,6 +23,13 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
         * InnoDB recovery
         * Recording MySQL replication
     """
+    mysql = connect_simple(config['mysql:client'])
+    try:
+        pathinfo = MySQLPathInfo.from_mysql(mysql)
+    finally:
+        mysql.close()
+    check_innodb(pathinfo, ensure_subdir_of_datadir=True)
+
     if config['mysql-lvm']['lock-tables']:
         extra_flush = config['mysql-lvm']['extra-flush-tables']
         act = FlushAndLockMySQLAction(client, extra_flush)
