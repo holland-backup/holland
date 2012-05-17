@@ -322,6 +322,7 @@ cd plugins/holland.backup.mysql_lvm
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 cd -
 install -m 0640 config/providers/mysql-lvm.conf %{buildroot}%{_sysconfdir}/holland/providers/
+install -m 0640 config/providers/mysqldump-lvm.conf %{buildroot}%{_sysconfdir}/holland/providers/
 
 # plugin : holland.backup.pgdump
 %if %{with pgdump}
@@ -457,6 +458,7 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland.lib.lvm-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.lib.lvm-%{version}-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/mysql-lvm.conf
+%config(noreplace) %{_sysconfdir}/holland/providers/mysqldump-lvm.conf
 
 %if %{with mysqlhotcopy}
 %files mysqlhotcopy
