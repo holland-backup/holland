@@ -41,17 +41,18 @@ class MySQLDumpDispatchAction(object):
         LOG.info("Waiting for %s to start", mysqld_exe)
 
         try:
-            wait_for_mysqld(self.mysqldump_plugin.mysql_config['client'])
+            wait_for_mysqld(self.mysqldump_plugin.mysql_config['client'],
+                            mysqld)
             LOG.info("%s accepting connections on unix socket %s", mysqld_exe, socket)
             self.mysqldump_plugin.backup()
         finally:
             mysqld.kill(signal.SIGKILL) # DIE DIE DIE
             mysqld.stop() # we dont' really care about the exit code, if mysqldump ran smoothly :)
 
-def wait_for_mysqld(config):
+def wait_for_mysqld(config, mysqld):
     client = connect(config, PassiveMySQLClient)
     LOG.debug("connect via client %r", client)
-    while True:
+    while mysqld.process.poll() is None:
         try:
             client.connect()
             client.ping()
