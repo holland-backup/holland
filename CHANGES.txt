@@ -13,7 +13,62 @@ https://github.com/holland-backup/holland/issues
 
 holland
 +++++++
-- bumping to development version 1.0.7
+- Fixed bug in purge-policy=before-backup that would fail to retain the
+  in-progress backup and ultimately cause the backup run to fail.
+- Added pre/post/failure backup command options to [holland:backup] for 
+  each backupset. Contributed by osheroff
+- holland purge now truncates files in increments of 256MB before running
+  unlink(2) to minimize the impact of removing a very large file.
+- Fixed a bug in holland.conf [logging] handling where the log-level would be
+  ignored in favor of the default value for holland --log-level.
+
+holland-mysqldump
++++++++++++++++++
+- Fix bug with holland backup --dry-run and mysqldump plugin's stop-slave=yes
+  option.  The slave would be incorrectly stopped in dry-run mode, but never
+  restarted.
+- Fixed a bug with estimate-method=const where lock-method=auto-detect would
+  not properly detect when to set single-transaction because table engine
+  information was not read.
+- Plugin estimate method now ignores MRG_MyISAM and Federated tables when
+  estimating the total backup space in order to avoid counting tables twice.
+- Fixed a bug in my.cnf parsing code that did not treat my.cnf sections case
+  insenstiviely.  This differed from the mysqldump behavior
+
+holland-mysqllvm
+++++++++++++++++
+- Fixed a bug in the relpath implementation where paths relative to / were not
+  properly calculated.  This was a bug in os.path.relpath in python <= 2.6:
+  http://bugs.python.org/issue5117.  Backported the fix from python 2.7
+- Fix a bug in tar archiver that was not closing the output stream at the end
+  of a backup.
+- Added pre- and post-args to [tar] config to allow customizing options to GNU
+  tar used for archiving mysql-lvm backups.
+- LVM plugins now detect when they cannot correctly backup innodb data.
+  mysql-lvm will abort by default if any innodb data files reside outside the
+  datadir. mysqldump-lvm will rewrite innodb-data-file-path,
+  innodb-data-home-dir and innodb-log-group-home-dir in order to startup the
+  bootstrap mysqld process correctly.
+- added force-innodb-backup option to force a mysql-lvm backup even if it
+  appears unsafe to do so.  InnoDB datafiles outside of the datadir are not
+  backed up by default unless tar's pre- and/or post-args are set correctly.
+
+holland-xtrabackup
+++++++++++++++++++
+- The xtrabackup plugin now fails more cleanly when the innbackupex command
+  could not be found
+- The xtrabackup plugin now handles failures in closing the output stream more
+  gracefully.
+- Updated xtrabackup plugin to support xtrabackup 2.0
+- Added stream=xbstream support
+- Added support for streaming=no to perform a simply directory copy backup
+- Added tmpdir option - previously tmpdir was taken from the my.cnf
+  defaults-file
+- Added an additional-options = option, option, option for specifying
+  arbitrary options to innobackupex
+- Added ibbackup=path option
+- Added pre-command=command option
+- Added safe-slave-backup=boolean option
 
 
 1.0.6 - Jan 12, 2011 
