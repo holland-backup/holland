@@ -12,7 +12,10 @@ from holland.lib.lvm import Snapshot, parse_bytes
 from holland.backup.mysql_lvm.actions import FlushAndLockMySQLAction, \
                                              RecordMySQLReplicationAction, \
                                              MySQLDumpDispatchAction
-from holland.backup.mysql_lvm.plugin.common import log_final_snapshot_size
+from holland.backup.mysql_lvm.plugin.common import log_final_snapshot_size, \
+                                                   connect_simple
+from holland.backup.mysql_lvm.plugin.innodb import MySQLPathInfo, check_innodb
+
 LOG = logging.getLogger(__name__)
 
 def setup_actions(snapshot, config, client, datadir, spooldir, plugin):
@@ -23,6 +26,9 @@ def setup_actions(snapshot, config, client, datadir, spooldir, plugin):
         * MySQL locking
         * Recording MySQL replication
     """
+    pathinfo = MySQLPathInfo.from_mysql(client)
+    check_innodb(pathinfo)
+
     if config['mysql-lvm']['lock-tables']:
         extra_flush = config['mysql-lvm']['extra-flush-tables']
         act = FlushAndLockMySQLAction(client, extra_flush)
@@ -42,9 +48,36 @@ def setup_actions(snapshot, config, client, datadir, spooldir, plugin):
     if ib_log_size:
         mysqld_config['innodb-log-file-size'] = ib_log_size
 
-    ib_data_file_path = client.show_variable('innodb_data_file_path')
-    if ib_data_file_path:
-        mysqld_config['innodb-data-file-path'] = ib_data_file_path
+    ibd_home_dir = pathinfo.innodb_data_home_dir
+    if ibd_home_dir:
+        # innodb_data_home_dir is set to something
+        ibd_home_dir = pathinfo.remap_path(pathinfo.get_innodb_datadir(),
+                                           snapshot.mountpoint)
+        mysqld_config['innodb-data-home-dir'] = ibd_home_dir
+        LOG.info("Remapped innodb-data-home-dir from %s to %s for snapshot",
+                 pathinfo.get_innodb_datadir(), ibd_home_dir)
+
+    ibd_file_path = pathinfo.innodb_data_file_path
+    if ibd_file_path:
+        ibd_file_path = pathinfo.remap_tablespaces(snapshot.mountpoint)
+        mysqld_config['innodb-data-file-path'] = ibd_file_path
+        if ibd_file_path != pathinfo.innodb_data_file_path:
+            LOG.info("Remapped innodb-data-file-path from %s to %s for snapshot",
+                     pathinfo.innodb_data_file_path, ibd_file_path)
+            if not ibd_home_dir:
+                LOG.info("Remapped one or more tablespaces but "
+                         "innodb-data-home-dir is not set. Setting "
+                         "innodb-data-home-dir = '' to support absolute "
+                         "tablespace paths on snapshot.")
+                mysqld_config['innodb-data-home-dir'] = ""
+
+    ib_logdir = pathinfo.innodb_log_group_home_dir
+    if ib_logdir and ib_logdir != './':
+        ib_logdir = pathinfo.remap_path(pathinfo.get_innodb_logdir(),
+                                        snapshot.mountpoint)
+        mysqld_config['innodb-log-group-home-dir'] = ib_logdir
+        LOG.info("Remapped innodb-log-group-home-dir from %s to %s for snapshot",
+                 pathinfo.get_innodb_logdir(), ib_logdir)
 
     act = MySQLDumpDispatchAction(plugin, mysqld_config)
     snapshot.register('post-mount', act, priority=100)
