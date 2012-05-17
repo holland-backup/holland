@@ -11,7 +11,6 @@ from holland.lib.mysql import PassiveMySQLClient, MySQLError, \
                               build_mysql_config, connect
 from holland.lib.compression import open_stream
 from holland.lib.lvm import Snapshot, parse_bytes
-from holland.backup.mysql_lvm.plugin.innodb import MySQLPathInfo
 
 LOG = logging.getLogger(__name__)
 
@@ -32,39 +31,10 @@ def cleanup_tempdir(path):
     LOG.info("Removing temporary mountpoint %s", path)
     shutil.rmtree(path)
 
-def check_innodb(pathinfo):
-    is_unsafe_for_lvm = False
-    datadir_mp = getmount(pathinfo.datadir)
-    for tablespace in pathinfo.walk_innodb_shared_tablespaces():
-        space_mp = getmount(tablespace)
-        if space_mp != datadir_mp:
-            LOG.error("InnoDB shared tablespace %s is not on the same "
-                      "filesystem as the datadir %s", tablespace, datadir)
-            is_unsafe_for_lvm = True
-    ib_logdir = pathinfo.get_innodb_logdir()
-    ib_logdir_mp = getmount(ib_logdir)
-
-    if ib_logdir_mp != datadir_mp:
-        LOG.error("innodb-log-group-home-dir %s is not on the same filesystem "
-                  "as the MySQL datadir %s", ib_logdir, datadir)
-        is_unsafe_for_lvm = True
-
-    if is_unsafe_for_lvm:
-        raise BackupError("One or more InnoDB file paths are not on the same "
-                          "logical volume as the datadir.  This is unsafe for "
-                          "LVM snapshot backups.")
-
 def build_snapshot(config, logical_volume):
     """Create a snapshot process for running through the various steps
     of creating, mounting, unmounting and removing a snapshot
     """
-    mysql = connect_simple(config['mysql:client'])
-    try:
-        pathinfo = MySQLPathInfo.from_mysql(mysql)
-    finally:
-        mysql.close()
-    check_innodb(pathinfo)
-
     snapshot_name = config['snapshot-name'] or \
                     logical_volume.lv_name + '_snapshot'
     extent_size = int(logical_volume.vg_extent_size)
