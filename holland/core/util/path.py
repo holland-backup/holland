@@ -86,30 +86,22 @@ def normpath(path):
     from os.path import normpath, abspath
     return abspath(normpath(path))
 
-def relpath(origin, dest):
-    """
-    Find the relative path between origin and dest
-    """
-    parts = []
-    origin = os.path.normpath(origin)
-    dest = os.path.normpath(dest)
+def relpath(path, start=os.curdir):
+    """Return a relative version of a path"""
 
-    if origin == dest:
-        return ""
+    if not path:
+        raise ValueError("no path specified")
 
-    path = dest
-    while True:
-        head, tail = os.path.split(path)
+    start_list = [x for x in os.path.abspath(start).split(os.sep) if x]
+    path_list = [x for x in os.path.abspath(path).split(os.sep) if x]
 
-        if not tail:
-            break
+    # Work out how much of the filepath is shared by start and path.
+    i = len(os.path.commonprefix([start_list, path_list]))
 
-        if head == origin:
-            return os.path.join('', *([tail] + parts))
-        else:
-            parts.insert(0, tail)
-        path = head
-    return None
+    rel_list = [os.pardir] * (len(start_list)-i) + path_list[i:]
+    if not rel_list:
+        return os.curdir
+    return os.path.join(*rel_list)
 
 def getmount(path):
     """Return the mount point of a path
