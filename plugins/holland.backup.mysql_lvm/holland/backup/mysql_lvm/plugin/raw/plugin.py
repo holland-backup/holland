@@ -27,6 +27,9 @@ snapshot-mountpoint = string(default=None)
 # default: no
 innodb-recovery = boolean(default=no)
 
+# ignore errors due to strange innodb configurations
+force-innodb-backup = boolean(default=no)
+
 # default: flush tables with read lock by default
 lock-tables = boolean(default=yes)
 
@@ -42,6 +45,8 @@ tmpdir                  = string(default=None)
 
 [tar]
 exclude = force_list(default='mysql.sock')
+post-args = string(default=None)
+pre-args = string(default=None)
 
 [compression]
 method = option('none', 'gzip', 'pigz', 'bzip2', 'lzop', default='gzip')
