@@ -86,7 +86,7 @@ class XtrabackupPlugin(object):
             backup_directory = os.path.join(backup_directory, 'data')
             args.append('--no-timestamp')
         if self.config['xtrabackup']['tmpdir']:
-            args.append('--tmpdir')
+            args.append('--tmpdir=' + self.config['xtrabackup']['tmpdir'])
         if self.config['xtrabackup']['slave-info']:
             args.append('--slave-info')
         if self.config['xtrabackup']['safe-slave-backup']:
