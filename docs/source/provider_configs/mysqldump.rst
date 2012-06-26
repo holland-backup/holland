@@ -71,7 +71,7 @@ mysqldump Provider Configuration [mysqldump]
     allowing data to be spooled from the master.
 
     Note that previous versions of Holland prior to 1.0.6 simply
-    ran a STOP SLAVE instead, which suspends both replicaiton
+    ran a STOP SLAVE instead, which suspends both replication
     threads.
 
 **bin-log-position** = yes | no
