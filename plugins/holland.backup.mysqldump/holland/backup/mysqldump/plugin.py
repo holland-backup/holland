@@ -56,7 +56,7 @@ additional-options  = force_list(default=list())
 estimate-method = string(default='plugin')
 
 [compression]
-method        = option('none', 'gzip', 'pigz', 'bzip2', 'lzma', 'lzop', default='gzip')
+method        = option('none', 'gzip', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', default='gzip')
 inline              = boolean(default=yes)
 level               = integer(min=0, max=9, default=1)
 
