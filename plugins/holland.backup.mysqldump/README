@@ -6,7 +6,7 @@ skipped by simply not passing them to the --database flags.
 
 Inline-compression of mysqldump output is supported and the default.  By
 default mechanism uses gzip -1 ("--fast") for fast but reasonable compression.
-bzip2, lzop and lzma (vi xz-utils) are also supported.
+bzip2, pbzip2, lzop and lzma (vi xz-utils) are also supported.
 
 For more information please consult the holland manual or visit the holland
 wiki at http://hollandbackup.org.
