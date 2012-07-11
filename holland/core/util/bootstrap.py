@@ -73,10 +73,10 @@ def setup_plugins():
 def bootstrap(opts):
     # Setup the configuration
     setup_config(opts)
-    # Setup logging per config
-    setup_logging(opts)
     # use umask setting
     setup_umask()
+    # Setup logging per config
+    setup_logging(opts)
     # setup tmpdir
     if hollandcfg.lookup('holland.tmpdir'):
         os.environ['TMPDIR'] = str(hollandcfg.lookup('holland.tmpdir'))
