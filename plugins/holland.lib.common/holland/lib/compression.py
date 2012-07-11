@@ -10,6 +10,7 @@ COMPRESSION_METHODS = {
     'gzip'  : ('gzip', '.gz'),
     'pigz'  : ('pigz', '.gz'),
     'bzip2' : ('bzip2', '.bz2'),
+    'pbzip2': ('pzip2', '.bz2'),
     'lzop'  : ('lzop', '.lzo'),
     'lzma'  : ('xz', '.xz'),
 }
@@ -143,7 +144,7 @@ def stream_info(path, method=None, level=None):
     Arguments:
 
     path    -- Path to file to compress/decompress
-    method  -- Compression method (i.e. 'gzip', 'bzip2', 'lzop')
+    method  -- Compression method (i.e. 'gzip', 'bzip2', 'pbzip2', 'lzop')
     level   -- Compression level (0-9)
     """
     if not method or level == 0:
@@ -168,7 +169,7 @@ def open_stream(path, mode, method=None, level=None, inline=True):
     Arguments:
 
     mode    -- File access mode (i.e. 'r' or 'w')
-    method  -- Compression method (i.e. 'gzip', 'bzip2', 'lzop')
+    method  -- Compression method (i.e. 'gzip', 'bzip2', 'pbzip2', 'lzop')
     level   -- Compression level
     inline  -- Boolean whether to compress inline, or after the file is written.
     """

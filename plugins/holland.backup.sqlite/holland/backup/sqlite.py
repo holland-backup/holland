@@ -15,7 +15,7 @@ databases = force_list(default=list())
 binary = string(default=/usr/bin/sqlite3)
 
 [compression]
-method = option('none', 'gzip', 'pigz', 'bzip2', 'lzop', default='gzip')
+method = option('none', 'gzip', 'pigz', 'bzip2', 'pbzip2', 'lzop', default='gzip')
 inline = boolean(default=yes)
 level = integer(min=0, max=9, default=1)
 """.splitlines()
