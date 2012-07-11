@@ -10,7 +10,7 @@ COMPRESSION_METHODS = {
     'gzip'  : ('gzip', '.gz'),
     'pigz'  : ('pigz', '.gz'),
     'bzip2' : ('bzip2', '.bz2'),
-    'pbzip2': ('pzip2', '.bz2'),
+    'pbzip2': ('pbzip2', '.bz2'),
     'lzop'  : ('lzop', '.lzo'),
     'lzma'  : ('xz', '.xz'),
 }
