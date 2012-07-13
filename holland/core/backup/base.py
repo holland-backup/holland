@@ -117,7 +117,7 @@ class BackupRunner(object):
         self.apply_cb('pre-backup', spool_entry)
 
         try:
-            estimated_size = self.check_available_space(plugin)
+            estimated_size = self.check_available_space(plugin, dry_run)
             LOG.info("Starting backup[%s] via plugin %s",
                      spool_entry.name,
                      spool_entry.config['holland:backup']['plugin'])
@@ -162,7 +162,7 @@ class BackupRunner(object):
         else:
             self.apply_cb('post-backup', spool_entry)
 
-    def check_available_space(self, plugin):
+    def check_available_space(self, plugin, dry_run=False):
         estimated_bytes_required = plugin.estimate_backup_size()
         LOG.info("Estimated Backup Size: %s",
                  format_bytes(estimated_bytes_required))
@@ -178,9 +178,17 @@ class BackupRunner(object):
 
         available_bytes = disk_free(self.spool.path)
         if available_bytes <= adjusted_bytes_required:
-            raise BackupError("Insufficient Disk Space. "
-                              "%s required, but only %s available on %s" %
-                              (format_bytes(adjusted_bytes_required),
-                               format_bytes(available_bytes),
-                               self.spool.path))
+            msg = ("Insufficient Disk Space. %s required, "
+                   "but only %s available on %s") % (
+                       format_bytes(adjusted_bytes_required),
+                       format_bytes(available_bytes),
+                       self.spool.path)
+            if dry_run:
+                LOG.error(msg)
+                LOG.info("Note: This is a dry-run and this "
+                         "space may be available during a normal "
+                         "backup depending on your purge-policy "
+                         "configuration.")
+            else:
+                raise BackupError(msg)
         return estimated_bytes_required
