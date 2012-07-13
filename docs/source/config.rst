@@ -140,7 +140,7 @@ put the following at the top of the backup set configuration file::
     Either ``holland purge`` must be run externally or an explicit removal of
     desired backup directories can be done at some later time.
 
-**pre-backup-hook** = string
+**pre-backup-command** = string
 
     Run a shell command before a backup starts.  This allows some command to 
     perform some action before the backup starts such as setting up an
@@ -151,7 +151,7 @@ put the following at the top of the backup set configuration file::
 
 .. versionadded:: 1.0.7
 
-**post-backup-hook** = string
+**post-backup-command** = string
 
     Run a shell command before a backup starts.  This allows some command to 
     perform some action when a backup completes successfully such as sending
@@ -161,7 +161,7 @@ put the following at the top of the backup set configuration file::
 
 .. versionadded:: 1.0.7
 
-**backup-failure-hook** = string
+**backup-failure-command** = string
 
     Run a shell command before a backup starts.  This allows some command to 
     perform some action when a backup fails such as sending out a failure
@@ -173,16 +173,16 @@ put the following at the top of the backup set configuration file::
 For all hook commands, Holland will perform simple text substitution substitution 
 on the three parameters:
 
-  * hook
-  * backupdir
-  * backupset
+  * hook - name of the hook being called (one of: pre-backup-command, post-backup-command, backup-failure-command)
+  * backupdir - path to the current backup directory (e.g. /var/spool/holland/mysqldump/YYYYmmdd_HHMMSS)
+  * backupset - name of the backupset being run (e.g. 'mysql-lvm')
 
 For example::
     
     [holland:backup]
     plugin = mysqldump
-    pre-backup-hook = /usr/local/bin/my-custom-script --hook ${hook} --backupset ${backupset} --backupdir ${backupdir}
-    post-backup-hook = echo ${backupset} completed successfully.  Files are in ${backupdir}
+    pre-backup-command = /usr/local/bin/my-custom-script --hook ${hook} --backupset ${backupset} --backupdir ${backupdir}
+    post-backup-command = echo ${backupset} completed successfully.  Files are in ${backupdir}
     
     [mysqldump]
     ...
