@@ -105,10 +105,12 @@ mysqldump Provider Configuration [mysqldump]
     one file, however this means that restore a single database can
     be difficult if multiple databases are defined in the backup set.
     
-**additional-options** = <mysqldump arguments>
+**additional-options** = <mysqldump argument>[, <mysqldump argument>]
 
     Can optionally specify additional options directly to ``mysqldump`` if
-    there is no native Holland option for it.
+    there is no native Holland option available.  This option accepts a comma
+    delimited list of arguments to pass on the commandline. 
+
 
 Database and Table filtering
 ----------------------------
