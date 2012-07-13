@@ -131,7 +131,7 @@ class CompressionOutput(object):
             status = self.pid.wait()
             if status != 0:
                 raise IOError(errno.EPIPE,
-                              "Compression program %r exited with status %d" %
+                              "Compression program '%s' exited with status %d" %
                                 (self.cmd, status))
 
 
