@@ -403,7 +403,7 @@ class AutoMySQLClient(PassiveMySQLClient):
     def __getattr__(self, key):
         if self._connection is None:
             getattr(MySQLdb.connections.Connection, key)
-            LOG.info("Initiating connection to MySQL")
+            LOG.debug("Connected to MySQL")
             self.connect()
 
         # ensure the connection is usable
