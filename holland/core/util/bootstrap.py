@@ -32,11 +32,7 @@ def log_warnings(message, category, filename, lineno, file=None, line=None):
                                             category,
                                             filename,
                                             lineno)
-    if category == DeprecationWarning:
-        WARNLOG.debug("%s", warning_string)
-    else:
-        WARNLOG.debug(warning_string)
-        WARNLOG.warn("%s", message)
+    WARNLOG.debug("%s", warning_string)
 
 def setup_logging(opts):
     clear_root_handlers()
