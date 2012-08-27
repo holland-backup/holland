@@ -410,8 +410,8 @@ def exclude_invalid_views(schema, client, definitions_file):
                 if table.engine != 'view':
                     continue
                 LOG.debug("Testing view %s.%s", db.name, table.name)
-                try:
-                    cursor.execute('SELECT * FROM `%s`.`%s` LIMIT 0' % 
+                try
+                    cursor.execute('SHOW FIELDS FROM `%s`.`%s`' %
                                     (db.name, table.name))
                 except MySQLError, exc:
                     # 1356 = View references invalid table(s)...
