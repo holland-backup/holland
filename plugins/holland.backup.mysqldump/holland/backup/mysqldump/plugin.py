@@ -421,7 +421,7 @@ def exclude_invalid_views(schema, client, definitions_file):
                         table.excluded = True
                         cursor.execute('SHOW CREATE VIEW `%s`.`%s`' %
                                         (db.name, table.name))
-                        LOG.info("* Writing invalid view definition for "
+                        LOG.info("* Saving view definition for "
                                  "`%s`.`%s`",
                                  db.name, table.name)
                         ddl = cursor.fetchone()[1]
