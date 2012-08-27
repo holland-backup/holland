@@ -41,6 +41,8 @@ exclude-tables      = force_list(default=list())
 engines             = force_list(default=list("*"))
 exclude-engines     = force_list(default=list())
 
+exclude-invalid-views = boolean(default=no)
+
 flush-logs           = boolean(default=no)
 flush-privileges    = boolean(default=yes)
 dump-routines       = boolean(default=no)
@@ -185,6 +187,11 @@ class MySQLDumpPlugin(object):
         # setup defaults_file with ignore-table exclusions
         defaults_file = os.path.join(self.target_directory, 'my.cnf')
         write_options(self.mysql_config, defaults_file)
+        if config['exclude-invalid-views']:
+            LOG.info("* Finding and excluding invalid views...")
+            definitions_path = os.path.join(self.target_directory,
+                                            'invalid_views.sql')
+            exclude_invalid_views(self.schema, self.client, definitions_path)
         add_exclusions(self.schema, defaults_file)
 
         # find the path to the mysqldump command
@@ -380,6 +387,55 @@ def _start_slave(client, config=None):
         LOG.info("Restarted slave")
     except MySQLError, exc:
         raise BackupError("Failed to restart slave [%d] %s" % exc.args)
+
+def exclude_invalid_views(schema, client, definitions_file):
+    """Flag invalid MySQL views as excluded to skip them during a mysqldump
+    """
+    sqlf = open(definitions_file, 'w')
+    LOG.info("* Invalid and excluded views will be saved to %s",
+            definitions_file)
+    cursor = client.cursor()
+    try:
+        print >>sqlf, "--"
+        print >>sqlf, "-- DDL of Invalid Views"
+        print >>sqlf, "-- Created automatically by Holland"
+        print >>sqlf, "--"
+        print >>sqlf
+        for db in schema.databases:
+            if db.excluded:
+                continue
+            for table in db.tables:
+                if table.excluded:
+                    continue
+                if table.engine != 'view':
+                    continue
+                LOG.debug("Testing view %s.%s", db.name, table.name)
+                try:
+                    cursor.execute('SELECT * FROM `%s`.`%s` LIMIT 0' % 
+                                    (db.name, table.name))
+                except MySQLError, exc:
+                    # 1356 = View references invalid table(s)...
+                    if exc.args[0] in (1356, 1142, 1143, 1449):
+                        LOG.warning("* Excluding invalid view `%s`.`%s`: [%d] %s",
+                                    db.name, table.name, *exc.args)
+                        table.excluded = True
+                        cursor.execute('SHOW CREATE VIEW `%s`.`%s`' %
+                                        (db.name, table.name))
+                        LOG.info("* Writing invalid view definition for "
+                                 "`%s`.`%s`",
+                                 db.name, table.name)
+                        ddl = cursor.fetchone()[1]
+                        print >>sqlf, "--"
+                        print >>sqlf, "-- Current View: `%s`.`%s`" % \
+                                      (db.name, table.name)
+                        print >>sqlf, "--"
+                        print >>sqlf
+                        print >>sqlf, ddl + ';'
+                        print >>sqlf
+                    else:
+                        raise
+    finally:
+        sqlf.close()
 
 def add_exclusions(schema, config):
     """Given a MySQLSchema add --ignore-table options in a [mysqldump]
