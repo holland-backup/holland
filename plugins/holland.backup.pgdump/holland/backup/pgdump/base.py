@@ -188,9 +188,11 @@ def pg_extra_options(config):
         config['compression']['method'] = 'none'
         args += ['--compress',
                  str(config['compression']['level'])]
-    if config['pgdump']['additional-options']:
+    additional_options = config['pgdump']['additional-options']
+    if additional_options:
         # XXX: we may want to check these options more carefully and warn as appropriate.
-        args += shlex.split(config['pgdump']['additional-options'])
+        additional_options = additional_options.encode('utf8')
+        args += shlex.split(additional_options)
     return args
 
 def generate_pgpassfile(backup_directory, password):
