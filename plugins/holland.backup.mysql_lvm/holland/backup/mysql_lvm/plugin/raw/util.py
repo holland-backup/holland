@@ -28,7 +28,11 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
         pathinfo = MySQLPathInfo.from_mysql(mysql)
     finally:
         mysql.close()
-    check_innodb(pathinfo, ensure_subdir_of_datadir=True)
+    try:
+        check_innodb(pathinfo, ensure_subdir_of_datadir=True)
+    except BackupError:
+        if not config['mysql-lvm']['force-innodb-backup']:
+            raise
 
     if config['mysql-lvm']['lock-tables']:
         extra_flush = config['mysql-lvm']['extra-flush-tables']
