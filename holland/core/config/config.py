@@ -106,6 +106,7 @@ class BackupConfig(BaseConfig):
     def __init__(self, path):
         BaseConfig.__init__(self, None)
         basecfg = BaseConfig(path)
+        basecfg.walk(self._canonicalize, call_on_sections=True)
         provider = basecfg.lookup('holland:backup.plugin')
         if provider:
             try:
@@ -113,13 +114,13 @@ class BackupConfig(BaseConfig):
                 providerpath = os.path.join(configbase, 'providers', provider)
                 providerpath += CONFIG_SUFFIX
                 providercfg = BaseConfig(providerpath)
+                providercfg.walk(self._canonicalize, call_on_sections=True)
                 self.merge(providercfg)
             except IOError, ex:
                 LOGGER.warning("Failed to load config for provider %r (%s)" %
                                     (provider, ex))
         self.merge(basecfg)
         self.filename = basecfg.filename
-        self.walk(self._canonicalize, call_on_sections=True)
 
 
 class GlobalConfig(BaseConfig):
