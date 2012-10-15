@@ -415,7 +415,7 @@ def exclude_invalid_views(schema, client, definitions_file):
                                     (db.name, table.name))
                     # check for missing definers that would bork
                     # lock-tables
-                    for _, error_code, msg in cursor.messages:
+                    for _, error_code, msg in client.show_warnings():
                         if error_code == 1449: # ER_NO_SUCH_USER
                             raise MySQLError(error_code, msg)
                 except MySQLError, exc:
