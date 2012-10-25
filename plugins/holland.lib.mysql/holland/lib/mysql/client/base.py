@@ -3,6 +3,7 @@
 import sys
 import re
 import logging
+from textwrap import dedent
 import MySQLdb
 import MySQLdb.connections
 
@@ -238,6 +239,68 @@ class MySQLClient(object):
         cursor.execute(sql)
         try:
             return [row for row in cursor]
+        finally:
+            cursor.close()
+
+    def show_create_view(self, schema, name, use_information_schema=True):
+        """Attempt to retrieve the CREATE VIEW statement for a given view
+
+        This method will return None if no view could be found or any of the
+        view queries have failed.
+
+        SHOW CREATE VIEW will fail if a view references a column that
+        no longer exists.
+
+        If SHOW CREATE VIEW fails, this method attempts to reconstruct the
+        CREATE VIEW statement from INFORMATION_SCHEMA.VIEWS, as long as
+        use_information_schema=True.  A view retrieved in this manner will
+        be missing the ALGORITHM attribute which would otherwise be reported
+        by SHOW CREATE VIEW.
+        """
+        cursor = self.cursor()
+        try:
+            try:
+                if cursor.execute('SHOW CREATE VIEW `%s`.`%s`' %
+                                  (schema, name)):
+                    return cursor.fetchone()[1]
+            except MySQLError, exc:
+                LOG.warning("!!! SHOW CREATE VIEW failed for `%s`.`%s`. "
+                            "The view likely references columns that no "
+                            "longer exist in the underlying tables.",
+                            schema, name)
+
+            if not use_information_schema:
+                return None
+
+            LOG.warning("!!! Reconstructing view definition `%s`.`%s` from "
+                        "INFORMATION_SCHEMA.VIEWS.  This definition will not "
+                        "have an explicit ALGORITHM set.", schema, name)
+            try:
+                sql = dedent("""
+                             SELECT CONCAT(
+                                'CREATE DEFINER=', DEFINER,
+                                ' SQL SECURITY ', SECURITY_TYPE,
+                                ' VIEW ', TABLE_NAME,
+                                ' AS ', VIEW_DEFINITION,
+                                CASE
+                                WHEN CHECK_OPTION <> 'NONE' THEN
+                                    CONCAT(' WITH ',
+                                           CHECK_OPTION,
+                                           ' CHECK OPTION')
+                                ELSE
+                                    ''
+                                END
+                                )
+                                FROM INFORMATION_SCHEMA.VIEWS
+                                WHERE TABLE_SCHEMA = %s
+                                AND TABLE_NAME = %s
+                             """)
+                if cursor.execute(sql, (schema, name)):
+                    return cursor.fetchone()[0]
+            except MySQLError, exc:
+                LOG.debug("INFORMATION_SCHEMA.VIEWS(%s,%s) failed: [%d] %s ",
+                        schema, name, *exc.args)
+            return None
         finally:
             cursor.close()
 

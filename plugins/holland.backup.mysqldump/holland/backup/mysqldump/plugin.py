@@ -410,6 +410,7 @@ def exclude_invalid_views(schema, client, definitions_file):
                 if table.engine != 'view':
                     continue
                 LOG.debug("Testing view %s.%s", db.name, table.name)
+                invalid_view = False
                 try:
                     cursor.execute('SHOW FIELDS FROM `%s`.`%s`' %
                                     (db.name, table.name))
@@ -421,24 +422,34 @@ def exclude_invalid_views(schema, client, definitions_file):
                 except MySQLError, exc:
                     # 1356 = View references invalid table(s)...
                     if exc.args[0] in (1356, 1142, 1143, 1449):
-                        LOG.warning("* Excluding invalid view `%s`.`%s`: [%d] %s",
-                                    db.name, table.name, *exc.args)
-                        table.excluded = True
-                        cursor.execute('SHOW CREATE VIEW `%s`.`%s`' %
-                                        (db.name, table.name))
-                        LOG.info("* Saving view definition for "
-                                 "`%s`.`%s`",
-                                 db.name, table.name)
-                        ddl = cursor.fetchone()[1]
-                        print >>sqlf, "--"
-                        print >>sqlf, "-- Current View: `%s`.`%s`" % \
-                                      (db.name, table.name)
-                        print >>sqlf, "--"
-                        print >>sqlf
-                        print >>sqlf, ddl + ';'
-                        print >>sqlf
+                        invalid_view = True
                     else:
                         raise
+                if invalid_view:
+                    LOG.warning("* Excluding invalid view `%s`.`%s`: [%d] %s",
+                                db.name, table.name, *exc.args)
+                    table.excluded = True
+                    view_definition = client.show_create_view(db.name,
+                                                              table.name,
+                                                              use_information_schema=True)
+                    if view_definition is None:
+                        LOG.error("!!! Failed to retrieve view definition for "
+                                  "`%s`.`%s`", db.name, table.name)
+                        LOG.warning("!!! View definition for `%s`.`%s` will "
+                                    "not be included in this backup", db.name,
+                                    table.name)
+                        continue
+
+                    LOG.info("* Saving view definition for "
+                                 "`%s`.`%s`",
+                                 db.name, table.name)
+                    print >>sqlf, "--"
+                    print >>sqlf, "-- Current View: `%s`.`%s`" % \
+                    (db.name, table.name)
+                    print >>sqlf, "--"
+                    print >>sqlf
+                    print >>sqlf, view_definition + ';'
+                    print >>sqlf
     finally:
         sqlf.close()
 
