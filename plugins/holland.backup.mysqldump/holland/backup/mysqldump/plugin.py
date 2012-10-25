@@ -134,7 +134,8 @@ class MySQLDumpPlugin(object):
         # However, with lock-method=auto-detect we must look at table engines
         # to determine what lock method to use
         config = self.config['mysqldump']
-        fast_iterate = config['lock-method'] != 'auto-detect'
+        fast_iterate = config['lock-method'] != 'auto-detect' and \
+                        not config['exclude-invalid-views']
 
         try:
             db_iter = DatabaseIterator(self.client)
