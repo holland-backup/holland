@@ -1,7 +1,6 @@
 import os
 import sys
 import logging
-import readline
 import itertools
 from holland.core.command import Command, option
 from holland.core.config import hollandcfg, ConfigError
