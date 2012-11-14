@@ -132,22 +132,32 @@ def mysqldump_version(command):
         '--no-defaults',
         '--version',
     ]
-    LOG.debug("Executing: %s", subprocess.list2cmdline(args))
+    list2cmdline = subprocess.list2cmdline
+    cmdline = list2cmdline(args)
+    LOG.debug("Executing: %s", cmdline)
     try:
-        output = subprocess.Popen(args,
-                                  stdout=subprocess.PIPE).communicate()[0]
+        process = subprocess.Popen(args,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT,
+                                   close_fds=True)
+        stdout, _ = process.communicate()
     except OSError, exc:
-        if exc.errno == ENOENT:
+        if exc.errno == errno.ENOENT:
             raise MySQLDumpError("'%s' does not exist" % command)
         else:
             raise MySQLDumpError("Error[%d:%s] when trying to run '%s'" % \
-                    (exc.errno, errno.errocode[exc.errno], command))
+                    (exc.errno, errno.errorcode[exc.errno], command))
 
+    if process.returncode != 0:
+        LOG.error("%s exited with non-zero status[%d]",
+                  cmdline, process.returncode)
+        for line in stdout.splitlines():
+            LOG.error("! %s", line)
     try:
         return tuple([int(digit) for digit in
-                        re.search(r'(\d+)[.](\d+)[.](\d+)', output).groups()])
+                        re.search(r'(\d+)[.](\d+)[.](\d+)', stdout).groups()])
     except AttributeError, exc:
-        LOG.debug("%s provided output %r", subprocess.list2cmdline(args), output)
+        LOG.debug("%s provided output %r", cmdline, stdout)
         raise MySQLDumpError("Failed to determine mysqldump version for %s" % \
                              command)
 
