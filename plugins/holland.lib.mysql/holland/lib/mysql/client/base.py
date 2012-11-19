@@ -508,7 +508,11 @@ def connect(config, client_class=AutoMySQLClient):
     }
 
     value_conv = {
-        'port' : int
+        'port' : int,
+        # XXX: MySQLdb doesn't handle unicode credentials well
+        #      These are encoded to utf8 byte strings as a result
+        'user' : lambda s: s.encode('utf8'),
+        'password' : lambda s: s.encode('utf8'),
     }
 
     args = {}
@@ -518,7 +522,7 @@ def connect(config, client_class=AutoMySQLClient):
             continue
         try:
             # normalize the value. port => int
-            value = value_conv.get(key, str)(config[key])
+            value = value_conv.get(key, unicode)(config[key])
             # convert my.cnf parameters to what MySQLdb expects
             args[cnf_to_mysqldb[key]] = value
         except KeyError:

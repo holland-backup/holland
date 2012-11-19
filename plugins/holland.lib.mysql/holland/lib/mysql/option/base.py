@@ -53,7 +53,7 @@ def write_options(config, filename):
     for section in config:
         print >>filename, "[%s]" % section
         for key in config[section]:
-            value = str(config[section][key])
+            value = unicode(config[section][key])
             print >>filename, "%s = %s" % (key, quote(value))
     filename.close()
 
