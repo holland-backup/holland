@@ -152,6 +152,9 @@ class XtrabackupPlugin(object):
                 try:
                     util.run_xtrabackup(args, stdout, stderr)
                 except Exception, exc:
+                    LOG.info("!! %s", exc)
+                    for line in open(join(self.target_directory, 'xtrabackup.log'), 'r'):
+                        LOG.error("    ! %s", line.rstrip())
                     raise
             finally:
                 try:

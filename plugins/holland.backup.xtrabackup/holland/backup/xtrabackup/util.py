@@ -8,7 +8,7 @@ Utility methods used by the xtrabackup plugin
 import codecs
 import tempfile
 import logging
-from os.path import join, isabs
+from os.path import join, isabs, expanduser
 from subprocess import Popen, PIPE, STDOUT, list2cmdline
 from holland.core.backup import BackupError
 from holland.lib.which import which, WhichError
@@ -23,10 +23,13 @@ def generate_defaults_file(defaults_file, include=(), auth_opts=None):
     :param auth_opts: dictionary of client options.  may include:
                       user, password, host, port, socket
     """
+    LOG.info("* Generating mysql option file: %s", defaults_file)
     try:
         fileobj = codecs.open(defaults_file, 'a', encoding='utf8')
         try:
             for path in include:
+                path = expanduser(path)
+                LOG.info("   + Added !include %s", path)
                 print >>fileobj, '!include ' + path
 
             if auth_opts:
@@ -36,6 +39,7 @@ def generate_defaults_file(defaults_file, include=(), auth_opts=None):
                     if value is None:
                         continue
                     if need_client_section:
+                        LOG.info("  + Added [client] section with credentials from [mysql:client] section")
                         print >>fileobj, "[client]"
                         need_client_section = False
                     print >>fileobj, '%s = %s' % (key, value)
@@ -78,9 +82,12 @@ def apply_xtrabackup_logfile(xb_cfg, backupdir):
     if stream_method is not None:
         LOG.warning("Skipping --prepare/--apply-logs since backup is streamed")
         return
-    # XXX: Note this can fail if --compress is used, explicitly in
-    # additional-options.
-    # apply logs can only be used on an uncompressed source
+
+    if '--compress' in xb_cfg['additional-options']:
+        LOG.warning("Skipping --apply-logs since --compress option appears "
+                    "to have been used.")
+        return
+
     innobackupex = xb_cfg['innobackupex']
     if not isabs(innobackupex):
         try:
