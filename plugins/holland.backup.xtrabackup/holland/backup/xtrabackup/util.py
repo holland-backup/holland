@@ -29,7 +29,7 @@ def generate_defaults_file(defaults_file, include=(), auth_opts=None):
         try:
             for path in include:
                 path = expanduser(path)
-                LOG.info("   + Added !include %s", path)
+                LOG.info("  + Added !include %s", path)
                 print >>fileobj, '!include ' + path
 
             if auth_opts:
