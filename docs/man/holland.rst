@@ -41,12 +41,14 @@ task. The currently available backup plugins include:
 * mysqldump
 * mysqlhotcopy (raw file backups for non-transactional tables)
 * mysql-lvm (raw file backups using LVM filesystem snasphots)
-* maatkit (mk-parallel-dump)
+* mysqldump-lvm (mysqldump backups using LVM filesystem snapshots)
+* pgdump
 
 Command plugins are used to add additional commands to the holland shell.
 Currently available commands include:
 
 * backup        - run one or more backup jobs
+* purge         - purge one or more old backups
 * list-plugins  - show known plugins
 * list-backups  - show completed backup jobs
 * mk-config     - generate a job config for a given backup plugin
@@ -73,9 +75,8 @@ PROBLEMS
 SEE ALSO
 ========
 
-* `Python Eggs <http://peak.telecommunity.com/DevCenter/PythonEggs>`
-* `pkg_resources <http://peak.telecommunity.com/DevCenter/PkgResources>`
-* `Plugins Using Eggs <http://ianbicking.org/docs/pycon2006/plugins.html>`
 * ``man holland-mysqlhotcopy``
 * ``man holland-mysqldump``
 * ``man holland-mysqllvm``
+* ``man holland-mysqldump-lvm``
+* ``man holland-pgdump``
