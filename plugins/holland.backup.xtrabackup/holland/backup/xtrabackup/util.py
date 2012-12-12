@@ -1,50 +1,193 @@
-import re
+"""
+holland.backup.xtrabackup.util
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Utility methods used by the xtrabackup plugin
+"""
+
+import codecs
+import tempfile
 import logging
+from os.path import join, isabs
 from subprocess import Popen, PIPE, STDOUT, list2cmdline
-from holland.core.exceptions import BackupError
-from holland.core.util.template import Template
+from holland.core.backup import BackupError
+from holland.lib.which import which, WhichError
 
 LOG = logging.getLogger(__name__)
 
-def xtrabackup_version(binary):
-    args = [
-        binary,
-        '--no-defaults',
-        '--version'
-    ]
-    process = Popen(args, stdout=PIPE, stderr=STDOUT, close_fds=True)
-    stdout, _ = process.communicate()
-    '''xtrabackup version 1.6.6 for Percona Server 5.1.59 unknown-linux-gnu'''
-    m = re.match('^xtrabackup version (?P<version>\d+\.\d+\.\d+) ', stdout)
-    if not m:
-        raise BackupError("Could not find xtrabackup version.  %s returned %s" %
-                          (list2cmdline(args), stdout))
-    version_string = m.group('version')
-    version_tuple = tuple(map(int, version_string.split('.')))
-    return version_tuple
+def generate_defaults_file(defaults_file, include=(), auth_opts=None):
+    """Generate a mysql options file
 
-def get_stream_method(method):
-    """Translate the backupset stream option to a valid argument
-    for innobackupex --stream
+    :param defaults_file: path where options should be written
+    :param include: ordered list of additional defaults files to include
+    :param auth_opts: dictionary of client options.  may include:
+                      user, password, host, port, socket
     """
-    if method == 'no':
-        return None
-    elif method in ('yes', 'tar'):
-        return 'tar'
-    else:
-        return 'xbstream'
+    try:
+        fileobj = codecs.open(defaults_file, 'a', encoding='utf8')
+        try:
+            for path in include:
+                print >>fileobj, '!include ' + path
 
-def resolve_template(value, **kwargs):
-    return Template(value).safe_substitute(**kwargs)
+            if auth_opts:
+                need_client_section = True
+                for key in ('user', 'password', 'host', 'port', 'socket'):
+                    value = auth_opts.get(key)
+                    if value is None:
+                        continue
+                    if need_client_section:
+                        print >>fileobj, "[client]"
+                        need_client_section = False
+                    print >>fileobj, '%s = %s' % (key, value)
+        finally:
+            fileobj.close()
+    except IOError, exc:
+        raise BackupError("Failed to create %s: [%d] %s" %
+                          (defaults_file, exc.errno, exc.strerror))
 
-def run_pre_command(command):
-    process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
-    LOG.info("Running pre-command: %s", command)
+    return defaults_file
+
+def run_xtrabackup(args, stdout, stderr):
+    """Run xtrabackup"""
+    cmdline = list2cmdline(args)
+    LOG.info("Executing: %s", cmdline)
+    LOG.info("  > %s 2 > %s", stdout.name, stderr.name)
+    try:
+        process = Popen(args, stdout=stdout, stderr=stderr, close_fds=True)
+    except OSError, exc:
+        # Failed to find innobackupex executable
+        raise BackupError("%s failed: %s" % (args[0], exc.strerror))
+
+    try:
+        process.wait()
+    except KeyboardInterrupt:
+        raise BackupError("Interrupted")
+    except SystemExit:
+        raise BackupError("Terminated")
+
+    if process.returncode != 0:
+        # innobackupex exited with non-zero status
+        raise BackupError("innobackupex exited with failure status [%d]" %
+                          process.returncode)
+
+def apply_xtrabackup_logfile(xb_cfg, backupdir):
+    """Apply xtrabackup_logfile via innobackupex --apply-log [options]"""
+    # run ${innobackupex} --apply-log ${backupdir}
+    # only applies when streaming is not used
+    stream_method = determine_stream_method(xb_cfg['stream'])
+    if stream_method is not None:
+        LOG.warning("Skipping --prepare/--apply-logs since backup is streamed")
+        return
+    # XXX: Note this can fail if --compress is used, explicitly in
+    # additional-options.
+    # apply logs can only be used on an uncompressed source
+    innobackupex = xb_cfg['innobackupex']
+    if not isabs(innobackupex):
+        try:
+            innobackupex = which(innobackupex)
+        except WhichError:
+            raise BackupError("Failed to find innobackupex script")
+    args = [
+        innobackupex,
+        '--apply-log',
+        backupdir
+    ]
+
+    cmdline = list2cmdline(args)
+    LOG.info("Executing: %s", cmdline)
+    try:
+        process = Popen(args, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    except OSError, exc:
+        raise BackupError("Failed to run %s: [%d] %s",
+                          cmdline, exc.errno, exc.strerror)
+
     for line in process.stdout:
-        LOG.info("  %s", line)
+        LOG.info("[pid=%d]: %s", process.pid, line.rstrip())
     process.wait()
     if process.returncode != 0:
-        raise BackupError("Pre-command %s exited with non-zero status %d" %
-                          (command, process.returncode))
+        raise BackupError("%s returned failure status [%d]" %
+                          (cmdline, process.returncode))
+
+def determine_stream_method(stream):
+    """Calculate the stream option from the holland config"""
+    if stream in ('tar', 'tar4ibd'):
+        return 'tar'
+    if stream in ('xbstream',):
+        return 'xbstream'
+    if stream == 'no':
+        return None
+    raise BackupError("Invalid stream method '%s'" % stream)
+
+def evaluate_tmpdir(tmpdir=None, basedir=None):
+    """Evaluate the tmpdir option"""
+    if not tmpdir:
+        return tempfile.gettempdir()
+    if basedir:
+        return tmpdir.replace('{backup_directory}', basedir)
+    return tmpdir
+
+
+def execute_pre_command(pre_command):
+    """Execute a pre-command"""
+    if not pre_command:
+        return
+    try:
+        process = Popen(pre_command,
+                        stdout=PIPE,
+                        stderr=STDOUT,
+                        shell=True,
+                        close_fds=True)
+    except OSError, exc:
+        # missing executable
+        raise BackupError("pre-command %s failed: %s" %
+                          (pre_command, exc.strerror))
+
+    for line in process.stdout:
+        LOG.info("[pre-command pid=%d]: >> %s", process.pid, line)
+    returncode = process.wait()
+    if returncode != 0:
+        raise BackupError("pre-command exited with failure status [%d]" %
+                          returncode)
+
+def build_xb_args(config, basedir, defaults_file=None):
+    """Build the commandline for xtrabackup"""
+    innobackupex = config['innobackupex']
+    if not isabs(innobackupex):
+        try:
+            innobackupex = which(innobackupex)
+        except WhichError:
+            raise BackupError("Failed to find innobackupex script")
+
+    ibbackup = config['ibbackup']
+    stream = determine_stream_method(config['stream'])
+    tmpdir = evaluate_tmpdir(config['tmpdir'], basedir)
+    slave_info = config['slave-info']
+    safe_slave_backup = config['safe-slave-backup']
+    no_lock = config['no-lock']
+    extra_opts = config['additional-options']
+
+    args = [
+        innobackupex,
+    ]
+    if defaults_file:
+        args.append('--defaults-file=' + defaults_file)
+    if ibbackup:
+        args.append('--ibbackup=' + ibbackup)
+    if stream:
+        args.append('--stream=' + stream)
     else:
-        LOG.info("Pre-command exited successfully.")
+        basedir = join(basedir, 'data')
+    if tmpdir:
+        args.append('--tmpdir=' + tmpdir)
+    if slave_info:
+        args.append('--slave-info')
+    if safe_slave_backup:
+        args.append('--safe-slave-backup')
+    if no_lock:
+        args.append('--no-lock')
+    args.append('--no-timestamp')
+    if extra_opts:
+        args.extend(extra_opts)
+    if basedir:
+        args.append(basedir)
+    return args
