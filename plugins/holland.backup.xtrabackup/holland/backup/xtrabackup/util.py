@@ -117,7 +117,7 @@ def apply_xtrabackup_logfile(xb_cfg, backupdir):
 
 def determine_stream_method(stream):
     """Calculate the stream option from the holland config"""
-    if stream in ('tar', 'tar4ibd'):
+    if stream in ('yes', 'tar', 'tar4ibd'):
         return 'tar'
     if stream in ('xbstream',):
         return 'xbstream'
