@@ -84,6 +84,9 @@ with ``[provider-name]``.
     provider_configs/example
     provider_configs/mysqldump
     provider_configs/mysql-lvm
+    provider_configs/mysqldump-lvm
+    provider_configs/xtrabackup
+    provider_configs/pgdump
 
 Backup-Set Configs
 ------------------
