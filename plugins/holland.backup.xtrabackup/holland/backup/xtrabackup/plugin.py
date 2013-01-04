@@ -22,6 +22,7 @@ global-defaults     = string(default='/etc/my.cnf')
 innobackupex        = string(default='innobackupex-1.5.1')
 ibbackup            = string(default=None)
 stream              = option(yes,no,tar,xbstream,default=tar)
+apply-logs          = boolean(default=yes)
 slave-info          = boolean(default=no)
 safe-slave-backup   = boolean(default=no)
 no-lock             = boolean(default=no)
@@ -165,5 +166,6 @@ class XtrabackupPlugin(object):
                         raise
         finally:
             stderr.close()
-        util.apply_xtrabackup_logfile(xb_cfg, args[-1])
+        if xb_cfg['apply-logs']:
+            util.apply_xtrabackup_logfile(xb_cfg, args[-1])
 
