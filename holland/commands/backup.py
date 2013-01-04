@@ -89,11 +89,12 @@ class Backup(Command):
                 lock = Lock(config.filename)
                 try:
                     lock.acquire()
-                    LOG.info("Acquired lock %s : '%s'", lock.path, lock.lock.name)
+                    LOG.debug("Set advisory lock on %s : '%s'", lock.path, lock.lock.name)
                 except LockError:
-                    LOG.error("Failed to acquire lock on backupset %s (%s)",
-                                name, config.filename)
-
+                    LOG.debug("Unable to acquire advisory lock on %s : '%s'",
+                              lock.path, lock.lock.name)
+                    LOG.error("Another holland backup process is already "
+                              "running backupset '%s'. Aborting", name)
                     break
 
             try:
