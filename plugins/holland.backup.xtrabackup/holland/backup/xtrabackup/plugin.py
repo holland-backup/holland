@@ -122,8 +122,8 @@ class XtrabackupPlugin(object):
             '--help'
         ]
         cmdline = list2cmdline(args)
-        LOG.info("* Running xtrabackup --help to verify %s is valid",
-                self.defaults_path)
+        LOG.info("* Verifying generated config '%s'", self.defaults_path)
+        LOG.debug("* Verifying via command: %s", cmdline)
         try:
             process = Popen(args, stdout=PIPE, stderr=STDOUT, close_fds=True)
         except OSError, exc:
@@ -137,6 +137,7 @@ class XtrabackupPlugin(object):
                 LOG.error("! %s", line)
             raise BackupError("%s exited with failure status [%d]" %
                               (cmdline, process.returncode))
+
     def backup(self):
         if self.dry_run:
             self.dryrun()
