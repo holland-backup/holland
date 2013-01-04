@@ -69,6 +69,7 @@ holland-xtrabackup
 - Added ibbackup=path option
 - Added pre-command=command option
 - Added safe-slave-backup=boolean option
+- Added apply-logs=boolean option
 
 
 1.0.6 - Jan 12, 2011 
