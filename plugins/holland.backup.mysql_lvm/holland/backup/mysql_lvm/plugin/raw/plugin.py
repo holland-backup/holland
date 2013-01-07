@@ -2,7 +2,8 @@
 
 import os
 import logging
-from holland.core.util.path import directory_size
+import tempfile
+from holland.core.util.path import directory_size, format_bytes
 from holland.core.exceptions import BackupError
 from holland.lib.lvm import LogicalVolume, CallbackFailuresError, \
                             LVMCommandError, relpath, getmount
@@ -126,11 +127,10 @@ class MysqlLVMBackup(object):
             raise BackupError("Failed to lookup logical volume for %s: %s" %
                               (datadir, str(exc)))
 
-        if self.dry_run:
-            return _dry_run(volume)
 
         # create a snapshot manager
-        snapshot = build_snapshot(self.config['mysql-lvm'], volume)
+        snapshot = build_snapshot(self.config['mysql-lvm'], volume,
+                                  suppress_tmpdir=True)
         # calculate where the datadirectory on the snapshot will be located
         rpath = relpath(datadir, getmount(datadir))
         snap_datadir = os.path.abspath(os.path.join(snapshot.mountpoint, rpath))
@@ -140,6 +140,9 @@ class MysqlLVMBackup(object):
                       client=self.client,
                       snap_datadir=snap_datadir,
                       spooldir=self.target_directory)
+
+        if self.dry_run:
+            return self._dry_run(volume, snapshot, datadir)
 
         try:
             snapshot.start(volume)
@@ -152,11 +155,23 @@ class MysqlLVMBackup(object):
             # Something failed in the snapshot process
             raise BackupError(str(exc))
 
-def _dry_run(volume):
-    """Implement dry-run for LVM snapshots.  Not much to do here at the moment
-    """
-    LOG.info("[dry-run] Snapshotting %s/%s to %s/%s_snapshot",
+    def _dry_run(self, volume, snapshot, datadir):
+        """Implement dry-run for LVM snapshots.
+        """
+        LOG.info("* Would snapshot source volume %s/%s as %s/%s (size=%s)",
              volume.vg_name,
              volume.lv_name,
              volume.vg_name,
-             volume.lv_name)
+             snapshot.name,
+             format_bytes(snapshot.size*int(volume.vg_extent_size)))
+        LOG.info("* Would mount on %s",
+             snapshot.mountpoint or 'generated temporary directory')
+
+        snapshot_mountpoint = snapshot.mountpoint or tempfile.gettempdir()
+        if getmount(self.target_directory) == getmount(datadir):
+            LOG.error("Backup directory %s is on the same filesystem as "
+                      "the source logical volume %s.",
+                      self.target_directory, volume.device_name())
+            LOG.error("This will result in very poor performance and "
+                      "has a high potential for failed backups.")
+            raise BackupError("Improper backup configuration for LVM.")

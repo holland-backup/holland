@@ -31,7 +31,7 @@ def cleanup_tempdir(path):
     LOG.info("Removing temporary mountpoint %s", path)
     shutil.rmtree(path)
 
-def build_snapshot(config, logical_volume):
+def build_snapshot(config, logical_volume, suppress_tmpdir=False):
     """Create a snapshot process for running through the various steps
     of creating, mounting, unmounting and removing a snapshot
     """
@@ -79,7 +79,8 @@ def build_snapshot(config, logical_volume):
     tempdir = False
     if not mountpoint:
         tempdir = True
-        mountpoint = tempfile.mkdtemp()
+        if not suppress_tmpdir:
+            mountpoint = tempfile.mkdtemp()
     else:
         try:
             os.makedirs(mountpoint)
