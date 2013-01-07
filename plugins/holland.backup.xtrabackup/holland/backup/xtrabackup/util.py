@@ -158,6 +158,22 @@ def execute_pre_command(pre_command):
         raise BackupError("pre-command exited with failure status [%d]" %
                           returncode)
 
+def add_xtrabackup_defaults(defaults_path, **kwargs):
+    if not kwargs:
+        return
+    fileobj = open(defaults_path, 'a')
+    try:
+        try:
+            # spurious newline for readability
+            print >>fileobj
+            print >>fileobj, "[xtrabackup]"
+            for key, value in kwargs.iteritems():
+                print >>fileobj, "%s = %s" % (key, value)
+        except IOError, exc:
+            raise BackupError("Error writing xtrabackup defaults to %s" %
+                              defaults_path)
+    finally:
+        fileobj.close()
 def build_xb_args(config, basedir, defaults_file=None):
     """Build the commandline for xtrabackup"""
     innobackupex = config['innobackupex']
