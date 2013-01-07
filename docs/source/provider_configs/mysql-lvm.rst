@@ -55,7 +55,7 @@ tar backup options
 Patterns to exclude from archive.   These should be relative paths and are almost 
 always relative to the mysql data directory.  For instance to exclude binary logs
 in the data directory from the backup you might specify:
-  exclude = ./bin-log.*, mysql.sock
+exclude = ./bin-log.*, mysql.sock
 
 **pre-args** = <string>
 
@@ -65,8 +65,7 @@ supported.
 
 For instance you
 might add the /etc/my.cnf to the tar archive via:
-  
-  pre-args = -C /etc ./my.cnf
+pre-args = -C /etc ./my.cnf
 
 **post-args** = <string>
 
