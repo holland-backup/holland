@@ -1,7 +1,7 @@
 .. _config-mysqldump-lvm:
 
 mysqldump LVM Provider Configuration [mysql-lvm]
-============================================
+================================================
 
 **snapshot-size** = <size-in-MB>
 
@@ -39,6 +39,26 @@ mysqldump LVM Provider Configuration [mysql-lvm]
     Whether or not to run a FLUSH TABLES before running the full 
     FLUSH TABLES WITH READ LOCK. Should make the FLUSH TABLES WITH READ LOCK
     operation a bit faster.
+
+[mysqld]
+--------
+
+**mysqld-exe** = <path>[, <path>...] (default: mysqld in PATH, /usr/libexec/mysqld)
+
+    This provides a list of locations where the mysqld process to use might be
+    found.  This is searched in order of entries in this list.
+
+**user** = <name>
+
+    The --user parameter to use with mysqld.
+
+**innodb-buffer-pool-size** = <size> (default: 128M)
+
+    How large to size the innodb-buffer-pool-size.
+
+**tmpdir** = <path>  (default: system tempdir)
+
+    Path to the --tmpdir that mysqld should use.
 
 [mysqldump]
 -----------
