@@ -127,6 +127,8 @@ def determine_stream_method(stream):
 
 def evaluate_tmpdir(tmpdir=None, basedir=None):
     """Evaluate the tmpdir option"""
+    if tmpdir is None:
+        return basedir
     if not tmpdir:
         return tempfile.gettempdir()
     if basedir:

@@ -26,7 +26,7 @@ apply-logs          = boolean(default=yes)
 slave-info          = boolean(default=no)
 safe-slave-backup   = boolean(default=no)
 no-lock             = boolean(default=no)
-tmpdir              = string(default="{backup_directory}")
+tmpdir              = string(default=None)
 additional-options  = force_list(default=list())
 pre-command         = string(default=None)
 
