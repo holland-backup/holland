@@ -53,7 +53,7 @@ Xtrabackup Provider Configuration [xtrabackup]
 
     Whether to enable the --no-lock innobackupex option
 
-**tmpdir** = <path> (default: ``backup_directory``)
+**tmpdir** = <path> (default: ``${backup_directory}``)
 
     The path for the innobackupex --tmpdir option. By default this will use the
     current holland backup directory to workaround the following bug:
@@ -61,7 +61,7 @@ Xtrabackup Provider Configuration [xtrabackup]
 
     .. versionadded:: 1.0.8
 
- **additional-options** = <option>[, <option>...]
+**additional-options** = <option>[, <option>...]
 
     A list of additional options to pass to innobackupex.  This is a comma
     separated list of options.
