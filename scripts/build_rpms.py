@@ -147,7 +147,7 @@ def main():
     print
 
     if int(retcode) == 0:
-        print "Holland %s%s built in %s" % (version, dev_tag, config['topdir'])
+        print "Holland %s%s built in %s" % (version, dev_tag or '', config['topdir'])
         exit(0, cli_opts.clean)
     else:
         print "Holland %s%s build FAILED!  Files in %s" % (version, dev_tag,
