@@ -46,9 +46,9 @@ MySQL LVM Provider Configuration [mysql-lvm]
     FLUSH TABLES WITH READ LOCK. Should make the FLUSH TABLES WITH READ LOCK
     operation a bit faster.
 
+
 [tar]
-=====
-tar backup options
+-----
 
 **exclude** = pattern[, pattern...]
 
