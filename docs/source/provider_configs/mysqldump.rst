@@ -119,18 +119,6 @@ Database and Table filtering
 
     databasefiltering
 
+.. include:: compression.rst
 
-[compression]
--------------
-.. toctree::
-    :maxdepth: 1
-
-    compression
-
-
-[mysql:client]
---------------
-.. toctree::
-    :maxdepth: 1
-
-    mysqlconfig
+.. include:: mysqlconfig.rst

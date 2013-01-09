@@ -13,14 +13,7 @@ pgdump Provider Configuration [pgdump]
 
     Pass additional options to the pg_dump command
 
-
-[compression]
--------------
-.. toctree::
-    :maxdepth: 1
-
-    compression
-
+.. include:: compression.rst
 
 [pgauth]
 --------

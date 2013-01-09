@@ -73,17 +73,6 @@ Xtrabackup Provider Configuration [xtrabackup]
     xtrabackup.  instances of ${backup_directory} will be replaced with the
     current holland backup directory where the xtrabackup data will be stored.
 
+.. include:: compression.rst
 
-[compression]
--------------
-.. toctree::
-    :maxdepth: 1
-
-    compression
-
-[mysql:client]
---------------
-.. toctree::
-    :maxdepth: 1
-
-    mysqlconfig
+.. include:: mysqlconfig.rst

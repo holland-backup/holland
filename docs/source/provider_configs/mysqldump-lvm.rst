@@ -71,16 +71,7 @@ Binary log information from SOHW MASTER STATUS and SHOW SLAVE STATUS is
 recorded in the ${backup_directory}/backup.conf file under the
 [mysql:replication] section.
 
-[compression]
--------------
-.. toctree::
-    :maxdepth: 1
+.. include:: compression.rst
 
-    compression
+.. include:: mysqlconfig.rst
 
-[mysql:client]
---------------
-.. toctree::
-    :maxdepth: 1
-
-    mysqlconfig

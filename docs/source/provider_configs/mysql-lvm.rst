@@ -73,16 +73,6 @@ Additional arguments to append to the tar commandline after the backup path is s
 This should be a string exactly as you might specify on the commandline.  Shell globbing is not
 evaluated.
 
-[compression]
--------------
-.. toctree::
-    :maxdepth: 1
+.. include:: compression.rst
 
-    compression
-
-[mysql:client]
---------------
-.. toctree::
-    :maxdepth: 1
-
-    mysqlconfig
+.. include:: mysqlconfig.rst
