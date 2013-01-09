@@ -114,7 +114,7 @@ class BackupRunner(object):
 
         spool_entry.config['holland:backup']['start-time'] = time.time()
         spool_entry.flush()
-        self.apply_cb('pre-backup', spool_entry)
+        self.apply_cb('before-backup', spool_entry)
 
         try:
             estimated_size = self.check_available_space(plugin, dry_run)
@@ -157,10 +157,10 @@ class BackupRunner(object):
             spool_entry.purge()
 
         if sys.exc_info() != (None, None, None):
-            self.apply_cb('backup-failure', spool_entry)
+            self.apply_cb('failed-backup', spool_entry)
             raise
         else:
-            self.apply_cb('post-backup', spool_entry)
+            self.apply_cb('after-backup', spool_entry)
 
     def check_available_space(self, plugin, dry_run=False):
         estimated_bytes_required = plugin.estimate_backup_size()

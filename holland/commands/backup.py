@@ -64,15 +64,15 @@ class Backup(Command):
         if not opts.no_lock:
             purge_mgr = PurgeManager()
 
-            runner.register_cb('pre-backup', purge_mgr)
-            runner.register_cb('post-backup', purge_mgr)
-            runner.register_cb('backup-failure', purge_backup)
+            runner.register_cb('before-backup', purge_mgr)
+            runner.register_cb('after-backup', purge_mgr)
+            runner.register_cb('failed-backup', purge_backup)
 
-        runner.register_cb('post-backup', report_low_space)
+        runner.register_cb('after-backup', report_low_space)
 
-        runner.register_cb('pre-backup', call_hooks)
-        runner.register_cb('post-backup', call_hooks)
-        runner.register_cb('backup-failure', call_hooks)
+        runner.register_cb('before-backup', call_hooks)
+        runner.register_cb('after-backup', call_hooks)
+        runner.register_cb('failed-backup', call_hooks)
 
         error = 1
         LOG.info("--- Starting %s run ---", opts.dry_run and 'dry' or 'backup')
@@ -156,9 +156,9 @@ class PurgeManager(object):
     def __call__(self, event, entry):
         purge_policy = entry.config['holland:backup']['purge-policy']
 
-        if event == 'pre-backup' and purge_policy != 'before-backup':
+        if event == 'before-backup' and purge_policy != 'before-backup':
             return
-        if event == 'post-backup' and purge_policy != 'after-backup':
+        if event == 'after-backup' and purge_policy != 'after-backup':
             return
 
         backupset = spool.find_backupset(entry.backupset)
@@ -168,14 +168,14 @@ class PurgeManager(object):
 
         retention_count = entry.config['holland:backup']['backups-to-keep']
         retention_count = int(retention_count)
-        if event == 'post-backup' and retention_count == 0:
+        if event == 'after-backup' and retention_count == 0:
             # Always maintain latest backup
             LOG.warning("!! backups-to-keep set to 0, but "
                         "purge-policy = after-backup. This would immediately "
                         "purge all backups which is probably not intended. "
                         "Setting backups-to-keep to 1")
             retention_count = 1
-        if event == 'pre-backup':
+        if event == 'before-backup':
             retention_count += 1
         self.purge_backupset(backupset, retention_count)
         backupset.update_symlinks()
