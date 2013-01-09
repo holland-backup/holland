@@ -8,14 +8,14 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
-1.0.7 - unreleased
+1.0.8 - unreleased
 ------------------
 
 holland
 +++++++
 - Fixed bug in purge-policy=before-backup that would fail to retain the
   in-progress backup and ultimately cause the backup run to fail.
-- Added pre/post/failure backup command options to [holland:backup] for 
+- Added before/after/failed backup command options to [holland:backup] for 
   each backupset. Contributed by osheroff
 - holland purge now truncates files in increments of 256MB before running
   unlink(2) to minimize the impact of removing a very large file.
@@ -52,6 +52,9 @@ holland-mysqllvm
 - added force-innodb-backup option to force a mysql-lvm backup even if it
   appears unsafe to do so.  InnoDB datafiles outside of the datadir are not
   backed up by default unless tar's pre- and/or post-args are set correctly.
+- added force-backup-to-snapshot-origin option to disable sanity check when
+  holland's backup-directory is set to store backups on the same volume we are
+  currently snapshotting.
 
 holland-xtrabackup
 ++++++++++++++++++
