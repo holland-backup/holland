@@ -143,6 +143,7 @@ def execute_pre_command(pre_command, **kwargs):
         return
 
     pre_command = Template(pre_command).safe_substitute(**kwargs)
+    LOG.info("Executing pre-command: %s", pre_command)
     try:
         process = Popen(pre_command,
                         stdout=PIPE,
@@ -155,7 +156,7 @@ def execute_pre_command(pre_command, **kwargs):
                           (pre_command, exc.strerror))
 
     for line in process.stdout:
-        LOG.info("[pre-command pid=%d]: >> %s", process.pid, line)
+        LOG.info("  >> %s", process.pid, line)
     returncode = process.wait()
     if returncode != 0:
         raise BackupError("pre-command exited with failure status [%d]" %
