@@ -1,7 +1,0 @@
-usr/lib/python*.*/*-packages/holland.backup.mysql_lvm-*.egg-info
-usr/lib/python*.*/*-packages/holland.backup.mysql_lvm-*-nspkg.pth
-usr/lib/python*.*/*-packages/holland/backup/mysql_lvm/
-usr/lib/python*.*/*-packages/holland.lib.lvm-*.egg-info
-usr/lib/python*.*/*-packages/holland.lib.lvm-*-nspkg.pth
-usr/lib/python*.*/*-packages/holland/lib/lvm/
-etc/holland/providers/mysql-lvm.conf

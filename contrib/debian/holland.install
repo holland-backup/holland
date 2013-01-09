@@ -1,0 +1,11 @@
+debian/tmp/usr/lib/python*.*/*-packages/holland-*.egg-info
+debian/tmp/usr/lib/python*.*/*-packages/holland/core/
+debian/tmp/usr/lib/python*.*/*-packages/holland/__init__.py
+debian/tmp/usr/lib/python*.*/*-packages/holland/lib/__init__.py
+debian/tmp/usr/lib/python*.*/*-packages/holland/backup/__init__.py
+debian/tmp/usr/lib/python*.*/*-packages/holland/commands/*.py
+debian/tmp/usr/bin/holland usr/sbin/
+config/holland.conf etc/holland/
+config/README etc/holland/
+config/providers/README etc/holland/providers/
+config/backupsets/default.conf etc/holland/backupsets/

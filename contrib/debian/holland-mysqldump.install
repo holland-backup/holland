@@ -1,0 +1,3 @@
+debian/tmp/usr/lib/python*.*/*-packages/holland.backup.mysqldump-*.egg-info
+debian/tmp/usr/lib/python*.*/*-packages/holland/backup/mysqldump/
+config/providers/mysqldump.conf etc/holland/providers/

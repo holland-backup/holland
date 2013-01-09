@@ -1,4 +1,0 @@
-usr/lib/python*.*/*-packages/holland.backup.xtrabackup-*.egg-info
-usr/lib/python*.*/*-packages/holland.backup.xtrabackup-*-nspkg.pth
-usr/lib/python*.*/*-packages/holland/backup/xtrabackup/
-etc/holland/providers/xtrabackup.conf
