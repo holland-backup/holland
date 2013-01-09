@@ -502,6 +502,9 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
+* Wed Jan 09 2013 Andrew Garner <andrew.garner@rackspace.com> - 1.0.8-1
+- Latest sources from upstream
+
 * Wed Jan 12 2011 BJ Dierkes <wdierkes@rackspace.com> - 1.0.7-1
 - Development version
 
