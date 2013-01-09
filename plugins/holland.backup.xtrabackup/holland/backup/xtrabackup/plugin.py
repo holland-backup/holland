@@ -148,7 +148,8 @@ class XtrabackupPlugin(object):
         # innobackupex --tmpdir does not affect xtrabackup
         util.add_xtrabackup_defaults(self.defaults_path, tmpdir=tmpdir)
         args = util.build_xb_args(xb_cfg, backup_directory, self.defaults_path)
-        util.execute_pre_command(xb_cfg['pre-command'])
+        util.execute_pre_command(xb_cfg['pre-command'],
+                                 backup_directory=backup_directory)
         stderr = self.open_xb_logfile()
         try:
             stdout = self.open_xb_stdout()

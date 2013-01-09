@@ -8,6 +8,7 @@ Utility methods used by the xtrabackup plugin
 import codecs
 import tempfile
 import logging
+from string import Template
 from os.path import join, isabs, expanduser
 from subprocess import Popen, PIPE, STDOUT, list2cmdline
 from holland.core.backup import BackupError
@@ -136,10 +137,12 @@ def evaluate_tmpdir(tmpdir=None, basedir=None):
     return tmpdir
 
 
-def execute_pre_command(pre_command):
+def execute_pre_command(pre_command, **kwargs):
     """Execute a pre-command"""
     if not pre_command:
         return
+
+    pre_command = Template(pre_command).safe_substitute(**kwargs)
     try:
         process = Popen(pre_command,
                         stdout=PIPE,
