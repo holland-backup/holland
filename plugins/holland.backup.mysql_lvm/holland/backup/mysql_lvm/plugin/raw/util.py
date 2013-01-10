@@ -25,15 +25,16 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
         * Recording MySQL replication
     """
     mysql = connect_simple(config['mysql:client'])
-    try:
-        pathinfo = MySQLPathInfo.from_mysql(mysql)
-    finally:
-        mysql.close()
-    try:
-        check_innodb(pathinfo, ensure_subdir_of_datadir=True)
-    except BackupError:
-        if not config['mysql-lvm']['force-innodb-backup']:
-            raise
+    if mysql.show_variable('have_innodb') == 'YES':
+        try:
+            pathinfo = MySQLPathInfo.from_mysql(mysql)
+        finally:
+            mysql.close()
+        try:
+            check_innodb(pathinfo, ensure_subdir_of_datadir=True)
+        except BackupError:
+            if not config['mysql-lvm']['force-innodb-backup']:
+                raise
 
     if config['mysql-lvm']['lock-tables']:
         extra_flush = config['mysql-lvm']['extra-flush-tables']
