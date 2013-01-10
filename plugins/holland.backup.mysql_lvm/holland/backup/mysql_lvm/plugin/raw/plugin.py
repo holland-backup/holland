@@ -106,7 +106,7 @@ class MysqlLVMBackup(object):
     def configspec(self):
         """INI Spec for the configuration values this plugin supports"""
         return self.CONFIGSPEC
-    
+
     def backup(self):
         """Run a backup by running through a LVM snapshot against the device
         the MySQL datadir resides on
@@ -130,7 +130,7 @@ class MysqlLVMBackup(object):
 
         # create a snapshot manager
         snapshot = build_snapshot(self.config['mysql-lvm'], volume,
-                                  suppress_tmpdir=True)
+                                  suppress_tmpdir=self.dry_run)
         # calculate where the datadirectory on the snapshot will be located
         rpath = relpath(datadir, getmount(datadir))
         snap_datadir = os.path.abspath(os.path.join(snapshot.mountpoint, rpath))
