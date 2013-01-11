@@ -219,6 +219,7 @@ class MkConfig(Command):
         backups-to-keep         = 1
         auto-purge-failures     = yes
         purge-policy            = after-backup
+        estimated-size-factor   = 1.0
         """.lstrip().splitlines()
         cfg = ConfigObj(base_config, configspec=cfgspec, list_values=True,stringify=True)
         cfg['holland:backup']['plugin'] = plugin_type
