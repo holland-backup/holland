@@ -193,7 +193,8 @@ def build_xb_args(config, basedir, defaults_file=None):
     slave_info = config['slave-info']
     safe_slave_backup = config['safe-slave-backup']
     no_lock = config['no-lock']
-    extra_opts = config['additional-options']
+    # filter additional options to remove any empty values
+    extra_opts = filter(None, config['additional-options'])
 
     args = [
         innobackupex,
