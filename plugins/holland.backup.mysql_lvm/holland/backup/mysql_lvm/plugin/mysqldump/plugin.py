@@ -6,6 +6,7 @@ import logging
 from holland.lib.lvm import LogicalVolume, CallbackFailuresError, \
                             LVMCommandError, relpath, getmount
 from holland.lib.mysql.client import MySQLError
+from holland.core.util.fmt import format_bytes
 from holland.core.util.path import directory_size
 from holland.core.exceptions import BackupError
 from holland.backup.mysql_lvm.plugin.common import build_snapshot, \
@@ -87,16 +88,14 @@ class MysqlDumpLVMBackup(object):
             raise BackupError("Failed to lookup logical volume for %s: %s" %
                               (datadir, str(exc)))
 
-        if self.dry_run:
-            _dry_run(volume)
-            # do the normal mysqldump dry-run
-            return self.mysqldump_plugin.backup()
 
         # create a snapshot manager
-        snapshot = build_snapshot(self.config['mysql-lvm'], volume)
+        snapshot = build_snapshot(self.config['mysql-lvm'], volume,
+                                  suppress_tmpdir=self.dry_run)
         # calculate where the datadirectory on the snapshot will be located
         rpath = relpath(datadir, getmount(datadir))
-        snap_datadir = os.path.abspath(os.path.join(snapshot.mountpoint, rpath))
+        snap_datadir = os.path.abspath(os.path.join(snapshot.mountpoint or
+        '/tmp', rpath))
         # setup actions to perform at each step of the snapshot process
         setup_actions(snapshot=snapshot,
                       config=self.config,
@@ -104,6 +103,18 @@ class MysqlDumpLVMBackup(object):
                       datadir=snap_datadir,
                       spooldir=self.target_directory,
                       plugin=self.mysqldump_plugin)
+
+        if self.config['mysqldump']['bin-log-position']:
+            LOG.warn("bin-log-position is not supported with mysqldump-lvm.")
+            LOG.warn("Replication status will be saved to the "
+                     "[mysql:replication] section in %s",
+                    self.config.filename)
+            self.config['mysqldump']['bin-log-position'] = False
+
+        if self.dry_run:
+            self._dry_run(volume, snapshot, datadir)
+            # do the normal mysqldump dry-run
+            return self.mysqldump_plugin.backup()
 
         try:
             snapshot.start(volume)
@@ -116,11 +127,23 @@ class MysqlDumpLVMBackup(object):
             # Something failed in the snapshot process
             raise BackupError(str(exc))
 
-def _dry_run(volume):
-    """Implement dry-run for LVM snapshots.  Not much to do here at the moment
-    """
-    LOG.info("[dry-run] Snapshotting %s/%s to %s/%s_snapshot",
+    def _dry_run(self, volume, snapshot, datadir):
+        """Implement dry-run for LVM snapshots.
+        """
+        LOG.info("* Would snapshot source volume %s/%s as %s/%s (size=%s)",
              volume.vg_name,
              volume.lv_name,
              volume.vg_name,
-             volume.lv_name)
+             snapshot.name,
+             format_bytes(snapshot.size*int(volume.vg_extent_size)))
+        LOG.info("* Would mount on %s",
+             snapshot.mountpoint or 'generated temporary directory')
+
+        snapshot_mountpoint = snapshot.mountpoint or tempfile.gettempdir()
+        if getmount(self.target_directory) == getmount(datadir):
+            LOG.error("Backup directory %s is on the same filesystem as "
+                      "the source logical volume %s.",
+                      self.target_directory, volume.device_name())
+            LOG.error("This will result in very poor performance and "
+                      "has a high potential for failed backups.")
+            raise BackupError("Improper backup configuration for LVM.")
