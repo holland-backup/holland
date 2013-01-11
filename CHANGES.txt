@@ -21,6 +21,15 @@ holland
   unlink(2) to minimize the impact of removing a very large file.
 - Fixed a bug in holland.conf [logging] handling where the log-level would be
   ignored in favor of the default value for holland --log-level.
+- holland mk-config now adds a default estimated-size-factor to the 
+  [holland:backup] section.
+
+holland-common
+++++++++++++++
+
+- pbzip2 is now a supported compression option.  This is valid for any holland
+  plugins that use the internal holland compression command api.
+  Contributed by justino
 
 holland-mysqldump
 +++++++++++++++++
