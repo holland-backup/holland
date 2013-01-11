@@ -48,12 +48,29 @@ mysqldump Provider Configuration [mysqldump]
         databases or backup-set. This should only be used when backing
         up a slave and only after the slave has been turned off 
         (ie, this can be used with the **stop-slave** option).
-    
-**dump-routines** = yes | no
+ 
+**exclude-invalid-views** =  yes | no (default: no)
+
+    Whether to automate exclusion of invalid views that would otherwise cause
+    mysqldump to fail.  This adds additional overhead so this option is not
+    enabled by default.
+
+    When enabled, thos option will scan the INFORMATION_SCHEMA.VIEWS table and
+    execute SHOW FIELDS against each view.  If a view is detects as invalid, an
+    ignore-table option will be added to exclude the table.  Additionally, the
+    plugin will attempt to save the view definion to 'invalid_views.sql' in the
+    backupset's backup directory.
+
+    .. versionadded:: 1.0.8
+
+**dump-routines** = yes | no (default: yes)
 
     Whether or not to backup routines in the backup set directly. Routines
     are stored in the 'mysql' database, but it can sometimes be convenient
     to include them in a backup-set directly.
+
+    .. versionchanged:: 1.0.8
+       This option now enabled by default.
     
 **dump-events** = yes | no
 
@@ -61,7 +78,12 @@ mysqldump Provider Configuration [mysqldump]
     stored in the 'mysql' database. Nonetheless, it can sometimes be 
     convenient to include them in the backup-set directly. 
     
-    **Note**: This feature requires MySQL 5.1 or later.
+    **Note**: This feature requires MySQL 5.1 or later. The mysqldump plugin
+    will automatically disable events if the version of mysqldump is too old.
+
+    .. versionchanged:: 1.0.8
+       This option is now enabled by default
+
     
 **stop-slave** = yes | no
 
@@ -111,6 +133,25 @@ mysqldump Provider Configuration [mysqldump]
     there is no native Holland option available.  This option accepts a comma
     delimited list of arguments to pass on the commandline. 
 
+**extra-defaults** = yes | no (default: no)
+
+    This option controls whether mysqldump will only read options as set by
+    holland or if additional options from global config files are read.  By
+    default, the plugin only uses optons as set in the backupset config and
+    includes authentication credentials only from the [client] section in
+    ~/.my.cnf.
+
+**estimate-method** = plugin | const:<size> (default: plugin)
+
+    This option will skip some of the heavyweight queries necessary to
+    calculate the size of tables to be backed up.  If a constant size is
+    specified, then only table names are evaluated and only if table filtering
+    is being used. Additionally, engines will be looked up via SHOW CREATE
+    TABLE if lock-method = auto-detect, in order for the plugin to determine if
+    tables are using a transactional storage engine.  With 'plugin', the
+    default behavior of reading both size information and table names from the
+    information schema is used, which may be slow particularly for a large
+    number of tables.
 
 Database and Table filtering
 ----------------------------
