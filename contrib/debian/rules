@@ -2,8 +2,16 @@
 
 export DH_VERBOSE=1
 
+# Lucid does not have dh_python2, but we would like to be able to use this
+# rules file to build on lucid as well. Thus the branching logic.
+WITH_PYTHON2 = $(shell test -f /usr/bin/dh_python2 && echo "--with python2")
+
+WITH_SPHINXDOC = $(shell test -f /usr/bin/dh_sphinxdoc && echo "--with sphinxdoc")
+
 %:
-	dh $@ --with quilt --with sphinxdoc --with python2 --buildsystem=python_distutils
+	dh $@ \
+		--with quilt \
+	   	${WITH_SPHINXDOC} ${WITH_PYTHON2} --buildsystem=python_distutils
 
 override_dh_auto_clean:
 	rm -rf docs/html/
@@ -38,10 +46,12 @@ override_dh_auto_install:
 
 override_dh_installdocs:
 	dh_installdocs
-	# Remove embedded copy of libjs-jquery
+	# Remove embedded copy of libjs-jquery, if sphinxdocs will not
+	if [ ! ${WITH_SPHINXDOC} ]; then \
 	cd debian/holland/usr/share/doc/holland/html/_static \
 		&& rm jquery.js \
-                && ln -s ../../../../javascript/jquery/jquery.js .
+                && ln -s ../../../../javascript/jquery/jquery.js .; \
+	fi
 
 override_dh_compress:
 	dh_compress -X.txt
