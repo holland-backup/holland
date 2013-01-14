@@ -1,17 +1,22 @@
 Source: holland
 Section: utils
 Priority: optional
-Maintainer: Andrew Garner <andrew.garner@rackspace.com>
-Build-Depends: debhelper (>= 7.0.50), quilt
-Build-Depends-Indep: python (>= 2.6.6-3), python-sphinx,
- python-setuptools, libjs-jquery
+Maintainer: Andrew Garner <muzazzi@gmail.com>
+Build-Depends: debhelper (>= 7.0.50),
+ quilt
+Build-Depends-Indep: python (>= 2.6),
+ python-sphinx,
+ python-setuptools (>= 0.6b3),
+ libjs-jquery
 Homepage: http://hollandbackup.org
 Standards-Version: 3.9.2
 
 
 Package: holland
 Architecture: all 
-Depends: ${python:Depends}, ${misc:Depends}, python-pkg-resources
+Depends: python-pkg-resources,
+ ${misc:Depends},
+ ${python:Depends}
 Description: pluggable backup manager
  Pluggable backup framework which focuses on, but is not limited to, highly 
  configurable database backups.
@@ -31,7 +36,10 @@ Description: pluggable backup manager
 
 Package: holland-common
 Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}, holland (>= ${source:Version}), python-mysqldb (>= 1.2)
+Depends: holland (>= ${binary:Version}),
+ python-mysqldb (>= 1.2),
+ ${misc:Depends},
+ ${python:Depends}
 Recommends: mysql-client
 Description: Holland Common Library Plugins
  This package provides the common holland plugins that are generally used by
@@ -39,32 +47,41 @@ Description: Holland Common Library Plugins
 
 Package: holland-mysqldump
 Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}, holland (>= ${source:Version}), holland-common(>= ${source:Version}), mysql-client
+Depends: holland (>= ${binary:Version}),
+ holland-common (>= ${binary:Version}),
+ mysql-client,
+ ${misc:Depends},
+ ${python:Depends}
 Description: Holland MySQL Dump Backup Provider Plugin
  This package provides the holland mysqldump plugin. 
  
-Package: holland-example
-Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}, holland (>= ${source:Version})
-Description: Holland Example Backup Provider Plugin 
- This package provides the holland example plugin. 
-
 Package: holland-mysqllvm
 Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}, holland (>= ${source:Version}), holland-common (>= ${source:Version})
+Depends: holland (>= ${binary:Version}),
+ holland-common (>= ${binary:Version}),
+ ${misc:Depends},
+ ${python:Depends}
 Replaces: holland-mysql-lvm
 Description: Holland MySQL Hot Copy Backup Provider Plugin 
  This package provides the Holland mysql-lvm plugin. 
 
 Package: holland-xtrabackup
 Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}, holland (>= ${source:Version}), holland-common (>= ${source:Version}), mysql-client
+Depends: holland (>= ${binary:Version}),
+ holland-common (>= ${binary:Version}),
+ mysql-client,
+ ${misc:Depends},
+ ${python:Depends}
 Description: Holland xtrabackup Backup plugin
  This package provides the holland xtrabackup plugin.
  
 Package: holland-pgdump
 Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}, holland (>= ${source:Version}), holland-common(>= ${source:Version})
-Description: Holland Postgres Backup Provider Plugin
+Depends: holland (>= ${binary:Version}),
+ holland-common (>= ${binary:Version}),
+ postgresql-client-common | postgresql-xc-client,
+ ${misc:Depends},
+ ${python:Depends}
+description: Holland Postgres Backup Provider Plugin
  This package provides the holland pgdump plugin. 
  
