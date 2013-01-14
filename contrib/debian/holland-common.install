@@ -1,0 +1,8 @@
+debian/tmp/usr/lib/python*.*/*-packages/holland/lib/compression.py*
+debian/tmp/usr/lib/python*.*/*-packages/holland/lib/which.py*
+debian/tmp/usr/lib/python*.*/*-packages/holland/lib/safefilename.py*
+debian/tmp/usr/lib/python*.*/*-packages/holland/lib/multidict.py*
+debian/tmp/usr/lib/python*.*/*-packages/holland/lib/archive/
+debian/tmp/usr/lib/python*.*/*-packages/holland/lib/mysql/
+debian/tmp/usr/lib/python*.*/*-packages/holland.lib.common-*.egg-info
+debian/tmp/usr/lib/python*.*/*-packages/holland.lib.mysql-*.egg-info

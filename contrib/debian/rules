@@ -1,101 +1,51 @@
 #!/usr/bin/make -f
-# -*- makefile -*-
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
+export DH_VERBOSE=1
 
--include /usr/share/python/python.mk
+%:
+	dh $@ --with quilt --with sphinxdoc --with python2 --buildsystem=python_distutils
 
-PYTHON=python
-PLUGINDIR=/usr/share/holland/plugins
-SBINDIR=/usr/sbin
-HOLLAND_CORE=$(CURDIR)
+override_dh_auto_clean:
+	rm -rf docs/html/
+	find -type d \( -name '*.egg-info' -or -name 'build' \) | xargs rm -fr
+	dh_auto_clean
 
-configure: configure-stamp
-configure-stamp:
-	dh_testdir
-	touch configure-stamp
+override_dh_auto_build:
+	dh_auto_build
+	dh_auto_build -Dplugins/holland.lib.common
+	dh_auto_build -Dplugins/holland.lib.mysql
+	dh_auto_build -Dplugins/holland.lib.lvm
+	dh_auto_build -Dplugins/holland.backup.mysqldump
+	dh_auto_build -Dplugins/holland.backup.mysql_lvm
+	dh_auto_build -Dplugins/holland.backup.pgdump
+	dh_auto_build -Dplugins/holland.backup.example
+	dh_auto_build -Dplugins/holland.backup.xtrabackup
+        
+	# Build the HTML documentation.
+	PYTHONPATH=. sphinx-build -N -q -E -b html docs/source/ docs/html/
 
+override_dh_auto_install:
+	dh_auto_install -O--buildsystem=python_distutils
+	dh_auto_install -O--buildsystem=python_distutils -Dplugins/holland.lib.common 
+	dh_auto_install -O--buildsystem=python_distutils -Dplugins/holland.lib.mysql
+	dh_auto_install -O--buildsystem=python_distutils -Dplugins/holland.lib.lvm
+	dh_auto_install -O--buildsystem=python_distutils -Dplugins/holland.backup.mysqldump
+	dh_auto_install -O--buildsystem=python_distutils -Dplugins/holland.backup.mysql_lvm
+	dh_auto_install -O--buildsystem=python_distutils -Dplugins/holland.backup.pgdump
+	dh_auto_install -O--buildsystem=python_distutils -Dplugins/holland.backup.example
+	dh_auto_install -O--buildsystem=python_distutils -Dplugins/holland.backup.xtrabackup
+	find debian/tmp/ \( -name '*.pth' -or -name 'namespace_packages.txt' \) -delete
 
-build: build-stamp
-build-stamp: configure-stamp  
-	dh_testdir
-	touch $@
-
-clean: 
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp configure-stamp
-
-	@for ADDON in $(HOLLAND_CORE); \
-	do cd $$ADDON ; \
-		$(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) clean; \
-	done
-
-	@for PLUGIN in $(shell ls -d $(CURDIR)/plugins/*/); \
-	do cd $$PLUGIN ; \
-	    $(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) clean; \
-	done
-	dh_clean 
-
-install: build 
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	dh_installdirs
-
-	cd docs && make text
-	@for ADDON in $(HOLLAND_CORE); \
-	do cd $$ADDON ; \
-		$(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) install \
-			--no-compile \
-			--prefix=/usr \
-			--root=$(CURDIR)/debian/tmp \
-			--install-scripts=$(SBINDIR) \
-			--single-version-externally-managed \
-			$(py_setup_install_args); \
-	done
-
-	@for PLUGIN in $(shell ls -d $(CURDIR)/plugins/*/); \
-	do cd $$PLUGIN ; \
-	    $(PYTHON) setup.py $(if $(DH_VERBOSE),,-q) install \
-			--no-compile \
-			--prefix=/usr \
-			--root=$(CURDIR)/debian/tmp \
-			--install-scripts=$(SBINDIR) \
-			--single-version-externally-managed \
-			$(py_setup_install_args); \
-	done
-    
-	mkdir -p $(CURDIR)/debian/tmp/etc/holland
-	mkdir -p $(CURDIR)/debian/tmp/etc/holland/backupsets
-	mkdir -p $(CURDIR)/debian/tmp/etc/holland/providers
-	@for name in $(shell ls $(CURDIR)/config/); \
-	do cp -a $(CURDIR)/config/$$name $(CURDIR)/debian/tmp/etc/holland; \
-	done
-# This should probably be a patch
-	@sed -i 's/^backupsets = default/backupsets = /g' $(CURDIR)/debian/tmp/etc/holland/holland.conf
-
-binary-indep: install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs
+override_dh_installdocs:
 	dh_installdocs
-	dh_installexamples
-	dh_install
-	dh_movefiles
-	dh_installlogrotate
-#	dh_installcron
-	dh_installman
-	dh_pysupport
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms -X etc/holland/backupsets -X var/log/holland
-	dh_installdeb
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
+	# Remove embedded copy of libjs-jquery
+	cd debian/holland/usr/share/doc/holland/html/_static \
+		&& rm jquery.js \
+                && ln -s ../../../../javascript/jquery/jquery.js .
 
-binary: binary-indep
-.PHONY: build clean binary install configure
+override_dh_compress:
+	dh_compress -X.txt
+
+override_dh_python2:
+	# only build for current python version
+	dh_python2 -V $(shell pyversions -vd)

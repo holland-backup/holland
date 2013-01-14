@@ -1,3 +1,27 @@
+holland (1.0.8-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Andrew Garner <andrew.garner@rackspace.com>  Wed, 09 Jan 2013 15:10:45 +0000
+
+holland (1.0.6-3) unstable; urgency=low
+
+  * Installed holland command as /usr/sbin/holland to fix regression from 
+    previous releases 
+
+ -- Andrew Garner <andrew.garner@rackspace.com>  Wed, 30 May 2012 15:10:45 +0000
+
+holland (1.0.6-2) unstable; urgency=low
+
+  * Adding missing ${python:Depends} to all subpackages
+  * Removed mysql-client version requirement
+  * Removed python-support dependency and use dh_python2
+  * Remove namespace_package support
+  * Build sphinx html documentation
+  * Add missing mysqldump-lvm.conf global plugin config
+
+ -- Andrew Garner <andrew.garner@rackspace.com>  Sat, 05 May 2012 11:12:27 -0500
+
 holland (1.0.6-1) unstable; urgency=low
 
   * New upstream release

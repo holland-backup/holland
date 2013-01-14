@@ -1,9 +1,0 @@
-usr/lib/python*.*/*-packages/holland-*.egg-info
-usr/lib/python*.*/*-packages/holland-*-nspkg.pth
-usr/lib/python*.*/*-packages/holland/core/
-usr/lib/python*.*/*-packages/holland/commands/*.py*
-etc/holland/holland.conf
-etc/holland/README
-etc/holland/providers/README
-etc/holland/backupsets/default.conf
-usr/sbin/holland

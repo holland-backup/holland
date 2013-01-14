@@ -1,0 +1,3 @@
+debian/tmp/usr/lib/python*.*/*-packages/holland.backup.pgdump-*.egg-info
+debian/tmp/usr/lib/python*.*/*-packages/holland/backup/pgdump/
+config/providers/pgdump.conf etc/holland/providers/

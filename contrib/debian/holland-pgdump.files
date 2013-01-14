@@ -1,4 +1,0 @@
-usr/lib/python*.*/*-packages/holland.backup.pgdump-*.egg-info
-usr/lib/python*.*/*-packages/holland.backup.pgdump-*-nspkg.pth
-usr/lib/python*.*/*-packages/holland/backup/pgdump/
-etc/holland/providers/pgdump.conf
