@@ -17,8 +17,6 @@ holland
   in-progress backup and ultimately cause the backup run to fail.
 - Added before/after/failed backup command options to [holland:backup] for 
   each backupset. Contributed by osheroff
-- holland purge now truncates files in increments of 256MB before running
-  unlink(2) to minimize the impact of removing a very large file.
 - Fixed a bug in holland.conf [logging] handling where the log-level would be
   ignored in favor of the default value for holland --log-level.
 - holland mk-config now adds a default estimated-size-factor to the 
