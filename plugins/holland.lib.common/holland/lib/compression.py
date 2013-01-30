@@ -6,8 +6,11 @@ import which
 
 LOGGER = logging.getLogger(__name__)
 
+#: This is a simple table of method_name : (command, extension)
+#: mappings.
 COMPRESSION_METHODS = {
     'gzip'  : ('gzip', '.gz'),
+    'gzip-rsyncable' : ('gzip --rsyncable', '.gz'),
     'pigz'  : ('pigz', '.gz'),
     'bzip2' : ('bzip2', '.bz2'),
     'pbzip2': ('pbzip2', '.bz2'),
@@ -26,8 +29,9 @@ def lookup_compression(method):
     """
     try:
         cmd, ext = COMPRESSION_METHODS[method]
+        argv = shlex.split(cmd)
         try:
-            return which.which(cmd), ext
+            return [which.which(argv[0])] + argv[1:], ext
         except which.WhichError, e:
             raise OSError("No command found for compression method '%s'" %
                     method)
@@ -39,11 +43,11 @@ class CompressionInput(object):
     Class to create a compressed file descriptor for reading.  Functions like
     a standard file descriptor such as from open().
     """
-    def __init__(self, path, mode, cmd, bufsize=1024*1024):
+    def __init__(self, path, mode, argv, bufsize=1024*1024):
         self.fileobj = open(path, 'r')
-        self.pid = subprocess.Popen([cmd, '--decompress'], 
-                                    stdin=self.fileobj.fileno(), 
-                                    stdout=subprocess.PIPE, 
+        self.pid = subprocess.Popen(argv + ['--decompress'],
+                                    stdin=self.fileobj.fileno(),
+                                    stdout=subprocess.PIPE,
                                     bufsize=bufsize)
         self.fd = self.pid.stdout.fileno()
         self.name = path
@@ -75,8 +79,8 @@ class CompressionOutput(object):
     Class to create a compressed file descriptor for writing.  Functions like
     a standard file descriptor such as from open().
     """
-    def __init__(self, path, mode, cmd, level, inline):
-        self.cmd = cmd
+    def __init__(self, path, mode, argv, level, inline):
+        self.argv = argv
         self.level = level
         self.inline = inline
         if not inline:
@@ -84,12 +88,11 @@ class CompressionOutput(object):
             self.fd = self.fileobj.fileno()
         else:
             self.fileobj = open(path, 'w')
-            args = [cmd]
             if level:
-                args += ['-%d' % level]
-            self.pid = subprocess.Popen(args, 
-                                        stdin=subprocess.PIPE, 
-                                        stdout=self.fileobj.fileno(), 
+                argv += ['-%d' % level]
+            self.pid = subprocess.Popen(argv,
+                                        stdin=subprocess.PIPE,
+                                        stdout=self.fileobj.fileno(),
                                         stderr=subprocess.PIPE)
             self.fd = self.pid.stdin.fileno()
         self.name = path
@@ -104,17 +107,17 @@ class CompressionOutput(object):
     def close(self):
         self.closed = True
         if not self.inline:
-            args = [self.cmd]
+            argv = list(self.argv)
             if self.level:
-                args += ['-%d' % self.level, '-']
+                argv += ['-%d' % self.level, '-']
             self.fileobj.close()
             self.fileobj = open(self.fileobj.name, 'r')
             cmp_f = open(self.name, 'w')
-            LOGGER.debug("Running %r < %r[%d] > %r[%d]", 
-                         args, self.fileobj.name, self.fileobj.fileno(), 
+            LOGGER.debug("Running %r < %r[%d] > %r[%d]",
+                         argv, self.fileobj.name, self.fileobj.fileno(),
                          cmp_f.name, cmp_f.fileno())
-            pid = subprocess.Popen(args, 
-                                   stdin=self.fileobj.fileno(), 
+            pid = subprocess.Popen(args,
+                                   stdin=self.fileobj.fileno(),
                                    stdout=cmp_f.fileno())
             status = pid.wait()
             os.unlink(self.fileobj.name)
@@ -124,7 +127,7 @@ class CompressionOutput(object):
             for line in self.pid.stderr:
                 errmsg = line.strip()
                 if not errmsg:
-                    # gzip, among others, output a spurious blank line 
+                    # gzip, among others, output a spurious blank line
                     continue
                 LOGGER.error("Compression Error: %s", errmsg)
             self.fileobj.close()
@@ -132,7 +135,7 @@ class CompressionOutput(object):
             if status != 0:
                 raise IOError(errno.EPIPE,
                               "Compression program '%s' exited with status %d" %
-                                (self.cmd, status))
+                                (self.argv[0], status))
 
 
 def stream_info(path, method=None, level=None):
@@ -150,15 +153,15 @@ def stream_info(path, method=None, level=None):
     if not method or level == 0:
         return path
 
-    cmd, ext = lookup_compression(method)
+    argv, ext = lookup_compression(method)
 
-    if not cmd:
-        raise IOError("Unknown compression method '%s'" % cmd)
+    if not argv:
+        raise IOError("Unknown compression method '%s'" % argv[0])
 
     if not path.endswith(ext):
         path += ext
 
-    return cmd, path
+    return argv, path
 
 def open_stream(path, mode, method=None, level=None, inline=True):
     """
@@ -176,14 +179,11 @@ def open_stream(path, mode, method=None, level=None, inline=True):
     if not method or method == 'none' or level == 0:
         return open(path, mode)
     else:
-        cmd, path = stream_info(path, method)
-        if not cmd:
-            raise IOError("Unknown compression method '%s'" % cmd)
-
+        argv, path = stream_info(path, method)
         if mode == 'r':
-            return CompressionInput(path, mode, cmd=cmd)
+            return CompressionInput(path, mode, argv=argv)
         elif mode == 'w':
-            return CompressionOutput(path, mode, cmd=cmd, level=level, 
+            return CompressionOutput(path, mode, argv=argv, level=level,
                                      inline=inline)
         else:
             raise IOError("invalid mode: %s" % mode)

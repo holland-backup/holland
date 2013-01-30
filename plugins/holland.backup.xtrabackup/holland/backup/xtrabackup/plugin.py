@@ -31,7 +31,7 @@ additional-options  = force_list(default=list())
 pre-command         = string(default=None)
 
 [compression]
-method              = option('none', 'gzip', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', default=gzip)
+method              = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', default=gzip)
 inline              = boolean(default=yes)
 level               = integer(min=0, max=9, default=1)
 
