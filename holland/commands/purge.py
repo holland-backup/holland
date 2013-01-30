@@ -69,6 +69,8 @@ class Purge(Command):
                     error = 1
                     continue
                 purge_backup(backup, opts.force)
+                if opts.force:
+                    spool.find_backupset(backup.backupset).update_symlinks()
         return error
 
 def purge_backupset(backupset, force=False, all_backups=False):
@@ -85,7 +87,7 @@ def purge_backupset(backupset, force=False, all_backups=False):
     else:
         try:
             config = hollandcfg.backupset(backupset.name)
-            config.validate_config(CONFIGSPEC)
+            config.validate_config(CONFIGSPEC, suppress_warnings=True)
         except (IOError, ConfigError), exc:
             LOG.error("Failed to load backupset '%s': %s", backupset.name, exc)
             LOG.error("Aborting, because I could not tell how many backups to "
@@ -144,4 +146,3 @@ def purge_backup(backup, force=False):
     else:
         backup.purge()
         LOG.info("Purged %s", backup.name)
-	backup.backupset.update_symlinks()
