@@ -21,6 +21,7 @@ holland
   ignored in favor of the default value for holland --log-level.
 - holland mk-config now adds a default estimated-size-factor to the 
   [holland:backup] section.
+- holland purge now correctly updates symlinks when run manually
 
 holland-common
 ++++++++++++++
