@@ -50,7 +50,7 @@ post-args = string(default=None)
 pre-args = string(default=None)
 
 [compression]
-method = option('none', 'gzip', 'pigz', 'bzip2', 'pbzip2', 'lzop', default='gzip')
+method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzop', default='gzip')
 level = integer(min=0, max=9, default=1)
 
 [mysql:client]
