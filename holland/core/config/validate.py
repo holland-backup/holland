@@ -1226,7 +1226,7 @@ def force_list(value, min=None, max=None):
     ['hello']
     """
     if not isinstance(value, (list, tuple)):
-        value = [value]
+        value = value and [value] or []
     return is_list(value, min, max)
     
     
