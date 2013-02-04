@@ -118,13 +118,14 @@ def apply_xtrabackup_logfile(xb_cfg, backupdir):
 
 def determine_stream_method(stream):
     """Calculate the stream option from the holland config"""
-    if stream in ('yes', 'tar', 'tar4ibd'):
+    stream = stream.lower()
+    if stream in ('yes', '1', 'true', 'tar', 'tar4ibd'):
         return 'tar'
     if stream in ('xbstream',):
         return 'xbstream'
-    if stream == 'no':
+    if stream in ('no', '0', 'false'):
         return None
-    raise BackupError("Invalid stream method '%s'" % stream)
+    raise BackupError("Invalid xtrabackup stream method '%s'" % stream)
 
 def evaluate_tmpdir(tmpdir=None, basedir=None):
     """Evaluate the tmpdir option"""
