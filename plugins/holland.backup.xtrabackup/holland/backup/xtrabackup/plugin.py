@@ -95,17 +95,20 @@ class XtrabackupPlugin(object):
         """Open the stdout output for a streaming xtrabackup run"""
         config = self.config['xtrabackup']
         backup_directory = self.target_directory
-        if config['stream'] in ('tar', 'tar4ibd', 'xbstream'):
+        stream = util.determine_stream_method(config['stream'])
+        if stream:
             # XXX: bounce through compression
-            if 'tar' in config['stream']:
+            if stream == 'tar':
                 archive_path = join(backup_directory, 'backup.tar')
                 zconfig = self.config['compression']
                 return open_stream(archive_path, 'w',
-                                        method=zconfig['method'],
-                                        level=zconfig['level'])
-            elif 'xbstream' in config['stream']:
+                                   method=zconfig['method'],
+                                   level=zconfig['level'])
+            elif stream == 'xbstream':
                 archive_path = join(backup_directory, 'backup.xb')
                 return open(archive_path, 'w')
+            else:
+                raise BackupError("Unknown stream method '%s'" % stream)
         else:
             return open('/dev/null', 'w')
 
