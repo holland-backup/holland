@@ -219,7 +219,8 @@ class MySQLDumpPlugin(object):
             self.config['compression']['level'] > 0:
             cmd, ext = lookup_compression(self.config['compression']['method'])
             LOG.info("Using %s compression level %d",
-                     cmd, self.config['compression']['level'])
+                     self.config['compression']['method'],
+                     self.config['compression']['level'])
         else:
             LOG.info("Not compressing mysqldump output")
             cmd = ''
