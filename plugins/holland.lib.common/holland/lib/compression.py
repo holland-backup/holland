@@ -3,6 +3,7 @@ import logging
 import errno
 import subprocess
 import which
+import shlex
 
 LOGGER = logging.getLogger(__name__)
 
