@@ -71,7 +71,7 @@ class MySQLClient(object):
         http://dev.mysql.com/doc/refman/5.0/en/flush.html
         """
         cursor = self.cursor()
-        cursor.execute('FLUSH TABLES')
+        cursor.execute('FLUSH /*!40101 LOCAL */ TABLES')
         cursor.close()
 
     def flush_tables_with_read_lock(self):
