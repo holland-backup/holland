@@ -8,8 +8,16 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
-1.0.8 - unreleased
+1.0.9 - unreleased
 ------------------
+holland-common
+++++++++++++++
+- FLUSH TABLES is now run as FLUSH /*!40101 LOCAL */ TABLES to avoid
+  replicating this statement.  This affects any plugins that issue flush
+  tables via the holland-common mysql client API
+
+1.0.8 - Mar 7, 2013
+-------------------
 
 holland
 +++++++
