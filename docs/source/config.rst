@@ -145,7 +145,7 @@ put the following at the top of the backup set configuration file::
 
 **before-backup-command** = string
 
-    Run a shell command before a backup starts.  This allows some command to 
+    Run a shell command before a backup starts.  This allows a command to 
     perform some action before the backup starts such as setting up an
     iptables rule (taking a mysql slave out of a load balancer) or aborting 
     the backup based on some external condition. 
@@ -156,7 +156,7 @@ put the following at the top of the backup set configuration file::
 
 **after-backup-command** = string
 
-    Run a shell command before a backup starts.  This allows some command to 
+    Run a shell command after a backup completes.  This allows a command to 
     perform some action when a backup completes successfully such as sending
     out a success notification.
     
@@ -166,14 +166,15 @@ put the following at the top of the backup set configuration file::
 
 **failed-backup-command** = string
 
-    Run a shell command before a backup starts.  This allows some command to 
+    Run a shell command if a backup starts.  This allows some command to 
     perform some action when a backup fails such as sending out a failure
-    notification.  The backup will fail if this command exits with a non-zero
-    status.
+    notification.
+
+    The backup will fail if this command exits with a non-zero status.
 
 .. versionadded:: 1.0.7
 
-For all hook commands, Holland will perform simple text substitution substitution 
+For all hook commands, Holland will perform simple text substitution  
 on the three parameters:
 
   * hook - name of the hook being called (one of: before-backup-command, after-backup-command, failed-backup-command)
