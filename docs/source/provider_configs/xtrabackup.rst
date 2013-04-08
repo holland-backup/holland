@@ -3,6 +3,11 @@
 Xtrabackup Provider Configuration [xtrabackup]
 ==============================================
 
+Backs up a MySQL instance using Percona's Xtrabackup tool.
+
+[xtrabackup]
+------------
+
 **global-defaults** = <path> (default: /etc/my.cnf)
 
     The MySQL configuration file for xtrabackup to parse.  This is !include'd

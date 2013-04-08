@@ -3,6 +3,11 @@
 pgdump Provider Configuration [pgdump]
 ======================================
 
+Backs up a PostgreSQL instance using the pgdump utility.
+
+[pgdump]
+--------
+
 **format** = custom | tar | plain (default: custom)
 
     Defines the --format option for pg_dump.  This defaults to --format=custom.
