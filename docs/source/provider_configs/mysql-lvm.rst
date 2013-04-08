@@ -3,6 +3,14 @@
 MySQL LVM Provider Configuration [mysql-lvm]
 ============================================
 
+Creates an LVM snapshot of a running MySQL instance and performs a 
+binary-based backup with minimal locking. MySQL must be running on an
+LVM volume with reserved space for snapshots. It is highly recommended
+that this volume be separate from the one storing the resulting backups.
+
+[mysql-lvm]
+-----------
+
 **snapshot-size** = <size-in-MB>
 
     The size of the snapshot itself. By default it is 20% of the size of  the 
