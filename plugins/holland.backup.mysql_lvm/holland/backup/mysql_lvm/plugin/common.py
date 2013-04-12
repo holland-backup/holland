@@ -9,7 +9,6 @@ from holland.core.exceptions import BackupError
 from holland.core.util.fmt import format_bytes
 from holland.lib.mysql import PassiveMySQLClient, MySQLError, \
                               build_mysql_config, connect
-from holland.lib.compression import open_stream
 from holland.lib.lvm import Snapshot, parse_bytes
 
 LOG = logging.getLogger(__name__)

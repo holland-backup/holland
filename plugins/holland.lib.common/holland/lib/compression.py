@@ -91,6 +91,7 @@ class CompressionOutput(object):
             self.fileobj = open(path, 'w')
             if level:
                 argv += ['-%d' % level]
+            LOGGER.debug("* Executing: %s", subprocess.list2cmdline(argv))
             self.pid = subprocess.Popen(argv,
                                         stdin=subprocess.PIPE,
                                         stdout=self.fileobj.fileno(),
@@ -164,7 +165,18 @@ def stream_info(path, method=None, level=None):
 
     return argv, path
 
-def open_stream(path, mode, method=None, level=None, inline=True):
+def _parse_args(value):
+    """Convert a cmdline string to a list"""
+    if isinstance(value, unicode):
+        value = value.encode('utf8')
+    return shlex.split(value)
+
+def open_stream(path,
+                mode,
+                method=None,
+                level=None,
+                inline=True,
+                extra_args=None):
     """
     Opens a compressed data stream, and returns a file descriptor type object
     that acts much like os.open() does.  If no method is passed, or the 
@@ -181,6 +193,8 @@ def open_stream(path, mode, method=None, level=None, inline=True):
         return open(path, mode)
     else:
         argv, path = stream_info(path, method)
+        if extra_args:
+            argv += _parse_args(extra_args)
         if mode == 'r':
             return CompressionInput(path, mode, argv=argv)
         elif mode == 'w':

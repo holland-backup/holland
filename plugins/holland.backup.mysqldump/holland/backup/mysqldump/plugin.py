@@ -58,9 +58,10 @@ additional-options  = force_list(default=list())
 estimate-method = string(default='plugin')
 
 [compression]
-method        = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', default='gzip')
-inline              = boolean(default=yes)
-level               = integer(min=0, max=9, default=1)
+method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', default='gzip')
+options = string(default="")
+inline = boolean(default=yes)
+level  = integer(min=0, max=9, default=1)
 
 [mysql:client]
 defaults-extra-file = force_list(default=list('~/.my.cnf'))
@@ -218,9 +219,10 @@ class MySQLDumpPlugin(object):
         if self.config['compression']['method'] != 'none' and \
             self.config['compression']['level'] > 0:
             cmd, ext = lookup_compression(self.config['compression']['method'])
-            LOG.info("Using %s compression level %d",
+            LOG.info("Using %s compression level %d with args %s",
                      self.config['compression']['method'],
-                     self.config['compression']['level'])
+                     self.config['compression']['level'],
+                     self.config['compression']['options'])
         else:
             LOG.info("Not compressing mysqldump output")
             cmd = ''
@@ -243,7 +245,12 @@ class MySQLDumpPlugin(object):
         path = os.path.join(self.target_directory, 'backup_data', path)
         compression_method = method or self.config['compression']['method']
         compression_level = self.config['compression']['level']
-        stream = open_stream(path, mode, compression_method, compression_level)
+        compression_options = self.config['compression']['options']
+        stream = open_stream(path,
+                             mode,
+                             compression_method,
+                             compression_level,
+                             extra_args=compression_options)
         return stream
 
     def info(self):
