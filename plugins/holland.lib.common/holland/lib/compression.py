@@ -126,18 +126,19 @@ class CompressionOutput(object):
         else:
             self.pid.stdin.close()
             # Check for anything on stderr
-            for line in self.pid.stderr:
-                errmsg = line.strip()
-                if not errmsg:
-                    # gzip, among others, output a spurious blank line
-                    continue
-                LOGGER.error("Compression Error: %s", errmsg)
-            self.fileobj.close()
+            stderr = self.pid.stderr.readlines()
             status = self.pid.wait()
             if status != 0:
+                for line in stderr:
+                    LOGGER.error("%s: %s", self.argv[0], line.rstrip())
                 raise IOError(errno.EPIPE,
                               "Compression program '%s' exited with status %d" %
                                 (self.argv[0], status))
+            else:
+                for line in stderr:
+                    if not line.strip():
+                        continue
+                    LOGGER.info("%s: %s", self.argv[0], line.rstrip())
 
 
 def stream_info(path, method=None, level=None):
