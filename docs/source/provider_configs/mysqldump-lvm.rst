@@ -1,7 +1,14 @@
 .. _config-mysqldump-lvm:
 
-mysqldump LVM Provider Configuration [mysql-lvm]
-================================================
+mysqldump LVM Provider Configuration [mysqldump-lvm]
+====================================================
+
+Backs up one or more MySQL databases by creating an LVM snapshot and
+then starting a instance of MySQL on top of it to then perform a 
+mysqldump. This effectively produces a non-blocking logical backup.
+
+[mysql-lvm]
+-----------
 
 **snapshot-size** = <size-in-MB>
 
