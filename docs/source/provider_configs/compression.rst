@@ -6,9 +6,9 @@ compression level, etc.
 
 **method** = gzip | pigz | bzip | lzop | lzma 
 
-    Define which compression method to use. Note that ``lzop`` and 
-    ``lzma`` may not be available on every system and may need to be compiled 
-    / installed.
+    Define which compression method to use. Note that some methods may 
+    not be available by default on every system and may need to be compiled
+    or installed.
     
 **inline** = yes | no
 
