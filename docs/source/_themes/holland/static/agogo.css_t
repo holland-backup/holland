@@ -425,3 +425,17 @@ div.viewcode-block:target {
     border-top: 1px solid #ac9;
     border-bottom: 1px solid #ac9;
 }
+
+span.versionmodified {
+    font-weight: bold;
+    font-size: 85%;
+}
+
+pre {
+    font-size: 100%;
+    line-height: 125%;
+    background-color: #dddddd;
+    border-style: dotted;
+    border-width: 1px;
+    border-color: #aaaaaa;
+}
