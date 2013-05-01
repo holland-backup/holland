@@ -31,15 +31,25 @@ As of Holland 0.5, there are 5 providers:
 
     Uses the ``mysqldump`` utility to backup databases.
 
-* Example
-
-    This is used solely as a template for designing providers. It otherwise
-    does nothing.
-
 * MySQL + LVM
 
     Backup MySQL databases using LVM snapshots which allows for near lockless 
     or fully lockless (when transactional engines are used) backups.
+
+* XtraBackup
+
+    Backup MySQL databases using Percona's 
+    `XtraBackup <http://www.percona.com/software/percona-xtrabackup>`_ tool.
+    This provides a near lockless backup when using the InnoDB storage engine.
+
+* pgdump
+
+    Backup PostgreSQL databases using the ``pgdump`` utility.
+
+* Example
+
+    This is used solely as a template for designing providers. It otherwise
+    does nothing.
     
 As Holland is a framework, it can actually backup most anything as long
 as there is a provider for it. This includes things that have nothing to do 
