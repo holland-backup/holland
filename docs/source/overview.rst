@@ -38,11 +38,11 @@ As of Holland 0.5, there are 5 providers:
 
 * XtraBackup
 
+    .. versionadded:: 1.0.8
+    
     Backup MySQL databases using Percona's 
     `XtraBackup <http://www.percona.com/software/percona-xtrabackup>`_ tool.
     This provides a near lockless backup when using the InnoDB storage engine.
-
-.. versionadded:: 1.0.8
 
 * pgdump
 
