@@ -99,7 +99,10 @@ put the following at the top of the backup set configuration file::
     plugin = <plugin>
     backups-to-keep = #
     estimated-size-factor = #
-    
+
+Configuration Options
+^^^^^^^^^^^^^^^^^^^^^
+
 **plugin** = <plugin>
 
     This is the name of the provider that will be used for the backup-set.
@@ -152,7 +155,7 @@ put the following at the top of the backup set configuration file::
     
     The backup will fail if this command exits with a non-zero status.
 
-.. versionadded:: 1.0.7
+    .. versionadded:: 1.0.7
 
 **after-backup-command** = string
 
@@ -162,7 +165,7 @@ put the following at the top of the backup set configuration file::
     
     The backup will fail if this command exits with a non-zero status.
 
-.. versionadded:: 1.0.7
+    .. versionadded:: 1.0.7
 
 **failed-backup-command** = string
 
@@ -172,7 +175,7 @@ put the following at the top of the backup set configuration file::
 
     The backup will fail if this command exits with a non-zero status.
 
-.. versionadded:: 1.0.7
+    .. versionadded:: 1.0.7
 
 For all hook commands, Holland will perform simple text substitution  
 on the three parameters:
