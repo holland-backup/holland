@@ -22,7 +22,7 @@ MySQL based plugins additional require the MySQLdb python connector:
 * `MySQLdb <http://mysql-python.sourceforge.net/>`_
 
 For Red-Hat Enterprise Linux 5, all dependencies are available directly from
-the base channels.  Red-Hat Enterprise Linux 4, EPEL is required for
+the base channels. For Red-Hat Enterprise Linux 4, EPEL is required for
 python-setuptools. 
 
 Note that other plugins may have additional dependency requirements.

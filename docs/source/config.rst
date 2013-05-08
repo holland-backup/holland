@@ -70,8 +70,8 @@ two sections :ref:`[holland]<holland-config>` and :ref:`[logging]<logging-config
     Sets the verbosity of Holland's logging process. Available options are
     ``debug``, ``info``, ``warning``, ``error``, and ``critical``
 
-Provider Configs
-----------------
+Provider Plugin Configs
+-----------------------
 
 These files control the global settings / defaults for the providers used by 
 the backup-sets. Many of these global settings can be overridden if defined
