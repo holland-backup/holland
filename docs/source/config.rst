@@ -238,15 +238,9 @@ These are used within their own braced section in the backup-set
 configuration file. For specific information on how to configure a
 desired provider, see the list below.
 
-Note that provider configuration defaults can be overriden by
-FIX ME
-
-
-
-These files control the global settings / defaults for the providers used by 
-the backup-sets. Many of these global settings can be overridden if defined
-in a backup-set. Note that each provider's configuration file should begin
-with ``[provider-name]``.
+For advanced users, the defaults for each provider plugin can be changed
+by editing the default configuration file for said provider. These files are 
+located in ``/etc/holland/providers`` by default.
 
 .. toctree::
     :maxdepth: 1
@@ -258,4 +252,43 @@ with ``[provider-name]``.
     provider_configs/xtrabackup
     provider_configs/pgdump
 
+Backup Set Config Example
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Here is an example backup set which uses mysqldump to backup all but a
+few databases, in a one-file-per-database fashion. For more specific
+examples, consult the documentation for the specific provider plugin you
+wish to use (see above).
+
+.. code-block:: INI
+
+    [holland:backup]
+    plugin = mysqldump
+    backups-to-keep = 1
+    auto-purge-failures = yes
+    purge-policy = after-backup
+    estimated-size-factor = 0.25
+
+    [mysqldump]
+    extra-defaults = no
+    lock-method = auto-detect
+    databases = *
+    exclude-databases = "mydb", "myotherdb"
+    exclude-invalid-views = no
+    flush-logs = no
+    flush-privileges = yes
+    dump-routines = no
+    dump-events = no
+    stop-slave = no
+    max-allowed-packet = 128M
+    bin-log-position = no
+    file-per-database = yes
+    estimate-method = plugin
+
+    [compression]
+    method = gzip
+    inline = yes
+    level = 1
+
+    [mysql:client]
+    defaults-extra-file = ~/.my.cnf
