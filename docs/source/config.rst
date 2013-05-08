@@ -77,7 +77,7 @@ two sections :ref:`[holland]<holland-config>` and :ref:`[logging]<logging-config
 Example
 ^^^^^^^
 
-.. code-block:: INI
+.. code-block:: ini
 
     ## Root holland config file
     [holland]
@@ -106,32 +106,37 @@ Example
 
     ## debug, info, warning, error, critical (case insensitive)
     level = info
+
 Backup-Set Configs
 ------------------
 
 Backup-Set configuration files largely inherit the configuration options of
 the specified plugins. To define a provider plugin for the backup set, you
-must put the following at the top of the backup set configuration file::
+must put the following at the top of the backup set configuration file
+
+.. code-block:: ini
 
     [holland:backup]
     plugin = <plugin>
     backups-to-keep = #
     estimated-size-factor = #
 
-[holland:bakcup] Configuration Options
+.. _holland-backup-config_options:
+
+[holland:backup] Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**plugin** = <plugin>
+.. describe:: plugin = [provider plugin]
 
     This is the name of the provider that will be used for the backup-set.
     This is required in order for the backup-set to function.
 
-**backups-to-keep** = #
+.. describe:: backups-to-keep = #
 
     Specifies the number of backups to keep for a backup-set. 
     Defaults to retaining 1 backup.
-    
-**estimated-size-factor** = #
+
+.. describe:: estimated-size-factor = #
 
     Specifies the scale factor when Holland decides if there is enough
     free space to perform a backup.  The default is 1.0 and this number
@@ -139,7 +144,7 @@ must put the following at the top of the backup set configuration file::
     estimated backup size when Holland is verifying sufficient free
     space for the backupset.
 
-**auto-purge-failures** = yes | no
+.. describe:: auto-purge-failures = [yes|no]
 
     Specifies whether to keep a failed backup or to automatically remove
     the backup directory.  By default this is on with the intention that
@@ -147,7 +152,7 @@ must put the following at the top of the backup set configuration file::
     This behavior can be disabled by setting auto-purge-failures = no when
     partial backups might be useful or when troubleshooting a backup failure.
 
-**purge-policy** = manual | before-backup | after-backup
+.. describe:: purge-policy = [manual|before-backup|after-backup]
 
     Specifies when to run the purge routine on a backupset.  By default this is
     run after a new successful backup completes.  Up to ``backups-to-keep``
@@ -164,7 +169,10 @@ must put the following at the top of the backup set configuration file::
     Either ``holland purge`` must be run externally or an explicit removal of
     desired backup directories can be done at some later time.
 
-**before-backup-command** = string
+Hooks
+"""""
+
+.. describe:: before-backup-command = string
 
     Run a shell command before a backup starts.  This allows a command to 
     perform some action before the backup starts such as setting up an
@@ -175,7 +183,7 @@ must put the following at the top of the backup set configuration file::
 
     .. versionadded:: 1.0.7
 
-**after-backup-command** = string
+.. describe:: after-backup-command = string
 
     Run a shell command after a backup completes.  This allows a command to 
     perform some action when a backup completes successfully such as sending
@@ -185,7 +193,7 @@ must put the following at the top of the backup set configuration file::
 
     .. versionadded:: 1.0.7
 
-**failed-backup-command** = string
+.. describe:: failed-backup-command = string
 
     Run a shell command if a backup starts.  This allows some command to 
     perform some action when a backup fails such as sending out a failure
@@ -198,13 +206,13 @@ must put the following at the top of the backup set configuration file::
 For all hook commands, Holland will perform simple text substitution  
 on the three parameters:
 
-  * hook - name of the hook being called (one of: before-backup-command, after-backup-command, failed-backup-command)
-  * backupdir - path to the current backup directory (e.g. /var/spool/holland/mysqldump/YYYYmmdd_HHMMSS)
-  * backupset - name of the backupset being run (e.g. 'mysql-lvm')
+  * **hook**: The name of the hook being called (one of: ``before-backup-command``, ``after-backup-command``, ``failed-backup-command``)
+  * **backupdir**: The path to the current backup directory (e.g. ``/var/spool/holland/mysqldump/YYYYmmdd_HHMMSS``)
+  * **backupset**: The name of the backupset being run (e.g. ``mysql-lvm``)
 
 For example
 
-.. code-block:: INI
+.. code-block:: ini
     
     [holland:backup]
     plugin = mysqldump
@@ -213,7 +221,6 @@ For example
     
     [mysqldump]
     ...
-
 
 Backup-Set files are defined in the "backupsets" directory which is,
 by default, ``/etc/holland/backupsets``. The name of the backup-set is 
@@ -260,7 +267,7 @@ few databases, in a one-file-per-database fashion. For more specific
 examples, consult the documentation for the specific provider plugin you
 wish to use (see above).
 
-.. code-block:: INI
+.. code-block:: ini
 
     [holland:backup]
     plugin = mysqldump
