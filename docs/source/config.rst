@@ -36,6 +36,10 @@ two sections :ref:`[holland]<holland-config>` and :ref:`[logging]<logging-config
     Defines where the plugins can be found. This can be a comma-separated 
     list but usually does not need to be modified. For most installations,
     this will usually be ``/usr/share/holland/plugins``.
+
+.. deprecated:: 1.0.8
+
+    This option is no longer required and can be ommitted. 
     
 .. _holland-config-backup_directory:    
     
