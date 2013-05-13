@@ -10,31 +10,37 @@ use another method other than mysqldump.
 
 For instance, one can configure a backup set to backup certain databases
 using mysqldump, others using the mysql-lvm plugins etc. All this is done
-by a mix of providers and backup-sets.
+by a mix of plugins (sometimes called providers) and backup-sets.
 
 Backup-Sets
 ^^^^^^^^^^^
 
-Each backup-set implements exactly one provider and will inherit the default
-values of that provider. These values can be overridden to adjust the
-behavior of the backup set. This includes defining what databases or tables
-to include (or exclude) in the backup, the type of compression used (if 
-any), what locking method to use, among other things.
+Each backup-set implements a backup plugin (provider) and often some helper
+plugins for things such as compression. Plugins come with a set of defaults
+such that only values that need to be overridden need to be specified, 
+although it is perfectly acceptable to specify options that are already 
+default - one would merely be stating the obvious. Doing so would also 
+make sure future changes to the defaults in Holland do not impact existing
+backup-sets.
 
-Providers
-^^^^^^^^^
+Provider Plugins
+^^^^^^^^^^^^^^^^
 
-Providers essentially provide a backup service for use in a backup set. 
-As of Holland 0.5, there are 5 providers:
+Provider plugins provide a backup service for use in a backup set. They
+are the interface between Holland and the method of backing up data.
+As of Holland 1.0.8, there are 5 providers included with Holland:
 
 * mysqldump
 
-    Uses the ``mysqldump`` utility to backup databases.
+    Uses the ``mysqldump`` utility to backup MySQL databases.
 
 * MySQL + LVM
 
     Backup MySQL databases using LVM snapshots which allows for near lockless 
-    or fully lockless (when transactional engines are used) backups.
+    or fully lockless (when transactional engines are used) backups. MySQL
+    must be running on an LVM volume with sufficient free extents to store
+    a working snapshot. It is also extremely ill-advised to store the backup
+    on the same volume as MySQL.
 
 * XtraBackup
 
@@ -42,7 +48,8 @@ As of Holland 0.5, there are 5 providers:
     
     Backup MySQL databases using Percona's 
     `XtraBackup <http://www.percona.com/software/percona-xtrabackup>`_ tool.
-    This provides a near lockless backup when using the InnoDB storage engine.
+    This provides a near lockless backup when using the InnoDB storage engine
+    while also providing a mysqlhotcopy style backup for MyISAM tables.
 
 * pgdump
 
@@ -54,6 +61,6 @@ As of Holland 0.5, there are 5 providers:
     does nothing.
     
 As Holland is a framework, it can actually backup most anything as long
-as there is a provider for it. This includes things that have nothing to do 
-with databases. The idea is to present an easy to use and clear method
-of backing up and restoring backups no matter the source.
+as there is a provider plugin for it. This includes things that have
+nothing to do with databases. The idea is to present an easy to use 
+and clear method of backing up and restoring backups no matter the source.
