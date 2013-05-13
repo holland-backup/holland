@@ -154,6 +154,7 @@ def mysqldump_version(command):
         for line in stdout.splitlines():
             LOG.error("! %s", line)
     try:
+        stdout = stdout.strip()
         return tuple([int(digit) for digit in
                         re.search(r'(\d+)[.](\d+)[.](\d+)', stdout).groups()])
     except AttributeError, exc:
