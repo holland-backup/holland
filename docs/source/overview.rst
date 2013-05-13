@@ -19,14 +19,14 @@ Each backup-set implements a backup plugin (provider) and often some helper
 plugins for things such as compression. Plugins come with a set of defaults
 such that only values that need to be overridden need to be specified, 
 although it is perfectly acceptable to specify options that are already 
-default - one would merely be stating the obvious. Doing so woudl also 
+default - one would merely be stating the obvious. Doing so would also 
 make sure future changes to the defaults in Holland do not impact existing
 backup-sets.
 
 Provider Plugins
 ^^^^^^^^^^^^^^^^
 
-Provider plugins provide a backup service for use in a backup set. The 
+Provider plugins provide a backup service for use in a backup set. They
 are the interface between Holland and the method of backing up data.
 As of Holland 1.0.8, there are 5 providers included with Holland:
 
