@@ -426,8 +426,8 @@ div.viewcode-block:target {
     border-bottom: 1px solid #ac9;
 }
 
-span.versionmodified {
-    font-weight: bold;
+div.versionadded, div.versionmodified, div.deprecated {
+    font-style: italic;
     font-size: 85%;
 }
 
