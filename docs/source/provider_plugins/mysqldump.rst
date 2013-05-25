@@ -3,7 +3,7 @@
 mysqldump Provider Configuration [mysqldump]
 ============================================
 
-Backs up a MySQL database using the mysqldump tool.
+Backs up one or more MySQL databases using the mysqldump tool.
 
 [mysqldump]
 -----------
