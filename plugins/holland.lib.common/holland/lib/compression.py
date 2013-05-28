@@ -4,6 +4,7 @@ import errno
 import subprocess
 import which
 import shlex
+from tempfile import TemporaryFile
 
 LOG = logging.getLogger(__name__)
 
@@ -92,10 +93,11 @@ class CompressionOutput(object):
             if level:
                 argv += ['-%d' % level]
             LOG.debug("* Executing: %s", subprocess.list2cmdline(argv))
+            self.stderr = TemporaryFile()
             self.pid = subprocess.Popen(argv,
                                         stdin=subprocess.PIPE,
                                         stdout=self.fileobj.fileno(),
-                                        stderr=subprocess.PIPE)
+                                        stderr=self.stderr)
             self.fd = self.pid.stdin.fileno()
         self.name = path
         self.closed = False
@@ -125,20 +127,24 @@ class CompressionOutput(object):
             os.unlink(self.fileobj.name)
         else:
             self.pid.stdin.close()
-            # Check for anything on stderr
-            stderr = self.pid.stderr.readlines()
             status = self.pid.wait()
-            if status != 0:
-                for line in stderr:
-                    LOG.error("%s: %s", self.argv[0], line.rstrip())
-                raise IOError(errno.EPIPE,
+            stderr = self.stderr
+            stderr.flush()
+            stderr.seek(0)
+            try:
+                if status != 0:
+                    for line in stderr:
+                        if not line.strip(): continue
+                        LOG.error("%s: %s", self.argv[0], line.rstrip())
+                    raise IOError(errno.EPIPE,
                               "Compression program '%s' exited with status %d" %
                                 (self.argv[0], status))
-            else:
-                for line in stderr:
-                    if not line.strip():
-                        continue
-                    LOG.info("%s: %s", self.argv[0], line.rstrip())
+                else:
+                    for line in stderr:
+                        if not line.strip(): continue
+                        LOG.info("%s: %s", self.argv[0], line.rstrip())
+            finally:
+                stderr.close()
 
 
 def stream_info(path, method=None, level=None):
