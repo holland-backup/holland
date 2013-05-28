@@ -5,7 +5,7 @@ import subprocess
 import which
 import shlex
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 #: This is a simple table of method_name : (command, extension)
 #: mappings.
@@ -91,7 +91,7 @@ class CompressionOutput(object):
             self.fileobj = open(path, 'w')
             if level:
                 argv += ['-%d' % level]
-            LOGGER.debug("* Executing: %s", subprocess.list2cmdline(argv))
+            LOG.debug("* Executing: %s", subprocess.list2cmdline(argv))
             self.pid = subprocess.Popen(argv,
                                         stdin=subprocess.PIPE,
                                         stdout=self.fileobj.fileno(),
@@ -115,7 +115,7 @@ class CompressionOutput(object):
             self.fileobj.close()
             self.fileobj = open(self.fileobj.name, 'r')
             cmp_f = open(self.name, 'w')
-            LOGGER.debug("Running %r < %r[%d] > %r[%d]",
+            LOG.debug("Running %r < %r[%d] > %r[%d]",
                          argv, self.fileobj.name, self.fileobj.fileno(),
                          cmp_f.name, cmp_f.fileno())
             pid = subprocess.Popen(args,
@@ -130,7 +130,7 @@ class CompressionOutput(object):
             status = self.pid.wait()
             if status != 0:
                 for line in stderr:
-                    LOGGER.error("%s: %s", self.argv[0], line.rstrip())
+                    LOG.error("%s: %s", self.argv[0], line.rstrip())
                 raise IOError(errno.EPIPE,
                               "Compression program '%s' exited with status %d" %
                                 (self.argv[0], status))
@@ -138,7 +138,7 @@ class CompressionOutput(object):
                 for line in stderr:
                     if not line.strip():
                         continue
-                    LOGGER.info("%s: %s", self.argv[0], line.rstrip())
+                    LOG.info("%s: %s", self.argv[0], line.rstrip())
 
 
 def stream_info(path, method=None, level=None):
