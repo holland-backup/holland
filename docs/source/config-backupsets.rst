@@ -145,12 +145,12 @@ located in ``/etc/holland/providers`` by default.
 .. toctree::
     :maxdepth: 1
 
-    provider_configs/example
-    provider_configs/mysqldump
-    provider_configs/mysql-lvm
-    provider_configs/mysqldump-lvm
-    provider_configs/xtrabackup
-    provider_configs/pgdump
+    provider_plugins/example
+    provider_plugins/mysqldump
+    provider_plugins/mysql-lvm
+    provider_plugins/mysqldump-lvm
+    provider_plugins/xtrabackup
+    provider_plugins/pgdump
 
 Backup Set Config Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,7 +1,7 @@
 .. _config:
 
-Holland Config Files
-====================
+Configuring Holland
+===================
 
 By default, Holland's configuration files reside in /etc/holland. The main
 configuration file is holland.conf, however there are a number of other
