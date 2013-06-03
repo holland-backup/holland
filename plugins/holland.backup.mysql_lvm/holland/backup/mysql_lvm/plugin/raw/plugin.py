@@ -51,6 +51,7 @@ pre-args = string(default=None)
 
 [compression]
 method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzop', default='gzip')
+options = string(default="")
 level = integer(min=0, max=9, default=1)
 
 [mysql:client]

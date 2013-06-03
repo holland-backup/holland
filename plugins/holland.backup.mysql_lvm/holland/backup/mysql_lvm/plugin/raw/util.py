@@ -58,7 +58,9 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
 
     archive_stream = open_stream(os.path.join(spooldir, 'backup.tar'),
                                  'w',
-                                 **config['compression'])
+                                 method=config['compression']['method'],
+                                 level=config['compression']['level'],
+                                 extra_args=config['compression']['options'])
     act = TarArchiveAction(snap_datadir, archive_stream, config['tar'])
     snapshot.register('post-mount', act, priority=50)
 

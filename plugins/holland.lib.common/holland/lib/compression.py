@@ -4,8 +4,9 @@ import errno
 import subprocess
 import which
 import shlex
+from tempfile import TemporaryFile
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 #: This is a simple table of method_name : (command, extension)
 #: mappings.
@@ -91,10 +92,12 @@ class CompressionOutput(object):
             self.fileobj = open(path, 'w')
             if level:
                 argv += ['-%d' % level]
+            LOG.debug("* Executing: %s", subprocess.list2cmdline(argv))
+            self.stderr = TemporaryFile()
             self.pid = subprocess.Popen(argv,
                                         stdin=subprocess.PIPE,
                                         stdout=self.fileobj.fileno(),
-                                        stderr=subprocess.PIPE)
+                                        stderr=self.stderr)
             self.fd = self.pid.stdin.fileno()
         self.name = path
         self.closed = False
@@ -114,7 +117,7 @@ class CompressionOutput(object):
             self.fileobj.close()
             self.fileobj = open(self.fileobj.name, 'r')
             cmp_f = open(self.name, 'w')
-            LOGGER.debug("Running %r < %r[%d] > %r[%d]",
+            LOG.debug("Running %r < %r[%d] > %r[%d]",
                          argv, self.fileobj.name, self.fileobj.fileno(),
                          cmp_f.name, cmp_f.fileno())
             pid = subprocess.Popen(args,
@@ -124,19 +127,24 @@ class CompressionOutput(object):
             os.unlink(self.fileobj.name)
         else:
             self.pid.stdin.close()
-            # Check for anything on stderr
-            for line in self.pid.stderr:
-                errmsg = line.strip()
-                if not errmsg:
-                    # gzip, among others, output a spurious blank line
-                    continue
-                LOGGER.error("Compression Error: %s", errmsg)
-            self.fileobj.close()
             status = self.pid.wait()
-            if status != 0:
-                raise IOError(errno.EPIPE,
+            stderr = self.stderr
+            stderr.flush()
+            stderr.seek(0)
+            try:
+                if status != 0:
+                    for line in stderr:
+                        if not line.strip(): continue
+                        LOG.error("%s: %s", self.argv[0], line.rstrip())
+                    raise IOError(errno.EPIPE,
                               "Compression program '%s' exited with status %d" %
                                 (self.argv[0], status))
+                else:
+                    for line in stderr:
+                        if not line.strip(): continue
+                        LOG.info("%s: %s", self.argv[0], line.rstrip())
+            finally:
+                stderr.close()
 
 
 def stream_info(path, method=None, level=None):
@@ -164,7 +172,18 @@ def stream_info(path, method=None, level=None):
 
     return argv, path
 
-def open_stream(path, mode, method=None, level=None, inline=True):
+def _parse_args(value):
+    """Convert a cmdline string to a list"""
+    if isinstance(value, unicode):
+        value = value.encode('utf8')
+    return shlex.split(value)
+
+def open_stream(path,
+                mode,
+                method=None,
+                level=None,
+                inline=True,
+                extra_args=None):
     """
     Opens a compressed data stream, and returns a file descriptor type object
     that acts much like os.open() does.  If no method is passed, or the 
@@ -181,6 +200,8 @@ def open_stream(path, mode, method=None, level=None, inline=True):
         return open(path, mode)
     else:
         argv, path = stream_info(path, method)
+        if extra_args:
+            argv += _parse_args(extra_args)
         if mode == 'r':
             return CompressionInput(path, mode, argv=argv)
         elif mode == 'w':
