@@ -55,12 +55,14 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
         act = InnodbRecoveryAction(mysqld_config)
         snapshot.register('post-mount', act, priority=100)
 
-
-    archive_stream = open_stream(os.path.join(spooldir, 'backup.tar'),
-                                 'w',
-                                 method=config['compression']['method'],
-                                 level=config['compression']['level'],
-                                 extra_args=config['compression']['options'])
+    try:
+        archive_stream = open_stream(os.path.join(spooldir, 'backup.tar'),
+                                     'w',
+                                     method=config['compression']['method'],
+                                     level=config['compression']['level'],
+                                     extra_args=config['compression']['options'])
+    except OSError, exc:
+        raise BackupError("Unable to open archive: %s", exc)
     act = TarArchiveAction(snap_datadir, archive_stream, config['tar'])
     snapshot.register('post-mount', act, priority=50)
 
