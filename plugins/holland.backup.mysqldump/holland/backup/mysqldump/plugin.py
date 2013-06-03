@@ -218,7 +218,11 @@ class MySQLDumpPlugin(object):
 
         if self.config['compression']['method'] != 'none' and \
             self.config['compression']['level'] > 0:
-            cmd, ext = lookup_compression(self.config['compression']['method'])
+            try:
+                cmd, ext = lookup_compression(self.config['compression']['method'])
+            except OSError, exc:
+                raise BackupError("Unable to load compression method '%s': %s" %
+                                  (self.config['compression']['method'], exc))
             LOG.info("Using %s compression level %d with args %s",
                      self.config['compression']['method'],
                      self.config['compression']['level'],
