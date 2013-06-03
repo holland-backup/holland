@@ -62,7 +62,8 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
                                      level=config['compression']['level'],
                                      extra_args=config['compression']['options'])
     except OSError, exc:
-        raise BackupError("Unable to open archive: %s", exc)
+        raise BackupError("Unable to create archive file '%s': %s" %
+                          (os.path.join(spooldir, 'backup.tar'), exc))
     act = TarArchiveAction(snap_datadir, archive_stream, config['tar'])
     snapshot.register('post-mount', act, priority=50)
 
