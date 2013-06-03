@@ -36,6 +36,7 @@ additional-options = string(default=None)
 [compression]
 method = option('gzip', 'gzip-rsyncable', 'bzip2', 'pbzip2', 'lzop', 'lzma', 'pigz', 'none', default='gzip')
 level = integer(min=0, default=1)
+options = string(default="")
 
 [pgauth]
 username = string(default=None)
