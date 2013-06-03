@@ -3,6 +3,11 @@
 mysqldump Provider Configuration [mysqldump]
 ============================================
 
+Backs up a MySQL database using the mysqldump tool.
+
+[mysqldump]
+-----------
+
 **mysql-binpath** = /path/to/mysql/bin
 
     Defines the location of the MySQL binary utilities. If not provided,
