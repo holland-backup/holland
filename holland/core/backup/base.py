@@ -162,6 +162,33 @@ class BackupRunner(object):
         else:
             self.apply_cb('after-backup', spool_entry)
 
+    def free_required_space(self, name, required_bytes, dry_run=False):
+        """Attempt to free at least ``required_bytes`` of old backups from a backupset
+
+        :param name: name of the backupset to free space from
+        :param required_bytes: integer number of bytes required for the backupset path
+        :param dry_run: if true, this will only generate log messages but won't actually free space
+        :returns: bool; True if freed or False otherwise
+        """
+        # XXX: this should really check the backupset path
+        available_bytes = disk_free(self.spool.path)
+        to_purge = {}
+        for backup in self.spool.list_backups(name):
+            backup_size = directory_size(backup.path)
+            LOG.info("Backup '%s' uses %d bytes", backup.path, backup_size)
+            available_bytes += backup_size
+            to_purge{backup} = backup_size
+            if available_bytes > required_bytes:
+                break
+        else:
+            # fell through loop - so we don't have enoug space
+            total_space = sum(to_purge.values())
+            LOG.info("Only %d bytes available in backupset '%s'.  This would only give us %d available bytes, but we require %d for this current backup",
+                     total_space, available_bytes, required_bytes)
+            return False
+        for backup in to_purge:
+            LOG.info("Would purge: %s", backup.path)
+        
     def check_available_space(self, plugin, spool_entry, dry_run=False):
         available_bytes = disk_free(spool_entry.path)
 
@@ -179,6 +206,7 @@ class BackupRunner(object):
                      format_bytes(adjusted_bytes_required))
 
         if available_bytes <= adjusted_bytes_required:
+            self.free_required_space(spool_entry.backupset, adjusted_bytes_required, dry_run)
             msg = ("Insufficient Disk Space. %s required, "
                    "but only %s available on %s") % (
                        format_bytes(adjusted_bytes_required),
