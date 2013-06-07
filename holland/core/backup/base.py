@@ -163,6 +163,8 @@ class BackupRunner(object):
             self.apply_cb('after-backup', spool_entry)
 
     def check_available_space(self, plugin, spool_entry, dry_run=False):
+        available_bytes = disk_free(spool_entry.path)
+
         estimated_bytes_required = plugin.estimate_backup_size()
         LOG.info("Estimated Backup Size: %s",
                  format_bytes(estimated_bytes_required))
@@ -176,7 +178,6 @@ class BackupRunner(object):
                      adjustment_factor,
                      format_bytes(adjusted_bytes_required))
 
-        available_bytes = disk_free(self.spool.path)
         if available_bytes <= adjusted_bytes_required:
             msg = ("Insufficient Disk Space. %s required, "
                    "but only %s available on %s") % (
