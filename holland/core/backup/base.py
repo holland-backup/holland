@@ -117,7 +117,7 @@ class BackupRunner(object):
         self.apply_cb('before-backup', spool_entry)
 
         try:
-            estimated_size = self.check_available_space(plugin, dry_run)
+            estimated_size = self.check_available_space(plugin, spool_entry, dry_run)
             LOG.info("Starting backup[%s] via plugin %s",
                      spool_entry.name,
                      spool_entry.config['holland:backup']['plugin'])
@@ -162,7 +162,7 @@ class BackupRunner(object):
         else:
             self.apply_cb('after-backup', spool_entry)
 
-    def check_available_space(self, plugin, dry_run=False):
+    def check_available_space(self, plugin, spool_entry, dry_run=False):
         estimated_bytes_required = plugin.estimate_backup_size()
         LOG.info("Estimated Backup Size: %s",
                  format_bytes(estimated_bytes_required))
