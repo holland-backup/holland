@@ -30,9 +30,10 @@ Note that other plugins may have additional dependency requirements.
 Installation
 ------------
 Holland has ready-made packages available for Red-Hat, CentOS, and Ubuntu
-which are available via the OpenSUSE build system 
-`here <http://download.opensuse.org/repositories/home:/holland-backup/>`_.
-Other distributions may download the generic tarball
-`here <http://hollandbackup.org/releases/stable/1.0/>`_ or pull directly
-from the GitHub tree `here <https://github.com/holland-backup/holland>`_.
+which are available via the `OpenSUSE build system`_.
+Other distributions may download the `generic tarball`_ or pull directly
+from `github`_.
 
+.. _OpenSUSE build system: http://download.opensuse.org/repositories/home:/holland-backup/
+.. _generic tarball: http://hollandbackup.org/releases/stable/1.0/
+.. _github: https://github.com/holland-backup/holland

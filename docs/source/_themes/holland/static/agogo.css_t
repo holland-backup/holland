@@ -199,11 +199,21 @@ div.document .section:first-child {
   margin-top: 0px;
 }
 
-div.document div.highlight {
+div.highlight {
   padding: 3px;
   background-color: #eeeeec;
+  border: 1px solid #dddddd;
+  margin-top: .8em;
+  margin-bottom: .8em;
+}
+
+div.document {
+  padding: 3px;
+/*  
+  background-color: #eeeeec; 
   border-top: 2px solid #dddddd;
   border-bottom: 2px solid #dddddd;
+*/
   margin-top: .8em;
   margin-bottom: .8em;
 }
@@ -434,8 +444,11 @@ div.versionadded, div.versionmodified, div.deprecated {
 pre {
     font-size: 100%;
     line-height: 125%;
+/*
     background-color: #dddddd;
     border-style: dotted;
     border-width: 1px;
     border-color: #aaaaaa;
+*/
+    overflow-y: auto;
 }
