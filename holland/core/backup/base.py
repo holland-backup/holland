@@ -210,9 +210,10 @@ class BackupRunner(object):
                      format_bytes(adjusted_bytes_required))
 
         if available_bytes <= adjusted_bytes_required:
-            if not self.free_required_space(spool_entry.backupset,
-                                            adjusted_bytes_required,
-                                            dry_run):
+            if not (config['purge-on-demand'] and 
+                    self.free_required_space(spool_entry.backupset,
+                                         adjusted_bytes_required,
+                                         dry_run)):
                 msg = ("Insufficient Disk Space. %s required, "
                        "but only %s available on %s") % (
                        format_bytes(adjusted_bytes_required),
