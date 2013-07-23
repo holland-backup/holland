@@ -10,6 +10,16 @@ https://github.com/holland-backup/holland/issues
 
 1.0.9 - unreleased
 ------------------
+
+holland
++++++++
+- Added purge-on-demand option to [holland:backup]
+  If set, this option will cause holland backup to attempt to purge old backups
+  to allow a new backup to start rather than failing when it appears that
+  there is insufficient space to run a new backup.
+  If the space consumed by all purgable backups is less than the estimated
+  space for a new backup, no backups are purged.
+
 holland-common
 ++++++++++++++
 - FLUSH TABLES is now run as FLUSH /*!40101 LOCAL */ TABLES to avoid
