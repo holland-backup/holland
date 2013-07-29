@@ -26,6 +26,12 @@ holland-common
   replicating this statement.  This affects any plugins that issue flush
   tables via the holland-common mysql client API
 
+- [compression] config sections now support an additional parameter
+  "options".  This extends the commandline for the underlying compression
+  command.  This was added to allow specifying command specific options
+  such as gzip --rsyncable or pigz -p N.
+  
+
 holland-mysqldump
 +++++++++++++++++
 - dump-events now defaults to on - automatically disabled for MySQL < 5.1
