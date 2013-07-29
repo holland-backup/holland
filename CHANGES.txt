@@ -8,8 +8,8 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
-1.0.9 - unreleased
-------------------
+1.0.10 - Jul 29, 2013
+---------------------
 
 holland
 +++++++
