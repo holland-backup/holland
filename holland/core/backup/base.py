@@ -185,19 +185,18 @@ class BackupRunner(object):
                 break
         else:
             # fell through loop - so we don't have enoug space
-            total_space = sum(to_purge.values())
+            total_space = sum(to_purge.values()) + available_bytes
             LOG.info("Only %s available in backupset '%s'.",
                       format_bytes(total_space),  name)
-            LOG.info("Purging would only recover %s, but the current backup "
-                     "requires %s", format_bytes(total_space), 
+            LOG.info("Purging would only recover %s total, but the current backup "
+                     "requires %s", format_bytes(total_space),
                                     format_bytes(required_bytes))
             return False
 
         purge_bytes = sum(to_purge.values())
-        total_free = disk_free(os.path.join(self.spool.path, name)) + purge_bytes
-        LOG.info("Found %d backups to purge which will free %s (%s total)",
+        LOG.info("Found %d backups to purge which will recover %s",
                  len(to_purge), format_bytes(sum(to_purge.values())),
-                 format_bytes(total_free))
+                 format_bytes(purge_bytes))
 
         for backup in to_purge:
             if dry_run:
