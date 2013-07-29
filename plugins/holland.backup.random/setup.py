@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.0.8'
+version = '1.0.10'
 
 setup(name='holland.backup.random',
       version=version,
