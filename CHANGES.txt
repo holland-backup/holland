@@ -36,6 +36,9 @@ holland-mysqldump
 +++++++++++++++++
 - dump-events now defaults to on - automatically disabled for MySQL < 5.1
 - dump-routines now defaults to on - automatically disabled for MySQL < 5.0
+- when no databases are found during schema discovery, mysqldump now fails
+  with a backup error.  This can occur if the configured backup user does
+  not have sufficient access to any database.
 
 1.0.8 - Mar 7, 2013
 -------------------
