@@ -37,6 +37,9 @@ def start(mysqldump,
         target_databases = ALL_DATABASES
     else:
 
+        if len(schema.databases) == 0:
+            raise BackupError("No databases found to backup")
+
         if not file_per_database and not [x for x in schema.excluded_databases]:
             target_databases = ALL_DATABASES
         else:
