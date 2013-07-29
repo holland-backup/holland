@@ -184,19 +184,17 @@ class BackupRunner(object):
             if available_bytes > required_bytes:
                 break
         else:
-            # fell through loop - so we don't have enoug space
-            total_space = sum(to_purge.values()) + available_bytes
-            LOG.info("Only %s available in backupset '%s'.",
-                      format_bytes(total_space),  name)
-            LOG.info("Purging would only recover %s total, but the current backup "
-                     "requires %s", format_bytes(total_space),
-                                    format_bytes(required_bytes))
+            LOG.info("Purging would only recover an additional %s", 
+                     format_bytes(sum(to_purge.values())))
+            LOG.info("Only %s total would be available, but the current "
+                     "backup requires %s",
+                     format_bytes(available_bytes),
+                     format_bytes(required_bytes))
             return False
 
         purge_bytes = sum(to_purge.values())
         LOG.info("Found %d backups to purge which will recover %s",
-                 len(to_purge), format_bytes(sum(to_purge.values())),
-                 format_bytes(purge_bytes))
+                 len(to_purge), format_bytes(purge_bytes))
 
         for backup in to_purge:
             if dry_run:
@@ -204,6 +202,9 @@ class BackupRunner(object):
             else:
                 LOG.info("Purging: %s", backup.path)
                 backup.purge()
+        LOG.info("%s now has %s of available space",
+                 os.path.join(self.spool.path, name),
+                 format_bytes(disk_free(os.path.join(self.spool.path, name))))
         return True
 
     def check_available_space(self, plugin, spool_entry, dry_run=False):
