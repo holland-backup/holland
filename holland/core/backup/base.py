@@ -170,21 +170,35 @@ class BackupRunner(object):
         :param dry_run: if true, this will only generate log messages but won't actually free space
         :returns: bool; True if freed or False otherwise
         """
+        LOG.info("Insufficient disk space for adjusted estimated backup size: %s",
+                 format_bytes(required_bytes))
+        LOG.info("purge-on-demand is enabled. Discovering old backups to purge.")
         available_bytes = disk_free(os.path.join(self.spool.path, name))
         to_purge = {}
         for backup in self.spool.list_backups(name):
             backup_size = directory_size(backup.path)
-            LOG.info("Backup '%s' uses %d bytes", backup.path, backup_size)
+            LOG.info("Found backup '%s': %s",
+                     backup.path, format_bytes(backup_size))
             available_bytes += backup_size
-            to_purge{backup} = backup_size
+            to_purge[backup] = backup_size
             if available_bytes > required_bytes:
                 break
         else:
             # fell through loop - so we don't have enoug space
             total_space = sum(to_purge.values())
-            LOG.info("Only %d bytes available in backupset '%s'.  This would only give us %d available bytes, but we require %d for this current backup",
-                     total_space, available_bytes, required_bytes)
+            LOG.info("Only %s available in backupset '%s'.",
+                      format_bytes(total_space),  name)
+            LOG.info("Purging would only recover %s, but the current backup "
+                     "requires %s", format_bytes(total_space), 
+                                    format_bytes(required_bytes))
             return False
+
+        purge_bytes = sum(to_purge.values())
+        total_free = disk_free(os.path.join(self.spool.path, name)) + purge_bytes
+        LOG.info("Found %d backups to purge which will free %s (%s total)",
+                 len(to_purge), format_bytes(sum(to_purge.values())),
+                 format_bytes(total_free))
+
         for backup in to_purge:
             if dry_run:
                 LOG.info("Would purge: %s", backup.path)
