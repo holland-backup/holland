@@ -9,7 +9,7 @@ LOG = logging.getLogger(__name__)
 #: engines we consider 'transactional'
 #: transactional in this context means '--single-transaction'
 #: is probably a reasonable option for mysqldump
-TRANSACTIONAL_ENGINES = 'innodb', 'federated', 'myisam_mrg', 'memory'
+TRANSACTIONAL_ENGINES = 'innodb', 'federated', 'myisam_mrg', 'memory', 'view'
 
 class MySQLSchema(object):
     """A catalog summary of a MySQL Instance"""
