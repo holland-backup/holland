@@ -328,7 +328,7 @@ class SimpleTableIterator(MetadataTableIterator):
                "          TABLE_NAME AS `name`, "
                "          0 AS `data_size`, "
                "          0 AS `index_size`, "
-               "          COALESCE(ENGINE, 'view') AS `engine`, "
+               "          LOWER(COALESCE(ENGINE, 'view')) AS `engine` "
                "FROM INFORMATION_SCHEMA.TABLES "
                "WHERE TABLE_SCHEMA = %s")
         cursor = self.client.cursor()

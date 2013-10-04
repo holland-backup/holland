@@ -169,7 +169,7 @@ class MySQLClient(object):
                "          TABLE_NAME AS `name`, "
                "          COALESCE(DATA_LENGTH, 0) AS `data_size`, "
                "          COALESCE(INDEX_LENGTH, 0) AS `index_size`, "
-               "          COALESCE(ENGINE, 'view') AS `engine`, "
+               "          LOWER(COALESCE(ENGINE, 'view')) AS `engine` "
                "FROM INFORMATION_SCHEMA.TABLES "
                "WHERE TABLE_SCHEMA = %s")
         cursor = self.cursor()
