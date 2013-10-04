@@ -141,8 +141,6 @@ class MySQLClient(object):
                         LOG.warning("Invalid table %s.%s: %s",
                                     row['database'], row['name'],
                                     row['comment'] or '')
-            row['is_transactional'] = row['engine'].lower() in ['view', 
-                                                                'innodb']
             for key in row.keys():
                 valid_keys = [
                     'database',
@@ -150,7 +148,6 @@ class MySQLClient(object):
                     'data_size',
                     'index_size',
                     'engine',
-                    'is_transactional'
                 ]
                 if key not in valid_keys:
                     row.pop(key)
@@ -173,13 +170,11 @@ class MySQLClient(object):
                "          COALESCE(DATA_LENGTH, 0) AS `data_size`, "
                "          COALESCE(INDEX_LENGTH, 0) AS `index_size`, "
                "          COALESCE(ENGINE, 'view') AS `engine`, "
-               "          (TRANSACTIONS = 'YES' OR ENGINE IS NULL) AS `is_transactional` "
                "FROM INFORMATION_SCHEMA.TABLES "
-               "LEFT JOIN INFORMATION_SCHEMA.ENGINES USING (ENGINE) "
                "WHERE TABLE_SCHEMA = %s")
         cursor = self.cursor()
         cursor.execute(sql, (database))
-        names = [info[0] for info in cursor.description]
+        names = [info[0].lower() for info in cursor.description]
         all_rows = cursor.fetchall()
         result = [dict(zip(names, row)) for row in all_rows]
         cursor.close()

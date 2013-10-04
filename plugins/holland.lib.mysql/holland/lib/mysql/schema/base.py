@@ -6,6 +6,11 @@ from holland.lib.mysql.client import MySQLError
 
 LOG = logging.getLogger(__name__)
 
+#: engines we consider 'transactional'
+#: transactional in this context means '--single-transaction'
+#: is probably a reasonable option for mysqldump
+TRANSACTIONAL_ENGINES = 'innodb', 'federated', 'myisam_mrg', 'memory'
+
 class MySQLSchema(object):
     """A catalog summary of a MySQL Instance"""
 
@@ -217,19 +222,21 @@ class Table(object):
                        name,
                        data_size,
                        index_size,
-                       engine,
-                       is_transactional):
+                       engine):
         self.database = database
         self.name = name
         self.data_size = data_size
         self.index_size = index_size
         self.engine = engine
-        self.is_transactional = is_transactional
         self.excluded = False
 
     def size(self):
         return self.data_size + self.index_size
     size = property(size)
+
+    def is_transactional(self):
+        return self.engine in TRANSACTIONAL_ENGINES
+    is_transactional = property(is_transactional)
 
     def __str__(self):
         return "%sTable(name=%r, data_size=%s, " + \
@@ -322,9 +329,7 @@ class SimpleTableIterator(MetadataTableIterator):
                "          0 AS `data_size`, "
                "          0 AS `index_size`, "
                "          COALESCE(ENGINE, 'view') AS `engine`, "
-               "          TRANSACTIONS = 'YES' AS `is_transactional` "
                "FROM INFORMATION_SCHEMA.TABLES "
-               "JOIN INFORMATION_SCHEMA.ENGINES USING (ENGINE) "
                "WHERE TABLE_SCHEMA = %s")
         cursor = self.client.cursor()
         try:
@@ -355,13 +360,10 @@ class SimpleTableIterator(MetadataTableIterator):
 
                 if kind == 'VIEW':
                     metadata.append(('engine', 'view'))
-                    metadata.append(('is_transactional', 'yes'))
                 else:
                     if self.record_engines:
                         engine = self._lookup_engine(database, table).lower()
                         metadata.append(('engine', engine))
-                        metadata.append(('is_transactional', engine == 'innodb'))
                     else:
                         metadata.append(('engine', ''))
-                        metadata.append(('is_transactional', False))
                 yield Table(**dict(metadata))
