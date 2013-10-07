@@ -38,6 +38,9 @@ def get_connection(config, db='template1'):
     if not connection:
         raise PgError("Failed to connect to the Postgres database.")
 
+    # set connection in autocommit mode
+    connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+
     if config["pgdump"]["role"]:
         try:
             cursor = connection.cursor()
