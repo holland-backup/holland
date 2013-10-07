@@ -437,7 +437,12 @@ def exclude_invalid_views(schema, client, definitions_file):
                     if exc.args[0] in (1356, 1142, 1143, 1449, 1267):
                         invalid_view = True
                     else:
-                        raise
+                        LOG.error("Unexpected error when checking invalid "
+                                  "view %s.%s: [%d] %s",
+                                  db.name,
+                                  table.name,
+                                  *exc.args)
+                        raise BackupError("[%d] %s" % exc.args)
                 if invalid_view:
                     LOG.warning("* Excluding invalid view `%s`.`%s`: [%d] %s",
                                 db.name, table.name, *exc.args)
