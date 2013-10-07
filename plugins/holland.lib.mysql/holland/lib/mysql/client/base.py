@@ -330,16 +330,22 @@ class MySQLClient(object):
         :returns: slave status dict
         """
         sql = "SHOW SLAVE STATUS"
+        charset = self.character_set_name()
         cursor = self.cursor()
-        cursor.execute(sql)
-        keys = [col[0].lower() for col in cursor.description]
-        slave_status = cursor.fetchone()
-        cursor.close()
+        try:
+            self.set_character_set('binary')
+            cursor.execute(sql)
+            keys = [col[0].lower() for col in cursor.description]
+            slave_status = cursor.fetchone()
+            cursor.close()
 
-        if not slave_status:
-            return None
-        else:
-            return dict(zip(keys, slave_status))
+            if not slave_status:
+                return None
+            else:
+                return dict(zip(keys, slave_status))
+        finally:
+            cursor.close()
+            self.set_character_set(charset)
 
     def show_master_status(self):
         """Fetch MySQL master status"""
