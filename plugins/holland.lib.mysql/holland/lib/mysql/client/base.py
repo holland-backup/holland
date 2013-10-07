@@ -342,10 +342,15 @@ class MySQLClient(object):
             if not slave_status:
                 return None
             else:
-                return dict(zip(keys, slave_status))
+                result = []
+                for value in slave_status:
+                    if isinstance(value, basestring):
+                        value = value.decode(charset, 'ignore')
+                    result.append(value)
+                return dict(zip(keys, result))
         finally:
-            cursor.close()
             self.set_character_set(charset)
+            cursor.close()
 
     def show_master_status(self):
         """Fetch MySQL master status"""
