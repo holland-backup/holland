@@ -18,6 +18,7 @@ COMPRESSION_METHODS = {
     'pbzip2': ('pbzip2', '.bz2'),
     'lzop'  : ('lzop', '.lzo'),
     'lzma'  : ('xz', '.xz'),
+    'gpg'   : ('gpg -e', '.gpg'),
 }
 
 def lookup_compression(method):
@@ -91,7 +92,10 @@ class CompressionOutput(object):
         else:
             self.fileobj = open(path, 'w')
             if level:
-                argv += ['-%d' % level]
+                if "gpg" in argv[0]:
+                    argv += ['-z %d' % level]
+                else:
+                    argv += ['-%d' % level]
             LOG.debug("* Executing: %s", subprocess.list2cmdline(argv))
             self.stderr = TemporaryFile()
             self.pid = subprocess.Popen(argv,
@@ -113,7 +117,10 @@ class CompressionOutput(object):
         if not self.inline:
             argv = list(self.argv)
             if self.level:
-                argv += ['-%d' % self.level, '-']
+                if "gpg" in argv[0]:
+                    argv += ['-z %d' % self.level, '-']
+                else:
+                    argv += ['-%d' % self.level, '-']
             self.fileobj.close()
             self.fileobj = open(self.fileobj.name, 'r')
             cmp_f = open(self.name, 'w')
