@@ -18,7 +18,7 @@ COMPRESSION_METHODS = {
     'pbzip2': ('pbzip2', '.bz2'),
     'lzop'  : ('lzop', '.lzo'),
     'lzma'  : ('xz', '.xz'),
-    'gpg'   : ('gpg -e', '.gpg'),
+    'gpg'   : ('gpg -e --batch --no-tty', '.gpg'),
 }
 
 def lookup_compression(method):
@@ -93,7 +93,7 @@ class CompressionOutput(object):
             self.fileobj = open(path, 'w')
             if level:
                 if "gpg" in argv[0]:
-                    argv += ['-z %d' % level]
+                    argv += ['-z%d' % level]
                 else:
                     argv += ['-%d' % level]
             LOG.debug("* Executing: %s", subprocess.list2cmdline(argv))
@@ -118,7 +118,7 @@ class CompressionOutput(object):
             argv = list(self.argv)
             if self.level:
                 if "gpg" in argv[0]:
-                    argv += ['-z %d' % self.level, '-']
+                    argv += ['-z%d' % self.level, '-']
                 else:
                     argv += ['-%d' % self.level, '-']
             self.fileobj.close()
