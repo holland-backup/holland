@@ -19,7 +19,7 @@ LOG = logging.getLogger(__name__)
 CONFIGSPEC = """
 [xtrabackup]
 global-defaults     = string(default='/etc/my.cnf')
-innobackupex        = string(default='innobackupex-1.5.1')
+innobackupex        = string(default='innobackupex')
 ibbackup            = string(default=None)
 stream              = string(default=tar)
 apply-logs          = boolean(default=yes)
