@@ -8,6 +8,15 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.0.12 - Jul 27, 2014
+---------------------
+
+holland-xtrabackup
++++++++
+- holland-xtrabackup now uses innobackupex as innobackupex binary
+  as innobackupex-1.5.1 has been deprecated upstream for several
+  releases
+
 1.0.10 - Jul 29, 2013
 ---------------------
 
