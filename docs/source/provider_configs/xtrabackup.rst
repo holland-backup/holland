@@ -13,7 +13,7 @@ Backs up a MySQL instance using Percona's Xtrabackup tool.
     The MySQL configuration file for xtrabackup to parse.  This is !include'd
     into the my.cnf the xtrabackup plugin generates
 
-**innobackupex** = <name> (default: innobackupex-1.5.1)
+**innobackupex** = <name> (default: innobackupex)
 
     The path to the innobackupex script to run. If this is a relative path
     this will be found in holland's environment PATH as configured in
