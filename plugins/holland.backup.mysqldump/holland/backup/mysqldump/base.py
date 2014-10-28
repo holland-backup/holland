@@ -37,6 +37,9 @@ def start(mysqldump,
         target_databases = ALL_DATABASES
     else:
 
+        if len(schema.databases) == 0:
+            raise BackupError("No databases found to backup")
+
         if not file_per_database and not [x for x in schema.excluded_databases]:
             target_databases = ALL_DATABASES
         else:
@@ -73,26 +76,40 @@ def start(mysqldump,
                         raise BackupError(str(exc))
     else:
         more_options = [mysqldump_lock_option(lock_method, target_databases)]
-        stream = open_stream('all_databases.sql', 'w')
-        if target_databases is not ALL_DATABASES:
-            target_databases = [db.name for db in target_databases]
-        mysqldump.run(target_databases, stream, more_options)
+        try:
+            stream = open_stream('all_databases.sql', 'w')
+        except (IOError, OSError), exc:
+            raise BackupError("Failed to open output stream %s: %s" %
+                              'all_databases.sql' + compression_ext, exc)
+        try:
+            if target_databases is not ALL_DATABASES:
+                target_databases = [db.name for db in target_databases]
+            mysqldump.run(target_databases, stream, more_options)
+        finally:
+            try:
+                stream.close()
+            except (IOError, OSError), exc:
+                if exc.errno != errno.EPIPE:
+                    LOG.error("%s", str(exc))
+                    raise BackupError(str(exc))
 
 def write_manifest(schema, open_stream, ext):
     """Write real database names => encoded names to MANIFEST.txt"""
     manifest_fileobj = open_stream('MANIFEST.txt', 'w', method='none')
-    manifest = csv.writer(manifest_fileobj,
-                          dialect=csv.excel_tab,
-                          lineterminator="\n",
-                          quoting=csv.QUOTE_MINIMAL)
-    for database in schema.databases:
-        if database.excluded:
-            continue
-        name = database.name
-        encoded_name = encode(name)[0]
-        manifest.writerow([name.encode('utf-8'), encoded_name + '.sql' + ext])
-    manifest_fileobj.close()
-    LOG.info("Wrote backup manifest %s", manifest_fileobj.name)
+    try:
+        manifest = csv.writer(manifest_fileobj,
+                              dialect=csv.excel_tab,
+                              lineterminator="\n",
+                              quoting=csv.QUOTE_MINIMAL)
+        for database in schema.databases:
+            if database.excluded:
+                continue
+            name = database.name
+            encoded_name = encode(name)[0]
+            manifest.writerow([name.encode('utf-8'), encoded_name + '.sql' + ext])
+    finally:
+        manifest_fileobj.close()
+        LOG.info("Wrote backup manifest %s", manifest_fileobj.name)
 
 def mysqldump_lock_option(lock_method, databases):
     """Choose the mysqldump option to use for locking

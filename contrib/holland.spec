@@ -3,7 +3,7 @@
 # el4 also... which doesn't support it
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
-%{!?holland_version: %global holland_version 1.0.8}
+%{!?holland_version: %global holland_version 1.0.10}
 
 # default %%rhel to make things easier to build
 %{!?rhel: %global rhel %%(%{__sed} 's/^[^0-9]*\\([0-9]\\+\\).*/\\1/' /etc/redhat-release)}
@@ -502,6 +502,9 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
+* Mon Jul 29 2013 Andrew Garner <andrew.garner@rackspace.com> - 1.0.10-1
+- Latest sources from upstream
+
 * Wed Jan 09 2013 Andrew Garner <andrew.garner@rackspace.com> - 1.0.8-1
 - Latest sources from upstream
 

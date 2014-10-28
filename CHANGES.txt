@@ -8,18 +8,37 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
-1.0.9 - unreleased
-------------------
+1.0.10 - Jul 29, 2013
+---------------------
+
+holland
++++++++
+- Added purge-on-demand option to [holland:backup]
+  If set, this option will cause holland backup to attempt to purge old backups
+  to allow a new backup to start rather than failing when it appears that
+  there is insufficient space to run a new backup.
+  If the space consumed by all purgable backups is less than the estimated
+  space for a new backup, no backups are purged.
+
 holland-common
 ++++++++++++++
 - FLUSH TABLES is now run as FLUSH /*!40101 LOCAL */ TABLES to avoid
   replicating this statement.  This affects any plugins that issue flush
   tables via the holland-common mysql client API
 
+- [compression] config sections now support an additional parameter
+  "options".  This extends the commandline for the underlying compression
+  command.  This was added to allow specifying command specific options
+  such as gzip --rsyncable or pigz -p N.
+  
+
 holland-mysqldump
 +++++++++++++++++
 - dump-events now defaults to on - automatically disabled for MySQL < 5.1
 - dump-routines now defaults to on - automatically disabled for MySQL < 5.0
+- when no databases are found during schema discovery, mysqldump now fails
+  with a backup error.  This can occur if the configured backup user does
+  not have sufficient access to any database.
 
 1.0.8 - Mar 7, 2013
 -------------------

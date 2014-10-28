@@ -26,7 +26,8 @@ SRPMDIR=$(rpm --eval "%{_srcrpmdir}")
 RPMDIR=$(rpm --eval "%{_rpmdir}")
 HOLLAND_VERSION=$(python setup.py --version)
 HOLLAND_SRC=$SOURCEDIR/holland-$HOLLAND_VERSION.tar.gz
-MOCK_CHROOT=${MOCK_CHROOT:-epel-5-x86_64}
+RHEL_VERSION=$(sed -r 's/.*([0-9]+)[.].*/\1/' < /etc/redhat-release)
+MOCK_CHROOT=${MOCK_CHROOT:-epel-${RHEL_VERSION}-x86_64}
 
 # Export HEAD as the source
 echo "Exporting current git tree as tarball to ${HOLLAND_SRC}"
@@ -50,6 +51,6 @@ mock --quiet --root=${MOCK_CHROOT} \
      $HOLLAND_SRPM
 
 echo "Finished. The following rpms are available in ${RPMDIR}/noarch/:"
-ls ${RPMDIR}/noarch/holland-*1.0.8*.noarch.rpm | xargs -n1 basename
+ls ${RPMDIR}/noarch/holland-*${HOLLAND_VERSION}*.noarch.rpm | xargs -n1 basename
 
 # vim:set ts=4 sw=4 ft=sh et:

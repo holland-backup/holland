@@ -33,6 +33,7 @@ pre-command         = string(default=None)
 [compression]
 method              = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', default=gzip)
 inline              = boolean(default=yes)
+options             = string(default="")
 level               = integer(min=0, max=9, default=1)
 
 [mysql:client]
@@ -101,9 +102,13 @@ class XtrabackupPlugin(object):
             if stream == 'tar':
                 archive_path = join(backup_directory, 'backup.tar')
                 zconfig = self.config['compression']
-                return open_stream(archive_path, 'w',
-                                   method=zconfig['method'],
-                                   level=zconfig['level'])
+                try:
+                    return open_stream(archive_path, 'w',
+                                       method=zconfig['method'],
+                                       level=zconfig['level'],
+                                       extra_args=zconfig['options'])
+                except OSError, exc:
+                    raise BackupError("Unable to create output file: %s" % exc)
             elif stream == 'xbstream':
                 archive_path = join(backup_directory, 'backup.xb')
                 return open(archive_path, 'w')

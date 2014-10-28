@@ -117,7 +117,7 @@ class BackupRunner(object):
         self.apply_cb('before-backup', spool_entry)
 
         try:
-            estimated_size = self.check_available_space(plugin, dry_run)
+            estimated_size = self.check_available_space(plugin, spool_entry, dry_run)
             LOG.info("Starting backup[%s] via plugin %s",
                      spool_entry.name,
                      spool_entry.config['holland:backup']['plugin'])
@@ -162,7 +162,54 @@ class BackupRunner(object):
         else:
             self.apply_cb('after-backup', spool_entry)
 
-    def check_available_space(self, plugin, dry_run=False):
+    def free_required_space(self, name, required_bytes, dry_run=False):
+        """Attempt to free at least ``required_bytes`` of old backups from a backupset
+
+        :param name: name of the backupset to free space from
+        :param required_bytes: integer number of bytes required for the backupset path
+        :param dry_run: if true, this will only generate log messages but won't actually free space
+        :returns: bool; True if freed or False otherwise
+        """
+        LOG.info("Insufficient disk space for adjusted estimated backup size: %s",
+                 format_bytes(required_bytes))
+        LOG.info("purge-on-demand is enabled. Discovering old backups to purge.")
+        available_bytes = disk_free(os.path.join(self.spool.path, name))
+        to_purge = {}
+        for backup in self.spool.list_backups(name):
+            backup_size = directory_size(backup.path)
+            LOG.info("Found backup '%s': %s",
+                     backup.path, format_bytes(backup_size))
+            available_bytes += backup_size
+            to_purge[backup] = backup_size
+            if available_bytes > required_bytes:
+                break
+        else:
+            LOG.info("Purging would only recover an additional %s", 
+                     format_bytes(sum(to_purge.values())))
+            LOG.info("Only %s total would be available, but the current "
+                     "backup requires %s",
+                     format_bytes(available_bytes),
+                     format_bytes(required_bytes))
+            return False
+
+        purge_bytes = sum(to_purge.values())
+        LOG.info("Found %d backups to purge which will recover %s",
+                 len(to_purge), format_bytes(purge_bytes))
+
+        for backup in to_purge:
+            if dry_run:
+                LOG.info("Would purge: %s", backup.path)
+            else:
+                LOG.info("Purging: %s", backup.path)
+                backup.purge()
+        LOG.info("%s now has %s of available space",
+                 os.path.join(self.spool.path, name),
+                 format_bytes(disk_free(os.path.join(self.spool.path, name))))
+        return True
+
+    def check_available_space(self, plugin, spool_entry, dry_run=False):
+        available_bytes = disk_free(spool_entry.path)
+
         estimated_bytes_required = plugin.estimate_backup_size()
         LOG.info("Estimated Backup Size: %s",
                  format_bytes(estimated_bytes_required))
@@ -176,19 +223,17 @@ class BackupRunner(object):
                      adjustment_factor,
                      format_bytes(adjusted_bytes_required))
 
-        available_bytes = disk_free(self.spool.path)
         if available_bytes <= adjusted_bytes_required:
-            msg = ("Insufficient Disk Space. %s required, "
-                   "but only %s available on %s") % (
+            if not (config['purge-on-demand'] and 
+                    self.free_required_space(spool_entry.backupset,
+                                         adjusted_bytes_required,
+                                         dry_run)):
+                msg = ("Insufficient Disk Space. %s required, "
+                       "but only %s available on %s") % (
                        format_bytes(adjusted_bytes_required),
                        format_bytes(available_bytes),
                        self.spool.path)
-            if dry_run:
                 LOG.error(msg)
-                LOG.info("Note: This is a dry-run and this "
-                         "space may be available during a normal "
-                         "backup depending on your purge-policy "
-                         "configuration.")
-            else:
-                raise BackupError(msg)
+                if not dry_run:
+                    raise BackupError(msg)
         return estimated_bytes_required
