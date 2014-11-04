@@ -333,7 +333,7 @@ class SimpleTableIterator(MetadataTableIterator):
                "WHERE TABLE_SCHEMA = %s")
         cursor = self.client.cursor()
         try:
-            cursor.execute(sql, database)
+            cursor.execute(sql, (database,))
             return cursor.fetchall()
         finally:
             cursor.close()

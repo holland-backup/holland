@@ -173,8 +173,8 @@ class MySQLClient(object):
                "FROM INFORMATION_SCHEMA.TABLES "
                "WHERE TABLE_SCHEMA = %s")
         cursor = self.cursor()
-        cursor.execute(sql, (database))
-        names = [info[0].lower() for info in cursor.description]
+        cursor.execute(sql, (database,))
+        names = [info[0] for info in cursor.description]
         all_rows = cursor.fetchall()
         result = [dict(zip(names, row)) for row in all_rows]
         cursor.close()
