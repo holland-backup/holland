@@ -33,4 +33,4 @@ compression level, etc.
 **options** = <string of otpions>
 
     Pass additional options not included in the above directly to the
-    compression utility (e.g. ``--compress-algo=bzip2`` if using ``gpg``).
+    compression utility (e.g. ``--compress-algo=bzip2`` if using 'gpg').
