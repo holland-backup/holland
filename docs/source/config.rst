@@ -40,7 +40,7 @@ two sections :ref:`[holland]<holland-config>` and :ref:`[logging]<logging-config
 
 .. deprecated:: 1.0.8
 
-    This option is no longer required and can be ommitted.
+    This option is no longer required and can be omitted.
 
 .. _holland-config-backup_directory:
 
