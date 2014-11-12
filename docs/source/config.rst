@@ -214,6 +214,11 @@ Hooks
     e-mail or performing external post backup cleanup tasks (such putting a
     server back in a load balancer for example).
 
+    Note if the backup fails, ``failed-backup-command`` will be run instead.
+    Thus, if doing things like pulling the server out of a load-balancer,
+    such commands should added to ``after-backup-command`` and
+    ``failed-backup-command`` to avoid an inconsistent state.
+
     The backup will fail if this command exits with a non-zero status.
 
     .. versionadded:: 1.0.7
