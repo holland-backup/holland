@@ -116,21 +116,20 @@ Example
 
 Backup-Set Configs
 ------------------
-Backup-Set files are defined in the "backupsets" directory which is,
-by default, ``/etc/holland/backupsets``. The name of the backup-set is
-defined by its configuration filename and can really be most anything. That
-means backup-sets can be organized in any arbitrary way, although backup
-set files must end in .conf. The file extension is not part of the name of
-the backup-set.
+Backup-Set configuration files are housed in ``/etc/holland/backupsets`` with
+the name of the backup-set being the name of the file before the .conf suffix
+(e.g. 'myfavoritebackup.conf' is the configuration file for the
+'myfavoritebackup' backup-set).
 
-Backups themselves are placed under the directory defined in the
-:ref:`backup_directory<holland-config-backup_directory>`
-section of the main configuration file. Each backup resides under a directory
-corresponding to the backup-set name followed by a date-encoded directory.
+The backups themselves are placed under the directory defined in the
+:ref:`backup_directory<holland-config-backup_directory>` section of the main
+configuration file. Each backup resides under a directory corresponding to the
+backup-set name followed by one or more date-encoded directories.
 
-Backup-Set configuration files largely inherit the configuration options of
-the specified plugins. To define a provider plugin for the backup set, you
-must put the following at the top of the backup set configuration file.
+Backup-Set configuration files inherit the configuration options of
+the specified plugins (though these settings can be overridden). To define a
+provider plugin for the backup set, you must put the following at the top of the
+backup set configuration file.
 
 .. code-block:: ini
 
@@ -180,14 +179,19 @@ helper plugins (which are defined within their own sections - see below).
     run after a new successful backup completes.  Up to ``backups-to-keep``
     backups will be retained including the most recent.
 
-    ``purge-policy`` = ``before-backup`` will run the purge routine just before
+    ``purge-policy = before-backup`` will run the purge routine just before
     a new backup starts.  This will retain up to ``backups-to-keep`` backups
     before the new backup is even started allowing purging all previous
     backups if ``backups-to-keep`` is set to 0.  This behavior is useful if
     some other process is retaining backups off-server and disk space is at a
     premium.
 
-    ``purge-policy`` = manual will never run the purge routine automatically.
+    ``purge-policy = after-backup`` will run the purge routine after the
+    completion of the backup. This means more space is required during the
+    backup run. This is safer than ``before-backup`` due to failed backups not
+    causing good backups to be purged.
+
+    ``purge-policy = manual`` will never run the purge routine automatically.
     Either ``holland purge`` must be run externally or an explicit removal of
     desired backup directories can be done at some later time.
 
@@ -206,7 +210,7 @@ Hooks
 
 .. describe:: after-backup-command = string
 
-    Run a shell command after a backup completes, such as sending out an
+    Run a shell command after a **successful** backup, such as sending out an
     e-mail or performing external post backup cleanup tasks (such putting a
     server back in a load balancer for example).
 
