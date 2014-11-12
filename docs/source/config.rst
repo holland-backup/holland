@@ -1,11 +1,10 @@
 .. _config:
 
-
-Holland Config Files
-====================
+Configuring Holland
+===================
 
 By default, Holland's configuration files reside in /etc/holland. The main
-configuration file is holland.conf, however there are a number of other 
+configuration file is holland.conf, however there are a number of other
 configuration files for configuring default settings for providers and for
 configuring backup sets.
 
@@ -17,10 +16,12 @@ Comments are prefixed by the # sign.
 Note that many settings have default values and, as a result, can either
 be commented out or omitted entirely.
 
-holland.conf - main config
---------------------------
+.. _config-global:
 
-The main configuration file (usually /etc/holland/holland.conf) defines
+Global Config
+-------------
+
+The main configuration file (usually ``/etc/holland/holland.conf``) defines
 both global settings as well as the active backup sets. It is divided into
 two sections :ref:`[holland]<holland-config>` and :ref:`[logging]<logging-config>`. 
 
@@ -110,6 +111,8 @@ Example
 
     ## debug, info, warning, error, critical (case insensitive)
     level = info
+
+.. _config-backupsets:
 
 Backup-Set Configs
 ------------------
@@ -223,8 +226,6 @@ For example
     before-backup-command = /usr/local/bin/my-custom-script --hook ${hook} --backupset ${backupset} --backupdir ${backupdir}
     after-backup-command = echo ${backupset} completed successfully.  Files are in ${backupdir}
     
-    [mysqldump]
-    ...
 
 Backup-Set files are defined in the "backupsets" directory which is,
 by default, ``/etc/holland/backupsets``. The name of the backup-set is 
@@ -253,15 +254,31 @@ For advanced users, the defaults for each provider plugin can be changed
 by editing the default configuration file for said provider. These files are 
 located in ``/etc/holland/providers`` by default.
 
+MySQL Plugins
+"""""""""""""
 .. toctree::
     :maxdepth: 1
 
-    provider_configs/example
-    provider_configs/mysqldump
-    provider_configs/mysql-lvm
-    provider_configs/mysqldump-lvm
-    provider_configs/xtrabackup
-    provider_configs/pgdump
+    mysqldump <provider_plugins/mysqldump>
+    MySQL + LVM <provider_plugins/mysql-lvm>
+    mysqldump + LVM <provider_plugins/mysqldump-lvm>
+    Xtrabackup <provider_plugins/xtrabackup>
+    MySQL Client Helper Plugin <provider_plugins/mysqlconfig>
+
+Other Plugins
+"""""""""""""
+.. toctree::
+    :maxdepth: 1
+
+    pgdump (PostgreSQL) <provider_plugins/pgdump>
+    Example Plugin <provider_plugins/example>
+
+Helper Plugins
+""""""""""""""
+.. toctree::
+    :maxdepth: 1
+
+    Compression Helper Plugin <provider_plugins/compression>
 
 Backup Set Config Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^

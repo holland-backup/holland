@@ -178,7 +178,7 @@ class MySQLClient(object):
                "LEFT JOIN INFORMATION_SCHEMA.ENGINES USING (ENGINE) "
                "WHERE TABLE_SCHEMA = %s")
         cursor = self.cursor()
-        cursor.execute(sql, (database))
+        cursor.execute(sql, (database,))
         names = [info[0] for info in cursor.description]
         all_rows = cursor.fetchall()
         result = [dict(zip(names, row)) for row in all_rows]

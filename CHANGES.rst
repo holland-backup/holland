@@ -8,6 +8,30 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.0.12 - unreleased
+-------------------
+
+holland
++++++++
+- The "holland" command no longer attempts to suppress log output when output
+  is not to a terminal. Previously this was done when either the --quiet
+  options was used or if holland detected it was not writing to a console.
+  Now the "holland --quiet" option must be used to suppress output or output
+  can be redirected via standard shell stdio facilities.
+  (Fixes GH#98)
+
+holland-mysqldump
++++++++++++++++++
+- Various MySQL metadata queries used by the mysqldump plugin
+  were not compatible with MySQL-python 1.2.5 due to the
+  way parameters were passed. (Fixes GH#106).
+
+holland-xtrabackup
+++++++++++++++++++
+- holland-xtrabackup now uses innobackupex as innobackupex binary
+  as innobackupex-1.5.1 has been deprecated upstream for several
+  releases
+
 1.0.10 - Jul 29, 2013
 ---------------------
 
@@ -22,7 +46,7 @@ holland
 
 holland-common
 ++++++++++++++
-- FLUSH TABLES is now run as FLUSH /*!40101 LOCAL */ TABLES to avoid
+- FLUSH TABLES is now run as FLUSH /\*!40101 LOCAL \*/ TABLES to avoid
   replicating this statement.  This affects any plugins that issue flush
   tables via the holland-common mysql client API
 
