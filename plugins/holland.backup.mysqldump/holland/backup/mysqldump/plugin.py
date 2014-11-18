@@ -434,10 +434,15 @@ def exclude_invalid_views(schema, client, definitions_file):
                             raise MySQLError(error_code, msg)
                 except MySQLError, exc:
                     # 1356 = View references invalid table(s)...
-                    if exc.args[0] in (1356, 1142, 1143, 1449):
+                    if exc.args[0] in (1356, 1142, 1143, 1449, 1267):
                         invalid_view = True
                     else:
-                        raise
+                        LOG.error("Unexpected error when checking invalid "
+                                  "view %s.%s: [%d] %s",
+                                  db.name,
+                                  table.name,
+                                  *exc.args)
+                        raise BackupError("[%d] %s" % exc.args)
                 if invalid_view:
                     LOG.warning("* Excluding invalid view `%s`.`%s`: [%d] %s",
                                 db.name, table.name, *exc.args)
