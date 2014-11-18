@@ -129,28 +129,22 @@ class MySQLClient(object):
             row['index_size'] = (row.pop('index_length') or 0)
             # coerce null engine to 'view' as necessary
             if row['engine'] is None:
-                if row['comment'] == 'VIEW':
-                    row['engine'] = 'VIEW'
-                else:
-                    row['engine'] = ''
-                    if 'references invalid table' in (row['comment'] or ''):
-                        LOG.warning("Invalid view %s.%s: %s", 
-                                    row['database'], row['name'],
-                                    row['comment'] or '')
-                    if 'Incorrect key file' in (row['comment'] or ''):
-                        LOG.warning("Invalid table %s.%s: %s",
-                                    row['database'], row['name'],
-                                    row['comment'] or '')
-            row['is_transactional'] = row['engine'].lower() in ['view', 
-                                                                'innodb']
-            for key in row.keys():
+                row['engine'] = 'view'
+                if 'references invalid table' in (row['comment'] or ''):
+                    LOG.warning("Invalid view %s.%s: %s", 
+                                row['database'], row['name'],
+                                row['comment'] or '')
+                if 'Incorrect key file' in (row['comment'] or ''):
+                    LOG.warning("Invalid table %s.%s: %s",
+                                row['database'], row['name'],
+                                row['comment'] or '')
+            for key in row:
                 valid_keys = [
                     'database',
                     'name',
                     'data_size',
                     'index_size',
                     'engine',
-                    'is_transactional'
                 ]
                 if key not in valid_keys:
                     row.pop(key)
