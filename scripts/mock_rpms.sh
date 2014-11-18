@@ -26,7 +26,7 @@ SRPMDIR=$(rpm --eval "%{_srcrpmdir}")
 RPMDIR=$(rpm --eval "%{_rpmdir}")
 HOLLAND_VERSION=$(python setup.py --version)
 HOLLAND_SRC=$SOURCEDIR/holland-$HOLLAND_VERSION.tar.gz
-RHEL_VERSION=$(sed -r 's/.*([0-9]+)[.].*/\1/' < /etc/redhat-release)
+RHEL_VERSION=$(sed -nr '1s/.*([0-9]+)[.].*/\1/p' < /etc/redhat-release)
 MOCK_CHROOT=${MOCK_CHROOT:-epel-${RHEL_VERSION}-x86_64}
 
 # Export HEAD as the source
