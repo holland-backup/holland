@@ -22,26 +22,27 @@
 %endif
 
 %bcond_with     tests
-%bcond_with     example 
+%bcond_with     example
 %bcond_with     sphinxdocs
 %bcond_with     mysqlhotcopy
 %bcond_with     maatkit
 %bcond_without  pgdump
 %bcond_without  sqlite
 %bcond_without  xtrabackup
+%bcond_without  tar
 
 Name:           holland
 Version:        %{holland_version}
 Release:        1%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
-License:        BSD 
+License:        BSD
 URL:            http://hollandbackup.org
-Source0:        http://hollandbackup.org/releases/stable/1.0/%{name}-%{version}.tar.gz 
+Source0:        http://hollandbackup.org/releases/stable/1.0/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
-BuildRequires:  python2-devel python-setuptools 
+BuildRequires:  python2-devel python-setuptools
 %if %{with sphinxdocs}
 BuildRequires:  python-sphinx
 %endif
@@ -86,7 +87,7 @@ Requires: %{name} = %{version}-%{release}, %{name}-common = %{version}-%{release
 Requires: maatkit
 
 %description maatkit
-This plugin provides support for holland to perform MySQL backups using the 
+This plugin provides support for holland to perform MySQL backups using the
 mk-parallel-dump script from the Maatkit toolkit.
 %endif
 
@@ -108,13 +109,13 @@ Group: Development/Libraries
 Requires: %{name} = %{version}-%{release} %{name}-common = %{version}-%{release}
 
 %description mysqlhotcopy
-This plugin allows holland to perform backups of MyISAM and other 
+This plugin allows holland to perform backups of MyISAM and other
 non-transactional table types in MySQL by issuing a table lock and copying the
 raw files from the data directory.
 %endif
 
 %package mysqllvm
-Summary: Holland LVM snapshot backup plugin for MySQL 
+Summary: Holland LVM snapshot backup plugin for MySQL
 License: GPLv2
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release} %{name}-common = %{version}-%{release}
@@ -128,7 +129,7 @@ and to generate a tar archive of the raw data directory.
 
 %if %{with pgdump}
 %package    pgdump
-Summary: Holland LVM snapshot backup plugin for MySQL 
+Summary: Holland LVM snapshot backup plugin for MySQL
 License: GPLv2
 Group: Development/Libraries
 Provides: %{name}-pgdump = %{version}-%{release}
@@ -146,7 +147,7 @@ Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 Requires: %{name}-common = %{version}-%{release}
 
-%description sqlite 
+%description sqlite
 SQLite Backup Provider Plugin for Holland
 %endif
 
@@ -160,15 +161,27 @@ Requires: %{name}-common = %{version}-%{release}
 Requires: xtrabackup >= 1.2
 
 %description xtrabackup
-This package provides a Holland plugin for the Percona Xtrabackup 
+This package provides a Holland plugin for the Percona Xtrabackup
 backup tool for InnoDB and XtraDB engines for MySQL
+%endif
+
+%if %{with tar}
+%package tar
+Summary: tar plugin for Holland
+License: GPLv2
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
+
+%description tar
+This package provides a Holland plugin for creating tar files
 %endif
 
 %prep
 %setup -q
 find ./ -name setup.cfg -exec rm -f {} \;
 mv plugins/README README.plugins
-mv config/providers/README README.providers 
+mv config/providers/README README.providers
 
 # cleanup, will be removed upstream at some point
 rm plugins/ACTIVE
@@ -188,7 +201,7 @@ popd
 cd plugins/holland.lib.common
 %{__python} setup.py build
 cd -
-    
+
 # library : holland.lib.mysql
 cd plugins/holland.lib.mysql
 %{__python} setup.py build
@@ -254,6 +267,12 @@ cd plugins/holland.backup.xtrabackup
 cd -
 %endif
 
+%if %{with tar}
+cd plugins/holland.backup.tar
+%{__python} setup.py build
+cd -
+%endif
+
 %install
 rm -rf %{buildroot}
 
@@ -274,7 +293,7 @@ install -m 0644 docs/man/holland.1 %{buildroot}%{_mandir}/man1
 cd plugins/holland.lib.common
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 cd -
-    
+
 # library : holland.lib.mysql
 cd plugins/holland.lib.mysql
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
@@ -354,6 +373,14 @@ cd -
 install -m 0640 config/providers/xtrabackup.conf %{buildroot}%{_sysconfdir}/holland/providers/
 %endif
 
+%if %{with tar}
+# plugin : holland.backup.tar
+cd plugins/holland.backup.tar
+%{__python} setup.py install -O1 --skip-build --root %{buildroot}
+cd -
+install -m 0640 config/providers/tar.conf %{buildroot}%{_sysconfdir}/holland/providers/
+%endif
+
 # logrotate
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/logrotate.d
 cat > %{buildroot}%{_sysconfdir}/logrotate.d/holland <<EOF
@@ -373,8 +400,8 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc CHANGES.txt README README.plugins README.providers 
-%doc INSTALL LICENSE config/backupsets/examples/ 
+%doc CHANGES.txt README README.plugins README.providers
+%doc INSTALL LICENSE config/backupsets/examples/
 %if %{with sphinxdocs}
 %doc docs/build/html/
 %endif
@@ -482,7 +509,7 @@ rm -rf %{buildroot}
 %endif
 
 %if %{with sqlite}
-%files sqlite 
+%files sqlite
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.sqlite/{README,LICENSE}
 %{python_sitelib}/holland/backup/sqlite.py*
@@ -499,6 +526,16 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland.backup.xtrabackup-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.xtrabackup-%{version}-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/xtrabackup.conf
+%endif
+
+%if %{with tar}
+%files tar
+%defattr(-,root,root,-)
+%doc plugins/holland.backup.tar/{README,LICENSE}
+%{python_sitelib}/holland/backup/tar/
+%{python_sitelib}/holland.backup.tar-%{version}-*-nspkg.pth
+%{python_sitelib}/holland.backup.tar-%{version}-*.egg-info
+%config(noreplace) %{_sysconfdir}/holland/providers/tar.conf
 %endif
 
 %changelog
@@ -628,7 +665,7 @@ rm -rf %{buildroot}
 
 * Thu Oct 08 2009 BJ Dierkes <wdierkes@rackspace.com> - 0.9.4-1.1.rs
 - BuildRequires: python-dev
-- Rebuilding for Fedora Core 
+- Rebuilding for Fedora Core
 
 * Tue Sep 15 2009 BJ Dierkes <wdierkes@rackspace.com> - 0.9.4-1.rs
 - Latest sources.
@@ -659,7 +696,7 @@ rm -rf %{buildroot}
 - Rebuild from trunk
 - Adding commvault addon package.
 - Removing Patch2: holland-0.3-config.patch
-- Disable backupsets by default 
+- Disable backupsets by default
 
 * Sat May 02 2009 BJ Dierkes <wdierkes@rackspace.com> - 0.3.1-1.2.rs
 - Build as noarch.
