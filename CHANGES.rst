@@ -42,6 +42,8 @@ holland-pgdump
 ++++++++++++++
 - missing pg_dump/pg_dumpall commands are now handled more gracefully
   (LP #1206202)
+- The connection used for discovering databases to backup is now
+  closed before pg_dump commands are run (LP #1236618)
 
 holland-xtrabackup
 ++++++++++++++++++
