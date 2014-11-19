@@ -166,10 +166,8 @@ class MySQLClient(object):
                "          TABLE_NAME AS `name`, "
                "          COALESCE(DATA_LENGTH, 0) AS `data_size`, "
                "          COALESCE(INDEX_LENGTH, 0) AS `index_size`, "
-               "          COALESCE(ENGINE, 'view') AS `engine`, "
-               "          (TRANSACTIONS = 'YES' OR ENGINE IS NULL) AS `is_transactional` "
+               "          LOWER(COALESCE(ENGINE, 'view')) AS `engine` "
                "FROM INFORMATION_SCHEMA.TABLES "
-               "LEFT JOIN INFORMATION_SCHEMA.ENGINES USING (ENGINE) "
                "WHERE TABLE_SCHEMA = %s")
         cursor = self.cursor()
         cursor.execute(sql, (database,))

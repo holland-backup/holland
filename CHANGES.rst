@@ -25,6 +25,13 @@ holland-mysqldump
 - Various MySQL metadata queries used by the mysqldump plugin
   were not compatible with MySQL-python 1.2.5 due to the
   way parameters were passed. (Fixes GH#106).
+- exclude-invalid-views will now handle invalid views using
+  an illegal mix of collation (Fixes LP#1207852).
+- exclude-invalid-views handles unexpected mysql errors more
+  gracefully now. (Fixes LP#1207852)
+- lock-method = auto-detect now considers memory, myisam_mrg
+  and federated engines as transactional when determining
+  whether to use mysqldump --single-transaction  (LP #1081261)
 
 holland-xtrabackup
 ++++++++++++++++++
