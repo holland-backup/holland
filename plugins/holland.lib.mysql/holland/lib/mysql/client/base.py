@@ -129,28 +129,22 @@ class MySQLClient(object):
             row['index_size'] = (row.pop('index_length') or 0)
             # coerce null engine to 'view' as necessary
             if row['engine'] is None:
-                if row['comment'] == 'VIEW':
-                    row['engine'] = 'VIEW'
-                else:
-                    row['engine'] = ''
-                    if 'references invalid table' in (row['comment'] or ''):
-                        LOG.warning("Invalid view %s.%s: %s", 
-                                    row['database'], row['name'],
-                                    row['comment'] or '')
-                    if 'Incorrect key file' in (row['comment'] or ''):
-                        LOG.warning("Invalid table %s.%s: %s",
-                                    row['database'], row['name'],
-                                    row['comment'] or '')
-            row['is_transactional'] = row['engine'].lower() in ['view', 
-                                                                'innodb']
-            for key in row.keys():
+                row['engine'] = 'view'
+                if 'references invalid table' in (row['comment'] or ''):
+                    LOG.warning("Invalid view %s.%s: %s", 
+                                row['database'], row['name'],
+                                row['comment'] or '')
+                if 'Incorrect key file' in (row['comment'] or ''):
+                    LOG.warning("Invalid table %s.%s: %s",
+                                row['database'], row['name'],
+                                row['comment'] or '')
+            for key in row:
                 valid_keys = [
                     'database',
                     'name',
                     'data_size',
                     'index_size',
                     'engine',
-                    'is_transactional'
                 ]
                 if key not in valid_keys:
                     row.pop(key)
@@ -172,13 +166,11 @@ class MySQLClient(object):
                "          TABLE_NAME AS `name`, "
                "          COALESCE(DATA_LENGTH, 0) AS `data_size`, "
                "          COALESCE(INDEX_LENGTH, 0) AS `index_size`, "
-               "          COALESCE(ENGINE, 'view') AS `engine`, "
-               "          (TRANSACTIONS = 'YES' OR ENGINE IS NULL) AS `is_transactional` "
+               "          LOWER(COALESCE(ENGINE, 'view')) AS `engine` "
                "FROM INFORMATION_SCHEMA.TABLES "
-               "LEFT JOIN INFORMATION_SCHEMA.ENGINES USING (ENGINE) "
                "WHERE TABLE_SCHEMA = %s")
         cursor = self.cursor()
-        cursor.execute(sql, (database))
+        cursor.execute(sql, (database,))
         names = [info[0] for info in cursor.description]
         all_rows = cursor.fetchall()
         result = [dict(zip(names, row)) for row in all_rows]
@@ -330,16 +322,27 @@ class MySQLClient(object):
         :returns: slave status dict
         """
         sql = "SHOW SLAVE STATUS"
+        charset = self.character_set_name()
         cursor = self.cursor()
-        cursor.execute(sql)
-        keys = [col[0].lower() for col in cursor.description]
-        slave_status = cursor.fetchone()
-        cursor.close()
+        try:
+            self.set_character_set('binary')
+            cursor.execute(sql)
+            keys = [col[0].lower() for col in cursor.description]
+            slave_status = cursor.fetchone()
+            cursor.close()
 
-        if not slave_status:
-            return None
-        else:
-            return dict(zip(keys, slave_status))
+            if not slave_status:
+                return None
+            else:
+                result = []
+                for value in slave_status:
+                    if isinstance(value, basestring):
+                        value = value.decode(charset, 'ignore')
+                    result.append(value)
+                return dict(zip(keys, result))
+        finally:
+            self.set_character_set(charset)
+            cursor.close()
 
     def show_master_status(self):
         """Fetch MySQL master status"""

@@ -19,7 +19,7 @@ LOG = logging.getLogger(__name__)
 CONFIGSPEC = """
 [xtrabackup]
 global-defaults     = string(default='/etc/my.cnf')
-innobackupex        = string(default='innobackupex-1.5.1')
+innobackupex        = string(default='innobackupex')
 ibbackup            = string(default=None)
 stream              = string(default=tar)
 apply-logs          = boolean(default=yes)
@@ -31,7 +31,7 @@ additional-options  = force_list(default=list())
 pre-command         = string(default=None)
 
 [compression]
-method              = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', default=gzip)
+method              = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', default=gzip)
 inline              = boolean(default=yes)
 options             = string(default="")
 level               = integer(min=0, max=9, default=1)
