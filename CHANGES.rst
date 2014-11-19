@@ -34,6 +34,8 @@ holland-mysqldump
   whether to use mysqldump --single-transaction  (LP #1081261)
 - mysqldump failed to detect invalid views under mysql 5.0
   (LP #1262352)
+- invalid strings in show slave status are now handled more
+  gracefully (LP #1220841)
 
 holland-xtrabackup
 ++++++++++++++++++
