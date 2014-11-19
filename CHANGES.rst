@@ -32,6 +32,8 @@ holland-mysqldump
 - lock-method = auto-detect now considers memory, myisam_mrg
   and federated engines as transactional when determining
   whether to use mysqldump --single-transaction  (LP #1081261)
+- mysqldump failed to detect invalid views under mysql 5.0
+  (LP #1262352)
 
 holland-xtrabackup
 ++++++++++++++++++
