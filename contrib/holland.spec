@@ -172,6 +172,7 @@ License: GPLv2
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 Requires: %{name}-common = %{version}-%{release}
+Requires: tar
 
 %description tar
 This package provides a Holland plugin for creating tar files
