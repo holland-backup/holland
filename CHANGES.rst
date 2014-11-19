@@ -37,6 +37,12 @@ holland-mysqldump
 - invalid strings in show slave status are now handled more
   gracefully (LP #1220841)
 
+
+holland-pgdump
+++++++++++++++
+- missing pg_dump/pg_dumpall commands are now handled more gracefully
+  (LP #1206202)
+
 holland-xtrabackup
 ++++++++++++++++++
 - holland-xtrabackup now uses innobackupex as innobackupex binary
