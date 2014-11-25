@@ -8,11 +8,45 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
-1.0.12 - Jul 27, 2014
----------------------
+1.0.12 - unreleased
+-------------------
+
+holland
++++++++
+- The "holland" command no longer attempts to suppress log output when output
+  is not to a terminal. Previously this was done when either the --quiet
+  options was used or if holland detected it was not writing to a console.
+  Now the "holland --quiet" option must be used to suppress output or output
+  can be redirected via standard shell stdio facilities.
+  (Fixes GH#98)
+
+holland-mysqldump
++++++++++++++++++
+- Various MySQL metadata queries used by the mysqldump plugin
+  were not compatible with MySQL-python 1.2.5 due to the
+  way parameters were passed. (Fixes GH#106).
+- exclude-invalid-views will now handle invalid views using
+  an illegal mix of collation (Fixes LP#1207852).
+- exclude-invalid-views handles unexpected mysql errors more
+  gracefully now. (Fixes LP#1207852)
+- lock-method = auto-detect now considers memory, myisam_mrg
+  and federated engines as transactional when determining
+  whether to use mysqldump --single-transaction  (LP #1081261)
+- mysqldump failed to detect invalid views under mysql 5.0
+  (LP #1262352)
+- invalid strings in show slave status are now handled more
+  gracefully (LP #1220841)
+
+
+holland-pgdump
+++++++++++++++
+- missing pg_dump/pg_dumpall commands are now handled more gracefully
+  (LP #1206202)
+- The connection used for discovering databases to backup is now
+  closed before pg_dump commands are run (LP #1236618)
 
 holland-xtrabackup
-+++++++
+++++++++++++++++++
 - holland-xtrabackup now uses innobackupex as innobackupex binary
   as innobackupex-1.5.1 has been deprecated upstream for several
   releases
@@ -31,7 +65,7 @@ holland
 
 holland-common
 ++++++++++++++
-- FLUSH TABLES is now run as FLUSH /*!40101 LOCAL */ TABLES to avoid
+- FLUSH TABLES is now run as FLUSH /\*!40101 LOCAL \*/ TABLES to avoid
   replicating this statement.  This affects any plugins that issue flush
   tables via the holland-common mysql client API
 

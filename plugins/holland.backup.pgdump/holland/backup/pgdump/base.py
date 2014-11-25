@@ -12,6 +12,7 @@ import subprocess
 import psycopg2 as dbapi
 import psycopg2.extensions
 
+from holland.core.exceptions import BackupError
 # holland-core has a few nice utilities such as format_bytes
 from holland.core.util.fmt import format_bytes
 # Holland general compression functions
@@ -21,7 +22,7 @@ from holland.lib.safefilename import encode as encode_safe
 
 LOG = logging.getLogger(__name__)
 
-class PgError(Exception):
+class PgError(BackupError):
     """Raised when any error associated with Postgres occurs"""
 
 def get_connection(config, db='template1'):
@@ -37,6 +38,9 @@ def get_connection(config, db='template1'):
     connection = dbapi.connect(database=db, **args)
     if not connection:
         raise PgError("Failed to connect to the Postgres database.")
+
+    # set connection in autocommit mode
+    connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
     if config["pgdump"]["role"]:
         try:
@@ -98,20 +102,26 @@ def run_pgdump(dbname, output_stream, connection_params, format='custom', env=No
                         output_stream.name)
 
     stderr = tempfile.TemporaryFile()
-    returncode = subprocess.call(args,
-                                 stdout=output_stream,
-                                 stderr=stderr,
-                                 env=env,
-                                 close_fds=True)
-    stderr.flush()
-    stderr.seek(0)
-    for line in stderr:
-        LOG.error('%s', line.rstrip())
-    stderr.close()
+    try:
+        try:
+            returncode = subprocess.call(args,
+                                         stdout=output_stream,
+                                         stderr=stderr,
+                                         env=env,
+                                         close_fds=True)
+        except OSError, exc:
+            raise PgError("Failed to execute '%s': [%d] %s" %
+                          (args[0], exc.errno, exc.strerror))
+
+        stderr.flush()
+        stderr.seek(0)
+        for line in stderr:
+            LOG.error('%s', line.rstrip())
+    finally:
+        stderr.close()
 
     if returncode != 0:
-        raise OSError("%s failed." %
-                      subprocess.list2cmdline(args))
+        raise PgError("%s failed." % subprocess.list2cmdline(args))
 
 def backup_globals(backup_directory, config, connection_params, env=None):
     """Backup global Postgres data that wouldn't otherwise
@@ -126,7 +136,7 @@ def backup_globals(backup_directory, config, connection_params, env=None):
 
     path = os.path.join(backup_directory, 'global.sql')
     zopts = config['compression']
-    output_stream = open_stream(path, 'w', 
+    output_stream = open_stream(path, 'w',
                                 method=zopts['method'],
                                 level=zopts['level'],
                                 extra_args=zopts['options'])
@@ -139,17 +149,24 @@ def backup_globals(backup_directory, config, connection_params, env=None):
     LOG.info('%s > %s', subprocess.list2cmdline(args),
                         output_stream.name)
     stderr = tempfile.TemporaryFile()
-    returncode = subprocess.call(args,
-                                 stdout=output_stream,
-                                 stderr=stderr,
-                                 env=env,
-                                 close_fds=True)
-    output_stream.close()
-    stderr.flush()
-    stderr.seek(0)
-    for line in stderr:
-        LOG.error('%s', line.rstrip())
-    stderr.close()
+    try:
+        try:
+            returncode = subprocess.call(args,
+                                         stdout=output_stream,
+                                         stderr=stderr,
+                                         env=env,
+                                         close_fds=True)
+        except OSError, exc:
+            raise PgError("Failed to execute '%s': [%d] %s" %
+                          (args[0], exc.errno, exc.strerror))
+
+        output_stream.close()
+        stderr.flush()
+        stderr.seek(0)
+        for line in stderr:
+            LOG.error('%s', line.rstrip())
+    finally:
+        stderr.close()
 
     if returncode != 0:
         raise PgError("pg_dumpall command exited with failure code %d." %

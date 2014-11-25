@@ -41,7 +41,7 @@ def setup_logging(opts):
     else:
         log_level = hollandcfg.lookup('logging.level')
 
-    if (os.isatty(sys.stdin.fileno()) and not opts.quiet):
+    if (not opts.quiet):
         setup_console_logging(level=log_level)
 
     if hollandcfg.lookup('logging.filename'):

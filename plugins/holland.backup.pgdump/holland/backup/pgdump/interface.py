@@ -104,6 +104,10 @@ class PgDump(object):
         Start a backup.
         """
 
+        # estimate and setup has completed at this point
+        # so ensure the connection is closed - we will never reuse this
+        self.connection.close()
+
         if self.dry_run:
             # Very simply dry run information
             # enough to know that:

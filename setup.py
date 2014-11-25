@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '1.0.10'
+version = '1.0.11'
 
 setup(name="holland",
       version=version,

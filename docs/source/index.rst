@@ -5,12 +5,12 @@ Table of Contents
 -----------------
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 3
 
-   intro
-   commands
-   overview
-   config        
+    intro
+    commands
+    overview
+    config
 
 Indices and tables
 ------------------
