@@ -220,6 +220,8 @@ def generate_pgpassfile(backup_directory, password):
     fileobj = open(os.path.join(backup_directory, 'pgpass'), 'w')
     # pgpass should always be 0600
     os.chmod(fileobj.name, 0600)
+    password = password.replace('\\', '\\\\')
+    password = password.replace(':', '\\:')
     fileobj.write('*:*:*:*:%s' % password)
     fileobj.close()
     return fileobj.name
