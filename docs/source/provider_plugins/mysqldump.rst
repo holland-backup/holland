@@ -141,6 +141,11 @@ Backs up one or more MySQL databases using the mysqldump tool.
     one file, however this means that restore a single database can
     be difficult if multiple databases are defined in the backup set.
 
+    When backing up all databases within a single file, the backup file
+    will be named ``all_databases.sql``. If compression is used, the 
+    compression extension will be appended to the filename
+    (e.g. ``all_databases.sql.gz``).
+
 **additional-options** = <mysqldump argument>[, <mysqldump argument>]
 
     Can optionally specify additional options directly to ``mysqldump`` if
