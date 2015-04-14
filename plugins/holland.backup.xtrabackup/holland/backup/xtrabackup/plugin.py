@@ -2,7 +2,7 @@
 holland.mysql.xtrabackup
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Xtrabackup backup strategy plugin
+Backup plugin implementation to provide support for Percona XtraBackup.
 """
 
 import sys

@@ -4,9 +4,9 @@ version = '1.0.11'
 
 setup(name='holland.backup.xtrabackup',
       version=version,
-      description="Xtrabackup Plugin for Holland",
+      description="Holland plugin for Percona XtraBackup"
       long_description="""\
-      Xtrabackup plugin for the Holland backup framework
+      Holland plugin for Percona XtraBackup
       """,
       author='Rackspace',
       author_email='holland-devel@googlegroups.com',

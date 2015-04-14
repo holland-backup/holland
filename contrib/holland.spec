@@ -153,7 +153,7 @@ SQLite Backup Provider Plugin for Holland
 
 %if %{with xtrabackup}
 %package xtrabackup
-Summary: Xtrabackup plugin for Holland
+Summary: Holland plugin for Percona XtraBackup
 License: GPLv2
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
@@ -161,8 +161,9 @@ Requires: %{name}-common = %{version}-%{release}
 Requires: xtrabackup >= 1.2
 
 %description xtrabackup
-This package provides a Holland plugin for the Percona Xtrabackup
-backup tool for InnoDB and XtraDB engines for MySQL
+This package provides a Holland plugin for Percona Xtrabackup. This
+plugin requires Percona XtraBackup and runs the provided
+/usr/bin/innobackupex script.
 %endif
 
 %if %{with tar}
