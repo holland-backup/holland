@@ -1,9 +1,14 @@
 .. _config-xtrabackup:
 
-Xtrabackup Provider Configuration [xtrabackup]
-==============================================
+Holland Plugin for Percona XtraBackup Configuration [xtrabackup]
+=========================================================================
 
-Backs up a MySQL instance using Percona's Xtrabackup tool.
+Backup a MySQL instance using `Percona XtraBackup`_.
+
+.. note:: Percona XtraBackup is a trademark of Percona LLC
+   The Holland Project does not intend the use or display of Percona's
+   trademark to imply a relationship with, or endorsement or sponsorship
+   of the Holland Project by Percona.
 
 [xtrabackup]
 ------------
@@ -81,3 +86,5 @@ Backs up a MySQL instance using Percona's Xtrabackup tool.
 .. include:: compression.rst
 
 .. include:: mysqlconfig.rst
+
+.. _Percona XtraBackup: https://www.percona.com/software/percona-xtrabackup

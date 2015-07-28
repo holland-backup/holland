@@ -42,12 +42,11 @@ As of Holland 1.0.8, there are 5 providers included with Holland:
     a working snapshot. It is also extremely ill-advised to store the backup
     on the same volume as MySQL.
 
-* XtraBackup
+* Support for `Percona XtraBackup <http://www.percona.com/software/percona-xtrabackup>`_
 
     .. versionadded:: 1.0.8
     
-    Backup MySQL databases using Percona's 
-    `XtraBackup <http://www.percona.com/software/percona-xtrabackup>`_ tool.
+    Backup MySQL databases using `Percona XtraBackup <http://www.percona.com/software/percona-xtrabackup>`_.
     This provides a near lockless backup when using the InnoDB storage engine
     while also providing a mysqlhotcopy style backup for MyISAM tables.
 

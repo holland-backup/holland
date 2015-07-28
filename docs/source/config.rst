@@ -269,7 +269,7 @@ MySQL Plugins
     mysqldump <provider_plugins/mysqldump>
     MySQL + LVM <provider_plugins/mysql-lvm>
     mysqldump + LVM <provider_plugins/mysqldump-lvm>
-    Xtrabackup <provider_plugins/xtrabackup>
+    Plugin for Percona XtraBackup <provider_plugins/xtrabackup>
     MySQL Client Helper Plugin <provider_plugins/mysqlconfig>
 
 Other Plugins
