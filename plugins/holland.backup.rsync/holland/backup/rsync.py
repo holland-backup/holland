@@ -2,6 +2,8 @@ import logging
 import os
 from subprocess import Popen, PIPE, STDOUT, list2cmdline
 from holland.core.exceptions import BackupError
+from holland.core import spool
+from holland.core import config
 from tempfile import TemporaryFile
 
 LOG = logging.getLogger(__name__)
@@ -11,6 +13,7 @@ LOG = logging.getLogger(__name__)
 CONFIGSPEC = """
 [rsync]
 directory = string(default='/home')
+flags = string(default='-avz')
 hardlinks = boolean(default=yes)
 """.splitlines()
 
@@ -44,20 +47,28 @@ class RsyncPlugin(object):
 		return total_size
 
 	def backup(self):
+		hardlink_cmd = ""
+
 		if self.dry_run:
 			return
 
-		#if not os.path.exists(self.config['rsync']['directory'])
-		#or not os.path.isdir(self.config['rsync']['directory']):
-		#	raise BackupError('{0} is not a directory!'.format(self.config['rsync']['directory']))
-		outdir = os.path.join(self.target_directory, self.config['rsync']['directory'])
-		cmd = ['rsync', '-avz', self.config['rsync']['directory'], outdir]
+		if not os.path.exists(self.config['rsync']['directory']):
+			raise BackupError('{0} does not exist!'.format(self.config['rsync']['directory']))
+		if not os.path.isdir(self.config['rsync']['directory']):
+			raise BackupError('{0} is not a directory!'.format(self.config['rsync']['directory']))
+
+		self.spool = spool.Spool()
+		backupsets = self.spool.find_backupset(self.name)
+		backups = backupsets.list_backups(reverse=True)
+		if len(backups) > 1 and self.config['rsync']['hardlinks']:
+			LOG.info("Previous Backup Found: %s", backups[1].path)
+			cmd = ['rsync', self.config['rsync']['flags'], "--link-dest=" + backups[1].path, self.config['rsync']['directory'], self.target_directory]
+		else:
+			cmd = ['rsync', self.config['rsync']['flags'], self.config['rsync']['directory'], self.target_directory]
 		errlog = TemporaryFile()
-		#stream = self._open_stream(outfile, 'w')
 		LOG.info("Executing: %s", list2cmdline(cmd))
 		pid = Popen(
 			cmd,
-			#stdout=stream.fileno(),
 			stderr=errlog.fileno(),
 			close_fds=True)
 		status = pid.wait()
