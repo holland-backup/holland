@@ -2,7 +2,6 @@ import logging
 import os
 from subprocess import Popen, PIPE, STDOUT, list2cmdline
 from holland.core.exceptions import BackupError
-from holland.lib.compression import open_stream, lookup_compression
 from tempfile import TemporaryFile
 
 LOG = logging.getLogger(__name__)
@@ -44,34 +43,21 @@ class RsyncPlugin(object):
 					total_size += os.path.getsize(fp)
 		return total_size
 
-	def _open_stream(self, path, mode, method=None):
-        """Open a stream through the holland compression api, relative to
-        this instance's target directory
-        """
-        compression_method = method or self.config['compression']['method']
-        compression_level = self.config['compression']['level']
-        compression_options = self.config['compression']['options']
-        stream = open_stream(path,
-                             mode,
-                             compression_method,
-                             compression_level,
-                             extra_args=compression_options)
-        return stream
-
 	def backup(self):
 		if self.dry_run:
 			return
-		if not os.path.exists(self.config['rsync']['directory'])
-		 or not os.path.isdir(self.config['rsync']['directory']):
-			raise BackupError('{0} is not a directory!'.format(self.config['rsync']['directory']))
+
+		#if not os.path.exists(self.config['rsync']['directory'])
+		#or not os.path.isdir(self.config['rsync']['directory']):
+		#	raise BackupError('{0} is not a directory!'.format(self.config['rsync']['directory']))
 		outdir = os.path.join(self.target_directory, self.config['rsync']['directory'])
-		cmd = ['rsync', 'avz', self.config['rsync']['directory'], outdir]
+		cmd = ['rsync', '-avz', self.config['rsync']['directory'], outdir]
 		errlog = TemporaryFile()
-		stream = self._open_stream(outfile, 'w')
-		LOG.info("Executing: %s", list2cmdline(args))
+		#stream = self._open_stream(outfile, 'w')
+		LOG.info("Executing: %s", list2cmdline(cmd))
 		pid = Popen(
 			cmd,
-			stdout=stream.fileno(),
+			#stdout=stream.fileno(),
 			stderr=errlog.fileno(),
 			close_fds=True)
 		status = pid.wait()
@@ -79,6 +65,6 @@ class RsyncPlugin(object):
 			errlog.flush()
 			errlog.seek(0)
 			for line in errlog:
-				LOG.error("%s[%d]: %s", list2cmdline(args), pid.pid, line.rstrip())
+				LOG.error("%s[%d]: %s", list2cmdline(cmd), pid.pid, line.rstrip())
 		finally:
 			errlog.close()
