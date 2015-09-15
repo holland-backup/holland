@@ -94,6 +94,7 @@ class RsyncPlugin(object):
 			if(self.config['rsync']['username']):
 				source += self.config['rsync']['username'] + "@"
 			source += self.config['rsync']['server']
+			# If a password was specified, toss it in as a env variable.
 			if(self.config['rsync']['password']):
 				env = {"RSYNC_PASSWORD": self.config['rsync']['password']}
 		# We're using SSH. If a username was specified, provide it.
