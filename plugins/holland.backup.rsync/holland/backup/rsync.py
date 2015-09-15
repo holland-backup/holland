@@ -14,9 +14,12 @@ CONFIGSPEC = """
 [rsync]
 method = option('local', 'ssh', 'rsync', default='local')
 server = string(default=None)
+username = string(default=None)
+password = string(default=None)
 directory = string(default='/')
 flags = string(default='-avz')
 hardlinks = boolean(default=yes)
+one-file-system = boolean(default=no)
 exclude = list(default=None)
 """.splitlines()
 
@@ -51,6 +54,7 @@ class RsyncPlugin(object):
 
 	def backup(self):
 		hardlink_cmd = ""
+		env = None
 
 		if self.dry_run:
 			return
@@ -81,13 +85,30 @@ class RsyncPlugin(object):
 				cmd.append("--exclude=" + exclude)
 
 		# Check the rsync method (local, ssh, rsync)
+		# Each case, we're doing local copy so we do nothing.
 		if(self.config['rsync']['method'] == 'local'):
 			source = ""
+		# We're using rsync. If a username was specified, provide it.
 		elif(self.config['rsync']['method'] == 'rsync'):
-			source = "rsync://" + self.config['rsync']['server']
+			source = "rsync://"
+			if(self.config['rsync']['username']):
+				source += self.config['rsync']['username'] + "@"
+			source += self.config['rsync']['server']
+			if(self.config['rsync']['password']):
+				env = {"RSYNC_PASSWORD": self.config['rsync']['password']}
+		# We're using SSH. If a username was specified, provide it.
+		# Note no password will be provided here. SSH keys should be used.
+		# The "user@host:/path" syntax is being used here.
 		elif(self.config['rsync']['method'] == 'ssh'):
-			source = "ssh://" + self.config['rsync']['server']
+			if(self.config['rsync']['username']):
+				source = self.config['rsync']['username'] + "@"
+			source += self.config['rsync']['server'] + ":"
+		# Now concatenate all the above work with the desired path.
 		source += "/" + self.config['rsync']['directory']
+
+		# Check on one-file-system flag
+		if(self.config['rsync']['one-file-system']):
+			cmd.append('--one-file-system')
 
 		# Append the source and destinations
 		cmd.append(source)
@@ -99,6 +120,7 @@ class RsyncPlugin(object):
 		pid = Popen(
 			cmd,
 			stderr=errlog.fileno(),
+			env=env,
 			close_fds=True)
 		status = pid.wait()
 		try:
