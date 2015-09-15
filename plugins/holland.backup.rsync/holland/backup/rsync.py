@@ -15,6 +15,7 @@ CONFIGSPEC = """
 directory = string(default='/home')
 flags = string(default='-avz')
 hardlinks = boolean(default=yes)
+exclude = list(default=None)
 """.splitlines()
 
 class RsyncPlugin(object):
@@ -52,19 +53,41 @@ class RsyncPlugin(object):
 		if self.dry_run:
 			return
 
+		# Check if the directory we are trying to backup exists
 		if not os.path.exists(self.config['rsync']['directory']):
 			raise BackupError('{0} does not exist!'.format(self.config['rsync']['directory']))
 		if not os.path.isdir(self.config['rsync']['directory']):
 			raise BackupError('{0} is not a directory!'.format(self.config['rsync']['directory']))
 
+		# Process exclusion tuples and turn them into
+		# --exclude flags
+		if self.config['rsync']['exclude']:
+			for exclude in self.config['rsync']['exclude']:
+				excludes.append("--exclude=" + exclude)
+
+
+		# Check if a previous backup directory exists
+		# if so, and hardlinks are enabled, use it for the --link-dest
 		self.spool = spool.Spool()
 		backupsets = self.spool.find_backupset(self.name)
 		backups = backupsets.list_backups(reverse=True)
 		if len(backups) > 1 and self.config['rsync']['hardlinks']:
 			LOG.info("Previous Backup Found: %s", backups[1].path)
-			cmd = ['rsync', self.config['rsync']['flags'], "--link-dest=" + backups[1].path, self.config['rsync']['directory'], self.target_directory]
+			cmd = ['rsync', self.config['rsync']['flags'], "--link-dest=" + backups[1].path]
 		else:
-			cmd = ['rsync', self.config['rsync']['flags'], self.config['rsync']['directory'], self.target_directory]
+			cmd = ['rsync', self.config['rsync']['flags']]
+
+		# Process exclusion tuples and turn them into
+		# --exclude flags
+		if self.config['rsync']['exclude']:
+			for exclude in self.config['rsync']['exclude']:
+				cmd.append("--exclude=" + exclude)
+
+		# Append the source and destinations
+		cmd.append(self.config['rsync']['directory'])
+		cmd.append(self.target_directory)
+
+		# Do it!
 		errlog = TemporaryFile()
 		LOG.info("Executing: %s", list2cmdline(cmd))
 		pid = Popen(
