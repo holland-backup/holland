@@ -12,9 +12,9 @@ LOG = logging.getLogger(__name__)
 # See: http://www.voidspace.org.uk/python/validate.html
 CONFIGSPEC = """
 [rsync]
-method = string(default='local')
+method = option('local', 'ssh', 'rsync', default='local')
 server = string(default=None)
-directory = string(default='/home')
+directory = string(default='/')
 flags = string(default='-avz')
 hardlinks = boolean(default=yes)
 exclude = list(default=None)
