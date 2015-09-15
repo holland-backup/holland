@@ -21,6 +21,7 @@ flags = string(default='-avz')
 hardlinks = boolean(default=yes)
 one-file-system = boolean(default=no)
 exclude = list(default=None)
+bandwidth-limit = string(default=None)
 """.splitlines()
 
 class RsyncPlugin(object):
@@ -106,6 +107,9 @@ class RsyncPlugin(object):
 			source += self.config['rsync']['server'] + ":"
 		# Now concatenate all the above work with the desired path.
 		source += "/" + self.config['rsync']['directory']
+
+		if(self.config['rsync']['bandwidth-limit']):
+			cmd.append('--bwlimit=' + self.config['rsync']['bandwidth-limit'])
 
 		# Check on one-file-system flag
 		if(self.config['rsync']['one-file-system']):
