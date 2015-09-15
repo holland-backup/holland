@@ -14,6 +14,7 @@ CONFIGSPEC = """
 [rsync]
 method = option('local', 'ssh', 'rsync', default='local')
 server = string(default=None)
+port = integer(default=None)
 username = string(default=None)
 password = string(default=None)
 directory = string(default='/')
@@ -94,20 +95,40 @@ class RsyncPlugin(object):
 			source = "rsync://"
 			if(self.config['rsync']['username']):
 				source += self.config['rsync']['username'] + "@"
+			# Add in the host
 			source += self.config['rsync']['server']
+			# If a port was specified, provide it as well.
+			if(self.config['rsync']['port']):
+				source += ":" + self.config['rsync']['port']
 			# If a password was specified, toss it in as a env variable.
 			if(self.config['rsync']['password']):
 				env = {"RSYNC_PASSWORD": self.config['rsync']['password']}
+
 		# We're using SSH. If a username was specified, provide it.
 		# Note no password will be provided here. SSH keys should be used.
 		# The "user@host:/path" syntax is being used here.
 		elif(self.config['rsync']['method'] == 'ssh'):
+			source = ""
 			if(self.config['rsync']['username']):
 				source = self.config['rsync']['username'] + "@"
 			source += self.config['rsync']['server'] + ":"
+
+			# Now we build the --rsh flag
+
+			#if(self.config['rsync']['port']):
+				#rsh = "--rsh='ssh"
+				#rsh += " -p"
+				#-p" #+ str(self.config['rsync']['port']) + "'"
+				#LOG.info(rsh)
+				#cmd.append(rsh)
+			#else:
+				#rsh="""--rsh='ssh'"""
+			#cmd.append(rsh)
+
 		# Now concatenate all the above work with the desired path.
 		source += "/" + self.config['rsync']['directory']
 
+		# Check on the bandwidth limit
 		if(self.config['rsync']['bandwidth-limit']):
 			cmd.append('--bwlimit=' + self.config['rsync']['bandwidth-limit'])
 
