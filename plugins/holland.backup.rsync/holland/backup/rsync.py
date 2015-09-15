@@ -12,6 +12,8 @@ LOG = logging.getLogger(__name__)
 # See: http://www.voidspace.org.uk/python/validate.html
 CONFIGSPEC = """
 [rsync]
+method = string(default='local')
+server = string(default=None)
 directory = string(default='/home')
 flags = string(default='-avz')
 hardlinks = boolean(default=yes)
@@ -54,10 +56,12 @@ class RsyncPlugin(object):
 			return
 
 		# Check if the directory we are trying to backup exists
-		if not os.path.exists(self.config['rsync']['directory']):
-			raise BackupError('{0} does not exist!'.format(self.config['rsync']['directory']))
-		if not os.path.isdir(self.config['rsync']['directory']):
-			raise BackupError('{0} is not a directory!'.format(self.config['rsync']['directory']))
+		# if we are backing up a local directory.
+		if self.config['rsync']['method'] == 'local':
+			if not os.path.exists(self.config['rsync']['directory']):
+				raise BackupError('{0} does not exist!'.format(self.config['rsync']['directory']))
+			if not os.path.isdir(self.config['rsync']['directory']):
+				raise BackupError('{0} is not a directory!'.format(self.config['rsync']['directory']))
 
 		# Check if a previous backup directory exists
 		# if so, and hardlinks are enabled, use it for the --link-dest
@@ -76,8 +80,17 @@ class RsyncPlugin(object):
 			for exclude in self.config['rsync']['exclude']:
 				cmd.append("--exclude=" + exclude)
 
+		# Check the rsync method (local, ssh, rsync)
+		if(self.config['rsync']['method'] == 'local'):
+			source = ""
+		elif(self.config['rsync']['method'] == 'rsync'):
+			source = "rsync://" + self.config['rsync']['server']
+		elif(self.config['rsync']['method'] == 'ssh'):
+			source = "ssh://" + self.config['rsync']['server']
+		source += "/" + self.config['rsync']['directory']
+
 		# Append the source and destinations
-		cmd.append(self.config['rsync']['directory'])
+		cmd.append(source)
 		cmd.append(self.target_directory)
 
 		# Do it!
