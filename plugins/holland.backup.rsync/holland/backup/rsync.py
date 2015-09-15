@@ -59,13 +59,6 @@ class RsyncPlugin(object):
 		if not os.path.isdir(self.config['rsync']['directory']):
 			raise BackupError('{0} is not a directory!'.format(self.config['rsync']['directory']))
 
-		# Process exclusion tuples and turn them into
-		# --exclude flags
-		if self.config['rsync']['exclude']:
-			for exclude in self.config['rsync']['exclude']:
-				excludes.append("--exclude=" + exclude)
-
-
 		# Check if a previous backup directory exists
 		# if so, and hardlinks are enabled, use it for the --link-dest
 		self.spool = spool.Spool()
