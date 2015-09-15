@@ -1,0 +1,4 @@
+* Implement a way to specify additional options (such as --bwlimit)
+
+Either by exposing the flags as config variables or providing a sort
+of extra-args for putting flags in manually (or both).
