@@ -1,0 +1,3 @@
+debian/tmp/usr/lib/python*.*/*-packages/holland.backup.rsync-*.egg-info
+debian/tmp/usr/lib/python*.*/*-packages/holland/backup/rsync/
+config/providers/rsync.conf etc/holland/providers/

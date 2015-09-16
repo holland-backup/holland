@@ -28,6 +28,7 @@ override_dh_auto_build:
 	dh_auto_build -Dplugins/holland.backup.pgdump
 	dh_auto_build -Dplugins/holland.backup.example
 	dh_auto_build -Dplugins/holland.backup.xtrabackup
+	dh_auto_build -Dplugins/holland.backup.rsync
         
 	# Build the HTML documentation.
 	PYTHONPATH=. sphinx-build -N -q -E -b html docs/source/ docs/html/
@@ -40,6 +41,7 @@ override_dh_auto_install:
 	dh_auto_install -O--buildsystem=python_distutils -Dplugins/holland.backup.mysqldump
 	dh_auto_install -O--buildsystem=python_distutils -Dplugins/holland.backup.mysql_lvm
 	dh_auto_install -O--buildsystem=python_distutils -Dplugins/holland.backup.pgdump
+	dh_auto_install -O--buildsystem=python_distutils -Dplugins/holland.backup.rsync
 	dh_auto_install -O--buildsystem=python_distutils -Dplugins/holland.backup.example
 	dh_auto_install -O--buildsystem=python_distutils -Dplugins/holland.backup.xtrabackup
 	find debian/tmp/ \( -name '*.pth' -or -name 'namespace_packages.txt' \) -delete

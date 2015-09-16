@@ -85,3 +85,13 @@ Depends: holland (>= ${binary:Version}),
 description: Holland Postgres Backup Provider Plugin
  This package provides the holland pgdump plugin. 
  
+Package: holland-rsync
+Architecture: all
+Depends: holland (>= ${binary:Version}),
+ holland-common (>= ${binary:Version}),
+ rsync
+ ${misc:Depends},
+ ${python:Depends}
+description: Holland rsync Backup Provider Plugin
+ This package provides the holland rsync plugin. 
+ 
