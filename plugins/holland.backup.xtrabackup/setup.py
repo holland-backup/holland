@@ -4,7 +4,7 @@ version = '1.0.11'
 
 setup(name='holland.backup.xtrabackup',
       version=version,
-      description="Holland plugin for Percona XtraBackup"
+      description="Holland plugin for Percona XtraBackup",
       long_description="""\
       Holland plugin for Percona XtraBackup
       """,
