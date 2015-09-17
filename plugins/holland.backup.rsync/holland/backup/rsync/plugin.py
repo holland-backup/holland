@@ -45,14 +45,15 @@ class RsyncPlugin(object):
 		self.config.validate_config(CONFIGSPEC)
 
 	def estimate_backup_size(self):
-		total_size = 0
-		for dirpath, dirnames, filenames in os.walk(self.config['rsync']['directory']):
-			for f in filenames:
-				fp = os.path.join(dirpath, f)
-				# verify the symlink and such exist before trying to get its size
-				if os.path.exists(fp):
-					total_size += os.path.getsize(fp)
-		return total_size
+		return 0
+		#total_size = 0
+		#for dirpath, dirnames, filenames in os.walk(self.config['rsync']['directory']):
+		#	for f in filenames:
+		#		fp = os.path.join(dirpath, f)
+		#		# verify the symlink and such exist before trying to get its size
+		#		if os.path.exists(fp):
+		#			total_size += os.path.getsize(fp)
+		#return total_size
 
 	def backup(self):
 		hardlink_cmd = ""
