@@ -21,8 +21,8 @@ directory = string(default='/')
 flags = string(default='-avz')
 hardlinks = boolean(default=yes)
 one-file-system = boolean(default=no)
-exclude = list(default=None)
 bandwidth-limit = string(default=None)
+exclude = list(default=None)
 """.splitlines()
 
 class RsyncPlugin(object):

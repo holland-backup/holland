@@ -1,6 +1,9 @@
-* Implement a way to specify additional options (such as --bwlimit)
+TODO
 
-Either by exposing the flags as config variables or providing a sort
-of extra-args for putting flags in manually (or both).
+  * Ports feature does not work
+    Running into an odd scaping issue that is making that difficult currently.
 
-* Username/Password is missing
+  * Estimate Backup Size busted
+    How to calculate size for remote hosts (--dry-run?) and what about cases
+    where --one-file-system is used? Plus the old way was expensive for large
+    files/directories.
