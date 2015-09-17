@@ -71,3 +71,9 @@ Depends: holland (>= ${source:Version}), holland-common
 Description: Holland CommVault Command Plugin 
  This package provides the holland commvault command plugin, enabling CommVault
  environments to trigger a backup through holland. 
+
+Package: holland-rsync
+Architecture: any
+Depends: holland (>= ${source:Version}), rsync
+Description: Holland rsync Plugin
+ This package provides the Holland rsync plugin.
