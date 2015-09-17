@@ -45,6 +45,10 @@ class RsyncPlugin(object):
 		self.config.validate_config(CONFIGSPEC)
 
 	def estimate_backup_size(self):
+		# This is 0 for now because estimating size for very large directories
+		# could be super time consuming and may not even be accurate if
+		# one-file-system is used. Another method other than what is below
+		# may need to be used instead.
 		return 0
 		#total_size = 0
 		#for dirpath, dirnames, filenames in os.walk(self.config['rsync']['directory']):
