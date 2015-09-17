@@ -147,9 +147,11 @@ class RsyncPlugin(object):
 
 		# Do it!
 		errlog = TemporaryFile()
+		output = open(self.target_directory + "/output.txt", 'w')
 		LOG.info("Executing: %s", list2cmdline(cmd))
 		pid = Popen(
 			cmd,
+			stdout=output,
 			stderr=errlog.fileno(),
 			env=env,
 			close_fds=True)
@@ -160,4 +162,5 @@ class RsyncPlugin(object):
 			for line in errlog:
 				LOG.error("%s[%d]: %s", list2cmdline(cmd), pid.pid, line.rstrip())
 		finally:
+			output.close()
 			errlog.close()
