@@ -1,7 +1,6 @@
 TODO
 
-  * Ports feature does not work
-    Running into an odd scaping issue that is making that difficult currently.
+  * Impelment an actual dry-run using --dry-run
 
   * Estimate Backup Size busted
     How to calculate size for remote hosts (--dry-run?) and what about cases

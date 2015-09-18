@@ -16,6 +16,7 @@ method = option('local', 'ssh', 'rsync', default='local')
 server = string(default=None)
 port = integer(default=None)
 username = string(default=None)
+keyfile = string(default=None)
 password = string(default=None)
 directory = string(default='/')
 flags = string(default='-avz')
@@ -45,25 +46,19 @@ class RsyncPlugin(object):
 		self.config.validate_config(CONFIGSPEC)
 
 	def estimate_backup_size(self):
-		# This is 0 for now because estimating size for very large directories
+		# We return None because estimating size for very large directories
 		# could be super time consuming and may not even be accurate if
-		# one-file-system is used. Another method other than what is below
-		# may need to be used instead.
-		return 0
-		#total_size = 0
-		#for dirpath, dirnames, filenames in os.walk(self.config['rsync']['directory']):
-		#	for f in filenames:
-		#		fp = os.path.join(dirpath, f)
-		#		# verify the symlink and such exist before trying to get its size
-		#		if os.path.exists(fp):
-		#			total_size += os.path.getsize(fp)
-		#return total_size
+		# one-file-system is used, and that's just for local rsync's.
+		# Remote rsyncs would require comparing the output of a --dry-run.
+		# All options seem to be expensive so this is a topic for another day.
+		return None
 
 	def backup(self):
-		hardlink_cmd = ""
 		env = None
 
 		if self.dry_run:
+			# We should be doing something here...you know, like, uhm
+			# using rsync's --dry-run ;)
 			return
 
 		# Check if the directory we are trying to backup exists
@@ -118,17 +113,19 @@ class RsyncPlugin(object):
 				source = self.config['rsync']['username'] + "@"
 			source += self.config['rsync']['server'] + ":"
 
-			# Now we build the --rsh flag
-
-			#if(self.config['rsync']['port']):
-				#rsh = "--rsh='ssh"
-				#rsh += " -p"
-				#-p" #+ str(self.config['rsync']['port']) + "'"
-				#LOG.info(rsh)
-				#cmd.append(rsh)
-			#else:
-				#rsh="""--rsh='ssh'"""
-			#cmd.append(rsh)
+			# Now we build the SSH sub-command
+			# This is a bit ugly, in part due to how subprocess
+			# likes to parse command-line arguments.
+			if(self.config['rsync']['port']
+				or self.config['rsync']['keyfile']):
+				port = ""
+				key = ""
+				if(self.config['rsync']['port']):
+					port = "-p%s" % str(self.config['rsync']['port'])
+				if(self.config['rsync']['keyfile']):
+					key = "-i%s" % self.config['rsync']['keyfile']
+				cmd.append('-e')
+				cmd.append("ssh -o PasswordAuthentication=false %s %s" % (port, key))
 
 		# Now concatenate all the above work with the desired path.
 		source += "/" + self.config['rsync']['directory']
@@ -152,6 +149,7 @@ class RsyncPlugin(object):
 		pid = Popen(
 			cmd,
 			stdout=output,
+			#stderr=STDOUT,
 			stderr=errlog.fileno(),
 			env=env,
 			close_fds=True)
