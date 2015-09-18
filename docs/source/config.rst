@@ -135,8 +135,7 @@ backup set configuration file.
 
     [holland:backup]
     plugin = <plugin>
-    backups-to-keep = #
-    estimated-size-factor = #
+    ...
 
 .. _holland-backup-config_options:
 
