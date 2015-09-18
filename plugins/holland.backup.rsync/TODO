@@ -1,5 +1,7 @@
 TODO
 
+  * Add license info (GPLv2)
+
   * Impelment an actual dry-run using --dry-run
 
   * Estimate Backup Size busted

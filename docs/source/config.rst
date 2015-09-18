@@ -277,6 +277,7 @@ Other Plugins
     :maxdepth: 1
 
     pgdump (PostgreSQL) <provider_plugins/pgdump>
+    rsync <provider_plugins/rsync>
     Example Plugin <provider_plugins/example>
 
 Helper Plugins
