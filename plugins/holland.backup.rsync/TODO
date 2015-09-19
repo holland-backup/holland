@@ -2,8 +2,6 @@ TODO
 
   * Add license info (GPLv2)
 
-  * Impelment an actual dry-run using --dry-run
-
   * Estimate Backup Size busted
     How to calculate size for remote hosts (--dry-run?) and what about cases
     where --one-file-system is used? Plus the old way was expensive for large

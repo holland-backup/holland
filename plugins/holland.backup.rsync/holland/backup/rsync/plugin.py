@@ -56,11 +56,6 @@ class RsyncPlugin(object):
 	def backup(self):
 		env = None
 
-		if self.dry_run:
-			# We should be doing something here...you know, like, uhm
-			# using rsync's --dry-run ;)
-			return
-
 		# Check if the directory we are trying to backup exists
 		# if we are backing up a local directory.
 		if self.config['rsync']['method'] == 'local':
@@ -138,18 +133,24 @@ class RsyncPlugin(object):
 		if(self.config['rsync']['one-file-system']):
 			cmd.append('--one-file-system')
 
+		# If using Holland's --dry-run, add rsync's --dry-run
+		# and redirect rsync's output to stdout.
+		if self.dry_run:
+			cmd.append('--dry-run')
+			output = None
+		else:
+			output = open(self.target_directory + "/output.txt", 'w')
+
 		# Append the source and destinations
 		cmd.append(source)
 		cmd.append(self.target_directory)
 
 		# Do it!
 		errlog = TemporaryFile()
-		output = open(self.target_directory + "/output.txt", 'w')
 		LOG.info("Executing: %s", list2cmdline(cmd))
 		pid = Popen(
 			cmd,
 			stdout=output,
-			#stderr=STDOUT,
 			stderr=errlog.fileno(),
 			env=env,
 			close_fds=True)
@@ -160,5 +161,6 @@ class RsyncPlugin(object):
 			for line in errlog:
 				LOG.error("%s[%d]: %s", list2cmdline(cmd), pid.pid, line.rstrip())
 		finally:
-			output.close()
+			if not self.dry_run:
+				output.close()
 			errlog.close()
