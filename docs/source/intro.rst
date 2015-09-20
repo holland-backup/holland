@@ -23,9 +23,7 @@ credentials, servers, etc. While some providers share similar options with
 each other, for the most part each provider has its own set of configuration
 options.
 
-Multiple backup-sets can be created and called specifically. Additionally, one
-can define one or more default backup sets to use when running the Holland
-backup command with no additional arguments.
+For more information, see :doc:`overview`
 
 Dependencies
 ------------
