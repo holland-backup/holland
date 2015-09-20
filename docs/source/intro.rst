@@ -8,14 +8,20 @@ now able to backup MySQL and PostgreSQL databases. Because Holland is
 plugin-based framework, it can conceivably backup most anything you want
 by whatever means you want.
 
-Overall Concepts
+General Concepts
 ----------------
-Holland is built around the concept of backup-sets, which define the parameters
-of a backup. This includes global parameters, such as which provider will be
-used and how many backups to keep; as well as provider-specific configuration
-options, such as databases to exclude, user credentials, servers, etc. While
-some providers share similar options with each other, for the most part each
-provider has its own set of configuration options.
+Holland is built around the concept of providers and backup-sets.
+
+A provider implements a backup solution. This can range from backing up MySQL
+databases using mysqldump, LVM, or Xtrabackup; to backing up a local or remote
+directory using rsync.
+
+A backup-set defines a backup and includes global parameters, such as which
+provider will be used and how many backups to keep; as well as
+provider-specific configuration options, such as databases to exclude, user
+credentials, servers, etc. While some providers share similar options with
+each other, for the most part each provider has its own set of configuration
+options.
 
 Multiple backup-sets can be created and called specifically. Additionally, one
 can define one or more default backup sets to use when running the Holland
