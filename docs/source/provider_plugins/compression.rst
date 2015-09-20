@@ -1,5 +1,5 @@
 [compression]
--------------
+_____________
 
 Specify various compression settings, such as compression utility,
 compression level, etc.

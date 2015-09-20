@@ -10,6 +10,7 @@ Table of Contents
     intro
     commands
     overview
+    providers
     config
 
 Indices and tables
@@ -18,4 +19,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

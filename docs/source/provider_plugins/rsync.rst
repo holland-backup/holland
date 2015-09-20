@@ -1,13 +1,16 @@
 .. _config-rsync:
 
-rsync Provider Configuration [rsync]
-======================================
+rsync
+=====
 
-Uses rsync to backup a local or remote directory, optionally by making use of
+Uses ``rsync`` to backup a local or remote directory, optionally by making use of
 hardlinks as a means to provide a sort of differential backup.
 
+Configuration
+-------------
+
 [rsync]
--------
+_______
 
 **method** = local | rsync | ssh (default: local)
 
