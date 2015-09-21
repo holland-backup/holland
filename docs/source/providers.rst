@@ -28,3 +28,4 @@ These are providers which do something other than backup a MySQL database.
 
     provider_plugins/pgdump
     provider_plugins/rsync
+    provider_plugins/example

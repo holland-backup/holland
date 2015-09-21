@@ -1,12 +1,15 @@
 .. _config-pgdump:
 
-pgdump Provider Configuration [pgdump]
-======================================
+pgdump
+======
 
 Backs up a PostgreSQL instance using the pgdump utility.
 
+Configuration
+-------------
+
 [pgdump]
---------
+________
 
 **format** = custom | tar | plain (default: custom)
 
@@ -21,7 +24,7 @@ Backs up a PostgreSQL instance using the pgdump utility.
 .. include:: compression.rst
 
 [pgauth]
---------
+________
 
 **username** = <name>
 

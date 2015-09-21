@@ -1,5 +1,5 @@
 Database and Table filtering
-____________________________
+""""""""""""""""""""""""""""
 
 **databases** = <glob>
 
