@@ -98,22 +98,20 @@ class XtrabackupPlugin(object):
         backup_directory = self.target_directory
         stream = util.determine_stream_method(config['stream'])
         if stream:
-            # XXX: bounce through compression
             if stream == 'tar':
                 archive_path = join(backup_directory, 'backup.tar')
-                zconfig = self.config['compression']
-                try:
-                    return open_stream(archive_path, 'w',
-                                       method=zconfig['method'],
-                                       level=zconfig['level'],
-                                       extra_args=zconfig['options'])
-                except OSError, exc:
-                    raise BackupError("Unable to create output file: %s" % exc)
             elif stream == 'xbstream':
                 archive_path = join(backup_directory, 'backup.xb')
-                return open(archive_path, 'w')
             else:
                 raise BackupError("Unknown stream method '%s'" % stream)
+            zconfig = self.config['compression']
+            try:
+                return open_stream(archive_path, 'w',
+                                   method=zconfig['method'],
+                                   level=zconfig['level'],
+                                   extra_args=zconfig['options'])
+            except OSError, exc:
+                raise BackupError("Unable to create output file: %s" % exc)
         else:
             return open('/dev/null', 'w')
 
