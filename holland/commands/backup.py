@@ -70,9 +70,10 @@ class Backup(Command):
 
         runner.register_cb('after-backup', report_low_space)
 
-        runner.register_cb('before-backup', call_hooks)
-        runner.register_cb('after-backup', call_hooks)
-        runner.register_cb('failed-backup', call_hooks)
+        if not opts.dry_run:
+            runner.register_cb('before-backup', call_hooks)
+            runner.register_cb('after-backup', call_hooks)
+            runner.register_cb('failed-backup', call_hooks)
 
         error = 1
         LOG.info("--- Starting %s run ---", opts.dry_run and 'dry' or 'backup')
