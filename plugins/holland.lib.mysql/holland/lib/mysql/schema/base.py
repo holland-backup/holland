@@ -225,8 +225,8 @@ class Table(object):
                        engine):
         self.database = database
         self.name = name
-        self.data_size = data_size
-        self.index_size = index_size
+        self.data_size = int(data_size)
+        self.index_size = int(index_size)
         self.engine = engine
         self.excluded = False
 
