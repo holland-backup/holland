@@ -3,7 +3,7 @@
 # el4 also... which doesn't support it
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
-%{!?holland_version: %global holland_version 1.0.11}
+%{!?holland_version: %global holland_version 1.0.12}
 
 # default %%rhel to make things easier to build
 %{!?rhel: %global rhel %%(%{__sed} 's/^[^0-9]*\\([0-9]\\+\\).*/\\1/' /etc/redhat-release)}
@@ -33,7 +33,7 @@
 
 Name:           holland
 Version:        %{holland_version}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD
@@ -543,6 +543,9 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
+* Mon Feb 08 2016 Andrew Garner <andrew.garner@rackspace.com> - 1.0.12-2
+- Latest sources from upstream
+
 * Mon Jul 29 2013 Andrew Garner <andrew.garner@rackspace.com> - 1.0.10-1
 - Latest sources from upstream
 
