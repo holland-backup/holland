@@ -19,6 +19,10 @@ holland
   Now the "holland --quiet" option must be used to suppress output or output
   can be redirected via standard shell stdio facilities.
   (Fixes GH#98)
+- Hooks are no longer run during a dry-run (Fixes GH#121; Thanks Mike Griffin!)
+- Holland now supports gpg as a compression option for all backup
+  plugins (Thanks to Ryan Cleere for the contribution and Tim Soderstrom
+  for documenting the improvement) GH#95
 
 holland-mysqldump
 +++++++++++++++++
@@ -36,7 +40,12 @@ holland-mysqldump
   (LP #1262352)
 - invalid strings in show slave status are now handled more
   gracefully (LP #1220841)
-
+- Estimating the size of a backup would fail under MariaDB 10.1
+  due to the numeric value being returned as a Decimal rather
+  than an int object, primarily causing later formatting of
+  the estimated values to fail due to mixing decimal and
+  integer arithemetic.  holland now ensures these values
+  are integers.  (GH#125)
 
 holland-pgdump
 ++++++++++++++
@@ -44,6 +53,8 @@ holland-pgdump
   (LP #1206202)
 - The connection used for discovering databases to backup is now
   closed before pg_dump commands are run (LP #1236618)
+- special characters in the provided password are escaped when
+  generating PGPASSFILE. (GH#116)
 
 holland-xtrabackup
 ++++++++++++++++++
