@@ -23,6 +23,8 @@ holland
 - Holland now supports gpg as a compression option for all backup
   plugins (Thanks to Ryan Cleere for the contribution and Tim Soderstrom
   for documenting the improvement) GH#95
+- Added contrib/holland-commvault; See contrib/holland-commvault/README
+  for a description of this module.
 
 holland-mysqldump
 +++++++++++++++++
