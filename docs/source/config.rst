@@ -173,6 +173,15 @@ helper plugins (which are defined within their own sections - see below).
     This behavior can be disabled by setting auto-purge-failures = no when
     partial backups might be useful or when troubleshooting a backup failure.
 
+.. describe:: purge-on-demand = [yes|no]
+
+   If enabled, this option will cause holland to attempt to purge old backups
+   within the same backupset to free enough space to allow a new backup to
+   start rather than failing when it appears that there is insufficient space
+   to run a new backup.  If the space consumed by all purgable backups is less
+   than the estimated space for a new backup, no backups are purged as the
+   new backup will fail regardless.
+
 .. describe:: purge-policy = [manual|before-backup|after-backup]
 
     Specifies when to run the purge routine on a backupset.  By default this is
