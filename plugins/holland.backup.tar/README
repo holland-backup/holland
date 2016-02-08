@@ -1,0 +1,3 @@
+This packages provides a holland backup plugin to
+create a tar archive of the directory specified in
+the backup config.
