@@ -26,10 +26,10 @@
 %bcond_with     sphinxdocs
 %bcond_with     mysqlhotcopy
 %bcond_with     maatkit
+%bcond_with     tar
 %bcond_without  pgdump
 %bcond_without  sqlite
 %bcond_without  xtrabackup
-%bcond_without  tar
 
 Name:           holland
 Version:        %{holland_version}
