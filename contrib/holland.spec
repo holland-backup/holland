@@ -592,10 +592,10 @@ rm -rf %{buildroot}
 * Thu Jul 01 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-3.rc3
 - Source updated to rc3
 
-* Tue Jun 28 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-2.rc2
+* Mon Jun 28 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-2.rc2
 - Source updated to rc2
 
-* Thu Jun 11 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-1.rc1
+* Fri Jun 11 2010 Andrew Garner <andrew.garner@rackspace.com> - 1.0.0-1.rc1
 - Repackaging for release candidate
 - Using conditional builds to exclude experimental plugins
 
@@ -611,7 +611,7 @@ rm -rf %{buildroot}
 * Thu May 27 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-9
 - Move plugins/README to README.plugins and install via %%doc
 
-* Mon May 25 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-8
+* Tue May 25 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-8
 - Adding holland.lib.lvm under -common subpackage
 
 * Wed May 19 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.9-7
@@ -650,7 +650,7 @@ rm -rf %{buildroot}
 - No longer package plugins as eggs
 - Conditionally BuildRequire: python-nose and run nose tests if _with_tests
 
-* Thu Apr 07 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.8-2.rs
+* Wed Apr 07 2010 BJ Dierkes <wdierkes@rackspace.com> - 0.9.8-2.rs
 - Rename holland-lvm to holland-mysqllvm, Obsoletes: holland-lvm
 - Manually install mysql-lvm.conf provider config (fixed in 0.9.9)
 - Install man files to _mandir
@@ -708,7 +708,7 @@ rm -rf %{buildroot}
 * Sat May 02 2009 BJ Dierkes <wdierkes@rackspace.com> - 0.3.1-1.2.rs
 - Build as noarch.
 
-* Tue Apr 29 2009 BJ Dierkes <wdierkes@rackspace.com> - 0.3.1-1.rs
+* Wed Apr 29 2009 BJ Dierkes <wdierkes@rackspace.com> - 0.3.1-1.rs
 - Latest sources.
 
 * Tue Apr 28 2009 BJ Dierkes <wdierkes@rackspace.com> - 0.3-1.rs
