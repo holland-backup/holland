@@ -1,0 +1,13 @@
+This package provides the holland_cvmysqlsv command to run
+holland as a pre-script within a Commvault environment.
+
+This provides a few features to support that environment:
+        - HOME is set to /root
+	- TMPDIR is set to /tmp
+	- LD_LIBRARY_PATH is unset in order to use the
+	  system libraries (avoiding certain libc
+	  incompatibilities between mysql and commvault
+	  that have been encountered in the past)
+
+There is limited support for parsing commvault options,
+but presently nothing is done with those parameters.
