@@ -402,8 +402,6 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc CHANGES.txt README README.plugins README.providers
-%doc INSTALL LICENSE config/backupsets/examples/
 %doc CHANGES.rst README README.plugins README.providers
 %doc INSTALL LICENSE config/backupsets/examples/
 %if %{with sphinxdocs}
