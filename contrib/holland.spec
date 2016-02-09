@@ -26,10 +26,10 @@
 %bcond_with     sphinxdocs
 %bcond_with     mysqlhotcopy
 %bcond_with     maatkit
+%bcond_with     tar
 %bcond_without  pgdump
 %bcond_without  sqlite
 %bcond_without  xtrabackup
-%bcond_without  tar
 
 Name:           holland
 Version:        %{holland_version}
@@ -402,8 +402,6 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc CHANGES.txt README README.plugins README.providers
-%doc INSTALL LICENSE config/backupsets/examples/
 %doc CHANGES.rst README README.plugins README.providers
 %doc INSTALL LICENSE config/backupsets/examples/
 %if %{with sphinxdocs}
@@ -536,7 +534,7 @@ rm -rf %{buildroot}
 %files tar
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.tar/{README,LICENSE}
-%{python_sitelib}/holland/backup/tar/
+%{python_sitelib}/holland/backup/tar.py*
 %{python_sitelib}/holland.backup.tar-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.tar-%{version}-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/tar.conf
