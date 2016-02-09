@@ -158,7 +158,7 @@ License: GPLv2
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 Requires: %{name}-common = %{version}-%{release}
-Requires: xtrabackup >= 1.2
+Requires: percona-xtrabackup
 
 %description xtrabackup
 This package provides a Holland plugin for Percona Xtrabackup. This
