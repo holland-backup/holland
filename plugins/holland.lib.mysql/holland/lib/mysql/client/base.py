@@ -138,7 +138,7 @@ class MySQLClient(object):
                     LOG.warning("Invalid table %s.%s: %s",
                                 row['database'], row['name'],
                                 row['comment'] or '')
-            for key in row:
+            for key in row.keys():
                 valid_keys = [
                     'database',
                     'name',
