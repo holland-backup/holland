@@ -534,7 +534,7 @@ rm -rf %{buildroot}
 %files tar
 %defattr(-,root,root,-)
 %doc plugins/holland.backup.tar/{README,LICENSE}
-%{python_sitelib}/holland/backup/tar.py
+%{python_sitelib}/holland/backup/tar.py*
 %{python_sitelib}/holland.backup.tar-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.tar-%{version}-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/tar.conf
