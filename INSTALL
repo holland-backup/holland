@@ -9,11 +9,11 @@ UNPACK THE SOURCE:
 LOCAL DEVELOPMENT INSTALLATION:
 
         you@linuxbox ~] cd ./holland-x.y.z
-        you@linuxbox holland-x.y.z] ./devtools/mkvirtenv.sh
-        
-    Optionally, for target testing...  add the --no-deps option to force 
+        you@linuxbox holland-x.y.z] ./scripts/mkvirtenv.sh
+
+    Optionally, for target testing...  add the --no-deps option to force
     holland to rely on system dependencies (such as MySQL-python).
-    
+
 
 SOURCE INSTALLATION:
 
@@ -33,7 +33,7 @@ SOURCE INSTALLATION:
 
 
     Install Optional Plugins (see plugins/ACTIVE):
-    
+
         you@linuxbox holland-x.y.z]$ cd plugins/<plugin_dir>
         you@linuxbox holland.<plugin_dir>]$ sudo python setup.py install
 
@@ -41,24 +41,20 @@ SOURCE INSTALLATION:
 
 UBUNTU INSTALLATION:
 
-    you@linuxbox holland-x.y.z]$ cp -a distribution/ubuntu/ubuntu.jaunty debian
+    you@linuxbox holland-x.y.z]$ cp -a contrib/ubuntu/ubuntu.jaunty debian
     you@linuxbox holland-x.y.z]$ dpkg-buildpackage -us -uc
 
 
- 
+
 REDHAT/FEDORA/CENTOS/ETC INSTALLATION:
 
-    root@linuxbox ~]# cp -a holland-x.y.z/distribution/holland.spec /usr/src/redhat/SPECS
-    root@linuxbox ~]# cp -a holland-x.y.z.tar.gz /usr/src/redhat/SOURCES 
+    root@linuxbox ~]# cp -a holland-x.y.z/contrib/holland.spec /usr/src/redhat/SPECS
+    root@linuxbox ~]# cp -a holland-x.y.z.tar.gz /usr/src/redhat/SOURCES
     root@linuxbox ~]# cd /usr/src/redhat
     root@linuxbox /usr/src/redhat]# rpmbuild -ba SPECS/holland.spec
 
     Alternatively you can use a build script:
 
     you@linuxbox ~]$ tar -zxvf holland-x.y.z
-    you@linuxbox ~]$ cd holland-x.y.z 
-    you@linuxbox ~]$ python devtools/build_rpms.py
-
-    
-    
-    
+    you@linuxbox ~]$ cd holland-x.y.z
+    you@linuxbox ~]$ python scripts/build_rpms.py
