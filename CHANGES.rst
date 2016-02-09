@@ -63,6 +63,9 @@ holland-xtrabackup
 - holland-xtrabackup now uses innobackupex as innobackupex binary
   as innobackupex-1.5.1 has been deprecated upstream for several
   releases
+- holland-xtrabackup previously failed to compress xbstream
+  archives regardless of the [compression] configuration for
+  the backupset.  (LP#1246562)
 
 1.0.10 - Jul 29, 2013
 ---------------------
