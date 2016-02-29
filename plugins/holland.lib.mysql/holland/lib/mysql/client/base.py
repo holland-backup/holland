@@ -322,10 +322,8 @@ class MySQLClient(object):
         :returns: slave status dict
         """
         sql = "SHOW SLAVE STATUS"
-        charset = self.character_set_name()
         cursor = self.cursor()
         try:
-            self.set_character_set('binary')
             cursor.execute(sql)
             keys = [col[0].lower() for col in cursor.description]
             slave_status = cursor.fetchone()
@@ -334,14 +332,8 @@ class MySQLClient(object):
             if not slave_status:
                 return None
             else:
-                result = []
-                for value in slave_status:
-                    if isinstance(value, basestring):
-                        value = value.decode(charset, 'ignore')
-                    result.append(value)
-                return dict(zip(keys, result))
+                return dict(zip(keys, slave_status))
         finally:
-            self.set_character_set(charset)
             cursor.close()
 
     def show_master_status(self):
