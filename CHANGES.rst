@@ -8,6 +8,18 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.0.14 - unreleased
+-------------------
+
+holland
++++++++
+
+- A fix for launchpad bug #1220841 caused plugins that used
+  "SHOW SLAVE STATUS" via the holland mysql lib to fail with
+  an "unknown encoding: binary" error.  The changes for 
+  LP #1220841 have been reverted.
+
+
 1.0.12 - Feb 8, 2016
 --------------------
 
