@@ -19,6 +19,13 @@ holland
   an "unknown encoding: binary" error.  The changes for 
   LP #1220841 have been reverted.
 
+holland-mysqldump
++++++++++++++++++
+
+- A bug was introduced in 1.0.12 which caused mysqldump's lock-method
+  "auto-detect" option to always use lock-tables under MySQL 5.0
+  environments. (Fixes GH#148)
+
 
 1.0.12 - Feb 8, 2016
 --------------------
