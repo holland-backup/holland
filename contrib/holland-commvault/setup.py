@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '1.0.12'
+version = '1.0.14'
 
 setup(
     name='holland_commvault',
