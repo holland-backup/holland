@@ -8,13 +8,13 @@ tom = """              \       _____
                  \  |   _\  |
                     | '---' |
                      \_____/
-           _\___    ___| |____       
-             |_/\  /   '-'    \    @ @@ @
-               \ \|  .GOOGLE.  |     @@@
-                \   /       |  |   @
-                 \ /|       |  |   @@
-                    |_______|_/  @
-                    |       |_\/
+           _\___    ___| |____
+             |_/\  /   '-'    \\
+               \\ \\|  . NASA .  |
+                \   /       |  |
+                 \ /|       |  |
+                    |_______|_/
+                    |       |_\\
                     |  .-.  |
                     |  | |  |
                     '._| |_.'
@@ -23,8 +23,8 @@ tom = """              \       _____
 
 MSG_WIDTH = 40
 
+
 def split_lines(words):
-    full_lines = len(words)/MSG_WIDTH
     line = 0
     msg_list = ['']
     for word in words:
@@ -35,8 +35,10 @@ def split_lines(words):
         msg_list[line] = ' '.join((msg_list[line], word)).strip()
     return msg_list
 
+
 def add_spaces(length, string):
     return string + (' ' * (length - len(string)))
+
 
 def build_bubble(msg):
     lines = split_lines(msg)
@@ -59,7 +61,8 @@ def build_bubble(msg):
 def main():
     msg = sys.argv[1:]
     bubble = build_bubble(msg)
-    print bubble + '\n' + tom + '\n'
+    sys.stdout.write(bubble + '\n' + tom + '\n\n')
+
 
 if __name__ == "__main__":
     main()
