@@ -1,7 +1,7 @@
 .. _config-xtrabackup:
 
-Holland Plugin for Percona XtraBackup Configuration [xtrabackup]
-=========================================================================
+Xtrabackup
+==========
 
 Backup a MySQL instance using `Percona XtraBackup`_.
 
@@ -10,8 +10,11 @@ Backup a MySQL instance using `Percona XtraBackup`_.
    trademark to imply a relationship with, or endorsement or sponsorship
    of the Holland Project by Percona.
 
+Configuration
+-------------
+
 [xtrabackup]
-------------
+____________
 
 **global-defaults** = <path> (default: /etc/my.cnf)
 
@@ -23,23 +26,23 @@ Backup a MySQL instance using `Percona XtraBackup`_.
     The path to the innobackupex script to run. If this is a relative path
     this will be found in holland's environment PATH as configured in
     /etc/holland/holland.conf.
-    
-    
-**ibbackup** = <name>    
-    
+
+
+**ibbackup** = <name>
+
     The path to the ibbackup command to use.  By default, no --ibbackup option
     is pass to the innobackupex script.  Usually innobackupex will detect this
     by itself and this should not need to be set.
 
 **stream** = tar|xbstream|yes|no (default: tar)
 
-    Whether to generate a streaming backup. 
+    Whether to generate a streaming backup.
 
 .. versionchanged:: 1.0.8
    'tar' and 'xbstream' are now valid options.  The old stream = yes is
    now equivalent to stream = tar and stream = no disables streaming
    entirely and will result in a normal directory copy with xtrabackup
-       
+
 
 **apply-logs** = yes | no (default: yes)
 
@@ -52,11 +55,11 @@ Backup a MySQL instance using `Percona XtraBackup`_.
     .. versionadded:: 1.0.8
 
 **slave-info** = yes | no (default: yes)
-    
+
     Whether to enable the --slave-info innobackupex option
 
 **safe-slave-backup** = yes | no (default: yes)
-    
+
     Whether to enable the --safe-slave-backup innobackupex option.
 
 **no-lock** = yes | no (default: no)

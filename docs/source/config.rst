@@ -135,8 +135,7 @@ backup set configuration file.
 
     [holland:backup]
     plugin = <plugin>
-    backups-to-keep = #
-    estimated-size-factor = #
+    ...
 
 .. _holland-backup-config_options:
 
@@ -256,8 +255,6 @@ For Example
     after-backup-command = echo ${backupset} completed successfully.  Files are in ${backupdir}
     failed-backup-command = echo "${backupset} failed!" | mail -s "${backupset} backup failed" sysadmins@example.com
 
-
-
 Provider Plugin Configs
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -270,30 +267,14 @@ For advanced users, the defaults for each provider plugin can be changed
 by editing the default configuration file for said provider. These files are
 located in ``/etc/holland/providers`` by default.
 
-MySQL Plugins
-"""""""""""""
-.. toctree::
-    :maxdepth: 1
-
-    mysqldump <provider_plugins/mysqldump>
-    MySQL + LVM <provider_plugins/mysql-lvm>
-    mysqldump + LVM <provider_plugins/mysqldump-lvm>
-    Plugin for Percona XtraBackup <provider_plugins/xtrabackup>
-    MySQL Client Helper Plugin <provider_plugins/mysqlconfig>
-
-Other Plugins
-"""""""""""""
-.. toctree::
-    :maxdepth: 1
-
-    pgdump (PostgreSQL) <provider_plugins/pgdump>
-    Example Plugin <provider_plugins/example>
+For more information on configuring a specific provider, see :doc:`providers`
 
 Helper Plugins
 """"""""""""""
 .. toctree::
     :maxdepth: 1
 
+    MySQL Client Helper Plugin <provider_plugins/mysqlconfig>
     Compression Helper Plugin <provider_plugins/compression>
 
 Backup Set Config Example

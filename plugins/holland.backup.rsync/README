@@ -1,0 +1,6 @@
+This plugin acts as a front-end to facilitate both local and remote
+backups of files and directories using rsync. Currently local copy,
+as well as SSH and RSYNC remote methods are supported. Additionally,
+hard-linking is supported across backups meaning that, if a file has
+not changed since the last time Holland was run, a hardlink from the
+previous backup is used instead of re-copying the file.

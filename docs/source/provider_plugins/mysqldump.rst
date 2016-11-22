@@ -1,12 +1,23 @@
 .. _config-mysqldump:
 
-mysqldump Provider Configuration [mysqldump]
-============================================
+mysqldump
+=========
 
-Backs up one or more MySQL databases using the mysqldump tool.
+Uses the ``mysqldump`` utility to backup one or more MySQL databases using a
+logical backup (aka a flat SQL file). Many options are available for which
+databases should be backed up and how.
+
+``mysqldump`` style backups tend to result in smaller
+backups, at least when dealing with databases which have few, if any,
+binary objects (BLOBs). That said, ``mysqldump`` tends to be slow and require
+more system resources than the other options. Restores likewise can take a
+very long time for large databases.
+
+Configuration
+-------------
 
 [mysqldump]
------------
+___________
 
 **mysql-binpath** = /path/to/mysql/bin
 
@@ -142,7 +153,7 @@ Backs up one or more MySQL databases using the mysqldump tool.
     be difficult if multiple databases are defined in the backup set.
 
     When backing up all databases within a single file, the backup file
-    will be named ``all_databases.sql``. If compression is used, the 
+    will be named ``all_databases.sql``. If compression is used, the
     compression extension will be appended to the filename
     (e.g. ``all_databases.sql.gz``).
 
@@ -172,12 +183,7 @@ Backs up one or more MySQL databases using the mysqldump tool.
     information schema is used, which may be slow particularly for a large
     number of tables.
 
-Database and Table filtering
-----------------------------
-.. toctree::
-    :maxdepth: 1
-
-    databasefiltering
+.. include:: databasefiltering.rst
 
 .. include:: compression.rst
 

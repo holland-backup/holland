@@ -1,5 +1,11 @@
 holland (1.0.8-1) unstable; urgency=low
 
+  * Added rsync
+
+ -- Tim Soderstrom <tim@moocowproductions.org>  Tue, 16 Sept 2015 02:08 +0000
+
+holland (1.0.8-1) unstable; urgency=low
+
   [ Andrew Garner ]
   * New upstream release
 

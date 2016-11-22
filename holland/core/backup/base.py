@@ -184,7 +184,7 @@ class BackupRunner(object):
             if available_bytes > required_bytes:
                 break
         else:
-            LOG.info("Purging would only recover an additional %s", 
+            LOG.info("Purging would only recover an additional %s",
                      format_bytes(sum(to_purge.values())))
             LOG.info("Only %s total would be available, but the current "
                      "backup requires %s",
@@ -211,29 +211,30 @@ class BackupRunner(object):
         available_bytes = disk_free(spool_entry.path)
 
         estimated_bytes_required = plugin.estimate_backup_size()
-        LOG.info("Estimated Backup Size: %s",
-                 format_bytes(estimated_bytes_required))
+        if estimated_bytes_required is not None:
+            LOG.info("Estimated Backup Size: %s",
+                     format_bytes(estimated_bytes_required))
 
-        config = plugin.config['holland:backup']
-        adjustment_factor = config['estimated-size-factor']
-        adjusted_bytes_required = (estimated_bytes_required*adjustment_factor)
+            config = plugin.config['holland:backup']
+            adjustment_factor = config['estimated-size-factor']
+            adjusted_bytes_required = (estimated_bytes_required*adjustment_factor)
 
-        if adjusted_bytes_required != estimated_bytes_required:
-            LOG.info("Adjusting estimated size by %.2f to %s",
-                     adjustment_factor,
-                     format_bytes(adjusted_bytes_required))
+            if adjusted_bytes_required != estimated_bytes_required:
+                LOG.info("Adjusting estimated size by %.2f to %s",
+                         adjustment_factor,
+                         format_bytes(adjusted_bytes_required))
 
-        if available_bytes <= adjusted_bytes_required:
-            if not (config['purge-on-demand'] and 
-                    self.free_required_space(spool_entry.backupset,
-                                         adjusted_bytes_required,
-                                         dry_run)):
-                msg = ("Insufficient Disk Space. %s required, "
-                       "but only %s available on %s") % (
-                       format_bytes(adjusted_bytes_required),
-                       format_bytes(available_bytes),
-                       self.spool.path)
-                LOG.error(msg)
-                if not dry_run:
-                    raise BackupError(msg)
+            if available_bytes <= adjusted_bytes_required:
+                if not (config['purge-on-demand'] and
+                        self.free_required_space(spool_entry.backupset,
+                                             adjusted_bytes_required,
+                                             dry_run)):
+                    msg = ("Insufficient Disk Space. %s required, "
+                           "but only %s available on %s") % (
+                           format_bytes(adjusted_bytes_required),
+                           format_bytes(available_bytes),
+                           self.spool.path)
+                    LOG.error(msg)
+                    if not dry_run:
+                        raise BackupError(msg)
         return estimated_bytes_required
