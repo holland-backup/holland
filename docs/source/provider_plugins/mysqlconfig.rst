@@ -1,5 +1,5 @@
 MySQL connection info [mysql:client]
-------------------------------------
+____________________________________
 
 These are optional and, if left undefined, Holland will try to login using
 the standard .my.cnf conventions.
