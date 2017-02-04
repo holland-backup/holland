@@ -135,8 +135,7 @@ backup set configuration file.
 
     [holland:backup]
     plugin = <plugin>
-    backups-to-keep = #
-    estimated-size-factor = #
+    ...
 
 .. _holland-backup-config_options:
 
@@ -172,15 +171,6 @@ helper plugins (which are defined within their own sections - see below).
     whatever process is calling holland will retry when a backup fails.
     This behavior can be disabled by setting auto-purge-failures = no when
     partial backups might be useful or when troubleshooting a backup failure.
-
-.. describe:: purge-on-demand = [yes|no]
-
-   If enabled, this option will cause holland to attempt to purge old backups
-   within the same backupset to free enough space to allow a new backup to
-   start rather than failing when it appears that there is insufficient space
-   to run a new backup.  If the space consumed by all purgable backups is less
-   than the estimated space for a new backup, no backups are purged as the
-   new backup will fail regardless.
 
 .. describe:: purge-policy = [manual|before-backup|after-backup]
 
@@ -256,8 +246,6 @@ For Example
     after-backup-command = echo ${backupset} completed successfully.  Files are in ${backupdir}
     failed-backup-command = echo "${backupset} failed!" | mail -s "${backupset} backup failed" sysadmins@example.com
 
-
-
 Provider Plugin Configs
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -270,30 +258,14 @@ For advanced users, the defaults for each provider plugin can be changed
 by editing the default configuration file for said provider. These files are
 located in ``/etc/holland/providers`` by default.
 
-MySQL Plugins
-"""""""""""""
-.. toctree::
-    :maxdepth: 1
-
-    mysqldump <provider_plugins/mysqldump>
-    MySQL + LVM <provider_plugins/mysql-lvm>
-    mysqldump + LVM <provider_plugins/mysqldump-lvm>
-    Plugin for Percona XtraBackup <provider_plugins/xtrabackup>
-    MySQL Client Helper Plugin <provider_plugins/mysqlconfig>
-
-Other Plugins
-"""""""""""""
-.. toctree::
-    :maxdepth: 1
-
-    pgdump (PostgreSQL) <provider_plugins/pgdump>
-    Example Plugin <provider_plugins/example>
+For more information on configuring a specific provider, see :doc:`providers`
 
 Helper Plugins
 """"""""""""""
 .. toctree::
     :maxdepth: 1
 
+    MySQL Client Helper Plugin <provider_plugins/mysqlconfig>
     Compression Helper Plugin <provider_plugins/compression>
 
 Backup Set Config Example

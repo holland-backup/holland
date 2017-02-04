@@ -1,14 +1,17 @@
 .. _config-mysqldump-lvm:
 
-mysqldump LVM Provider Configuration [mysqldump-lvm]
-====================================================
+mysqldump + LVM
+===============
 
 Backs up one or more MySQL databases by creating an LVM snapshot and
 then starting a instance of MySQL on top of it to then perform a
 mysqldump. This effectively produces a non-blocking logical backup.
 
+Configuration
+-------------
+
 [mysql-lvm]
------------
+___________
 
 **snapshot-size** = <size-in-MB>
 
@@ -48,7 +51,7 @@ mysqldump. This effectively produces a non-blocking logical backup.
     operation a bit faster.
 
 [mysqld]
---------
+________
 
 **mysqld-exe** = <path>[, <path>...] (default: mysqld in PATH, /usr/libexec/mysqld)
 
@@ -68,7 +71,7 @@ mysqldump. This effectively produces a non-blocking logical backup.
     Path to the --tmpdir that mysqld should use.
 
 [mysqldump]
------------
+___________
 
 mysqldump-lvm supports almost all of the options from the mysqldump plugin.
 --master-data is not supported, as the mysqld process will not read binary
