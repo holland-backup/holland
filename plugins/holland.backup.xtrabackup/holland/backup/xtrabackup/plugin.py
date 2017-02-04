@@ -61,8 +61,8 @@ class XtrabackupPlugin(object):
 
         defaults_path = join(self.target_directory, 'my.cnf')
         client_opts = self.config['mysql:client']
-        includes = client_opts['defaults-extra-file'] + \
-                   [self.config['xtrabackup']['global-defaults']]
+        includes = [self.config['xtrabackup']['global-defaults']] + \
+                   client_opts['defaults-extra-file']
         util.generate_defaults_file(defaults_path, includes, client_opts)
         self.defaults_path = defaults_path
 
