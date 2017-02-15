@@ -380,7 +380,7 @@ def _start_slave(client, config=None):
         slave_info = client.show_slave_status()
         if slave_info and slave_info['exec_master_log_pos'] != config['slave_master_log_pos']:
             LOG.warning("Sanity check on slave status failed.  "
-                    "Previously recorded %s:%d but currently found %s:%d",
+                    "Previously recorded %s:%s but currently found %s:%s",
                     config['slave_master_log_file'], config['slave_master_log_pos'],
                     slave_info['relay_master_log_file'], slave_info['exec_master_log_pos'])
             LOG.warning("ALERT! Slave position changed during backup!")
