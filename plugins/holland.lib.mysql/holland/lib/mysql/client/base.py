@@ -365,7 +365,7 @@ class MySQLClient(object):
         sql = "STOP SLAVE"
         if sql_thread_only:
             sql += " SQL_THREAD"
-        LOG.info("Issuing %s" % sql)
+        LOG.info("Issuing %s", sql)
         cursor = self.cursor()
         result = cursor.execute(sql)
         cursor.close()
