@@ -54,6 +54,29 @@ def generate_defaults_file(defaults_file, include=(), auth_opts=None):
 
 def run_xtrabackup(args, stdout, stderr):
     """Run xtrabackup"""
+
+    xtrabackup_binary = 'xtrabackup'
+    if not isabs(xtrabackup_binary):
+        try:
+            xtrabackup_binary = which(xtrabackup_binary)
+        except WhichError:
+            raise BackupError("Failed to find xtrabackup binary")
+    xb_version = xtrabackup_binary,'--version'
+    cmdline = list2cmdline(xb_version)
+    LOG.info("Executing: %s", cmdline)
+    try:
+        process = Popen(xb_version, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    except OSError, exc:
+        raise BackupError("Failed to run %s: [%d] %s",
+                          cmdline, exc.errno, exc.strerror)
+
+    for line in process.stdout:
+        LOG.info("%s", line.rstrip())
+    process.wait()
+    if process.returncode != 0:
+        raise BackupError("%s returned failure status [%d]" %
+                          (cmdline, process.returncode))
+    
     cmdline = list2cmdline(args)
     LOG.info("Executing: %s", cmdline)
     LOG.info("  > %s 2 > %s", stdout.name, stderr.name)
