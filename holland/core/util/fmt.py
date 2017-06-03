@@ -28,13 +28,13 @@ def format_bytes(bytes, precision=2):
         raise ArithmeticError("Only Positive Integers Allowed")
 
     if bytes != 0:
-        exponent = math.floor(math.log(bytes, 1024))
+        exponent = float(math.floor(math.log(bytes, 1024)))
     else:
-        exponent = 0
+        exponent = float(0)
 
     return "%.*f%s" % (
         precision,
-        bytes / (1024 ** exponent),
+        float(bytes) / (1024 ** exponent),
         ['B','KB','MB','GB','TB','PB','EB','ZB','YB'][int(exponent)]
     )
 
