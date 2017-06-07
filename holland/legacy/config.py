@@ -25,8 +25,14 @@ def extract_params(section):
 def get_config(**kwargs):
     global config
     global spec
+
+    holland_conf = '/etc/holland/holland.conf'
+    currplatform = sys.platform
+    if currplatform.startswith('freebsd'):
+        holland_conf = '/usr/local' + holland_conf
+
     config_file = os.path.abspath(kwargs.get("config_file",
-                                             "/etc/holland/holland.conf"))
+                                             holland_conf))
     include_folders = kwargs.get("include_folders", ["providers",
                                                      "helpers",
                                                      "backupsets"])
@@ -135,7 +141,13 @@ def setup_bootstrap_logging(**kwargs):
     # logging.  This will setup enough of logging to log the config parsing.
     # No validation or checking is preformed, we just need a log file to
     # write to.
-    config_file = kwargs.get("config_file", "/etc/holland/holland.conf")
+
+    holland_conf = '/etc/holland/holland.conf'
+    currplatform = sys.platform
+    if currplatform.startswith('freebsd'):
+        holland_conf = '/usr/local' + holland_conf
+
+    config_file = kwargs.get("config_file", holland_conf)
     
     log_config = ConfigObj(os.path.abspath(config_file), file_error=True)
     log_file = log_config["logging"]["log_filename"]

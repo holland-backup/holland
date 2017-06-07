@@ -41,6 +41,10 @@ def main():
 
     argv = sys.argv[1:]
 
+    holland_conf = '/etc/holland/holland.conf'
+    if sys.platform.startswith('freebsd'):
+        holland_conf = '/usr/local' + holland_conf
+
     parser = ArgumentParser()
     parser.add_argument("--config-file", "-c", metavar="<file>",
                         help="Read configuration from the given file")
@@ -65,7 +69,7 @@ def main():
     parser.add_argument("-vm")
     parser.add_argument("-cn")
     parser.set_defaults(
-        config_file=os.getenv('HOLLAND_CONFIG') or '/etc/holland/holland.conf',
+        config_file=os.getenv('HOLLAND_CONFIG') or holland_conf,
         verbose=False,
     )
 
