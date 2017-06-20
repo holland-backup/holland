@@ -21,6 +21,10 @@ More info available at http://hollandbackup.org
 
 LOGGER = logging.getLogger(__name__)
 
+holland_conf = '/etc/holland/holland.conf'
+if sys.platform.startswith('freebsd'):
+    holland_conf = '/usr/local' + holland_conf
+
 ## global parser
 parser = optparse.OptionParser(add_help_option=False,version=HOLLAND_BANNER)
 parser.add_option('-h', '--help', action='store_true',
@@ -42,7 +46,7 @@ parser.add_option('-l', '--log-level', type='choice', metavar='<log-level>',
 parser.set_defaults(log_level=None,
                     quiet=False,
                     config_file=os.getenv('HOLLAND_CONFIG',
-                                          '/etc/holland/holland.conf')
+                                          holland_conf)
                    )
 parser.disable_interspersed_args()
 
