@@ -34,19 +34,19 @@ ____________
     is pass to the innobackupex script.  Usually innobackupex will detect this
     by itself and this should not need to be set.
 
-**stream** = tar|xbstream|yes|no (default: tar)
+**stream** = mbstream|xbstream|yes|no (default: mbstream)
 
     Whether to generate a streaming backup.
 
-.. versionchanged:: 1.0.8
-   'tar' and 'xbstream' are now valid options.  The old stream = yes is
-   now equivalent to stream = tar and stream = no disables streaming
+.. versionchanged:: 1.0.15
+   'mbstream' and 'xbstream' are now valid options.  The old stream = yes is
+   now equivalent to stream = mbstream and stream = no disables streaming
    entirely and will result in a normal directory copy with mariabackup
 
 
 **apply-logs** = yes | no (default: yes)
 
-    Whether to run ``innobackupex --apply-logs`` at the end of the backup. This
+    Whether to run ``mariabackup --prepare`` at the end of the backup. This
     is only supported when performing a non-streaming, non-compressed backup.
     In this case, even if apply-logs = yes (the default), the prepare stage
     will be skipped.  Even with an uncompressed, non-streaming backup you may
