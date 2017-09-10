@@ -19,7 +19,10 @@ def connect_simple(config):
     """
     try:
         mysql_config = build_mysql_config(config)
-        LOG.debug("mysql_config => %r", mysql_config)
+        sanitized = {k:v for k,v in mysql_config.items()}
+        if 'password' in mysql_config.keys():
+            sanitized['password'] = "[REDACTED]"
+        LOG.debug("mysql_config => %r", sanitized)
         connection = connect(mysql_config['client'], PassiveMySQLClient)
         connection.connect()
         return connection
