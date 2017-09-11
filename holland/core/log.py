@@ -9,7 +9,7 @@ __all__ = [
 ]
 
 DEFAULT_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S'
-DEFAULT_LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
+DEFAULT_LOG_FORMAT = '%(asctime)s PID-%(process)s [%(levelname)s] %(message)s'
 DEFAULT_LOG_LEVEL = logging.INFO
 
 class NullHandler(logging.Handler):
