@@ -16,8 +16,10 @@ class Nagios(Command):
     aliases = []                                    
     description = 'Check backup retention'          
 
-    def run(self, cmd, opts):                       
-        backupsets = hollandcfg.lookup('holland.backupsets')
+    def run(self, cmd, opts, *backupsets):
+        if not backupsets:
+            backupsets = hollandcfg.lookup('holland.backupsets')
+
         # strip empty items from backupsets list
         backupsets = [name for name in backupsets if name]
         if not backupsets:
