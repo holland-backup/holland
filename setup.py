@@ -36,6 +36,7 @@ setup(name="holland",
       mk-config = holland.commands.mk_config:MkConfig
       purge = holland.commands.purge:Purge
       #restore = holland.commands.restore:Restore
+      nagios = holland.commands.nagios:Nagios
       """,
       namespace_packages=['holland', 'holland.backup', 'holland.lib', 'holland.commands'],
       )
