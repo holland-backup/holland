@@ -31,7 +31,7 @@ class Nagios(Command):
         backupsets = [name for name in backupsets if name]
         if not backupsets:
             print "HOLLAND WARNING - No backupsets"
-            return 0
+            return 1
 
         Retention = namedtuple("Retention",
                 ["backupset", "result", "message"])
@@ -71,6 +71,7 @@ class Nagios(Command):
         if errors:
             print "HOLLAND ERROR - Out of retention: {}".format(
                     [(x.backupset, x.message) for x in errors])
+            return 2
         else:
             print "HOLLAND OK - All backups in retention"
 
