@@ -20,7 +20,9 @@ class Nagios(Command):
     options = [
             option('-t', '--threshold', type="int", default=2,
                 help="If all backups in a backupset are older than this " +
-                "number in days consider out of retention")
+                "number in days consider out of retention"),
+            option('-c', '--copies', type="int",
+                help="Minimum number of copies in retention. Default 'backups-to-keep'"),
     ]
 
     def run(self, cmd, opts, *backupsets):
@@ -55,9 +57,11 @@ class Nagios(Command):
                 if d > most_recent:
                     most_recent = d
 
-            n_retention = int(config['holland:backup']['backups-to-keep'])
-            message = "{} of {}".format(len(backups), n_retention)
-            status = len(backups) >= n_retention
+            copies = int(opts.copies) if opts.copies \
+                    else int(config['holland:backup']['backups-to-keep'])
+
+            message = "{} of {}".format(len(backups), copies)
+            status = len(backups) >= copies
 
             threshold = datetime.now() - timedelta(days=opts.threshold)
             if most_recent < threshold:
