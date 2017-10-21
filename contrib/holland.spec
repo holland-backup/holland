@@ -27,6 +27,7 @@
 %bcond_with     mysqlhotcopy
 %bcond_with     maatkit
 %bcond_with     tar
+%bcond_with     nagios
 %bcond_without  pgdump
 %bcond_without  sqlite
 %bcond_without  xtrabackup
@@ -179,6 +180,18 @@ Requires: tar
 This package provides a Holland plugin for creating tar files
 %endif
 
+%if %{with nagios}
+%package nagios
+Summary: nagios plugin for Holland
+License: GPLv2
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
+
+%description nagios
+This package provides a Holland plugin for check retention with nagios
+%endif
+
 %prep
 %setup -q
 find ./ -name setup.cfg -exec rm -f {} \;
@@ -271,6 +284,12 @@ cd -
 
 %if %{with tar}
 cd plugins/holland.backup.tar
+%{__python} setup.py build
+cd -
+%endif
+
+%if %{with nagios}
+cd plugins/holland.commands.nagios
 %{__python} setup.py build
 cd -
 %endif
@@ -383,6 +402,13 @@ cd -
 install -m 0640 config/providers/tar.conf %{buildroot}%{_sysconfdir}/holland/providers/
 %endif
 
+%if %{with nagios}
+# plugin : holland.commands.nagios
+cd plugins/holland.commands.nagios
+%{__python} setup.py install -O1 --skip-build --root %{buildroot}
+cd -
+%endif
+
 # logrotate
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/logrotate.d
 cat > %{buildroot}%{_sysconfdir}/logrotate.d/holland <<EOF
@@ -415,6 +441,9 @@ rm -rf %{buildroot}
 %{_mandir}/man1/holland.1*
 %{_localstatedir}/log/holland/
 %{python_sitelib}/holland/commands/*.py*
+%if %{with nagios}
+%exclude %{python_sitelib}/holland/commands/nagios.py*
+%endif
 %attr(0755,root,root) %dir %{_sysconfdir}/holland/
 %attr(0755,root,root) %dir %{_sysconfdir}/holland/backupsets
 %attr(0755,root,root) %dir %{_sysconfdir}/holland/providers
@@ -540,7 +569,20 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/holland/providers/tar.conf
 %endif
 
+%if %{with nagios}
+%files nagios
+%defattr(-,root,root,-)
+%doc plugins/holland.commands.nagios/{README,LICENSE}
+%{python_sitelib}/holland/commands/nagios.py*
+%{python_sitelib}/holland.commands.nagios-%{version}-*-nspkg.pth
+%{python_sitelib}/holland.commands.nagios-%{version}-*.egg-info
+%endif
+
 %changelog
+* Sat Oct 21 2017 Jose Arthur Benetasso Villanova <jose.arthur@locaweb.com.br> - 1.0.15-1
+- New commands plugin infra
+- Nagios command plugin
+
 * Tue Mar 01 2016 Andrew Garner <andrew.garner@rackspace.com> - 1.0.14-1
 - Latest sources from upstream
 

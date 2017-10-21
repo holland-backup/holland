@@ -50,3 +50,5 @@ holland.backup.sqlite       - A backup plugin that produces logical exports
 holland.backup.xtrabackup   - A backup plugin that uses Percona's xtrabackup
                               utility to perform a raw file copy of MySQL datadir
                               Depends: [holland.lib.mysql, holland.lib.common]
+
+holland.commands.nagios - An easy way to check backup healthy and retention
