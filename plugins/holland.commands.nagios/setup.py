@@ -8,7 +8,7 @@ setup(name='holland.commands.nagios',
       long_description="""\
       Nagios command to check backup retention
       """,
-      author='Jose Arthur Benetasso Villanova',
+      author='Locaweb',
       author_email='jose.arthur@locaweb.com.br',
       url='',
       license='GPLv2',
