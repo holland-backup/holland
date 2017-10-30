@@ -1,6 +1,7 @@
-import urllib
 import logging
+import os.path
 import subprocess
+import urllib
 
 from pymongo import MongoClient
 
@@ -84,7 +85,10 @@ class MongoDump(object):
             LOG.info("MongoDump command: %s" % subprocess.list2cmdline(command))
         else:
             LOG.info("Example plugin - real backup run")
-            ret = subprocess.call(command)
+            logfile = open(os.path.join(self.target_directory, "mongodump.log"), "w")
+            p = subprocess.Popen(command, stderr=logfile)
+            ret = p.wait()
+            
             if ret != 0:
                 raise BackupError("Mongodump returned %d" % ret)
             
