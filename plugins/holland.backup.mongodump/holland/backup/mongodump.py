@@ -1,8 +1,10 @@
 import urllib
 import logging
+import subprocess
 
 from pymongo import MongoClient
 
+from holland.core.exceptions import BackupError
 
 LOG = logging.getLogger(__name__)
 
@@ -51,7 +53,7 @@ class MongoDump(object):
             uri += urllib.quote_plus(username)
             password = self.config["mongodump"].get("password")
             if password:
-                uri += urllib.quote_plus(password)
+                uri += ":" + urllib.quote_plus(password)
             uri += '@'
         uri += self.config["mongodump"].get("host")
         client = MongoClient(uri)
@@ -59,17 +61,33 @@ class MongoDump(object):
         for db in dbs:
             c = client[db]
             tup = c.command("dbstats")
-            ret += tup["storageSize"]
-        return ret
+            ret += int(tup["storageSize"])
+        # TODO: estimate, not just sum and divide by 2
+        return ret / 2
 
     def backup(self):
         """
         Do what is necessary to perform and validate a successful backup.
         """
+        command = ["mongodump"]
+        username = self.config["mongodump"].get("username")
+        if username:
+            command += ["-u", username]
+            password = self.config["mongodump"].get("password")
+            if password:
+                command += ["-p", password]
+        command += ["--host", self.config["mongodump"].get("host")]
+        command += ["--out", self.target_directory]
+
         if self.dry_run:
-            LOG.info("[Dry run] Example Plugin - test backup run")
+            LOG.info("[Dry run] MongoDump Plugin - test backup run")
+            LOG.info("MongoDump command: %s" % subprocess.list2cmdline(command))
         else:
             LOG.info("Example plugin - real backup run")
+            ret = subprocess.call(command)
+            if ret != 0:
+                raise BackupError("Mongodump returned %d" % ret)
+            
 
     def info(self):
         """Provide extra information about the backup this plugin produced
