@@ -1,0 +1,5 @@
+This plubin performs logical backups of a MongoDB by using the
+mongodump command.
+
+For more information please consult the holland manual or visit the holland
+wiki at http://hollandbackup.org.
