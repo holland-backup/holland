@@ -1,11 +1,16 @@
 import logging
+import os
 import os.path
 import subprocess
 import urllib
 
+from functools import partial
+
 from pymongo import MongoClient
 
 from holland.core.exceptions import BackupError
+from holland.lib.compression import open_stream
+
 
 LOG = logging.getLogger(__name__)
 
@@ -17,6 +22,10 @@ host = string(default=None)
 username = string(default=None)
 password = string(default=None)
 authenticationDatabase = string(default=None)
+
+[compression]
+method = option('gzip', 'gzip-rsyncable', 'bzip2', 'pbzip2', 'lzop', 'lzma', 'pigz', 'none', default='gzip')
+level = integer(min=0, default=1)
 """.splitlines()
 
 class MongoDump(object):
@@ -63,8 +72,8 @@ class MongoDump(object):
             c = client[db]
             tup = c.command("dbstats")
             ret += int(tup["storageSize"])
-        # TODO: estimate, not just sum and divide by 2
-        return ret / 2
+        # Give an upper estimate to make sure that we have enough disk space
+        return ret * 2
 
     def backup(self):
         """
@@ -76,6 +85,7 @@ class MongoDump(object):
             command += ["-u", username]
             password = self.config["mongodump"].get("password")
             if password:
+                # TODO: find a better way to inform the password
                 command += ["-p", password]
         command += ["--host", self.config["mongodump"].get("host")]
         command += ["--out", self.target_directory]
@@ -84,14 +94,27 @@ class MongoDump(object):
             LOG.info("[Dry run] MongoDump Plugin - test backup run")
             LOG.info("MongoDump command: %s" % subprocess.list2cmdline(command))
         else:
-            LOG.info("Example plugin - real backup run")
+            LOG.info("MongoDump command: %s" % subprocess.list2cmdline(command))
             logfile = open(os.path.join(self.target_directory, "mongodump.log"), "w")
             p = subprocess.Popen(command, stderr=logfile)
             ret = p.wait()
             
             if ret != 0:
                 raise BackupError("Mongodump returned %d" % ret)
-            
+
+            zopts = self.config['compression']
+            for root, _, files in os.walk(self.target_directory):
+                for f in files:
+                    path = os.path.join(root, f)
+                    ostream = open_stream(path, 'w',
+                            method=zopts['method'],
+                            level=zopts['level'],
+                            extra_args="")
+                    with open(path, 'rb') as f:
+                        for chunk in iter(partial(f.read, 4 * 1024), ''):
+                            ostream.write(chunk)
+                    ostream.close()
+                    os.remove(path)
 
     def info(self):
         """Provide extra information about the backup this plugin produced
