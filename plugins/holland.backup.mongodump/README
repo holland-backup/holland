@@ -3,3 +3,9 @@ mongodump command.
 
 For more information please consult the holland manual or visit the holland
 wiki at http://hollandbackup.org.
+
+This plugin was tested with MongoDB 3.4 and pymongo-3.5.1 
+
+The user needs backup role and to check database size, permission to execute
+listDatabases
+
