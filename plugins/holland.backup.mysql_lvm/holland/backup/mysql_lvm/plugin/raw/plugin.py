@@ -38,6 +38,9 @@ lock-tables = boolean(default=yes)
 #          run flush tables with read lock
 extra-flush-tables = boolean(default=yes)
 
+# default: create tar file from snapshot
+archive-method      = option(dir,tar,default="tar")
+
 [mysqld]
 mysqld-exe              = force_list(default=list('mysqld', '/usr/libexec/mysqld'))
 user                    = string(default='mysql')
