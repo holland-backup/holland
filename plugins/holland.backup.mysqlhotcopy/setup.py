@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.0.15'
+version = '1.1.0'
 
 setup(name='holland.backup.mysqlhotcopy',
       version=version,

@@ -26,7 +26,9 @@ class TestBootstrap(unittest.TestCase):
         filename = %s
         """ % (log_file)
         path = os.path.join(self.tmpdir, 'holland.conf')
-        open(path, 'w').write(test_cfg)
+        f = open(path, 'w')
+        f.write(test_cfg)
+        f.close()
         setup_config(path)
 
     def test_log_level(self):

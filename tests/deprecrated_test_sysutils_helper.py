@@ -6,7 +6,7 @@ import string
 import random
 import logging
 import logging.handlers as handlers
-import md5
+from hashlib import md5
 from shutil import rmtree
 
 # FIXME: This used to test holland.helpers which was

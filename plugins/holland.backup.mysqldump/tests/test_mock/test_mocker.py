@@ -12,10 +12,10 @@ try:
     import coverage
 except ImportError:
     coverage = None
-else:
+# else:
     # Start coverage check before importing from mocker, to get all of it.
-    coverage.erase()
-    coverage.start()
+  #  coverage.erase()
+  #  coverage.start()
 
 from holland.backup.mysqldump.mock.mocker import \
     MockerBase, Mocker, Mock, Event, Task, Action, Path, recorder, expect, \

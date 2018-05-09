@@ -5,7 +5,7 @@
 import cgi
 import copy
 import sys
-from UserDict import DictMixin
+from collections import MutableMapping as DictMixin
 
 class MultiDict(DictMixin):
 
