@@ -5,14 +5,14 @@ Configuration API support
 import os
 import logging
 from configobj import ConfigObj, Section, flatten_errors, get_extra_values
-from checks import validator
+from .checks import validator
 
 LOGGER = logging.getLogger(__name__)
 
 CONFIG_SUFFIX = '.conf'
 
 # Main Holland configspec
-CONFIGSPEC = """
+CONFIGSPEC ="""
 [holland]
 tmpdir              = string(default=None)
 plugin-dirs         = coerced_list(default=list('/usr/share/holland/plugins'))
@@ -44,6 +44,7 @@ class BaseConfig(ConfigObj):
                             interpolation=False,
                             write_empty_values=True,
                             encoding='utf8',
+                            default_encoding='utf8',
                             configspec={})
 
     def _canonicalize(self, section, key):
@@ -96,6 +97,8 @@ class BaseConfig(ConfigObj):
             section = result
         if not result and not safe:
             raise KeyError('%r not found (%r)' % (key, parts[count]))
+        if isinstance(result, bytes):
+                return result.decode('utf-8')
         return result
 
 class BackupConfig(BaseConfig):
@@ -116,7 +119,7 @@ class BackupConfig(BaseConfig):
                 providercfg = BaseConfig(providerpath)
                 providercfg.walk(self._canonicalize, call_on_sections=True)
                 self.merge(providercfg)
-            except IOError, ex:
+            except IOError as ex:
                 LOGGER.warning("Failed to load config for provider %r (%s)" %
                                     (provider, ex))
         self.merge(basecfg)
@@ -177,7 +180,7 @@ def setup_config(config_file):
     if not config_file:
         LOGGER.debug("load_config called with not configuration file")
         hollandcfg.validate_config(CONFIGSPEC)
-        print hollandcfg
+        print(hollandcfg)
         return
 
     config_file = os.path.abspath(config_file)

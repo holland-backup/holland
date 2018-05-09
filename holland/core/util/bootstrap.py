@@ -21,7 +21,7 @@ def setup_config(opts):
         setup_console_logging(level=[logging.INFO,logging.DEBUG][debug])
     try:
         _setup_config(opts.config_file)
-    except IOError, e:
+    except IOError as e:
         LOGGER.error("Failed to load holland config: %s", e)
         sys.exit(os.EX_CONFIG)
 
@@ -48,7 +48,7 @@ def setup_logging(opts):
         try:
             setup_file_logging(filename=str(hollandcfg.lookup('logging.filename')),
                                level=log_level)
-        except IOError, exc:
+        except IOError as exc:
             LOGGER.warn("Skipping file logging: %s", exc)
 
     # Monkey patch in routing warnings through logging
@@ -64,7 +64,8 @@ def setup_path():
         os.environ['PATH'] = hollandcfg.lookup('holland.path')
 
 def setup_plugins():
-    map(add_plugin_dir, hollandcfg.lookup('holland.plugin-dirs'))
+    for location in hollandcfg.lookup('holland.plugin-dirs'):
+        add_plugin_dir(location)
 
 def bootstrap(opts):
     # Setup the configuration

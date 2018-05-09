@@ -41,7 +41,7 @@ class TestBootstrap(unittest.TestCase):
         opts, args = p.parse_args(['test'])
         setup_logging(opts)
         import logging
-        self.assertEquals(logging.getLogger().getEffectiveLevel(), logging.CRITICAL)
+        self.assertEqual(logging.getLogger().getEffectiveLevel(), logging.CRITICAL)
 
     def test_backupset(self):
         pass

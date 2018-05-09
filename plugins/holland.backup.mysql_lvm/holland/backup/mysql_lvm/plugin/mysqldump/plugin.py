@@ -84,7 +84,7 @@ class MysqlDumpLVMBackup(object):
         # lookup the logical volume mysql's datadir sits on
         try:
              volume = LogicalVolume.lookup_from_fspath(datadir)
-        except LookupError, exc:
+        except LookupError as exc:
             raise BackupError("Failed to lookup logical volume for %s: %s" %
                               (datadir, str(exc)))
 
@@ -118,12 +118,12 @@ class MysqlDumpLVMBackup(object):
 
         try:
             snapshot.start(volume)
-        except CallbackFailuresError, exc:
+        except CallbackFailuresError as exc:
             # XXX: one of our actions failed.  Log this better
             for callback, error in exc.errors:
                 LOG.error("%s", error)
             raise BackupError("Error occurred during snapshot process. Aborting.")
-        except LVMCommandError, exc:
+        except LVMCommandError as exc:
             # Something failed in the snapshot process
             raise BackupError(str(exc))
 

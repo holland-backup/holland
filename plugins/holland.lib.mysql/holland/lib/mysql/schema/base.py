@@ -143,7 +143,7 @@ class MySQLSchema(object):
                     if self.is_engine_filtered(table.engine):
                         table.excluded = True
                     database.add_table(table)
-            except MySQLError, exc:
+            except MySQLError as exc:
                 # mimic mysqldump behavior here and skip any databases that 
                 # are not readable
                 if exc.args[0] == 1018:
@@ -214,7 +214,6 @@ class Table(object):
                  'data_size',
                  'index_size',
                  'engine',
-                 'is_transactional',
                  'excluded',
                 )
 

@@ -43,7 +43,7 @@ class Spool(object):
                 return backupset.find_backup(timestamp)
             else:
                 return None
-        except ValueError, e:
+        except ValueError as e:
             LOGGER.warning("Invalid backup name: %s", name)
             return None
 
@@ -172,7 +172,7 @@ class Backupset(object):
                               self.name,
                               dir) for dir in dirs]
 
-        backup_list.sort()
+        backup_list.sort(key = lambda x: x.name)
         if reverse:
             backup_list.reverse()
 
@@ -186,12 +186,12 @@ class Backupset(object):
         newest_link = os.path.join(self.path, 'newest')
         try:
             os.remove(oldest_link)
-        except OSError, exc:
+        except OSError as exc:
             if exc.errno != errno.ENOENT:
                 raise
         try:
             os.remove(newest_link)
-        except OSError, exc:
+        except OSError as exc:
             if exc.errno != errno.ENOENT:
                 raise
         if not backups:
@@ -264,7 +264,7 @@ class Backup(object):
         # purge the entire backup directory
         try:
             shutil.rmtree(self.path)
-        except OSError, exc:
+        except OSError as exc:
             if exc.errno != errno.ENOENT:
                 raise
 

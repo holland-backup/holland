@@ -64,7 +64,7 @@ class VolumeGroup(object):
     def __repr__(self):
         """Representation of this volume group"""
         attributes = ['%s=%r' % (key, value)
-                        for key, value in self.__dict__.items()
+                        for key, value in list(self.__dict__.items())
                             if key != 'self']
         return 'VolumeGroup(%s)' % ','.join(attributes)
 
@@ -102,7 +102,7 @@ class LogicalVolume(object):
         dev = getdevice(getmount(path))
         try:
             return cls.find_one(dev)
-        except LVMError, exc:
+        except LVMError as exc:
             logging.debug("Failed to find logical volume for device %r (path=%r): %s", dev, path, exc)
             return None
     find_mounted = classmethod(find_mounted)
@@ -234,6 +234,6 @@ class LogicalVolume(object):
 
     def __repr__(self):
         attributes = ['%s=%r' % (key, value)
-                        for key, value in self.__dict__.items()
+                        for key, value in list(self.__dict__.items())
                             if key != 'self']
         return "LogicalVolume(%s)" % ','.join(attributes)

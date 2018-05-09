@@ -98,7 +98,7 @@ def install_plugins(virtual_env, egg_env):
 
 if curses:
     COLOR_NAMES = "BLACK RED GREEN YELLOW BLUE MAGENTA CYAN WHITE"
-    COLORS = dict(zip(COLOR_NAMES.split(), xrange(8)))
+    COLORS = dict(list(zip(COLOR_NAMES.split(), list(range(8)))))
     RESET = curses.tigetstr('sgr0')
     def colorize(record):
         levelno = record.levelno

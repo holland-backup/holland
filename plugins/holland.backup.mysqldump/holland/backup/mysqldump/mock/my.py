@@ -2,7 +2,7 @@
 import os
 import logging
 import MySQLdb
-from mocker import *
+from .mocker import *
 from hldump.mysql.option import parse_options
 
 def mock_mysql(mocker):
@@ -29,7 +29,7 @@ def mock_mysql_config(mocker):
 def _mysql_config(mocker, options):
     mysql_keys = ['user','password','host','port','socket']
     mysql_options = { 'client' : dict([(key, value)
-                          for key, value in options.items()
+                          for key, value in list(options.items())
                               if key in mysql_keys])
                     }
 
@@ -71,7 +71,7 @@ def _mysqldb_connect(mocker, *args, **kwargs):
     if not hasattr(mocker, 'mysql_options'):
         mocker.mysql_options = {}
     mocker.mysql_options.setdefault('client', {})
-    for key, value in mocker.mysql_options['client'].items():
+    for key, value in list(mocker.mysql_options['client'].items()):
         if not value:
             continue
         if key not in ('user', 'password', 'host', 'port', 'socket'):
@@ -79,7 +79,7 @@ def _mysqldb_connect(mocker, *args, **kwargs):
         if key == 'password':
             key = 'passwd'
         kwargs[key] = value
-    print "MySQLdb.connect(**%r)" % kwargs
+    print("MySQLdb.connect(**%r)" % kwargs)
     return MySQLdb.connect(**kwargs)
 
 if __name__ == '__main__':

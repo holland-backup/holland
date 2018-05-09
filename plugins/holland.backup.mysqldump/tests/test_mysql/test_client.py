@@ -107,8 +107,8 @@ def test_50_metadata():
     mocker.result(fields)
     iter(cursor)
     results = [
-        ('user', 'myisam',1024L,1024L),
-        ('db', 'myisam', 1024L, 1024L),
+        ('user', 'myisam',1024,1024),
+        ('db', 'myisam', 1024, 1024),
     ]
     mocker.generate(results)
     cursor.close()
@@ -119,15 +119,15 @@ def test_50_metadata():
             { 'database' : 'mysql',
               'name' : 'user',
               'engine' : 'myisam',
-              'data_size' : 1024L,
-              'index_size' : 1024L,
+              'data_size' : 1024,
+              'index_size' : 1024,
               'is_transactional' : False
             },
             { 'database' : 'mysql',
               'name' : 'db',
               'engine' : 'myisam',
-              'data_size' : 1024L,
-              'index_size' : 1024L,
+              'data_size' : 1024,
+              'index_size' : 1024,
               'is_transactional' : False
             },
         ]
@@ -160,8 +160,8 @@ def test_51_metadata():
     mocker.result(fields)
     cursor.fetchall()
     results = [
-        ('mysql', 'user', 1024L,1024L, 'MyISAM', False),
-        ('mysql', 'db', 1024L, 1024L, 'MyISAM', False),
+        ('mysql', 'user', 1024,1024, 'MyISAM', False),
+        ('mysql', 'db', 1024, 1024, 'MyISAM', False),
     ]
     mocker.result(results)
     cursor.close()
@@ -172,15 +172,15 @@ def test_51_metadata():
             { 'database' : 'mysql',
               'name' : 'user',
               'engine' : 'MyISAM',
-              'data_size' : 1024L,
-              'index_size' : 1024L,
+              'data_size' : 1024,
+              'index_size' : 1024,
               'is_transactional' : False,
             },
             { 'database' : 'mysql',
               'name' : 'db',
               'engine' : 'MyISAM',
-              'data_size' : 1024L,
-              'index_size' : 1024L,
+              'data_size' : 1024,
+              'index_size' : 1024,
               'is_transactional' : False,
             },
         ]
@@ -245,12 +245,12 @@ def test_show_slave_status():
         'Waiting for master to send event',
         '127.0.0.1',
         'msandbox',
-        23351L,
-        60L,
+        23351,
+        60,
         'mysql-bin.000004',
-        106L,
+        106,
         'mysql_sandbox23353-relay-bin.001724',
-        251L,
+        251,
         'mysql-bin.000004',
         'Yes',
         'Yes',
@@ -260,25 +260,25 @@ def test_show_slave_status():
         '',
         '',
         '',
-        0L,
+        0,
         '',
-        0L,
-        106L,
-        564L,
+        0,
+        106,
+        564,
         'None',
         '',
-        0L,
+        0,
         'No',
         '',
         '',
         '',
         '',
         '',
-        0L,
+        0,
         'No',
-        0L,
+        0,
         '',
-        0L,
+        0,
         ''
     )
     mocker.result(result)
@@ -286,7 +286,7 @@ def test_show_slave_status():
     mocker.replay()
     try:
         client = MySQLClient(read_default_file='/etc/my.cnf')
-        expected_status = dict(zip([f[0].lower() for f in fields], result))
+        expected_status = dict(list(zip([f[0].lower() for f in fields], result)))
         slave_status = client.show_slave_status()
         assert_equals(slave_status, expected_status)
         mocker.verify()
@@ -365,7 +365,7 @@ def test_status():
     cursor = link.cursor()
     cursor.execute('SHOW GLOBAL STATUS LIKE %s', ('Bytes_sent',))
     cursor.fetchone()
-    mocker.result(('Bytes_sent', 978L))
+    mocker.result(('Bytes_sent', 978))
     cursor.close()
     mocker.replay()
 
@@ -383,7 +383,7 @@ def test_variable():
     cursor = link.cursor()
     sql = 'SHOW SESSION VARIABLES LIKE %s'
     cursor.execute(sql, ('sql_log_bin',))
-    mocker.result(1L)
+    mocker.result(1)
     cursor.fetchone()
     mocker.result(('sql_log_bin', 'ON'))
     cursor.close()
@@ -403,7 +403,7 @@ def test_variable_nomatch():
     cursor = link.cursor()
     sql = 'SHOW SESSION VARIABLES LIKE %s'
     cursor.execute(sql, ('postgresql',))
-    mocker.result(0L)
+    mocker.result(0)
     cursor.fetchone()
     mocker.result(None)
     cursor.close()

@@ -110,7 +110,7 @@ class MySQLDumpPlugin(object):
         if estimate_method.startswith('const:'):
             try:
                 return parse_size(estimate_method[6:])
-            except ValueError, exc:
+            except ValueError as exc:
                 raise BackupError(str(exc))
 
         if estimate_method != 'plugin':
@@ -121,8 +121,13 @@ class MySQLDumpPlugin(object):
             tbl_iter = MetadataTableIterator(self.client)
             try:
                 self.client.connect()
+            except Exception as ex:
+                LOG.error("Failed to connect to database")
+                LOG.error("%s", ex)
+                raise BackupError("MySQL Error %s" % ex)
+            try:
                 self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
-            except MySQLError, exc:
+            except MySQLError as exc:
                 LOG.error("Failed to estimate backup size")
                 LOG.error("[%d] %s", *exc.args)
                 raise BackupError("MySQL Error [%d] %s" % exc.args)
@@ -147,7 +152,7 @@ class MySQLDumpPlugin(object):
                 self.schema.refresh(db_iter=db_iter,
                                     tbl_iter=tbl_iter,
                                     fast_iterate=fast_iterate)
-            except MySQLError, exc:
+            except MySQLError as exc:
                 LOG.debug("MySQLdb error [%d] %s", exc_info=True, *exc.args)
                 raise BackupError("MySQL Error [%d] %s" % exc.args)
         finally:
@@ -164,7 +169,6 @@ class MySQLDumpPlugin(object):
             mock_env = MockEnvironment()
             mock_env.replace_environment()
             LOG.info("Running in dry-run mode.")
-
 
         try:
             if self.config['mysqldump']['stop-slave']:
@@ -196,20 +200,19 @@ class MySQLDumpPlugin(object):
                                             'invalid_views.sql')
             exclude_invalid_views(self.schema, self.client, definitions_path)
         add_exclusions(self.schema, defaults_file)
-
         # find the path to the mysqldump command
         mysqldump_bin = find_mysqldump(path=config['mysql-binpath'])
         LOG.info("Using mysqldump executable: %s", mysqldump_bin)
-
         # setup the mysqldump environment
         extra_defaults = config['extra-defaults']
         try:
             mysqldump = MySQLDump(defaults_file, 
                                   mysqldump_bin, 
                                   extra_defaults=extra_defaults)
-        except MySQLDumpError, exc:
+        except MySQLDumpError as exc:
             raise BackupError(str(exc))
-
+        except Exception as ex:
+            LOG.warning(ex)
         LOG.info("mysqldump version %s", '.'.join([str(digit)
                 for digit in mysqldump.version]))
         options = collect_mysqldump_options(config, mysqldump, self.client)
@@ -221,7 +224,7 @@ class MySQLDumpPlugin(object):
             self.config['compression']['level'] > 0:
             try:
                 cmd, ext = lookup_compression(self.config['compression']['method'])
-            except OSError, exc:
+            except OSError as exc:
                 raise BackupError("Unable to load compression method '%s': %s" %
                                   (self.config['compression']['method'], exc))
             LOG.info("Using %s compression level %d with args %s",
@@ -240,7 +243,7 @@ class MySQLDumpPlugin(object):
                   file_per_database=config['file-per-database'],
                   open_stream=self._open_stream,
                   compression_ext=ext)
-        except MySQLDumpError, exc:
+        except MySQLDumpError as exc:
             raise BackupError(str(exc))
 
     def _open_stream(self, path, mode, method=None):
@@ -344,7 +347,7 @@ def validate_mysqldump_options(mysqldump, options):
         try:
             mysqldump.add_option(option)
             LOG.info("Using mysqldump option %s", option)
-        except MyOptionError, exc:
+        except MyOptionError as exc:
             LOG.warning(str(exc))
 
 
@@ -353,7 +356,7 @@ def _stop_slave(client, config=None):
     try:
         client.stop_slave(sql_thread_only=True)
         LOG.info("Stopped slave")
-    except MySQLError, exc:
+    except MySQLError as exc:
         raise BackupError("Failed to stop slave[%d]: %s" % exc.args)
     if config is not None:
         try:
@@ -362,7 +365,7 @@ def _stop_slave(client, config=None):
                 # update config with replication info
                 config['slave_master_log_pos'] = slave_info['exec_master_log_pos']
                 config['slave_master_log_file'] = slave_info['relay_master_log_file']
-        except MySQLError, exc:
+        except MySQLError as exc:
             raise BackupError("Failed to acquire slave status[%d]: %s" % \
                                 exc.args)
         try:
@@ -370,7 +373,7 @@ def _stop_slave(client, config=None):
             if master_info:
                 config['master_log_file'] = master_info['file']
                 config['master_log_pos'] = master_info['position']
-        except MySQLError, exc:
+        except MySQLError as exc:
             raise BackupError("Failed to acquire master status [%d] %s" % exc.args)
 
     LOG.info("MySQL Replication has been stopped.")
@@ -385,7 +388,7 @@ def _start_slave(client, config=None):
                     config['slave_master_log_file'], config['slave_master_log_pos'],
                     slave_info['relay_master_log_file'], slave_info['exec_master_log_pos'])
             LOG.warning("ALERT! Slave position changed during backup!")
-    except MySQLError, exc:
+    except MySQLError as exc:
         LOG.warning("Failed to sanity check replication[%d]: %s",
                          *exc.args)
 
@@ -397,13 +400,13 @@ def _start_slave(client, config=None):
                     config['master_log_file'], config['master_log_pos'],
                     master_info['file'], master_info['position'])
             LOG.warning("ALERT! Binary log position changed during backup!")
-    except MySQLError, exc:
+    except MySQLError as exc:
         LOG.warning("Failed to sanity check master status. [%d] %s", *exc.args)
 
     try:
         client.start_slave()
         LOG.info("Restarted slave")
-    except MySQLError, exc:
+    except MySQLError as exc:
         raise BackupError("Failed to restart slave [%d] %s" % exc.args)
 
 def exclude_invalid_views(schema, client, definitions_file):
@@ -414,11 +417,11 @@ def exclude_invalid_views(schema, client, definitions_file):
             definitions_file)
     cursor = client.cursor()
     try:
-        print >>sqlf, "--"
-        print >>sqlf, "-- DDL of Invalid Views"
-        print >>sqlf, "-- Created automatically by Holland"
-        print >>sqlf, "--"
-        print >>sqlf
+        print("--", file=sqlf)
+        print("-- DDL of Invalid Views", file=sqlf)
+        print("-- Created automatically by Holland", file=sqlf)
+        print("--", file=sqlf)
+        print(file=sqlf)
         for db in schema.databases:
             if db.excluded:
                 continue
@@ -437,7 +440,7 @@ def exclude_invalid_views(schema, client, definitions_file):
                     for _, error_code, msg in client.show_warnings():
                         if error_code == 1449: # ER_NO_SUCH_USER
                             raise MySQLError(error_code, msg)
-                except MySQLError, exc:
+                except MySQLError as exc:
                     # 1356 = View references invalid table(s)...
                     if exc.args[0] in (1356, 1142, 1143, 1449, 1267, 1271):
                         invalid_view = True
@@ -466,13 +469,13 @@ def exclude_invalid_views(schema, client, definitions_file):
                     LOG.info("* Saving view definition for "
                                  "`%s`.`%s`",
                                  db.name, table.name)
-                    print >>sqlf, "--"
-                    print >>sqlf, "-- Current View: `%s`.`%s`" % \
-                    (db.name, table.name)
-                    print >>sqlf, "--"
-                    print >>sqlf
-                    print >>sqlf, view_definition + ';'
-                    print >>sqlf
+                    print("--", file=sqlf)
+                    print("-- Current View: `%s`.`%s`" % \
+                    (db.name, table.name), file=sqlf)
+                    print("--", file=sqlf)
+                    print(file=sqlf)
+                    print(view_definition + ';', file=sqlf)
+                    print(file=sqlf)
     finally:
         sqlf.close()
 
@@ -496,12 +499,12 @@ def add_exclusions(schema, config):
 
     try:
         my_cnf = codecs.open(config, 'a', 'utf8')
-        print >>my_cnf
-        print >>my_cnf, "[mysqldump]"
+        print(file=my_cnf)
+        print("[mysqldump]", file=my_cnf)
         for excl in exclusions:
-            print >>my_cnf, excl
+            print(excl, file=my_cnf)
         my_cnf.close()
-    except IOError, exc:
+    except IOError as exc:
         LOG.error("Failed to write ignore-table exclusions to %s", config)
         raise
 

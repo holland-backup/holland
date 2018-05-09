@@ -18,7 +18,7 @@ class NullHandler(logging.Handler):
 
 def clear_root_handlers():
     root = logging.getLogger()
-    map(root.removeHandler, root.handlers)
+    list(map(root.removeHandler, root.handlers))
 
 def setup_console_logging(level=DEFAULT_LOG_LEVEL, 
                           format='%(message)s', 

@@ -145,7 +145,7 @@ class MySQLHotcopy(object):
         error = None
         try:
             self._backup()
-        except Exception, e:
+        except Exception as e:
             error = e
 
         if self.config.lookup('mysqlhotcopy.stop-slave'):
@@ -166,8 +166,8 @@ class MySQLHotcopy(object):
                 self.mysqlclient.flush_tables_with_read_lock(extra_flush=True)
         elif self.config.lookup('mysqlhotcopy.lock-method') == 'lock-tables':
             tables = [x for x in self._find_tables() if x not in [('mysql', 'general_log'), ('mysql', 'slow_log')]]
-            quoted_tables = map(lambda x: '`' + '`.`'.join(x) +
-                                '`', tables)
+            quoted_tables = ['`' + '`.`'.join(x) +
+                                '`' for x in tables]
             if not self.dry_run:
                 self.mysqlclient.lock_tables(quoted_tables)
                 self.mysqlclient.flush_tables()
@@ -189,7 +189,7 @@ class MySQLHotcopy(object):
                     LOG.debug("%s", rpath)
                     if not self.dry_run:
                         archive.add_file(cpath, rpath)
-        except Exception, e:
+        except Exception as e:
             error = e
             LOG.error("Failed to archive data file. %s", e)
 

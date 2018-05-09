@@ -1,7 +1,7 @@
 import logging
-from mocker import Mocker, ANY, CONTAINS, ARGS, KWARGS, MATCH
-import storage
-from _subprocess import PopenMock
+from .mocker import Mocker, ANY, CONTAINS, ARGS, KWARGS, MATCH
+from . import storage
+from ._subprocess import PopenMock
 
 LOG = logging.getLogger(__name__)
 

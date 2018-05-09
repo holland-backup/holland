@@ -4,7 +4,7 @@ import os
 import re
 import csv
 import logging
-from cStringIO import StringIO
+from io import StringIO
 from subprocess import Popen, PIPE, STDOUT, list2cmdline
 
 from holland.lib.lvm.constants import PVS_ATTR, VGS_ATTR, LVS_ATTR
@@ -104,7 +104,7 @@ def parse_lvm_format(keys, values):
     """Convert LVM tool output into a dictionary"""
     stream = StringIO(values)
     for row in csv.reader(stream, delimiter=',', skipinitialspace=True):
-        yield dict(zip(keys, row))
+        yield dict(list(zip(keys, row)))
 
 def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
     """Create a snapshot of an existing logical volume

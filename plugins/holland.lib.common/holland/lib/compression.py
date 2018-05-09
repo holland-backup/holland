@@ -2,7 +2,7 @@ import os
 import logging
 import errno
 import subprocess
-import which
+from . import which
 import shlex
 from tempfile import TemporaryFile
 
@@ -35,7 +35,7 @@ def lookup_compression(method):
         argv = shlex.split(cmd)
         try:
             return [which.which(argv[0])] + argv[1:], ext
-        except which.WhichError, e:
+        except which.WhichError as e:
             raise OSError("No command found for compression method '%s'" %
                     method)
     except KeyError:
@@ -62,8 +62,8 @@ class CompressionInput(object):
     def read(self, size):
         return os.read(self.fd, size)
 
-    def next(self):
-        return self.pid.stdout.next()
+    def __next__(self):
+        return next(self.pid.stdout)
 
     def __iter__(self):
         return iter(self.pid.stdout)
@@ -181,7 +181,7 @@ def stream_info(path, method=None, level=None):
 
 def _parse_args(value):
     """Convert a cmdline string to a list"""
-    if isinstance(value, unicode):
+    if isinstance(value, str):
         value = value.encode('utf8')
     return shlex.split(value)
 

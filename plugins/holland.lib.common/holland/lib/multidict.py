@@ -21,15 +21,15 @@ class MultiDict(DictMixin):
                 "MultiDict can only be called with one positional argument")
         if args:
             if hasattr(args[0], 'iteritems'):
-                items = list(args[0].iteritems())
+                items = list(args[0].items())
             elif hasattr(args[0], 'items'):
-                items = args[0].items()
+                items = list(args[0].items())
             else:
                 items = list(args[0])
             self._items = items
         else:
             self._items = []
-        self._items.extend(kw.iteritems())
+        self._items.extend(iter(kw.items()))
 
     def __getitem__(self, key):
         for k, v in self._items:
@@ -141,8 +141,8 @@ class MultiDict(DictMixin):
 
     def pop(self, key, *args):
         if len(args) > 1:
-            raise TypeError, "pop expected at most 2 arguments, got "\
-                              + repr(1 + len(args))
+            raise TypeError("pop expected at most 2 arguments, got "\
+                              + repr(1 + len(args)))
         for i in range(len(self._items)):
             if self._items[i][0] == key:
                 v = self._items[i][1]
@@ -160,9 +160,9 @@ class MultiDict(DictMixin):
         if other is None:
             pass
         elif hasattr(other, 'items'):
-            self._items.extend(other.items())
+            self._items.extend(list(other.items()))
         elif hasattr(other, 'keys'):
-            for k in other.keys():
+            for k in list(other.keys()):
                 self._items.append((k, other[k]))
         else:
             for k, v in other:
@@ -291,7 +291,7 @@ class UnicodeMultiDict(DictMixin):
         request.
         """
         unicode_mixed = {}
-        for key, value in self.multi.mixed().iteritems():
+        for key, value in self.multi.mixed().items():
             if isinstance(value, list):
                 value = [self._decode_value(value) for value in value]
             else:
@@ -305,7 +305,7 @@ class UnicodeMultiDict(DictMixin):
         list of values.
         """
         unicode_dict = {}
-        for key, value in self.multi.dict_of_lists().iteritems():
+        for key, value in self.multi.dict_of_lists().items():
             value = [self._decode_value(value) for value in value]
             unicode_dict[self._decode_key(key)] = value
         return unicode_dict
@@ -335,7 +335,7 @@ class UnicodeMultiDict(DictMixin):
         return (self._decode_key(k), self._decode_value(v))
 
     def __repr__(self):
-        items = ', '.join(['(%r, %r)' % v for v in self.items()])
+        items = ', '.join(['(%r, %r)' % v for v in list(self.items())])
         return '%s([%s])' % (self.__class__.__name__, items)
 
     def __len__(self):
@@ -346,27 +346,27 @@ class UnicodeMultiDict(DictMixin):
     ##
 
     def keys(self):
-        return [self._decode_key(k) for k in self.multi.iterkeys()]
+        return [self._decode_key(k) for k in self.multi.keys()]
 
     def iterkeys(self):
-        for k in self.multi.iterkeys():
+        for k in self.multi.keys():
             yield self._decode_key(k)
 
     __iter__ = iterkeys
 
     def items(self):
         return [(self._decode_key(k), self._decode_value(v)) for \
-                    k, v in self.multi.iteritems()]
+                    k, v in self.multi.items()]
 
     def iteritems(self):
-        for k, v in self.multi.iteritems():
+        for k, v in self.multi.items():
             yield (self._decode_key(k), self._decode_value(v))
 
     def values(self):
-        return [self._decode_value(v) for v in self.multi.itervalues()]
+        return [self._decode_value(v) for v in self.multi.values()]
 
     def itervalues(self):
-        for v in self.multi.itervalues():
+        for v in self.multi.values():
             yield self._decode_value(v)
 
 __test__ = {

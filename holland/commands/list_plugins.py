@@ -21,10 +21,10 @@ class ListPlugins(Command):
         header = table[0]
         rest = table[1:]
         fmt = "%-12s %-15s %-9s %-16s %s"
-        print fmt % tuple(header)
-        print "-"*80
+        print(fmt % tuple(header))
+        print("-"*80)
         for row in rest:
-            print fmt % tuple(row)
+            print(fmt % tuple(row))
 
     def run(self, cmd, opts):
         table_header = ["Plugin-Type", "Plugin-Name", "Version", "Author", "Summary"]
@@ -44,7 +44,7 @@ class ListPlugins(Command):
         table.sort()
         table.insert(0, table_header)
         if len(table) == 1:
-            print "No Plugins Found"
+            print("No Plugins Found")
         else:
             self.print_table(table)
 

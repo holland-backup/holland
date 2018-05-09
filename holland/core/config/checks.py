@@ -5,16 +5,16 @@ a validate.py Validator instance
 
 import logging
 import shlex
-from types import StringTypes
-import validate as validate
-from validate import Validator
+#from types import StringTypes
+from . import validate as validate
+from .validate import Validator
 
 def is_coerced_list(value, min_val=None, max_val=None):
     """
     Checks if a value is a list, if not coerces
     it to a list
     """
-    if isinstance(value, StringTypes):
+    if isinstance(value, str):
         value = [value]
     return validate.is_list(value, min_val, max_val)
 
@@ -22,7 +22,7 @@ def is_octal(value, min_val=None, max_val=None):
     """
     Coerces a value to octal
     """
-    if not isinstance(value, StringTypes):
+    if not isinstance(value, str):
         return validate.is_integer(value, min_val, max_val)
         
     try:

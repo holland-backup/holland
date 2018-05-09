@@ -49,7 +49,7 @@ class DirArchive(object):
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
         fileobj = open(target_path, 'w')
-        print >> fileobj, string
+        print(string, file=fileobj)
         fileobj.close()
 
     def list(self):
@@ -99,4 +99,4 @@ if __name__ == '__main__':
     xv.add_file("user.MYD", "mysql/user.MYD")
     xv.add_file("user.MYI", "mysql/user.MYI")
     xv.close()
-    print (time.time() - now), "seconds"
+    print((time.time() - now), "seconds")

@@ -37,9 +37,9 @@ class BackupPlugin(object):
 def load_plugin(name, config, path, dry_run):
         try:
             plugin_cls = load_backup_plugin(config['holland:backup']['plugin'])
-        except KeyError, exc:
+        except KeyError as exc:
             raise BackupError("No plugin defined for backupset '%s'.", name)
-        except PluginLoadError, exc:
+        except PluginLoadError as exc:
             raise BackupError(str(exc))
 
 
@@ -50,7 +50,7 @@ def load_plugin(name, config, path, dry_run):
                               dry_run=dry_run)
         except (KeyboardInterrupt, SystemExit):
             raise
-        except Exception, exc:
+        except Exception as exc:
             LOG.debug("Error while initializing %r : %s",
                       plugin_cls, exc, exc_info=True)
             raise BackupError("Error initializing %s plugin: %s" %
@@ -86,11 +86,11 @@ class BackupRunner(object):
         :raises: BackupError if a backup fails
         """
 
-        for i in xrange(MAX_SPOOL_RETRIES):
+        for i in range(MAX_SPOOL_RETRIES):
             try:
                 spool_entry = self.spool.add_backup(name)
                 break
-            except OSError, exc:
+            except OSError as exc:
                 if exc.errno != errno.EEXIST:
                     raise BackupError("Failed to create spool: %s" % exc)
                 sys.exc_clear()

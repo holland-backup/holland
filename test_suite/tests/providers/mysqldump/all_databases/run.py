@@ -1,7 +1,7 @@
 import os, sys
 import shlex, subprocess
 import shutil
-import ConfigParser
+import configparser
 
 # Functions
 def execute(cmd, config):
@@ -9,13 +9,13 @@ def execute(cmd, config):
         stdout=config.get('global', 'output_log'), 
         stderr=config.get('global', 'error_log'))
     if returnCode != 0:
-        print "Failure is not an option! Except when it is"
+        print("Failure is not an option! Except when it is")
         sys.exit(returnCode)
     return
 
 # Setup
 pwd = os.getcwd()
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read('config/test.conf')
 outputLog = open(config.get('global', 'output_log'), 'w')
 errorLog = open(config.get('global', 'error_log'), 'w')
@@ -77,7 +77,7 @@ shutil.copytree(
     running_config_dir + '/providers')
 
 # Generate holland.conf from main test config
-holland_config = ConfigParser.ConfigParser()
+holland_config = configparser.ConfigParser()
 holland_config.add_section('holland')
 for item, value in config.items('holland'):
     holland_config.set('holland', item, value)

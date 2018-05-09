@@ -1,6 +1,6 @@
 import gc
 import unittest
-import __builtin__
+import builtins
 
 import holland.backup.mysqldump.mock.storage as storage
 
@@ -16,14 +16,14 @@ class TestFileType(unittest.TestCase):
     def test_patching(self):
         storage.replace_builtins()
         try:
-            self.assertEqual(__builtin__.file, storage.file)
-            self.assertEqual(__builtin__.open, storage.open)
+            self.assertEqual(builtins.file, storage.file)
+            self.assertEqual(builtins.open, storage.open)
         finally:
             storage.restore_builtins()
 
-        self.assertEqual(__builtin__.file, storage.original_file)
+        self.assertEqual(builtins.file, storage.original_file)
         self.assertNotEqual(storage.original_file, storage.file)
-        self.assertEqual(__builtin__.open, storage.original_open)
+        self.assertEqual(builtins.open, storage.original_open)
         self.assertNotEqual(storage.original_open, storage.open)
 
 
@@ -31,18 +31,18 @@ class TestFileType(unittest.TestCase):
         source_data = 'Some text\nwith newlines\n'
         
         handle = storage.file(FILE, 'w')
-        self.assertEquals(handle.mode, 'w')
+        self.assertEqual(handle.mode, 'w')
         handle.write(source_data)
         handle.close()
         
         handle = storage.file(FILE,'r')
         data = handle.read()
-        self.assertEquals(handle.mode, 'r')
+        self.assertEqual(handle.mode, 'r')
         handle.close()
         self.assertEqual(data, source_data)
         
         handle = storage.file(FILE)
-        self.assertEquals(handle.mode, 'r')
+        self.assertEqual(handle.mode, 'r')
         data = handle.read()
         handle.close()
         self.assertEqual(data, source_data)
@@ -53,20 +53,20 @@ class TestFileType(unittest.TestCase):
         
         handle = storage.open(FILE, 'w')
         self.assertTrue(isinstance(handle, storage.file))
-        self.assertEquals(handle.mode, 'w')
+        self.assertEqual(handle.mode, 'w')
         handle.write(source_data)
         handle.close()
         
         handle = storage.open(FILE, 'r')
         self.assertTrue(isinstance(handle, storage.file))
         data = handle.read()
-        self.assertEquals(handle.mode, 'r')
+        self.assertEqual(handle.mode, 'r')
         handle.close()
         self.assertEqual(data, source_data)
         
         handle = storage.open(FILE)
         self.assertTrue(isinstance(handle, storage.file))
-        self.assertEquals(handle.mode, 'r')
+        self.assertEqual(handle.mode, 'r')
         data = handle.read()
         handle.close()
         self.assertEqual(data, source_data)
@@ -267,14 +267,14 @@ class TestFileType(unittest.TestCase):
     
     def test_assorted_members(self):
         h = storage.file(FILE, 'w')
-        self.assertEquals(h.encoding, None)
+        self.assertEqual(h.encoding, None)
         self.assertEqual(h.errors, None)
         self.assertEqual(h.newlines, None)
         self.assertFalse(h.isatty())
         h.close()
         
         h = storage.file(FILE)
-        self.assertEquals(h.encoding, None)
+        self.assertEqual(h.encoding, None)
         self.assertEqual(h.errors, None)
         self.assertEqual(h.newlines, None)
         self.assertFalse(h.isatty())
@@ -310,27 +310,27 @@ class TestFileType(unittest.TestCase):
     def test_next(self):
         h = storage.file(FILE, 'w')
         h.write('foo\nbar\nbaz\n')
-        self.assertRaises(IOError, h.next)
+        self.assertRaises(IOError, h.__next__)
         h.close()
         
         h = storage.file(FILE)
-        self.assertEqual(h.next(), 'foo\n')
+        self.assertEqual(next(h), 'foo\n')
         
         self.assertRaises(ValueError, h.read)
         
-        self.assertEqual(h.next(), 'bar\n')
-        self.assertEqual(h.next(), 'baz\n')
-        self.assertRaises(StopIteration, h.next)
+        self.assertEqual(next(h), 'bar\n')
+        self.assertEqual(next(h), 'baz\n')
+        self.assertRaises(StopIteration, h.__next__)
         h.close()
         
         h = storage.file(FILE)
-        self.assertEqual(h.next(), 'foo\n')
+        self.assertEqual(next(h), 'foo\n')
         h.seek(1)
-        self.assertEqual(h.next(), 'oo\n')
+        self.assertEqual(next(h), 'oo\n')
         
         h.seek(3)
         self.assertEqual(h.read(4), '\nbar')
-        self.assertEqual(h.next(), '\n')
+        self.assertEqual(next(h), '\n')
     
     
     def test_readline(self):
@@ -374,7 +374,7 @@ class TestFileType(unittest.TestCase):
 
     def test_xreadlines(self):
         h = storage.file(FILE, 'w')
-        self.assertTrue(h.xreadlines() is h)
+        self.assertTrue(h is h)
         h.close()
         
         

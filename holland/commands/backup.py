@@ -82,7 +82,7 @@ class Backup(Command):
                 config = hollandcfg.backupset(name)
                 # ensure we have at least an empty holland:backup section
                 config.setdefault('holland:backup', {})
-            except (SyntaxError, IOError), exc:
+            except (SyntaxError, IOError) as exc:
                 LOG.error("Could not load backupset '%s': %s", name, exc)
                 break
 
@@ -101,10 +101,10 @@ class Backup(Command):
             try:
                 try:
                     runner.backup(name, config, opts.dry_run)
-                except BackupError, exc:
+                except BackupError as exc:
                     LOG.error("Backup failed: %s", exc.args[0])
                     break
-                except ConfigError, exc:
+                except ConfigError as exc:
                     break
             finally:
                 if not opts.no_lock:
@@ -142,7 +142,7 @@ def call_hooks(event, entry):
                             stderr=PIPE,
                             close_fds=True)
             output, errors = process.communicate()
-        except OSError, exc:
+        except OSError as exc:
             raise BackupError("%s", exc)
 
         for line in errors.splitlines():

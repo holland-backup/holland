@@ -1,10 +1,10 @@
 import unittest, doctest
 
-import test_ini
-import test_misc
-import test_fuzz
-import test_compat
-import test_unicode
+from . import test_ini
+from . import test_misc
+from . import test_fuzz
+from . import test_compat
+from . import test_unicode
 from holland.backup.mysqldump.util import config
 from holland.backup.mysqldump.util import ini
 

@@ -1,1 +1,1 @@
-from plugin import MysqlDumpLVMBackup
+from .plugin import MysqlDumpLVMBackup

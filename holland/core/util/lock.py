@@ -27,7 +27,7 @@ class Lock(object):
         try:
             self.lock = open(self.path, 'r')
             flock(self.lock, LOCK_EX|LOCK_NB)
-        except IOError, exc:
+        except IOError as exc:
             self.lock = None
             raise LockError(str(exc), exc)
         else:
@@ -44,7 +44,7 @@ class Lock(object):
             self.acquire()
             flock(self.lock, LOCK_UN)
             self.lock = None
-        except IOError, exc:
+        except IOError as exc:
             raise LockError(str(exc), exc)
         else:
             return True

@@ -1,5 +1,5 @@
 from holland.backup.mysqldump.util import compat as ConfigParser
-import StringIO
+import io
 import unittest
 import UserDict
 
@@ -7,23 +7,23 @@ from test import test_support
 
 class SortedDict(UserDict.UserDict):
     def items(self):
-        result = self.data.items()
+        result = list(self.data.items())
         result.sort()
         return result
 
     def keys(self):
-        result = self.data.keys()
+        result = list(self.data.keys())
         result.sort()
         return result
 
     def values(self):
-        result = self.items()
+        result = list(self.items())
         return [i[1] for i in values]
 
-    def iteritems(self): return iter(self.items())
-    def iterkeys(self): return iter(self.keys())
+    def iteritems(self): return iter(list(self.items()))
+    def iterkeys(self): return iter(list(self.keys()))
     __iter__ = iterkeys
-    def itervalues(self): return iter(self.values())
+    def itervalues(self): return iter(list(self.values()))
 
 class TestCaseBase(unittest.TestCase):
     __test__ = False
@@ -37,7 +37,7 @@ class TestCaseBase(unittest.TestCase):
 
     def fromstring(self, string, defaults=None):
         cf = self.newconfig(defaults)
-        sio = StringIO.StringIO(string)
+        sio = io.StringIO(string)
         cf.readfp(sio)
         return cf
 
@@ -83,16 +83,16 @@ class TestCaseBase(unittest.TestCase):
         eq(cf.get('Spaces', 'key with spaces'), 'value')
         eq(cf.get('Spaces', 'another with spaces'), 'splat!')
 
-        self.failIf('__name__' in cf.options("Foo Bar"),
+        self.assertFalse('__name__' in cf.options("Foo Bar"),
                     '__name__ "option" should not be exposed by the API!')
 
         # Make sure the right things happen for remove_option();
         # added to include check for SourceForge bug #123324:
-        self.failUnless(cf.remove_option('Foo Bar', 'foo'),
+        self.assertTrue(cf.remove_option('Foo Bar', 'foo'),
                         "remove_option() failed to report existance of option")
-        self.failIf(cf.has_option('Foo Bar', 'foo'),
+        self.assertFalse(cf.has_option('Foo Bar', 'foo'),
                     "remove_option() failed to remove option")
-        self.failIf(cf.remove_option('Foo Bar', 'foo'),
+        self.assertFalse(cf.remove_option('Foo Bar', 'foo'),
                     "remove_option() failed to report non-existance of option"
                     " that was removed")
 
@@ -114,10 +114,10 @@ class TestCaseBase(unittest.TestCase):
         eq(cf.options("a"), ["b"])
         eq(cf.get("a", "b"), "value",
            "could not locate option, expecting case-insensitive option names")
-        self.failUnless(cf.has_option("a", "b"))
+        self.assertTrue(cf.has_option("a", "b"))
         cf.set("A", "A-B", "A-B value")
         for opt in ("a-b", "A-b", "a-B", "A-B"):
-            self.failUnless(
+            self.assertTrue(
                 cf.has_option("A", opt),
                 "has_option() returned false for option which should exist")
         eq(cf.options("A"), ["a-b"])
@@ -134,7 +134,7 @@ class TestCaseBase(unittest.TestCase):
         # SF bug #561822:
         cf = self.fromstring("[section]\nnekey=nevalue\n",
                              defaults={"key":"value"})
-        self.failUnless(cf.has_option("section", "Key"))
+        self.assertTrue(cf.has_option("section", "Key"))
 
 
     def test_default_case_sensitivity(self):
@@ -163,14 +163,14 @@ class TestCaseBase(unittest.TestCase):
                          "No Section!\n")
 
     def parse_error(self, exc, src):
-        sio = StringIO.StringIO(src)
+        sio = io.StringIO(src)
         self.assertRaises(exc, self.cf.readfp, sio)
 
     def test_query_errors(self):
         cf = self.newconfig()
         self.assertEqual(cf.sections(), [],
                          "new ConfigParser should have no defined sections")
-        self.failIf(cf.has_section("Foo"),
+        self.assertFalse(cf.has_section("Foo"),
                     "new ConfigParser should have no acknowledged sections")
         self.assertRaises(ConfigParser.NoSectionError,
                           cf.options, "Foo")
@@ -183,7 +183,7 @@ class TestCaseBase(unittest.TestCase):
     def get_error(self, exc, section, option):
         try:
             self.cf.get(section, option)
-        except exc, e:
+        except exc as e:
             return e
         else:
             self.fail("expected exception type %s.%s"
@@ -209,8 +209,8 @@ class TestCaseBase(unittest.TestCase):
             "E5=FALSE AND MORE"
             )
         for x in range(1, 5):
-            self.failUnless(cf.getboolean('BOOLTEST', 't%d' % x))
-            self.failIf(cf.getboolean('BOOLTEST', 'f%d' % x))
+            self.assertTrue(cf.getboolean('BOOLTEST', 't%d' % x))
+            self.assertFalse(cf.getboolean('BOOLTEST', 'f%d' % x))
             self.assertRaises(ValueError,
                               cf.getboolean, 'BOOLTEST', 'e%d' % x)
 
@@ -229,7 +229,7 @@ class TestCaseBase(unittest.TestCase):
             "foo: another very\n"
             " long line"
             )
-        output = StringIO.StringIO()
+        output = io.StringIO()
         cf.write(output)
         self.assertEqual(
             output.getvalue(),
@@ -253,12 +253,12 @@ class TestCaseBase(unittest.TestCase):
         cf.set("sect", "option2", "splat")
         cf.set("sect", "option2", mystr("splat"))
         try:
-            unicode
+            str
         except NameError:
             pass
         else:
-            cf.set("sect", "option1", unicode("splat"))
-            cf.set("sect", "option2", unicode("splat"))
+            cf.set("sect", "option1", str("splat"))
+            cf.set("sect", "option2", str("splat"))
 
     def test_read_returns_file_list(self):
         file1 = test_support.findfile("cfgparser.1")
@@ -470,9 +470,9 @@ class SortedTestCase(RawConfigParserTestCase):
                         "o1=4\n"
                         "[a]\n"
                         "k=v\n")
-        output = StringIO.StringIO()
+        output = io.StringIO()
         self.cf.write(output)
-        self.assertEquals(output.getvalue(),
+        self.assertEqual(output.getvalue(),
                           "[a]\n"
                           "k = v\n\n"
                           "[b]\n"

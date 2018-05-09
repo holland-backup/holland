@@ -65,11 +65,11 @@ def unpack_option_value(value):
 def resolve_option(item):
     """Expand an option prefix to the full name of the option"""
     known = [
-        u'host',
-        u'password',
-        u'port',
-        u'socket',
-        u'user',
+        'host',
+        'password',
+        'port',
+        'socket',
+        'user',
     ]
     candidates = [key for key in known if key.startswith(item)]
 

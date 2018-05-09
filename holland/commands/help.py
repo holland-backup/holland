@@ -26,27 +26,27 @@ class Help(Command):
 
         commands = get_commands()
         if not command:
-            print >>sys.stderr, "No command specified"
+            print("No command specified", file=sys.stderr)
             parser.print_help()
 
             if not commands:
-                print >>sys.stderr, "No available commands"
+                print("No available commands", file=sys.stderr)
             else:
-                print "Available Commands:"
+                print("Available Commands:")
                 commands = list(set(commands.values()))
-                commands.sort(lambda x,y: cmp(x.name, y.name))
+                commands.sort(key = lambda x: x.name)
                 for cls in commands:
                     if cls.aliases:
                         cmdname = "%-13s (%s)" % (cls.name, ','.join(cls.aliases))
                     else:
                         cmdname = cls.name
-                    print "   %-19s  %s" % (cmdname, cls.description)
+                    print("   %-19s  %s" % (cmdname, cls.description))
 
             return 1
 
         if not command in commands:
-            print >>sys.stderr, "No such command: %r" % command
+            print("No such command: %r" % command, file=sys.stderr)
             return os.EX_TEMPFAIL
 
         cmdinst = commands[command]()
-        print cmdinst.help()
+        print(cmdinst.help())

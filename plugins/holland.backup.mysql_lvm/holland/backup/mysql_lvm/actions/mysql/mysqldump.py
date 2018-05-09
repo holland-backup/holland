@@ -5,7 +5,7 @@ import time
 import signal
 import logging
 from holland.lib.mysql import connect, MySQLError, PassiveMySQLClient
-from _mysqld import generate_server_config, MySQLServer, locate_mysqld_exe
+from ._mysqld import generate_server_config, MySQLServer, locate_mysqld_exe
 
 LOG = logging.getLogger(__name__)
 

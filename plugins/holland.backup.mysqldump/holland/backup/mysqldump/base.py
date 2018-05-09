@@ -29,7 +29,7 @@ def start(mysqldump,
           open_stream=open,
           compression_ext=''):
     """Run a mysqldump backup"""
-
+    LOG.info("got here")
     if not schema and file_per_database:
         raise BackupError("file_per_database specified without a valid schema")
 
@@ -62,7 +62,7 @@ def start(mysqldump,
                 LOG.warning("Encoding file-name for database %s to %s", db.name, db_name)
             try:
                 stream = open_stream('%s.sql' % db_name, 'w')
-            except (IOError, OSError), exc:
+            except (IOError, OSError) as exc:
                 raise BackupError("Failed to open output stream %s: %s" %
                                   ('%s.sql' + compression_ext, str(exc)))
             try:
@@ -70,7 +70,7 @@ def start(mysqldump,
             finally:
                 try:
                     stream.close()
-                except (IOError, OSError), exc:
+                except (IOError, OSError) as exc:
                     if exc.errno != errno.EPIPE:
                         LOG.error("%s", str(exc))
                         raise BackupError(str(exc))
@@ -78,7 +78,7 @@ def start(mysqldump,
         more_options = [mysqldump_lock_option(lock_method, target_databases)]
         try:
             stream = open_stream('all_databases.sql', 'w')
-        except (IOError, OSError), exc:
+        except (IOError, OSError) as exc:
             raise BackupError("Failed to open output stream %s: %s" %
                               'all_databases.sql' + compression_ext, exc)
         try:
@@ -88,7 +88,7 @@ def start(mysqldump,
         finally:
             try:
                 stream.close()
-            except (IOError, OSError), exc:
+            except (IOError, OSError) as exc:
                 if exc.errno != errno.EPIPE:
                     LOG.error("%s", str(exc))
                     raise BackupError(str(exc))

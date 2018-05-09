@@ -50,9 +50,9 @@ class TestPhysicalVolume(object):
         # not just a Volume object
         result = PhysicalVolume.search('/dev/loop0')
         ok_(not isinstance(result, Volume))
-        pv = result.next()
+        pv = next(result)
         ok_(isinstance(pv, PhysicalVolume), "not a physical volume? %r" % pv)
-        assert_raises(StopIteration, result.next)
+        assert_raises(StopIteration, result.__next__)
 
     def test_repr(self):
         pv = PhysicalVolume.lookup('/dev/loop0')

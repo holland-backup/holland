@@ -109,7 +109,7 @@ def run_pgdump(dbname, output_stream, connection_params, format='custom', env=No
                                          stderr=stderr,
                                          env=env,
                                          close_fds=True)
-        except OSError, exc:
+        except OSError as exc:
             raise PgError("Failed to execute '%s': [%d] %s" %
                           (args[0], exc.errno, exc.strerror))
 
@@ -156,7 +156,7 @@ def backup_globals(backup_directory, config, connection_params, env=None):
                                          stderr=stderr,
                                          env=env,
                                          close_fds=True)
-        except OSError, exc:
+        except OSError as exc:
             raise PgError("Failed to execute '%s': [%d] %s" %
                           (args[0], exc.errno, exc.strerror))
 
@@ -176,9 +176,9 @@ def generate_manifest(backups, path):
     manifest = open(os.path.join(path, 'MANIFEST'), 'w')
     for dbname, dumpfile in backups:
         try:
-            print >>manifest, "%s\t%s" % (dbname.encode('utf8'),
-                                          os.path.basename(dumpfile))
-        except UnicodeError, exc:
+            print("%s\t%s" % (dbname.encode('utf8'),
+                                          os.path.basename(dumpfile)), file=manifest)
+        except UnicodeError as exc:
             LOG.error("Failed to encode dbname %s: %s", dbname, exc)
     manifest.close()
 
@@ -219,7 +219,7 @@ def pg_extra_options(config):
 def generate_pgpassfile(backup_directory, password):
     fileobj = open(os.path.join(backup_directory, 'pgpass'), 'w')
     # pgpass should always be 0600
-    os.chmod(fileobj.name, 0600)
+    os.chmod(fileobj.name, 0o600)
     password = password.replace('\\', '\\\\')
     password = password.replace(':', '\\:')
     fileobj.write('*:*:*:*:%s' % password)

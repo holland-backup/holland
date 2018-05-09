@@ -81,7 +81,7 @@ class PgDump(object):
         for db in self.databases:
             try:
                 totalestimate += get_db_size(db, self.connection)
-            except dbapi.DatabaseError, exc:
+            except dbapi.DatabaseError as exc:
                 if exc.pgcode != '42883': # 'missing function'
                     raise BackupError("Failed to estimate database size for "
                                       "%s: %s" % (db, exc))
@@ -95,7 +95,7 @@ class PgDump(object):
             size = legacy_get_db_size(db, connection)
             connection.close()
             return size
-        except dbapi.DatabaseError, exc:
+        except dbapi.DatabaseError as exc:
             raise BackupError("Failed to estimate database size for %s: %s" %
                               (db, exc))
 
@@ -123,12 +123,12 @@ class PgDump(object):
         # put everything in data/
         try:
             os.mkdir(backup_dir)
-        except OSError, exc:
+        except OSError as exc:
             raise BackupError("Failed to create backup directory %s" % backup_dir)
 
         try:
             backup_pgsql(backup_dir, self.config, self.databases)
-        except (OSError, PgError), exc:
+        except (OSError, PgError) as exc:
             LOG.debug("Failed to backup Postgres. %s",
                           str(exc), exc_info=True)
             raise BackupError(str(exc))

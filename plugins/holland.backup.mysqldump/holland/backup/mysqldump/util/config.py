@@ -178,7 +178,7 @@ class BasicConfig(ConfigNamespace):
 
     def __str__(self, prefix=''):
         lines = []
-        keys = self._data.keys()
+        keys = list(self._data.keys())
         keys.sort()
         for name in keys:
             value = self._data[name]

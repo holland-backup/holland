@@ -1,4 +1,4 @@
-from storage import original_open as open
+from .storage import original_open as open
 
 class PopenMock(object):
     """subprocess.Popen mock object implementation

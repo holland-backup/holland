@@ -30,7 +30,7 @@ class Snapshot(object):
         self.sigmgr.trap(signal.SIGINT, signal.SIGTERM, signal.SIGHUP)
         try:
             self._apply_callbacks('initialize', self)
-        except CallbackFailuresError, exc:
+        except CallbackFailuresError as exc:
             return self.error(None, exc)
         return self.create_snapshot(volume)
 
@@ -43,12 +43,12 @@ class Snapshot(object):
             self._apply_callbacks('pre-snapshot', self, None)
             snapshot = logical_volume.snapshot(self.name, self.size)
             LOG.info("Created snapshot volume %s", snapshot.device_name())
-        except (LVMCommandError, CallbackFailuresError), exc:
+        except (LVMCommandError, CallbackFailuresError) as exc:
             return self.error(None, exc)
 
         try:
             self._apply_callbacks('post-snapshot', self, snapshot)
-        except CallbackFailuresError, exc:
+        except CallbackFailuresError as exc:
             return self.error(snapshot, exc)
 
         return self.mount_snapshot(snapshot)
@@ -68,7 +68,7 @@ class Snapshot(object):
             LOG.info("Mounted %s on %s",
                      snapshot.device_name(), self.mountpoint)
             self._apply_callbacks('post-mount', self, snapshot)
-        except (CallbackFailuresError, LVMCommandError), exc:
+        except (CallbackFailuresError, LVMCommandError) as exc:
             return self.error(snapshot, exc)
 
         return self.unmount_snapshot(snapshot)
@@ -79,12 +79,12 @@ class Snapshot(object):
             self._apply_callbacks('pre-unmount', snapshot)
             snapshot.unmount()
             LOG.info("Unmounted %s", snapshot.device_name())
-        except (CallbackFailuresError, LVMCommandError), exc:
+        except (CallbackFailuresError, LVMCommandError) as exc:
             return self.error(snapshot, exc)
 
         try:
             self._apply_callbacks('post-unmount', snapshot)
-        except CallbackFailuresError, exc:
+        except CallbackFailuresError as exc:
             return self.error(snapshot, exc)
 
         return self.remove_snapshot(snapshot)
@@ -95,12 +95,12 @@ class Snapshot(object):
             self._apply_callbacks('pre-remove', snapshot)
             snapshot.remove()
             LOG.info("Removed snapshot %s", snapshot.device_name())
-        except (CallbackFailuresError, LVMCommandError), exc:
+        except (CallbackFailuresError, LVMCommandError) as exc:
             return self.error(snapshot, exc)
 
         try:
             self._apply_callbacks('post-remove', snapshot)
-        except (CallbackFailuresError), exc:
+        except (CallbackFailuresError) as exc:
             return self.error(snapshot, exc)
 
         return self.finish()
@@ -136,7 +136,7 @@ class Snapshot(object):
                     snapshot.remove()
                     LOG.info("Removed snapshot %s on cleanup",
                              snapshot.device_name())
-            except LVMCommandError, exc:
+            except LVMCommandError as exc:
                 LOG.error("Failed to remove snapshot %s", exc)
 
         return self.finish()

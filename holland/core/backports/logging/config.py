@@ -30,12 +30,12 @@ To use, simply 'import logging' and log away!
 import sys, logging, logging.handlers, string, socket, struct, os
 
 try:
-    import thread
+    import _thread
     import threading
 except ImportError:
     thread = None
 
-from SocketServer import ThreadingTCPServer, StreamRequestHandler
+from socketserver import ThreadingTCPServer, StreamRequestHandler
 
 
 DEFAULT_LOGGING_CONFIG_PORT = 9030
@@ -65,9 +65,9 @@ def fileConfig(fname, defaults=None):
     rather than a filename, in which case the file-like object will be read
     using readfp.
     """
-    import ConfigParser
+    import configparser
 
-    cp = ConfigParser.ConfigParser(defaults)
+    cp = configparser.ConfigParser(defaults)
     if hasattr(cp, 'readfp') and hasattr(fname, 'readline'):
         cp.readfp(fname)
     else:
@@ -115,7 +115,7 @@ def fileConfig(fname, defaults=None):
                         klass = eval(klass, vars(logging))
                         args = cp.get(sectname, "args")
                         args = eval(args, vars(logging))
-                        h = apply(klass, args)
+                        h = klass(*args)
                         if "level" in opts:
                             level = cp.get(sectname, "level")
                             h.setLevel(logging._levelNames[level])
@@ -164,7 +164,7 @@ def fileConfig(fname, defaults=None):
             #what's left in existing is the set of loggers
             #which were in the previous configuration but
             #which are not in the new configuration.
-            existing = root.manager.loggerDict.keys()
+            existing = list(root.manager.loggerDict.keys())
             #now set up the new ones...
             for log in llist:
                 sectname = "logger_%s" % log
@@ -213,7 +213,7 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
     stopListening().
     """
     if not thread:
-        raise NotImplementedError, "listen() needs threading to work"
+        raise NotImplementedError("listen() needs threading to work")
 
     class ConfigStreamHandler(StreamRequestHandler):
         """
@@ -250,8 +250,8 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT):
                     f.close()
                     fileConfig(file)
                     os.remove(file)
-            except socket.error, e:
-                if type(e.args) != types.TupleType:
+            except socket.error as e:
+                if type(e.args) != tuple:
                     raise
                 else:
                     errcode = e.args[0]

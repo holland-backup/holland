@@ -286,7 +286,7 @@ def dottedQuadToNum(ip):
     except socket.error:
         # bug in inet_aton, corrected in Python 2.3
         if ip.strip() == '255.255.255.255':
-            return 0xFFFFFFFFL
+            return 0xFFFFFFFF
         else:
             raise ValueError('Not a good dotted-quad IP: %s' % ip)
     return
@@ -318,11 +318,11 @@ def numToDottedQuad(num):
     import socket, struct
     
     # no need to intercept here, 4294967295L is fine
-    if num > 4294967295L or num < 0:
+    if num > 4294967295 or num < 0:
         raise ValueError('Not a good numeric IP: %s' % num)
     try:
         return socket.inet_ntoa(
-            struct.pack('!L', long(num)))
+            struct.pack('!L', int(num)))
     except (socket.error, struct.error, OverflowError):
         raise ValueError('Not a good numeric IP: %s' % num)
 
@@ -617,7 +617,7 @@ class Validator(object):
             fun_kwargs = dict(fun_kwargs)
         else:
             fun_name, fun_args, fun_kwargs, default = self._parse_check(check)
-            fun_kwargs = dict([(str(key), value) for (key, value) in fun_kwargs.items()])
+            fun_kwargs = dict([(str(key), value) for (key, value) in list(fun_kwargs.items())])
             self._cache[check] = fun_name, list(fun_args), dict(fun_kwargs), default
         return fun_name, fun_args, fun_kwargs, default
         
@@ -748,10 +748,10 @@ def _is_num_param(names, values, to_float=False):
     for (name, val) in zip(names, values):
         if val is None:
             out_params.append(val)
-        elif isinstance(val, (int, long, float, basestring)):
+        elif isinstance(val, (int, float, str)):
             try:
                 out_params.append(fun(val))
-            except ValueError, e:
+            except ValueError as e:
                 raise VdtParamError(name, val)
         else:
             raise VdtParamError(name, val)
@@ -805,9 +805,9 @@ def is_integer(value, min=None, max=None):
     0
     """
     (min_val, max_val) = _is_num_param(('min', 'max'), (min, max))
-    if not isinstance(value, (int, long, basestring)):
+    if not isinstance(value, (int, str)):
         raise VdtTypeError(value)
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         # if it's a string - does it represent an integer ?
         try:
             value = int(value)
@@ -857,7 +857,7 @@ def is_float(value, min=None, max=None):
     """
     (min_val, max_val) = _is_num_param(
         ('min', 'max'), (min, max), to_float=True)
-    if not isinstance(value, (int, long, float, basestring)):
+    if not isinstance(value, (int, float, str)):
         raise VdtTypeError(value)
     if not isinstance(value, float):
         # if it's a string - does it represent a float ?
@@ -922,7 +922,7 @@ def is_boolean(value):
     VdtTypeError: the value "up" is of the wrong type.
     
     """
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         try:
             return bool_dict[value.lower()]
         except KeyError:
@@ -965,7 +965,7 @@ def is_ip_addr(value):
     Traceback (most recent call last):
     VdtTypeError: the value "0" is of the wrong type.
     """
-    if not isinstance(value, basestring):
+    if not isinstance(value, str):
         raise VdtTypeError(value)
     value = value.strip()
     try:
@@ -1007,7 +1007,7 @@ def is_list(value, min=None, max=None):
     VdtTypeError: the value "12" is of the wrong type.
     """
     (min_len, max_len) = _is_num_param(('min', 'max'), (min, max))
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         raise VdtTypeError(value)
     try:
         num_members = len(value)
@@ -1076,7 +1076,7 @@ def is_string(value, min=None, max=None):
     Traceback (most recent call last):
     VdtValueTooLongError: the value "1234" is too long.
     """
-    if not isinstance(value, basestring):
+    if not isinstance(value, str):
         raise VdtTypeError(value)
     (min_len, max_len) = _is_num_param(('min', 'max'), (min, max))
     try:
@@ -1182,7 +1182,7 @@ def is_string_list(value, min=None, max=None):
     Traceback (most recent call last):
     VdtTypeError: the value "hello" is of the wrong type.
     """
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         raise VdtTypeError(value)
     return [is_string(mem) for mem in is_list(value, min, max)]
 
@@ -1304,7 +1304,7 @@ def is_mixed_list(value, *args):
         raise VdtValueTooLongError(value)
     try:
         return [fun_dict[arg](val) for arg, val in zip(args, value)]
-    except KeyError, e:
+    except KeyError as e:
         raise VdtParamError('mixed_list', e)
 
 
@@ -1321,7 +1321,7 @@ def is_option(value, *options):
     Traceback (most recent call last):
     VdtTypeError: the value "0" is of the wrong type.
     """
-    if not isinstance(value, basestring):
+    if not isinstance(value, str):
         raise VdtTypeError(value)
     if not value in options:
         raise VdtValueError(value)

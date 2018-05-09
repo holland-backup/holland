@@ -1,7 +1,7 @@
 import os
 from holland.backup.lvm.pylvm.objects import *
 from nose.tools import *
-from lvm_helper import *
+from .lvm_helper import *
 
 def test_find_lv():
     lv, = LogicalVolume.find('%s/%s' % (VGNAME, LVNAME))

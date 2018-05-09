@@ -39,7 +39,7 @@ holland (%(version)s-local-%(today)s) unstable; urgency=low
                      }
     src = join(config['debian'], 'changelog')
     changelog = open(src + '.new', 'w')
-    print >>changelog, entry,
+    print(entry, end=' ', file=changelog)
     shutil.copyfileobj(open(src), changelog)
     changelog.close()
     os.rename(src + '.new', src)
@@ -111,7 +111,7 @@ def main():
         try:
             prep_tree()
             return build_deb()
-        except AssertionError, exc:
+        except AssertionError as exc:
             logging.fatal("%s", exc)
             return 1
     finally:

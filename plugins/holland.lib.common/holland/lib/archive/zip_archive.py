@@ -81,4 +81,4 @@ if __name__ == '__main__':
     xv.add_file("user.MYD", "mysql/user.MYD")
     xv.add_file("user.MYI", "mysql/user.MYI")
     xv.close()
-    print (time.time() - now), "seconds"
+    print((time.time() - now), "seconds")

@@ -26,11 +26,11 @@ config['compression'] = {
 
 try:
     config['sqlite']['binary'] = which('sqlite')    
-except WhichError, e:
+except WhichError as e:
     try:
         config['sqlite']['binary'] = which('sqlite3')
-    except WhichError, e:
-        raise Exception, "Unable to find sqlite binary"
+    except WhichError as e:
+        raise Exception("Unable to find sqlite binary")
     
     
 def setup_func():
@@ -62,5 +62,5 @@ def test_sqlite_info():
     name = 'sqlite/' + time.strftime('%Y%m%d_%H%M%S')
     dry_run = False
     plugin = SQLitePlugin(name, config, config['tmpdir'], dry_run)
-    ok_(isinstance(plugin.info(), basestring))
+    ok_(isinstance(plugin.info(), str))
     

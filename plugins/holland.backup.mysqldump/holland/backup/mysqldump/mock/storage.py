@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 
 __all__ = (
     'file', 'open',
@@ -8,8 +8,7 @@ __all__ = (
 
 from warnings import warn
 
-original_file = __builtin__.file
-original_open = __builtin__.open
+original_open = builtins.open
 
 
 # bad for introspection?
@@ -79,10 +78,10 @@ The preferred way to open a file is with the builtin open() function."""
     
     def __init__(self, name, mode='r'):
         "x.__init__(...) initializes x; see x.__class__.__doc__ for signature"
-        if not isinstance(name, basestring):
+        if not isinstance(name, str):
             raise TypeError('File name argument must be str got: %s' %
                              type(name))
-        if not isinstance(mode, basestring):
+        if not isinstance(mode, str):
             raise TypeError('File mode argument must be str got: %s' % 
                             type(mode))
             
@@ -139,7 +138,7 @@ The preferred way to open a file is with the builtin open() function."""
         if isinstance(arg, float):
             arg = int(arg)
             warn(DeprecationWarning('Integer argument expected got float'))
-        elif not isinstance(arg, (int, long)):
+        elif not isinstance(arg, int):
             raise TypeError('Integer argument expected. Got %s' % type(arg))
         return arg
 
@@ -284,7 +283,7 @@ This is needed for lower-level file interfaces, such os.read()."""
         return self
 
     
-    def next(self):
+    def __next__(self):
         "x.next() -> the next value, or raise StopIteration"
         if self.mode in WRITE_MODES:
             raise IOError('Bad file descriptor')
@@ -427,13 +426,13 @@ def mkdir(path, mode=None):
 
 def replace_builtins():
     "replace file and open in the builtin module"
-    __builtin__.file =  file
-    __builtin__.open = open
+    builtins.file =  file
+    builtins.open = open
 
 def restore_builtins():
     "restore the original file and open to the builtin module"
-    __builtin__.file =  original_file
-    __builtin__.open = original_open
+    builtins.file =  original_file
+    builtins.open = original_open
 
     
 _store = {}
