@@ -161,6 +161,9 @@ class LogicalVolume(Volume):
             raise LookupError("No LogicalVolume could be found "
                               "for pathspec %r" %
                               pathspec)
+        except Exception as ex:
+            raise OSError("unable to look up path %s" % ex)
+
     lookup = classmethod(lookup)
 
     def lookup_from_fspath(cls, path):

@@ -28,7 +28,7 @@ def getmount(path):
         if os.path.ismount(path):
             return path
         path = os.path.abspath(os.path.join(path, os.pardir))
-    return str(path)
+    return path
 
 def getdevice(mountpoint):
     """Return the device name for the given mountpoint

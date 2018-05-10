@@ -36,7 +36,7 @@ def pvs(*physical_volumes):
     stdout, stderr = process.communicate()
 
     if process.returncode != 0:
-        raise LVMCommandError('pvs', process.returncode, stderr)
+        raise LVMCommandError('pvs', process.returncode, stderr.decode('utf-8'))
 
     return parse_lvm_format(PVS_ATTR, stdout)
 
@@ -64,7 +64,7 @@ def vgs(*volume_groups):
     stdout, stderr = process.communicate()
 
     if process.returncode != 0:
-        raise LVMCommandError('vgs', process.returncode, stderr)
+        raise LVMCommandError('vgs', process.returncode, stderr.decode('utf-8'))
 
     return parse_lvm_format(VGS_ATTR, stdout)
 
@@ -93,18 +93,16 @@ def lvs(*volume_groups):
                     preexec_fn=os.setsid,
                     close_fds=True)
     stdout, stderr = process.communicate()
-
     if process.returncode != 0:
-        raise LVMCommandError('lvs', process.returncode, stderr)
+        raise LVMCommandError('lvs', process.returncode, stderr.decode('utf-8'))
 
-    return parse_lvm_format(LVS_ATTR, stdout)
+    return parse_lvm_format(LVS_ATTR, stdout.decode('utf-8'))
 
 
 def parse_lvm_format(keys, values):
     """Convert LVM tool output into a dictionary"""
-    stream = str(values)
-    for row in csv.reader(stream, delimiter=',', skipinitialspace=True):
-        yield dict(list(zip(keys, row)))
+    for row in csv.reader(values.splitlines(), delimiter=',', skipinitialspace=True):
+        yield dict(zip(keys, row))
 
 def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
     """Create a snapshot of an existing logical volume
@@ -135,7 +133,7 @@ def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
 
     stdout, stderr = process.communicate()
 
-    for line in stdout.splitlines():
+    for line in stdout.decode('utf-8').splitlines():
         if not line:
             continue
         LOG.debug("lvcreate: %s", line)
@@ -143,7 +141,7 @@ def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
     if process.returncode != 0:
         raise LVMCommandError(list2cmdline(lvcreate_args),
                               process.returncode,
-                              str(stderr).strip())
+                              stderr.decode('utf-8').strip())
 
 def lvremove(lv_path):
     """Remove a logical volume
@@ -165,7 +163,7 @@ def lvremove(lv_path):
 
     stdout, stderr = process.communicate()
 
-    for line in str(stdout).splitlines():
+    for line in stdout.decode('utf-8').splitlines():
         if not line:
             continue
         LOG.debug("%s : %s", list2cmdline(lvremove_args), line)
@@ -173,7 +171,7 @@ def lvremove(lv_path):
     if process.returncode != 0:
         raise LVMCommandError(list2cmdline(lvremove_args),
                               process.returncode,
-                              str(stderr).strip())
+                              stderr.decode('utf-8').strip())
 
 
 ## Filesystem utility functions
@@ -198,9 +196,9 @@ def blkid(*devices):
 
     if process.returncode != 0:
         cmd_str = list2cmdline(blkid_args)
-        raise LVMCommandError(cmd_str, process.returncode, stderr)
+        raise LVMCommandError(cmd_str, process.returncode, stderr.decode('utf-8'))
 
-    return parse_blkid_format(stdout)
+    return parse_blkid_format(stdout.decode('utf-8'))
 
 def parse_blkid_format(text):
     """Parse the blkid output format
@@ -238,7 +236,7 @@ def mount(device, path, options=None, vfstype=None):
 
     if process.returncode != 0:
         cmd_str = list2cmdline(mount_args)
-        raise LVMCommandError(cmd_str, process.returncode, stderr)
+        raise LVMCommandError(cmd_str, process.returncode, stderr.decode('utf-8'))
 
     return stdout
 
@@ -257,7 +255,7 @@ def umount(*path):
 
     if process.returncode != 0:
         cmd_str = list2cmdline(['umount'] + list(path))
-        raise LVMCommandError(cmd_str, process.returncode, stderr)
+        raise LVMCommandError(cmd_str, process.returncode, stderr.decode('utf-8'))
 
     return stdout
 

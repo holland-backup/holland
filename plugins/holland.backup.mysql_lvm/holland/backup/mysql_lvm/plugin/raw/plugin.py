@@ -130,7 +130,6 @@ class MysqlLVMBackup(object):
         except Exception as ex:
             LOG.debug(ex)
 
-
         # create a snapshot manager
         snapshot = build_snapshot(self.config['mysql-lvm'], volume,
                                   suppress_tmpdir=self.dry_run)

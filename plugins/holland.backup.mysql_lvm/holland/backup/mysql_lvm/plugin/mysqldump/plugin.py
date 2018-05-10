@@ -84,7 +84,6 @@ class MysqlDumpLVMBackup(object):
         # lookup the logical volume mysql's datadir sits on
         try:
              volume = LogicalVolume.lookup_from_fspath(datadir)
-             LOG.debug("Volume Name: %s" % volume)
         except LookupError as exc:
             raise BackupError("Failed to lookup logical volume for %s: %s" %
                               (datadir, str(exc)))

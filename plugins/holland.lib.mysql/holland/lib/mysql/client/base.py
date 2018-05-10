@@ -522,7 +522,10 @@ def connect(config, client_class=AutoMySQLClient):
             # normalize the value. port => int
             value = value_conv.get(key, str)(config[key])
             # convert my.cnf parameters to what MySQLdb expects
-            args[cnf_to_mysqldb[key]] = value.decode('utf-8')
+            if isinstance(value, bytes):
+                args[cnf_to_mysqldb[key]] = value.decode('utf-8')
+            else:
+                 args[cnf_to_mysqldb[key]] = str(value)
         except KeyError:
             LOG.warn("Skipping unknown parameter %s", key)
     # also, always use utf8
