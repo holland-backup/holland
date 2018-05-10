@@ -173,13 +173,15 @@ class MySQLDumpPlugin(object):
         try:
             if self.config['mysqldump']['stop-slave']:
                 self.client = connect(self.mysql_config['client'])
-                if self.client.show_status('Slave_running', session=None) != 'ON':
+                if self.client.show_slave_status()['slave_sql_running'] != 'Yes':
                     raise BackupError("stop-slave enabled, but replication is "
                                   "either not configured or the slave is not "
                                   "running.")
                 self.config.setdefault('mysql:replication', {})
                 _stop_slave(self.client, self.config['mysql:replication'])
             self._backup()
+        except Exception as ex:
+                LOG.debug(ex)
         finally:
             if self.config['mysqldump']['stop-slave'] and \
                 'mysql:replication' in self.config:
