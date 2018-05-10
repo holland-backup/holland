@@ -127,6 +127,8 @@ class MysqlLVMBackup(object):
         except LookupError as exc:
             raise BackupError("Failed to lookup logical volume for %s: %s" %
                               (datadir, str(exc)))
+        except Exception as ex:
+            LOG.debug(ex)
 
 
         # create a snapshot manager
@@ -155,6 +157,8 @@ class MysqlLVMBackup(object):
         except LVMCommandError as exc:
             # Something failed in the snapshot process
             raise BackupError(str(exc))
+        except Exception as ex:
+            LOG.debug(ex)
 
     def _dry_run(self, volume, snapshot, datadir):
         """Implement dry-run for LVM snapshots.

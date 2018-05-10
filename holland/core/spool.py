@@ -104,7 +104,7 @@ class Spool(object):
         backupsets = [Backupset(dir, os.path.join(self.path, dir)) \
                       for dir in dirs]
 
-        backupsets.sort()
+        backupsets.sort(key = lambda x: x.name)
 
         if reverse:
             backupsets.reverse()

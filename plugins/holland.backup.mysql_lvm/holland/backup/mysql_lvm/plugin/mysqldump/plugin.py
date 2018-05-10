@@ -84,25 +84,32 @@ class MysqlDumpLVMBackup(object):
         # lookup the logical volume mysql's datadir sits on
         try:
              volume = LogicalVolume.lookup_from_fspath(datadir)
+             LOG.debug("Volume Name: %s" % volume)
         except LookupError as exc:
             raise BackupError("Failed to lookup logical volume for %s: %s" %
                               (datadir, str(exc)))
+        except Exception as ex:
+            LOG.debug(ex)
 
+        try:
+            # create a snapshot manager
+            snapshot = build_snapshot(self.config['mysql-lvm'], volume,
+                                      suppress_tmpdir=self.dry_run)
+            # calculate where the datadirectory on the snapshot will be located
+            rpath = relpath(datadir, getmount(datadir))
+            snap_datadir = os.path.abspath(os.path.join(snapshot.mountpoint or
+            '/tmp', rpath))
 
-        # create a snapshot manager
-        snapshot = build_snapshot(self.config['mysql-lvm'], volume,
-                                  suppress_tmpdir=self.dry_run)
-        # calculate where the datadirectory on the snapshot will be located
-        rpath = relpath(datadir, getmount(datadir))
-        snap_datadir = os.path.abspath(os.path.join(snapshot.mountpoint or
-        '/tmp', rpath))
-        # setup actions to perform at each step of the snapshot process
-        setup_actions(snapshot=snapshot,
-                      config=self.config,
-                      client=self.client,
-                      datadir=snap_datadir,
-                      spooldir=self.target_directory,
-                      plugin=self.mysqldump_plugin)
+            LOG.debug("Snap Datadir: %s" % snap_datadir)
+            # setup actions to perform at each step of the snapshot process
+            setup_actions(snapshot=snapshot,
+                          config=self.config,
+                          client=self.client,
+                          datadir=snap_datadir,
+                        spooldir=self.target_directory,
+                        plugin=self.mysqldump_plugin)
+        except Exception as ex:
+            LOG.debug(ex)
 
         if self.config['mysqldump']['bin-log-position']:
             LOG.warn("bin-log-position is not supported with mysqldump-lvm.")

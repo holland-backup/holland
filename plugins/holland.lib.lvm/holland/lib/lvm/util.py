@@ -28,7 +28,7 @@ def getmount(path):
         if os.path.ismount(path):
             return path
         path = os.path.abspath(os.path.join(path, os.pardir))
-    return path
+    return str(path)
 
 def getdevice(mountpoint):
     """Return the device name for the given mountpoint
@@ -58,7 +58,7 @@ def getdevice(mountpoint):
     for path in proc_mounts_info:
         device, mount = path.split()[0:2]
         # handle path with spaces - encoded in /etc/mtab
-        mount = mount.decode('string_escape')
+        mount = str(bytes(mount, 'utf-8').decode('unicode_escape'))
         mount = os.path.normpath(mount)
         if mount == mountpoint:
             return device

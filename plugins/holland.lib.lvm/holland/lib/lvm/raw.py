@@ -102,7 +102,7 @@ def lvs(*volume_groups):
 
 def parse_lvm_format(keys, values):
     """Convert LVM tool output into a dictionary"""
-    stream = StringIO(values)
+    stream = str(values)
     for row in csv.reader(stream, delimiter=',', skipinitialspace=True):
         yield dict(list(zip(keys, row)))
 
@@ -117,9 +117,9 @@ def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
     lvcreate_args = [
         'lvcreate',
         '--snapshot',
-        '--name', snapshot_name,
+        '--name', str(snapshot_name),
         '--extents', "%d" % snapshot_extents,
-        orig_lv_path,
+        str(orig_lv_path),
     ]
 
     if chunksize:
