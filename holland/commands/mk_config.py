@@ -222,7 +222,8 @@ class MkConfig(Command):
         purge-policy            = after-backup
         estimated-size-factor   = 1.0
         """.lstrip().splitlines()
-        cfg = ConfigObj(base_config, configspec=cfgspec, list_values=True,stringify=True)
+        cfg = ConfigObj(base_config, configspec=cfgspec, list_values=True,
+                stringify=True)
         cfg['holland:backup']['plugin'] = plugin_type
         self._cleanup_config(cfg, skip_comments=opts.minimal)
 
@@ -264,14 +265,22 @@ class MkConfig(Command):
             tmpfileobj.close()
 
         if not opts.name and not opts.file:
-            cfg.write(sys.stdout)
+            buf = getattr(sys.stdout, 'buffer', sys.stdout)
+            cfg.write(buf)
+            buf.flush()
 
         if opts.file:
             print("Saving config to %r" % opts.file, file=sys.stderr)
-            cfg.write(open(opts.file, 'w'))
+            fh = open(opts.file, 'w')
+            buf = getattr(fh, 'buffer',fh)
+            cfg.write(buf)
+            buf.flush()
         elif opts.name:
             base_dir = os.path.dirname(hollandcfg.filename)
             path = os.path.join(base_dir, 'backupsets', opts.name + '.conf')
             print("Saving config to %r" % path, file=sys.stderr)
-            cfg.write(open(path, 'w'))
+            fh = open(path, 'w')
+            buf = getattr(fh, 'buffer', fh)
+            cfg.write(buf)
+            buf.flush()
         return 0
