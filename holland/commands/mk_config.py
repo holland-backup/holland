@@ -1,6 +1,7 @@
 """
 Command support for generating backupset configs
 """
+from __future__ import print_function
 
 import os
 import sys

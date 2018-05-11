@@ -2,12 +2,14 @@
 
 http://dev.mysql.com/doc/refman/5.1/en/option-files.html
 """
+from __future__ import print_function
 import os, sys
 import re
 import errno
 import codecs
 import logging
 import subprocess
+import six
 from holland.lib.mysql.option.parser import OptionFile
 
 LOG = logging.getLogger(__name__)
@@ -48,8 +50,10 @@ def quote(value):
     return '"' + value.replace('"', '\\"') + '"'
 
 def write_options(config, filename):
-    if isinstance(filename, str):
+    if isinstance(filename, six.string_types):
         filename = codecs.open(filename, 'w', 'utf8')
+    else:
+	raise TypeError("Filename isn't a string")	
     for section in config:
         print("[%s]" % section, file=filename)
         for key in config[section]:

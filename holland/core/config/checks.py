@@ -5,7 +5,8 @@ a validate.py Validator instance
 
 import logging
 import shlex
-#from types import StringTypes
+from builtins import str
+from io import StringIO
 from . import validate as validate
 from .validate import Validator
 

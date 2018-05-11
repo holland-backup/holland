@@ -4,6 +4,7 @@ Core plugin support
 
 import logging
 import os
+import sys
 from pkg_resources import working_set, Environment, iter_entry_points, \
                             get_distribution, find_distributions, \
                             DistributionNotFound, VersionConflict
@@ -85,21 +86,35 @@ def iter_plugins(group, name=None):
 
 def dist_metainfo_dict(dist):
     """Convert an Egg's PKG-INFO into a dict"""
-    from email.message import EmailMessage
-    distmetadata = dist.get_metadata('PKG-INFO')
-    msg = EmailMessage(distmetadata)
-    return dict(list(msg.items()))
+    if sys.version_info > (3, 0):
+    	from email.message import EmailMessage
+        distmetadata = dist.get_metadata('PKG-INFO')
+        msg = EmailMessage(distmetadata)
+        return dict(list(msg.items()))
+    else:
+        from rfc822 import Message
+        from cStringIO import StringIO
+        distmetadata = dist.get_metadata('PKG-INFO')
+        msg = Message(StringIO(distmetadata))
+        return dict(msg.items())
 
 def iter_plugininfo():
     """
     Iterate over the plugins loaded so far
     """
-    from email.message import EmailMessage
+    if sys.version_info > (3, 0):
+        from email.message import EmailMessage
+    else:
+        from rfc822 import Message
+        from cStringIO import StringIO
     global plugin_directories
     for plugin_dir in plugin_directories:
         for dist in find_distributions(plugin_dir):
             distmetadata = dist.get_metadata('PKG-INFO')
-            msg = EmailMessage(distmetadata)
+            if sys.version_info > (3, 0):
+                msg = EmailMessage(distmetadata)
+            else:
+                msg = Message(StringIO(distmetadata))
             filtered_keys = ['metadata-version', 'home-page', 'platform']
             distinfo = [x for x in list(msg.items()) if x[0] not in filtered_keys]
             yield dist, dict(distinfo)

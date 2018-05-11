@@ -1,10 +1,13 @@
 
 """Utility functions to help out the mysql-lvm plugin"""
+from __future__ import print_function
+from builtins import range
 import os
 import errno
 import shutil
 import tempfile
 import logging
+import copy
 from holland.core.exceptions import BackupError
 from holland.core.util.fmt import format_bytes
 from holland.lib.mysql import PassiveMySQLClient, MySQLError, \
@@ -19,11 +22,10 @@ def connect_simple(config):
     """
     try:
         mysql_config = build_mysql_config(config)
-        sanitized = {k:v for k,v in list(mysql_config.items())}
-        if 'password' in list(mysql_config.keys()):
-            sanitized['password'] = "[REDACTED]"
-        LOG.debug("mysql_config => %r", sanitized)
         connection = connect(mysql_config['client'], PassiveMySQLClient)
+	sanitized = copy.deepcopy(mysql_config)
+        sanitized['client']['password'] = "[REDACTED]"
+        LOG.debug("mysql_config => %s", sanitized)
         connection.connect()
         return connection
     except MySQLError as exc:

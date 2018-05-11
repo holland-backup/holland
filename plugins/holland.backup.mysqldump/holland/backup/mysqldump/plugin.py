@@ -1,5 +1,6 @@
 """Command Line Interface"""
 
+from __future__ import print_function
 import os
 import re
 import codecs
@@ -196,6 +197,7 @@ class MySQLDumpPlugin(object):
         # setup defaults_file with ignore-table exclusions
         defaults_file = os.path.join(self.target_directory, 'my.cnf')
         write_options(self.mysql_config, defaults_file)
+	LOG.debug('Got Here')
         if config['exclude-invalid-views']:
             LOG.info("* Finding and excluding invalid views...")
             definitions_path = os.path.join(self.target_directory,

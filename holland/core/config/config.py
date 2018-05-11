@@ -4,7 +4,7 @@ Configuration API support
 
 import os
 import logging
-from configobj import ConfigObj, Section, flatten_errors, get_extra_values
+from .configobj import ConfigObj, Section, flatten_errors, get_extra_values
 from .checks import validator
 
 LOGGER = logging.getLogger(__name__)

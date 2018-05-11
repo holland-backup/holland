@@ -15,6 +15,7 @@ For support, use the optik-users@lists.sourceforge.net mailing list
 
 # Python developers: please do not make changes to this file, since
 # it is automatically generated from the Optik source code.
+from __future__ import print_function
 
 __version__ = "1.5.3"
 
