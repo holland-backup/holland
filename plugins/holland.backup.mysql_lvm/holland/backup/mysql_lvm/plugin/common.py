@@ -1,7 +1,6 @@
 
 """Utility functions to help out the mysql-lvm plugin"""
 from __future__ import print_function
-from builtins import range
 import os
 import errno
 import shutil
@@ -23,7 +22,7 @@ def connect_simple(config):
     try:
         mysql_config = build_mysql_config(config)
         connection = connect(mysql_config['client'], PassiveMySQLClient)
-	sanitized = copy.deepcopy(mysql_config)
+        sanitized = copy.deepcopy(mysql_config)
         sanitized['client']['password'] = "[REDACTED]"
         LOG.debug("mysql_config => %s", sanitized)
         connection.connect()

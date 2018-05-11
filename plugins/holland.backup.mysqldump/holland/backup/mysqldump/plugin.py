@@ -161,7 +161,6 @@ class MySQLDumpPlugin(object):
 
     def backup(self):
         """Run a MySQL backup"""
-
         if self.schema.timestamp is None:
             self._fast_refresh_schema()
 
@@ -174,10 +173,13 @@ class MySQLDumpPlugin(object):
         try:
             if self.config['mysqldump']['stop-slave']:
                 self.client = connect(self.mysql_config['client'])
-                if self.client.show_slave_status()['slave_sql_running'] != 'Yes':
-                    raise BackupError("stop-slave enabled, but replication is "
-                                  "either not configured or the slave is not "
-                                  "running.")
+                slave_status = self.client.show_slave_status()
+                if slave_status is None:
+                     raise BackupError("stop-slave enabled, but 'show slave "
+                                      "status' failed")
+                if slave_status['slave_sql_running'] != 'Yes':
+                     raise BackupError("stop-slave enabled, but replication is "
+                                       "not running")
                 self.config.setdefault('mysql:replication', {})
                 _stop_slave(self.client, self.config['mysql:replication'])
             self._backup()
@@ -193,11 +195,9 @@ class MySQLDumpPlugin(object):
     def _backup(self):
         """Real backup method.  May raise BackupError exceptions"""
         config = self.config['mysqldump']
-
         # setup defaults_file with ignore-table exclusions
         defaults_file = os.path.join(self.target_directory, 'my.cnf')
         write_options(self.mysql_config, defaults_file)
-	LOG.debug('Got Here')
         if config['exclude-invalid-views']:
             LOG.info("* Finding and excluding invalid views...")
             definitions_path = os.path.join(self.target_directory,
@@ -210,8 +210,8 @@ class MySQLDumpPlugin(object):
         # setup the mysqldump environment
         extra_defaults = config['extra-defaults']
         try:
-            mysqldump = MySQLDump(defaults_file, 
-                                  mysqldump_bin, 
+            mysqldump = MySQLDump(defaults_file,
+                                  mysqldump_bin,
                                   extra_defaults=extra_defaults)
         except MySQLDumpError as exc:
             raise BackupError(str(exc))

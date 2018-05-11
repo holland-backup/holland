@@ -53,7 +53,7 @@ def write_options(config, filename):
     if isinstance(filename, six.string_types):
         filename = codecs.open(filename, 'w', 'utf8')
     else:
-	raise TypeError("Filename isn't a string")	
+        raise TypeError("Filename isn't a string")
     for section in config:
         print("[%s]" % section, file=filename)
         for key in config[section]:

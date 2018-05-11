@@ -87,7 +87,7 @@ def iter_plugins(group, name=None):
 def dist_metainfo_dict(dist):
     """Convert an Egg's PKG-INFO into a dict"""
     if sys.version_info > (3, 0):
-    	from email.message import EmailMessage
+        from email.message import EmailMessage
         distmetadata = dist.get_metadata('PKG-INFO')
         msg = EmailMessage(distmetadata)
         return dict(list(msg.items()))
