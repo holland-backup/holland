@@ -29,7 +29,6 @@ def start(mysqldump,
           open_stream=open,
           compression_ext=''):
     """Run a mysqldump backup"""
-    LOG.info("got here")
     if not schema and file_per_database:
         raise BackupError("file_per_database specified without a valid schema")
 
