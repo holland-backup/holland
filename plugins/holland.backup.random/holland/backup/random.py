@@ -35,8 +35,8 @@ class RandomPlugin(object):
             LOG.info("Read %d bytes from /dev/random" % len(r))
 
         outfile = os.path.join(self.target_directory, 'random_data')
-	f = open(outfile, "w")
-	f.write(data)
+        f = open(outfile, "w")
+        f.write(data)
         f.close()
         LOG.info("Wrote to "+outfile)
 
