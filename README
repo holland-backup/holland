@@ -12,7 +12,7 @@ for more details.
 
 holland-core bundles a few third party libraries
 including:
-ConfigObj 4.6
+ConfigObj 5.0.6
 backports from the python stdlib:
 - logging
 - subprocess.py
