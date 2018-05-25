@@ -87,10 +87,10 @@ def iter_plugins(group, name=None):
 def dist_metainfo_dict(dist):
     """Convert an Egg's PKG-INFO into a dict"""
     if sys.version_info > (3, 0):
-        from email.message import EmailMessage
+        from email.parser import Parser
+        from email.policy import default
         distmetadata = dist.get_metadata('PKG-INFO')
-        msg = EmailMessage(distmetadata)
-        return dict(list(msg.items()))
+        return Parser(policy=default).parsestr(distmetadata)
     else:
         from rfc822 import Message
         from cStringIO import StringIO
@@ -103,7 +103,8 @@ def iter_plugininfo():
     Iterate over the plugins loaded so far
     """
     if sys.version_info > (3, 0):
-        from email.message import EmailMessage
+        from email.parser import BytesParser, Parser
+        from email.policy import default
     else:
         from rfc822 import Message
         from cStringIO import StringIO
@@ -112,7 +113,7 @@ def iter_plugininfo():
         for dist in find_distributions(plugin_dir):
             distmetadata = dist.get_metadata('PKG-INFO')
             if sys.version_info > (3, 0):
-                msg = EmailMessage(distmetadata)
+                msg = Parser(policy=default).parsestr(distmetadata)
             else:
                 msg = Message(StringIO(distmetadata))
             filtered_keys = ['metadata-version', 'home-page', 'platform']
