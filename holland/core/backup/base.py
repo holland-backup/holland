@@ -125,8 +125,11 @@ class BackupRunner(object):
         except KeyboardInterrupt:
             LOG.warning("Backup aborted by interrupt")
             spool_entry.config['holland:backup']['failed'] = True
-        except:
+            raise
+        except Exception as ex:
+            LOG.warning(ex)
             spool_entry.config['holland:backup']['failed'] = True
+            raise
         else:
             spool_entry.config['holland:backup']['failed'] = False
 
