@@ -252,7 +252,7 @@ class MySQLDumpPlugin(object):
         """Open a stream through the holland compression api, relative to
         this instance's target directory
         """
-        path = os.path.join(self.target_directory, 'backup_data', path)
+        path = str(os.path.join(self.target_directory, 'backup_data', path))
         compression_method = method or self.config['compression']['method']
         compression_level = self.config['compression']['level']
         compression_options = self.config['compression']['options']

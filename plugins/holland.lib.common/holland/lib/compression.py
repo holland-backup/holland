@@ -4,6 +4,7 @@ import errno
 import subprocess
 from . import which
 import shlex
+import io
 from tempfile import TemporaryFile
 
 LOG = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ class CompressionInput(object):
     a standard file descriptor such as from open().
     """
     def __init__(self, path, mode, argv, bufsize=1024*1024):
-        self.fileobj = open(path, 'r')
+        self.fileobj = io.open(path, 'r')
         self.pid = subprocess.Popen(argv + ['--decompress'],
                                     stdin=self.fileobj.fileno(),
                                     stdout=subprocess.PIPE,
@@ -87,10 +88,10 @@ class CompressionOutput(object):
         self.level = level
         self.inline = inline
         if not inline:
-            self.fileobj = open(os.path.splitext(path)[0], mode)
+            self.fileobj = io.open(os.path.splitext(path)[0], mode)
             self.fd = self.fileobj.fileno()
         else:
-            self.fileobj = open(path, 'w')
+            self.fileobj = io.open(path, 'w')
             if level:
                 if "gpg" in argv[0]:
                     argv += ['-z%d' % level]
@@ -122,8 +123,8 @@ class CompressionOutput(object):
                 else:
                     argv += ['-%d' % self.level, '-']
             self.fileobj.close()
-            self.fileobj = open(self.fileobj.name, 'r')
-            cmp_f = open(self.name, 'w')
+            self.fileobj = io.open(self.fileobj.name, 'r')
+            cmp_f = io.open(self.name, 'w')
             LOG.debug("Running %r < %r[%d] > %r[%d]",
                          argv, self.fileobj.name, self.fileobj.fileno(),
                          cmp_f.name, cmp_f.fileno())
@@ -204,7 +205,7 @@ def open_stream(path,
     inline  -- Boolean whether to compress inline, or after the file is written.
     """
     if not method or method == 'none' or level == 0:
-        return open(path, mode)
+        return io.open(path, mode)
     else:
         argv, path = stream_info(path, method)
         if extra_args:

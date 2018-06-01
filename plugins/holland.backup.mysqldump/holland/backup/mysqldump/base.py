@@ -63,7 +63,7 @@ def start(mysqldump,
                 stream = open_stream('%s.sql' % db_name, 'w')
             except (IOError, OSError) as exc:
                 raise BackupError("Failed to open output stream %s: %s" %
-                                  ('%s.sql' + compression_ext, str(exc)))
+                                  ( db_name + '.sql' + compression_ext, str(exc)))
             try:
                 mysqldump.run([db.name], stream, more_options)
             finally:
@@ -94,7 +94,7 @@ def start(mysqldump,
 
 def write_manifest(schema, open_stream, ext):
     """Write real database names => encoded names to MANIFEST.txt"""
-    manifest_fileobj = open_stream('MANIFEST.txt', 'w', method='none')
+    manifest_fileobj = open_stream('MANIFEST.txt', 'wb', method='none')
     try:
         manifest = csv.writer(manifest_fileobj,
                               dialect=csv.excel_tab,
