@@ -8,6 +8,24 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.1.0 - May 5, 2018
+---------------------
+
+holland
++++++++
+
+holland
++++++++
+
+- Update Holland to work on Python 3. It's now using compatibility library to support Python version > 2.6
+- Update packaged version of ConfigObj to 5.0.6 
+- holland now has a few external dependencies: 
+  * future 
+  * six 
+- Implemented fix for github issue #185
+- Remove holland.backup.maatkit and holland.backup.mysqlhotcopy from active backup list
+
+
 1.0.14 - Nov 17, 2016
 ---------------------
 
