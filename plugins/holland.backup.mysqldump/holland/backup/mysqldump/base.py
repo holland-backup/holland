@@ -94,7 +94,11 @@ def start(mysqldump,
 
 def write_manifest(schema, open_stream, ext):
     """Write real database names => encoded names to MANIFEST.txt"""
-    manifest_fileobj = open_stream('MANIFEST.txt', 'wb', method='none')
+    if sys.version_info > (3, 0):
+        manifest_fileobj = open_stream('MANIFEST.txt', 'w', method='none')
+    else:
+        manifest_fileobj = open_stream('MANIFEST.txt', 'wb', method='none')
+
     try:
         manifest = csv.writer(manifest_fileobj,
                               dialect=csv.excel_tab,
