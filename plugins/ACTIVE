@@ -3,6 +3,5 @@ holland.lib.mysql
 holland.lib.lvm
 holland.backup.example
 holland.backup.mysqldump
-holland.backup.mysqlhotcopy
 holland.backup.mysql_lvm
 holland.backup.xtrabackup

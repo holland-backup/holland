@@ -9,12 +9,13 @@ import subprocess
 import tempfile
 import shutil
 import logging
+import binascii
 
 from holland.lib.mysql.client import connect, PassiveMySQLClient
 from holland.lib.mysql.schema import MySQLSchema, \
                                      DatabaseIterator, \
-                                     TableIterator
-from holland.lib.mysql.option import make_mycnf
+                                     SimpleTableIterator
+from holland.lib.mysql.option import build_mysql_config
 from holland.lib.archive import create_archive
 from holland.core.util.path import format_bytes, disk_free
 from holland.core.config.configobj import ConfigObj, ParseError
@@ -71,12 +72,12 @@ bin-path            = string(default=None)
 
 # MySQL connection information
 [mysql:client]
-default-extra-files = coerced_list(default=list('~/.my.cnf'))
+defaults-extra-file = force_list(default=list('~/.my.cnf'))
 user                = string(default=None)
 password            = string(default=None)
 socket              = string(default=None)
 host                = string(default=None)
-port                = integer(default=None)
+port                = integer(min=0, default=None)
 """.splitlines()
 
 # Used for our surrogate connection
@@ -95,14 +96,14 @@ class MySQLHotcopy(object):
         self.dry_run = dry_run
         self.config.validate_config(CONFIGSPEC)
         # Setup MySQL connection objects
-        mycnf_cfg = self.config['mysql:client']
-        self.mycnf = build_mysql_config(mycnf_cfg)
-        self.mycnf.filename = os.path.join(self.target_directory, 'my.cnf')
-        self.mysqlclient = holland.lib.mysql.connect(self.mycnf)
+        self.schema = MySQLSchema()
+        config = self.config['mysqlhotcopy']
+        self.mysql_config = build_mysql_config(self.config['mysql:client'])
+        self.client = connect(self.mysql_config['client'])
 
     def estimate_backup_size(self):
         total = 0
-        datadir = self.mysqlclient.show_variable('datadir')
+        datadir = self.client.show_variable('datadir')
         for cpath in self._find_files(datadir):
             st = os.stat(cpath)
             if cpath.endswith('.MYI') and self.config.lookup('mysqlhotcopy.partial-indexes'):
@@ -118,24 +119,24 @@ class MySQLHotcopy(object):
         """
 
         if self.config.lookup('mysqlhotcopy.stop-slave'):
-            self.mysqlclient.stop_slave()
+            self.client.stop_slave()
 
         if self.config.lookup('mysqlhotcopy.bin-log-position'):
             #ensure mysql:replication section exists
             self.config.setdefault('mysql:replication', {})
             # Log slave data if we can:
-            is_slave = self.mysqlclient.is_slave_running()
+            is_slave = self.client.is_slave_running()
             if is_slave:
-                slave_status = self.mysqlclient.show_slave_status()
+                slave_status = self.client.show_slave_status()
                 self.config['mysql:replication']['slave_master_log_file'] = slave_status['Relay_Master_Log_File']
                 self.config['mysql:replication']['slave_master_log_pos'] = slave_status['Exec_Master_Log_Pos']
-            master_data = self.mysqlclient.show_master_status()
+            master_data = self.client.show_master_status()
             if not master_data and not is_slave:
                 LOG.error("bin-log-position requested, but this server is neither a master nor a slave")
                 raise BackupError("Failboat: replication not configured")
             self.config['mysql:replication']['master_log_file'] = master_data[0]
             self.config['mysql:replication']['master_log_pos'] = master_data[1]
-            LOG.info("Writing master status to %s", self.mycnf.path)
+            LOG.info("Writing master status to %s", self.mysql_config.path)
             if not self.dry_run:
                 self.config.write()
 
@@ -145,17 +146,27 @@ class MySQLHotcopy(object):
         error = None
         try:
             self._backup()
-        except Exception as e:
-            error = e
+        except Exception as ex:
+            raise BackupError(ex)
+        finally:
+            if self.config.lookup('mysqlhotcopy.stop-slave'):
+                self.client.start_slave()
 
-        if self.config.lookup('mysqlhotcopy.stop-slave'):
-            self.mysqlclient.start_slave()
-
-        if error:
-            raise e
+    def _find_tables(self):
+        sql = ("SELECT TABLE_SCHEMA AS `database`, "
+               "          TABLE_NAME AS `name`"
+               "FROM INFORMATION_SCHEMA.TABLES "
+               "WHERE NOT TABLE_SCHEMA='information_schema' and "
+               " NOT TABLE_SCHEMA='performance_schema'" )
+        cursor = self.client.cursor()
+        try:
+            cursor.execute(sql)
+            return cursor.fetchall()
+        finally:
+            self.client.disconnect()
 
     def _backup(self):
-        datadir = self.mysqlclient.show_variable('datadir')
+        datadir = self.client.show_variable('datadir')
         archive_method = self.config.lookup('mysqlhotcopy.archive-method')
         if not self.dry_run:
             archive = create_archive(archive_method, os.path.join(self.target_directory, 'backup_data'))
@@ -163,14 +174,13 @@ class MySQLHotcopy(object):
 
         if self.config.lookup('mysqlhotcopy.lock-method') == 'flush-lock':
             if not self.dry_run:
-                self.mysqlclient.flush_tables_with_read_lock(extra_flush=True)
+                self.client.flush_tables_with_read_lock(extra_flush=True)
         elif self.config.lookup('mysqlhotcopy.lock-method') == 'lock-tables':
             tables = [x for x in self._find_tables() if x not in [('mysql', 'general_log'), ('mysql', 'slow_log')]]
             quoted_tables = ['`' + '`.`'.join(x) +
                                 '`' for x in tables]
             if not self.dry_run:
-                self.mysqlclient.lock_tables(quoted_tables)
-                self.mysqlclient.flush_tables()
+                self.client.flush_tables_with_read_lock()
 
         LOG.info("Starting Backup")
         error = None
@@ -194,7 +204,7 @@ class MySQLHotcopy(object):
             LOG.error("Failed to archive data file. %s", e)
 
         if not self.dry_run:
-            self.mysqlclient.unlock_tables()
+            self.client.unlock_tables()
             archive.close()
         if error:
             raise e
@@ -205,15 +215,28 @@ class MySQLHotcopy(object):
         """
         pass
 
+
+    def _decode_filename(self, filename):
+        ret = ""
+        for c in filename:
+            if c.isalnum() or c == '_':
+                ret = ret + c
+            else:
+                ret = ret + '@00' + \
+                    binascii.hexlify(c.encode('utf8')).decode('utf-8')
+        return ret
+
+
     def _find_files(self, datadir):
         for db, tbl in self._find_tables():
             base_path = os.path.join(datadir, db, tbl)
             if not os.path.exists(base_path + '.frm'):
                 LOG.debug("ARGH %s does not exist", base_path + '.frm')
-                if self.mysqlclient.server_version > (5, 1, 0):
-                    LOG.debug("Checking for weird encoding...")
-                    db = self.mysqlclient.encode_as_filename(db)
-                    tbl = self.mysqlclient.encode_as_filename(tbl)
+                if self.client.server_version() > (5, 1, 0):
+                    LOG.debug("Checking for weird encoding... on db %s and"
+                              " table %s" % (db,tbl))
+                    db = self._decode_filename(db)
+                    tbl = self._decode_filename(tbl)
                     LOG.debug("Encoded db: %r", db)
                     LOG.debug("Encoded tbl: %r", tbl)
                 base_path = os.path.join(datadir, db, tbl)
