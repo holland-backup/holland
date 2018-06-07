@@ -145,6 +145,7 @@ class XtrabackupPlugin(object):
                               (cmdline, process.returncode))
 
     def backup(self):
+        util.xtrabackup_version()
         if self.dry_run:
             self.dryrun()
             return

@@ -5,7 +5,7 @@ holland.backup.xtrabackup.util
 Utility methods used by the xtrabackup plugin
 """
 
-from __future__ import print_function
+
 import codecs
 import tempfile
 import logging
@@ -173,7 +173,7 @@ def add_xtrabackup_defaults(defaults_path, **kwargs):
             # spurious newline for readability
             print(file=fileobj)
             print("[xtrabackup]", file=fileobj)
-            for key, value in kwargs.items():
+            for key, value in list(kwargs.items()):
                 print("%s = %s" % (key, value), file=fileobj)
         except IOError as exc:
             raise BackupError("Error writing xtrabackup defaults to %s" %
@@ -223,3 +223,26 @@ def build_xb_args(config, basedir, defaults_file=None):
     if basedir:
         args.append(basedir)
     return args
+
+def xtrabackup_version():
+    xtrabackup_binary = 'xtrabackup'
+    if not isabs(xtrabackup_binary):
+        try:
+            xtrabackup_binary = which(xtrabackup_binary)
+        except WhichError:
+            raise BackupError("Failed to find xtrabackup binary")
+    xb_version = [xtrabackup_binary, '--version']
+    cmdline = list2cmdline(xb_version)
+    LOG.info("Executing: %s", cmdline)
+    try:
+        process = Popen(xb_version, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    except OSError as exc:
+        raise BackupError("Failed to run %s: [%d] %s",
+                          cmdline, exc.errno, exc.strerror)
+
+    for line in process.stdout:
+        LOG.info("%s", line.rstrip().decode('UTF-8'))
+    process.wait()
+    if process.returncode != 0:
+        raise BackupError("%s returned failure status [%d]" %
+                          (cmdline, process.returncode))

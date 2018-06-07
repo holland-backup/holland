@@ -32,6 +32,10 @@ holland-mysqldump
 
 - Add dir archive-method (GH Pull #184 chder)
 
+holland-xtrabackup
++++++++++++++++++
+
+- Print out xtrabackup version number
 
 1.0.14 - Nov 17, 2016
 ---------------------
