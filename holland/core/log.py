@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+from holland.core.config import hollandcfg, setup_config
 
 __all__ = [
     'clear_root_handlers',
@@ -20,8 +21,8 @@ def clear_root_handlers():
     root = logging.getLogger()
     list(map(root.removeHandler, root.handlers))
 
-def setup_console_logging(level=DEFAULT_LOG_LEVEL, 
-                          format='%(message)s', 
+def setup_console_logging(level=DEFAULT_LOG_LEVEL,
+                          format='%(message)s',
                           datefmt=DEFAULT_DATE_FORMAT):
     root = logging.getLogger()
     root.setLevel(level)
@@ -30,9 +31,9 @@ def setup_console_logging(level=DEFAULT_LOG_LEVEL,
     handler.setFormatter(formatter)
     logging.getLogger().addHandler(handler)
 
-def setup_file_logging(filename, 
-                       level=DEFAULT_LOG_LEVEL, 
-                       format=DEFAULT_LOG_FORMAT, 
+def setup_file_logging(filename,
+                       level=DEFAULT_LOG_LEVEL,
+                       format=DEFAULT_LOG_FORMAT,
                        datefmt=DEFAULT_DATE_FORMAT):
     root = logging.getLogger()
     root.setLevel(level)

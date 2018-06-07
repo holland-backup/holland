@@ -24,6 +24,7 @@ path                = string(default=None)
 [logging]
 level               = logging_level(default='info')
 filename            = string(default=None)
+format              = string(default=None)
 """.splitlines()
 
 class ConfigError(Exception):

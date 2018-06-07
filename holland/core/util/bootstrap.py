@@ -46,8 +46,13 @@ def setup_logging(opts):
 
     if hollandcfg.lookup('logging.filename'):
         try:
-            setup_file_logging(filename=str(hollandcfg.lookup('logging.filename')),
-                               level=log_level)
+            if hollandcfg.lookup('logging.format'):
+                setup_file_logging(filename=str(hollandcfg.lookup('logging.filename')),
+                                   level=log_level,
+                                   format=hollandcfg.lookup(str('logging.format')))
+            else:
+                setup_file_logging(filename=str(hollandcfg.lookup('logging.filename')),
+                                   level=log_level)
         except IOError as exc:
             LOGGER.warn("Skipping file logging: %s", exc)
 

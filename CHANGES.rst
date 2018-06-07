@@ -24,6 +24,8 @@ holland
   * six 
 - Implemented fix for broken stop-slave function on MySQL 5.7+ (Fixes GH#185 jacripe)
 - Remove holland.backup.maatkit and holland.backup.mysqlhotcopy from active backup list
+- Add 'format' option to 'logging' in /etc/holland/holland.conf (GH#99).
+  This uses the current log formatter if 'format' not defined.
 
 holland-mysqldump
 +++++++++++++++++
