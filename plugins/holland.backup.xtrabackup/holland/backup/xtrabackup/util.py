@@ -5,7 +5,7 @@ holland.backup.xtrabackup.util
 Utility methods used by the xtrabackup plugin
 """
 
-
+from __future__ import print_function
 import codecs
 import tempfile
 import logging
