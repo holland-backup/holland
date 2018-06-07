@@ -22,8 +22,13 @@ holland
 - holland now has a few external dependencies: 
   * future 
   * six 
-- Implemented fix for github issue #185
+- Implemented fix for broken stop-slave function on MySQL 5.7+ (Fixes GH#185 jacripe)
 - Remove holland.backup.maatkit and holland.backup.mysqlhotcopy from active backup list
+
+holland-mysqldump
++++++++++++++++++
+
+- Add dir archive-method (GH Pull #184 chder)
 
 
 1.0.14 - Nov 17, 2016

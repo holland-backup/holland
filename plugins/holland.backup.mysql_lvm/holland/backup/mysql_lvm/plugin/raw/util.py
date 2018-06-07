@@ -8,7 +8,8 @@ from holland.lib.compression import open_stream
 from holland.backup.mysql_lvm.actions import FlushAndLockMySQLAction, \
                                              RecordMySQLReplicationAction, \
                                              InnodbRecoveryAction, \
-                                             TarArchiveAction
+                                             TarArchiveAction, \
+                                             DirArchiveAction
 from holland.backup.mysql_lvm.plugin.common import log_final_snapshot_size, \
                                                    connect_simple
 from holland.backup.mysql_lvm.plugin.innodb import MySQLPathInfo, check_innodb
@@ -54,17 +55,26 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
         mysqld_config['innodb-log-file-size'] = ib_log_size
         act = InnodbRecoveryAction(mysqld_config)
         snapshot.register('post-mount', act, priority=100)
-
-    try:
-        archive_stream = open_stream(os.path.join(spooldir, 'backup.tar'),
-                                     'w',
-                                     method=config['compression']['method'],
-                                     level=config['compression']['level'],
-                                     extra_args=config['compression']['options'])
-    except OSError as exc:
-        raise BackupError("Unable to create archive file '%s': %s" %
+    if config['mysql-lvm']['archive-method'] == "dir":
+        try:
+            backup_datadir = os.path.join(spooldir, 'backup_data')
+            os.mkdir(backup_datadir)
+        except OSError as exc:
+            raise BackupError("Unable to create archive directory '%s': %s" %
+                            (backup_datadir, exc))
+        act = DirArchiveAction(snap_datadir, backup_datadir, config['tar'])
+        snapshot.register('post-mount', act, priority=50)
+    else:
+        try:
+            archive_stream = open_stream(os.path.join(spooldir, 'backup.tar'),
+                                        'w',
+                                        method=config['compression']['method'],
+                                        level=config['compression']['level'],
+                                        extra_args=config['compression']['options'])
+        except OSError as exc:
+            raise BackupError("Unable to create archive file '%s': %s" %
                           (os.path.join(spooldir, 'backup.tar'), exc))
-    act = TarArchiveAction(snap_datadir, archive_stream, config['tar'])
-    snapshot.register('post-mount', act, priority=50)
+        act = TarArchiveAction(snap_datadir, archive_stream, config['tar'])
+        snapshot.register('post-mount', act, priority=50)
 
     snapshot.register('pre-remove', log_final_snapshot_size)
