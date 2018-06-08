@@ -22,4 +22,4 @@ def test_example_plugin():
     plugin = ExamplePlugin(name, config, target_directory, dry_run)
     plugin.backup()
 
-    ok_(isinstance(plugin.info(), basestring))
+    ok_(isinstance(plugin.info(), str))

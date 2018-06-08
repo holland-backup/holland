@@ -3,7 +3,7 @@
 # el4 also... which doesn't support it
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
-%{!?holland_version: %global holland_version 1.0.15}
+%{!?holland_version: %global holland_version 1.1.0}
 
 # default %%rhel to make things easier to build
 %{!?rhel: %global rhel %%(%{__sed} 's/^[^0-9]*\\([0-9]\\+\\).*/\\1/' /etc/redhat-release)}
@@ -25,11 +25,12 @@
 %bcond_with     example
 %bcond_with     sphinxdocs
 %bcond_with     mysqlhotcopy
-%bcond_with     maatkit
 %bcond_with     tar
 %bcond_without  pgdump
 %bcond_without  sqlite
 %bcond_without  xtrabackup
+%bcond_without  mongodump
+%bcond_without  mariabackup
 
 Name:           holland
 Version:        %{holland_version}
@@ -38,7 +39,7 @@ Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD
 URL:            http://hollandbackup.org
-Source0:        http://hollandbackup.org/releases/stable/1.0/%{name}-%{version}.tar.gz
+Source0:        http://hollandbackup.org/releases/stable/1.1/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
@@ -79,18 +80,6 @@ Requires: %{name} = %{version}-%{release}
 %description random
 Random Backup Provider Plugin for Holland
 
-%if %{with maatkit}
-%package maatkit
-Summary: Holland mk-parallel-dump plugin
-Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}, %{name}-common = %{version}-%{release}
-Requires: maatkit
-
-%description maatkit
-This plugin provides support for holland to perform MySQL backups using the
-mk-parallel-dump script from the Maatkit toolkit.
-%endif
-
 %package mysqldump
 Summary: Logical mysqldump backup plugin for Holland
 License: GPLv2
@@ -129,7 +118,7 @@ and to generate a tar archive of the raw data directory.
 
 %if %{with pgdump}
 %package    pgdump
-Summary: Holland LVM snapshot backup plugin for MySQL
+Summary: pgdump plugin for Holland
 License: GPLv2
 Group: Development/Libraries
 Provides: %{name}-pgdump = %{version}-%{release}
@@ -166,6 +155,17 @@ plugin requires Percona XtraBackup and runs the provided
 /usr/bin/innobackupex script.
 %endif
 
+%if %{with mongodump}
+%package mongodump
+Summary: MongoDump Backup Provider Plugin for Holland
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+
+%description mongodump
+MongoDB Backup Plugin for Holland
+%endif
+
+
 %if %{with tar}
 %package tar
 Summary: tar plugin for Holland
@@ -177,6 +177,21 @@ Requires: tar
 
 %description tar
 This package provides a Holland plugin for creating tar files
+%endif
+
+%if %{with mariabackup}
+%package mariabackup
+Summary: Holland plugin for Mariabackup
+License: GPLv2
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
+Requires: MariaDB-backup
+
+%description mariabackup
+This package provides a Holland plugin for MariaDB-backup. This
+plugin requires MariaDB-backup and runs the provided
+/usr/bin/mariabackup.
 %endif
 
 %prep
@@ -265,6 +280,18 @@ cd -
 
 %if %{with xtrabackup}
 cd plugins/holland.backup.xtrabackup
+%{__python} setup.py build
+cd -
+%endif
+
+%if %{with mongodump}
+cd plugins/holland.backup.mongodump
+%{__python} setup.py build
+cd -
+%endif
+
+%if %{with mariabackup}
+cd plugins/holland.backup.mariabackup
 %{__python} setup.py build
 cd -
 %endif
@@ -373,6 +400,22 @@ cd plugins/holland.backup.xtrabackup
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 cd -
 install -m 0640 config/providers/xtrabackup.conf %{buildroot}%{_sysconfdir}/holland/providers/
+%endif
+
+%if %{with mongodump}
+# plugin : holland.backup.mongodump
+cd plugins/holland.backup.mongodump
+%{__python} setup.py install -O1 --skip-build --root %{buildroot}
+cd -
+install -m 0640 config/providers/mongodump.conf %{buildroot}%{_sysconfdir}/holland/providers/
+%endif
+
+%if %{with mariabackup}
+# plugin : holland.backup.mariabackup
+cd plugins/holland.backup.mariabackup
+%{__python} setup.py install -O1 --skip-build --root %{buildroot}
+cd -
+install -m 0640 config/providers/mariabackup.conf %{buildroot}%{_sysconfdir}/holland/providers/
 %endif
 
 %if %{with tar}
@@ -530,6 +573,27 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/holland/providers/xtrabackup.conf
 %endif
 
+%if %{with mongodump}
+%files mongodump
+%defattr(-,root,root,-)
+%doc plugins/holland.backup.mongodump/{README,LICENSE}
+%{python_sitelib}/holland/backup/mongodump.py*
+%{python_sitelib}/holland.backup.mongodump-%{version}-*-nspkg.pth
+%{python_sitelib}/holland.backup.mongodump-%{version}-*.egg-info
+%config(noreplace) %{_sysconfdir}/holland/providers/mongodump.conf
+%endif
+
+
+%if %{with mariabackup}
+%files mariabackup
+%defattr(-,root,root,-)
+%doc plugins/holland.backup.mariabackup/{README,LICENSE}
+%{python_sitelib}/holland/backup/mariabackup/
+%{python_sitelib}/holland.backup.mariabackup-%{version}-*-nspkg.pth
+%{python_sitelib}/holland.backup.mariabackup-%{version}-*.egg-info
+%config(noreplace) %{_sysconfdir}/holland/providers/mariabackup.conf
+%endif
+
 %if %{with tar}
 %files tar
 %defattr(-,root,root,-)
@@ -541,6 +605,9 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
+* Fri Jun 08 2018 Steven Soulen <steven@soulen.net> - 1.1.0-1
+- Latest sources from upstream
+
 * Tue Mar 01 2016 Andrew Garner <andrew.garner@rackspace.com> - 1.0.14-1
 - Latest sources from upstream
 

@@ -12,7 +12,7 @@ The underlying INIConfig object can be accessed as cfg.data
 """
 
 import re
-from ConfigParser import DuplicateSectionError,    \
+from configparser import DuplicateSectionError,    \
                   NoSectionError, NoOptionError,   \
                   InterpolationMissingOptionError, \
                   InterpolationDepthError,         \
@@ -21,10 +21,10 @@ from ConfigParser import DuplicateSectionError,    \
 
 # These are imported only for compatiability.
 # The code below does not reference them directly.
-from ConfigParser import Error, InterpolationError, \
+from configparser import Error, InterpolationError, \
                   MissingSectionHeaderError, ParsingError
 
-import ini
+from . import ini
 
 class RawConfigParser(object):
     def __init__(self, defaults=None, dict_type=dict):
@@ -56,7 +56,7 @@ class RawConfigParser(object):
         # The default section is the only one that gets the case-insensitive
         # treatment - so it is special-cased here.
         if section.lower() == "default":
-            raise ValueError, 'Invalid section name: %s' % section
+            raise ValueError('Invalid section name: %s' % section)
 
         if self.has_section(section):
             raise DuplicateSectionError(section)
@@ -92,7 +92,7 @@ class RawConfigParser(object):
         filename may also be given.
         """
         files_read = []
-        if isinstance(filenames, basestring):
+        if isinstance(filenames, str):
             filenames = [filenames]
         for filename in filenames:
             try:
@@ -146,7 +146,7 @@ class RawConfigParser(object):
     def getboolean(self, section, option):
         v = self.get(section, option)
         if v.lower() not in self._boolean_states:
-            raise ValueError, 'Not a boolean: %s' % v
+            raise ValueError('Not a boolean: %s' % v)
         return self._boolean_states[v.lower()]
 
     def has_option(self, section, option):
@@ -242,7 +242,7 @@ class ConfigParser(RawConfigParser):
             if "%(" in value:
                 try:
                     value = value % vars
-                except KeyError, e:
+                except KeyError as e:
                     raise InterpolationMissingOptionError(
                         option, section, rawval, e.args[0])
             else:
@@ -272,7 +272,7 @@ class ConfigParser(RawConfigParser):
             for x in self.data[section]:
                 if x not in vars:
                     options.append(x)
-            options.extend(vars.keys())
+            options.extend(list(vars.keys()))
 
         if "__name__" in options:
             options.remove("__name__")
@@ -291,7 +291,7 @@ class SafeConfigParser(ConfigParser):
     _badpercent_re = re.compile(r"%[^%]|%$")
 
     def set(self, section, option, value):
-        if not isinstance(value, basestring):
+        if not isinstance(value, str):
             raise TypeError("option values must be strings")
         # check for bad percent signs:
         # first, replace all "good" interpolations

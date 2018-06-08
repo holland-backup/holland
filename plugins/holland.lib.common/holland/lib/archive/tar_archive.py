@@ -5,15 +5,15 @@ import time
 import tarfile
 
 try:
-    from cStringIO import StringIO
+    from io import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
 
 def _make_tarinfo(name, size):
     tarinfo = tarfile.TarInfo(name=name)
     tarinfo.size = size
     tarinfo.mtime = time.time()
-    tarinfo.mode = 0660
+    tarinfo.mode = 0o660
     tarinfo.type = tarfile.REGTYPE
     tarinfo.uid = os.geteuid()
     tarinfo.gid = os.getegid()
@@ -100,4 +100,4 @@ if __name__ == '__main__':
     xv.add_file("user.MYD", "mysql/user.MYD")
     xv.add_file("user.MYI", "mysql/user.MYI")
     xv.close()
-    print (time.time() - now), "seconds"
+    print((time.time() - now), "seconds")

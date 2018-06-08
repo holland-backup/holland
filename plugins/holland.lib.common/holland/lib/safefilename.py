@@ -90,9 +90,9 @@ def handle_problematic_characters(errors, filename, start, end, message):
     :rtype: unicode
     """
     if errors == 'ignore':
-        return u""
+        return ""
     elif errors == 'replace':
-        return u"?"
+        return "?"
     else:
         raise UnicodeDecodeError("safefilename", filename, start, end, message)
 
@@ -115,7 +115,7 @@ def decode(filename, errors='strict'):
     """
     filename = str(filename)
     input_length = len(filename)
-    output = u""
+    output = ""
     i = 0
     while i < input_length:
         char = filename[i]
@@ -138,7 +138,7 @@ def decode(filename, errors='strict'):
                 continue
             else:
                 try:
-                    output += unichr(int(filename[i+1:end_position], 16))
+                    output += chr(int(filename[i+1:end_position], 16))
                 except:
                     output += handle_problematic_characters(errors, filename, i, end_position+1,
                                                             "invalid data between parentheses")

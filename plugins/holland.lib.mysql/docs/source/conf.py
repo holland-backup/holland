@@ -38,8 +38,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'holland.lib.mysql'
-copyright = u'2009, Andrew Garner'
+project = 'holland.lib.mysql'
+copyright = '2009, Andrew Garner'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -165,8 +165,8 @@ htmlhelp_basename = 'hollandlibmysqldoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
-  ('index', 'hollandlibmysql.tex', ur'holland.lib.mysql Documentation',
-   ur'Andrew Garner', 'manual'),
+  ('index', 'hollandlibmysql.tex', r'holland.lib.mysql Documentation',
+   r'Andrew Garner', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

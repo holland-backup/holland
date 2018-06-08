@@ -42,9 +42,9 @@ except NameError:
     from sets import Set as set
 
 import re
-from ConfigParser import DEFAULTSECT, ParsingError, MissingSectionHeaderError
+from configparser import DEFAULTSECT, ParsingError, MissingSectionHeaderError
 
-import config
+from . import config
 
 class LineType(object):
     line = None
@@ -457,7 +457,7 @@ class INIConfig(config.ConfigNamespace):
         self._sections = {}
         if defaults is None: defaults = {}
         self._defaults = INISection(LineContainer(), optionxformsource=self)
-        for name, value in defaults.iteritems():
+        for name, value in defaults.items():
             self._defaults[name] = value
         if fp is not None:
             self._readfp(fp)
@@ -506,7 +506,7 @@ class INIConfig(config.ConfigNamespace):
 
     def __str__(self):
         if self._bom:
-            fmt = u'\ufeff%s'
+            fmt = '\ufeff%s'
         else:
             fmt = '%s'
         return fmt % self._data.__str__()
@@ -543,8 +543,8 @@ class INIConfig(config.ConfigNamespace):
 
         for line in readline_iterator(fp):
             # Check for BOM on first line
-            if linecount == 0 and isinstance(line, unicode):
-                if line[0] == u'\ufeff':
+            if linecount == 0 and isinstance(line, str):
+                if line[0] == '\ufeff':
                     line = line[1:]
                     self._bom = True
 

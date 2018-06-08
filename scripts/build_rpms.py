@@ -54,8 +54,8 @@ def prep_buildroot(cli_opts):
     f.close()
 
     if cli_opts.tarball or not os.path.exists('.git'):
-        print "creating source distribution %s/SOURCES/holland-%s.tar.gz" % \
-              (config['topdir'], version)
+        print("creating source distribution %s/SOURCES/holland-%s.tar.gz" % \
+              (config['topdir'], version))
         from tarfile import TarFile
         archive = tarfile.open('%s/SOURCES/holland-%s.tar.gz' %
                                (config['topdir'], version),
@@ -65,7 +65,7 @@ def prep_buildroot(cli_opts):
     else:
         cmd = "git archive --prefix=holland-%s/ HEAD > %s/SOURCES/holland-%s.tar.gz" % \
               (version, config['topdir'], version)
-        print cmd
+        print(cmd)
         os.system(cmd)
 
 
@@ -91,7 +91,7 @@ def build_rpms(with_extra):
     with_extra = ' '.join(['--with %s' % extra for extra in with_extra])
     cmd = "rpmbuild -bb %s/SPECS/holland.spec --define='_topdir %s' %s %s" % \
            (config['topdir'], config['topdir'], dev_option, with_extra)
-    print cmd
+    print(cmd)
     retcode = os.system(cmd)
     return retcode
 
@@ -109,14 +109,14 @@ def get_holland_version():
         dev_tag = None
 
     if not version:
-        raise Exception, "unable to determine holland version"
+        raise Exception("unable to determine holland version")
     return version, dev_tag
 
 
 def exit(code=0, clean=False):
     if clean:
         if os.path.exists(config['topdir']):
-            print "cleaning %s" % config['topdir']
+            print("cleaning %s" % config['topdir'])
             shutil.rmtree(config['topdir'])
     sys.exit(code)
 
@@ -132,28 +132,28 @@ def main():
     prep_buildroot(cli_opts)
     retcode = build_srpm()
     if int(retcode) != 0:
-        print
-        print '-' * 77
-        print
-        print "Please correct the above errors"
-        print
+        print()
+        print('-' * 77)
+        print()
+        print("Please correct the above errors")
+        print()
         exit(1, cli_opts.clean)
 
     if not cli_opts.just_source:
         retcode = build_rpms(cli_opts.with_plugins)
 
-    print
-    print '-' * 77
-    print
+    print()
+    print('-' * 77)
+    print()
 
     if int(retcode) == 0:
-        print "Holland %s%s built in %s" % (version, dev_tag or '', config['topdir'])
+        print("Holland %s%s built in %s" % (version, dev_tag or '', config['topdir']))
         exit(0, cli_opts.clean)
     else:
-        print "Holland %s%s build FAILED!  Files in %s" % (version, dev_tag,
-                                                           config['topdir'])
+        print("Holland %s%s build FAILED!  Files in %s" % (version, dev_tag,
+                                                           config['topdir']))
         exit(1, cli_opts.clean)
-    print
+    print()
 
 if __name__ == '__main__':
     main()

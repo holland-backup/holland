@@ -1,6 +1,7 @@
 """
 Pluggable command support
 """
+from __future__ import print_function 
 
 import os
 import sys
@@ -8,7 +9,7 @@ import re
 import optparse
 import textwrap
 import logging
-from types import StringTypes
+# from types import StringTypes
 from inspect import getargspec, getdoc
 import logging
 from holland.core.util.template import Template
@@ -91,7 +92,7 @@ class Command(object):
 
     def _check_argspec(self, args, varargs, varkw, defaults):
         for arg in args:
-            if not isinstance(arg, StringTypes):
+            if not isinstance(arg, str):
                 raise AssertionError('Tuple arguments are not supported')
         if varkw:
             raise AssertionError('Keyword arguments are not supported')
@@ -181,35 +182,35 @@ class Command(object):
         run_args, run_varargs, run_varkw, run_defaults = getargspec(self.run)
         try:
             opts, args = self.parse_args(argv)
-        except StopOptionProcessing, e:
+        except StopOptionProcessing as e:
             return 1
-        except optparse.OptParseError, e:
-            print >>sys.stderr, self.usage()
-            print
-            print >>sys.stderr, "%s: error: %s" % (self.name, e)
+        except optparse.OptParseError as e:
+            print(self.usage(), file=sys.stderr)
+            print()
+            print("%s: error: %s" % (self.name, e), file=sys.stderr)
             return 1
 
         if opts.help:
-            print self.help()
+            print(self.help())
             return os.EX_USAGE
 
         cmd_name = self.optparser.prog
 
         if len(args) > len(run_args[3:]) and not run_varargs:
-            print >>sys.stderr, "Error: %s only accepts %d arguments but %d were provided" % ( (self.name, len(run_args[3:]), len(args)))
-            print self.help()
+            print("Error: %s only accepts %d arguments but %d were provided" % ( (self.name, len(run_args[3:]), len(args))), file=sys.stderr)
+            print(self.help())
             return os.EX_USAGE
 
         num_req = len(run_defaults or []) or 0
         if len(args) < len(run_args[3:-num_req or None]):
-            print >>sys.stderr, "Failed: %s requires %d arguments required, %d provided" % (cmd_name,len(run_args[3:-num_req or None]), len(args))
-            print self.help()
+            print("Failed: %s requires %d arguments required, %d provided" % (cmd_name,len(run_args[3:-num_req or None]), len(args)), file=sys.stderr)
+            print(self.help())
             return os.EX_USAGE
         try:
             return self.run(self.optparser.prog, opts, *args)
         except KeyboardInterrupt:
             raise
-        except Exception, e:
+        except Exception as e:
             LOGGER.error("Uncaught exception while running command '%s': %r", cmd_name, e, exc_info=True)
             return os.EX_SOFTWARE
 

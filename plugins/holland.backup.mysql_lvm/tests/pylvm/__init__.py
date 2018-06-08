@@ -1,6 +1,6 @@
 import os
 import holland.backup.lvm.pylvm.api
-import lvm_helper
+from . import lvm_helper
 
 def setup():
     if os.geteuid() != 0:

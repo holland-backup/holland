@@ -27,7 +27,7 @@ def record_master_status(client, config):
         else:
             LOG.info("This MySQL server does not have binary logs enabled. "
                      "Nothing to record from SHOW MASTER STATUS.")
-    except MySQLError, exc:
+    except MySQLError as exc:
         raise BackupError("MySQL error while acquiring master replication "
                           "status [%d] %s" % exc.args)
 
@@ -46,6 +46,6 @@ def record_slave_status(client, config):
         else:
             LOG.info("This MySQL server is not a slave. "
                      "Nothing to record from SHOW SLAVE STATUS")
-    except MySQLError, exc:
+    except MySQLError as exc:
         raise BackupError("MySQL error while acquiring slave replication "
                           "status [%d] %s" % exc.args)

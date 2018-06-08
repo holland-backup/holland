@@ -14,11 +14,11 @@ import tempfile
 import distutils.sysconfig
 try:
     import subprocess
-except ImportError, e:
+except ImportError as e:
     if sys.version_info <= (2, 3):
-        print 'ERROR: %s' % e
-        print 'ERROR: this script requires Python 2.4 or greater; or at least the subprocess module.'
-        print 'If you copy subprocess.py from a newer version of Python this script will probably work'
+        print('ERROR: %s' % e)
+        print('ERROR: this script requires Python 2.4 or greater; or at least the subprocess module.')
+        print('If you copy subprocess.py from a newer version of Python this script will probably work')
         sys.exit(101)
     else:
         raise
@@ -261,8 +261,8 @@ def rmtree(dir):
 
 def make_exe(fn):
     if hasattr(os, 'chmod'):
-        oldmode = os.stat(fn).st_mode & 07777
-        newmode = (oldmode | 0555) & 07777
+        oldmode = os.stat(fn).st_mode & 0o7777
+        newmode = (oldmode | 0o555) & 0o7777
         os.chmod(fn, newmode)
         logger.info('Changed mode of %s to %s', fn, oct(newmode))
 
@@ -530,12 +530,12 @@ def main():
             raise SystemExit(popen.wait())
 
     if not args:
-        print 'You must provide a DEST_DIR'
+        print('You must provide a DEST_DIR')
         parser.print_help()
         sys.exit(2)
     if len(args) > 1:
-        print 'There must be only one argument: DEST_DIR (you gave %s)' % (
-            ' '.join(args))
+        print('There must be only one argument: DEST_DIR (you gave %s)' % (
+            ' '.join(args)))
         parser.print_help()
         sys.exit(2)
 
@@ -591,7 +591,7 @@ def call_subprocess(cmd, show_stdout=True,
         proc = subprocess.Popen(
             cmd, stderr=subprocess.STDOUT, stdin=None, stdout=stdout,
             cwd=cwd, env=env)
-    except Exception, e:
+    except Exception as e:
         logger.fatal(
             "Error %s while executing command %s" % (e, cmd_desc))
         raise
@@ -673,9 +673,9 @@ def path_locations(home_dir):
             try:
                 import win32api
             except ImportError:
-                print 'Error: the path "%s" has a space in it' % home_dir
-                print 'To handle these kinds of paths, the win32api module must be installed:'
-                print '  http://sourceforge.net/projects/pywin32/'
+                print('Error: the path "%s" has a space in it' % home_dir)
+                print('To handle these kinds of paths, the win32api module must be installed:')
+                print('  http://sourceforge.net/projects/pywin32/')
                 sys.exit(3)
             home_dir = win32api.GetShortPathName(home_dir)
         lib_dir = join(home_dir, 'Lib')
@@ -700,7 +700,7 @@ def change_prefix(filename, dst_prefix):
     prefixes = [sys.prefix]
     if hasattr(sys, 'real_prefix'):
         prefixes.append(sys.real_prefix)
-    prefixes = map(os.path.abspath, prefixes)
+    prefixes = list(map(os.path.abspath, prefixes))
     filename = os.path.abspath(filename)
     for src_prefix in prefixes:
         if filename.startswith(src_prefix):
@@ -735,7 +735,7 @@ def copy_required_modules(dst_prefix):
 def install_python(home_dir, lib_dir, inc_dir, bin_dir, site_packages, clear):
     """Install just the base environment, no distutils patches etc"""
     if sys.executable.startswith(bin_dir):
-        print 'Please use the *system* python to run this script'
+        print('Please use the *system* python to run this script')
         return
 
     if clear:
@@ -975,7 +975,7 @@ def install_activate(home_dir, bin_dir, prompt=None):
 
     files['activate_this.py'] = ACTIVATE_THIS
     vname = os.path.basename(os.path.abspath(home_dir))
-    for name, content in files.items():
+    for name, content in list(files.items()):
         content = content.replace('__VIRTUAL_PROMPT__', prompt or '')
         content = content.replace('__VIRTUAL_WINPROMPT__', prompt or '(%s)' % vname)
         content = content.replace('__VIRTUAL_ENV__', os.path.abspath(home_dir))
@@ -1000,8 +1000,8 @@ def fix_lib64(lib_dir):
     instead of lib/pythonX.Y.  If this is such a platform we'll just create a
     symlink so lib64 points to lib
     """
-    if [p for p in distutils.sysconfig.get_config_vars().values()
-        if isinstance(p, basestring) and 'lib64' in p]:
+    if [p for p in list(distutils.sysconfig.get_config_vars().values())
+        if isinstance(p, str) and 'lib64' in p]:
         logger.debug('This system uses lib64; symlinking lib64 to lib')
         assert os.path.basename(lib_dir) == 'python%s' % sys.version[:3], (
             "Unexpected python lib dir: %r" % lib_dir)

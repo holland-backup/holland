@@ -3,6 +3,8 @@ Core plugin support
 """
 
 import logging
+import os
+import sys
 from pkg_resources import working_set, Environment, iter_entry_points, \
                             get_distribution, find_distributions, \
                             DistributionNotFound, VersionConflict
@@ -15,6 +17,8 @@ class PluginLoadError(Exception):
     pass
 
 def add_plugin_dir(plugin_dir):
+    if os.path.isdir(plugin_dir):
+       return None 
     LOGGER.debug("Adding plugin directory: %r", plugin_dir)
     env = Environment([plugin_dir])
     dists, errors = working_set.find_plugins(env)
@@ -23,7 +27,7 @@ def add_plugin_dir(plugin_dir):
         working_set.add(dist)
 
     if errors:
-        for dist, error in errors.items():
+        for dist, error in list(errors.items()):
             errmsg = None
             if isinstance(error, DistributionNotFound):
                 req, = error.args
@@ -47,9 +51,9 @@ def load_first_entrypoint(group, name=None):
     for ep in iter_entry_points(group, name):
         try:
             return ep.load()
-        except DistributionNotFound, e:
+        except DistributionNotFound as e:
             raise PluginLoadError("Could not find dependency '%s'" % e)
-        except ImportError, e:
+        except ImportError as e:
             raise PluginLoadError(e)
     raise PluginLoadError("'%s' not found" % '.'.join((group, name)))
 
@@ -64,7 +68,7 @@ def get_commands():
     for ep in iter_entry_points('holland.commands'):
         try:
             cmdcls = ep.load()
-        except Exception, e:
+        except Exception as e:
             LOGGER.warning("Skipping command plugin %s: %s", ep.name, e)
             continue
         cmds[cmdcls.name] = cmdcls
@@ -82,23 +86,36 @@ def iter_plugins(group, name=None):
 
 def dist_metainfo_dict(dist):
     """Convert an Egg's PKG-INFO into a dict"""
-    from rfc822 import Message
-    from cStringIO import StringIO
-    distmetadata = dist.get_metadata('PKG-INFO')
-    msg = Message(StringIO(distmetadata))
-    return dict(msg.items())
+    if sys.version_info > (3, 0):
+        from email.parser import Parser
+        from email.policy import default
+        distmetadata = dist.get_metadata('PKG-INFO')
+        return Parser(policy=default).parsestr(distmetadata)
+    else:
+        from rfc822 import Message
+        from cStringIO import StringIO
+        distmetadata = dist.get_metadata('PKG-INFO')
+        msg = Message(StringIO(distmetadata))
+        return dict(msg.items())
 
 def iter_plugininfo():
     """
     Iterate over the plugins loaded so far
     """
-    from rfc822 import Message
-    from cStringIO import StringIO
+    if sys.version_info > (3, 0):
+        from email.parser import BytesParser, Parser
+        from email.policy import default
+    else:
+        from rfc822 import Message
+        from cStringIO import StringIO
     global plugin_directories
     for plugin_dir in plugin_directories:
         for dist in find_distributions(plugin_dir):
             distmetadata = dist.get_metadata('PKG-INFO')
-            msg = Message(StringIO(distmetadata))
+            if sys.version_info > (3, 0):
+                msg = Parser(policy=default).parsestr(distmetadata)
+            else:
+                msg = Message(StringIO(distmetadata))
             filtered_keys = ['metadata-version', 'home-page', 'platform']
-            distinfo = filter(lambda x: x[0] not in filtered_keys, msg.items())
+            distinfo = [x for x in list(msg.items()) if x[0] not in filtered_keys]
             yield dist, dict(distinfo)

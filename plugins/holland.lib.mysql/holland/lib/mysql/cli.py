@@ -21,7 +21,7 @@ mycnf_groups()
 """
 import os
 import re
-import commands
+import subprocess
 
 #class CmdOption_OLD(object):
 #  def __init__(self, short_option=None, 
@@ -83,7 +83,7 @@ class MyCmdParser(dict):
             self[sopt] = opt
             self[lopt] = opt
             
-        self.cli_options = self.values()
+        self.cli_options = list(self.values())
 
     def _run_cli_help(self):
         args = [self.cli_path,
@@ -92,10 +92,10 @@ class MyCmdParser(dict):
                 '--help',
                 '--verbose']
         cli_cmd = ' '.join(args)
-        status, cli_output = commands.getstatusoutput(cli_cmd)
+        status, cli_output = subprocess.getstatusoutput(cli_cmd)
 
         if status != 0:
-            raise IOError, cli_output
+            raise IOError(cli_output)
         
         return cli_output
     

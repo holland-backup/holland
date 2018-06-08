@@ -1,7 +1,7 @@
 import os
 from holland.backup.lvm.pylvm.api import *
 from nose.tools import *
-from lvm_helper import *
+from .lvm_helper import *
 
 def test_pvs():
     for pv in pvs():

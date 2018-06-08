@@ -38,6 +38,9 @@ lock-tables = boolean(default=yes)
 #          run flush tables with read lock
 extra-flush-tables = boolean(default=yes)
 
+# default: create tar file from snapshot
+archive-method      = option(dir,tar,default="tar")
+
 [mysqld]
 mysqld-exe              = force_list(default=list('mysqld', '/usr/libexec/mysqld'))
 user                    = string(default='mysql')
@@ -100,7 +103,7 @@ class MysqlLVMBackup(object):
             self.client.connect()
             datadir = self.client.show_variable('datadir')
             self.client.disconnect()
-        except MySQLError, exc:
+        except MySQLError as exc:
             raise BackupError("[%d] %s" % exc.args)
         return directory_size(datadir)
 
@@ -116,7 +119,7 @@ class MysqlLVMBackup(object):
         try:
             self.client.connect()
             datadir = os.path.realpath(self.client.show_variable('datadir'))
-        except MySQLError, exc:
+        except MySQLError as exc:
             raise BackupError("[%d] %s" % exc.args)
 
         LOG.info("Backing up %s via snapshot", datadir)
@@ -124,10 +127,11 @@ class MysqlLVMBackup(object):
 
         try:
             volume = LogicalVolume.lookup_from_fspath(datadir)
-        except LookupError, exc:
+        except LookupError as exc:
             raise BackupError("Failed to lookup logical volume for %s: %s" %
                               (datadir, str(exc)))
-
+        except Exception as ex:
+            LOG.debug(ex)
 
         # create a snapshot manager
         snapshot = build_snapshot(self.config['mysql-lvm'], volume,
@@ -147,14 +151,16 @@ class MysqlLVMBackup(object):
 
         try:
             snapshot.start(volume)
-        except CallbackFailuresError, exc:
+        except CallbackFailuresError as exc:
             # XXX: one of our actions failed.  Log this better
             for callback, error in exc.errors:
                 LOG.error("%s", error)
             raise BackupError("Error occurred during snapshot process. Aborting.")
-        except LVMCommandError, exc:
+        except LVMCommandError as exc:
             # Something failed in the snapshot process
             raise BackupError(str(exc))
+        except Exception as ex:
+            LOG.debug(ex)
 
     def _dry_run(self, volume, snapshot, datadir):
         """Implement dry-run for LVM snapshots.

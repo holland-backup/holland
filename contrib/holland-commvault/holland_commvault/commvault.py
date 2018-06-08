@@ -11,7 +11,7 @@ from holland.commands.backup import Backup
 from holland.core.command import run
 from holland.core.cmdshell import HOLLAND_VERSION
 from holland.core.util.fmt import format_loglevel
-from argparse import ArgumentParser, Action
+from .argparse import ArgumentParser, Action
 # The janky arguments Commvault throws at us
 # http://documentation.commvault.com/commvault/release_8_0_0/books_online_1/english_us/features/pre_post/prepost_process.htm
 # http://documentation.commvault.com/commvault/release_7_0_0/books_online_1/english_us/features/pre_post/prepost_process.htm
@@ -84,7 +84,7 @@ def main():
     try:
         resource.setrlimit(resource.RLIMIT_NOFILE, (262144, 262144))
         logging.debug("(Adjusted ulimit -n (RLIMIT_NOFILE) to %d)", 262144)
-    except (ValueError, resource.error), exc:
+    except (ValueError, resource.error) as exc:
         logging.debug("Failed to raise RLIMIT_NOFILE: %s", exc)
 
     if args.log_level:

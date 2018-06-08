@@ -50,9 +50,9 @@ class MySQLPathInfo(tuple):
 
     def _replace(_self, **kwds):
         'Return a new MySQLPathInfo object replacing specified fields with new values'
-        result = _self._make(map(kwds.pop, ('datadir', 'innodb_log_group_home_dir', 'innodb_log_files_in_group', 'innodb_data_home_dir', 'innodb_data_file_path', 'abs_tablespace_paths'), _self))
+        result = _self._make(list(map(kwds.pop, ('datadir', 'innodb_log_group_home_dir', 'innodb_log_files_in_group', 'innodb_data_home_dir', 'innodb_data_file_path', 'abs_tablespace_paths'), _self)))
         if kwds:
-            raise ValueError('Got unexpected field names: %r' % kwds.keys())
+            raise ValueError('Got unexpected field names: %r' % list(kwds.keys()))
         return result
 
     def __getnewargs__(self):
@@ -111,7 +111,7 @@ class MySQLPathInfo(tuple):
     def walk_innodb_logs(self):
         """Iterate over InnoDB redo log paths"""
         basedir = self.get_innodb_logdir()
-        for logid in xrange(self.innodb_log_files_in_group):
+        for logid in range(self.innodb_log_files_in_group):
             yield join(basedir, 'ib_logfile' + str(logid))
 
     #@staticmethod

@@ -29,7 +29,6 @@ def start(mysqldump,
           open_stream=open,
           compression_ext=''):
     """Run a mysqldump backup"""
-
     if not schema and file_per_database:
         raise BackupError("file_per_database specified without a valid schema")
 
@@ -62,15 +61,15 @@ def start(mysqldump,
                 LOG.warning("Encoding file-name for database %s to %s", db.name, db_name)
             try:
                 stream = open_stream('%s.sql' % db_name, 'w')
-            except (IOError, OSError), exc:
+            except (IOError, OSError) as exc:
                 raise BackupError("Failed to open output stream %s: %s" %
-                                  ('%s.sql' + compression_ext, str(exc)))
+                                  ( db_name + '.sql' + compression_ext, str(exc)))
             try:
                 mysqldump.run([db.name], stream, more_options)
             finally:
                 try:
                     stream.close()
-                except (IOError, OSError), exc:
+                except (IOError, OSError) as exc:
                     if exc.errno != errno.EPIPE:
                         LOG.error("%s", str(exc))
                         raise BackupError(str(exc))
@@ -78,7 +77,7 @@ def start(mysqldump,
         more_options = [mysqldump_lock_option(lock_method, target_databases)]
         try:
             stream = open_stream('all_databases.sql', 'w')
-        except (IOError, OSError), exc:
+        except (IOError, OSError) as exc:
             raise BackupError("Failed to open output stream %s: %s" %
                               'all_databases.sql' + compression_ext, exc)
         try:
@@ -88,14 +87,18 @@ def start(mysqldump,
         finally:
             try:
                 stream.close()
-            except (IOError, OSError), exc:
+            except (IOError, OSError) as exc:
                 if exc.errno != errno.EPIPE:
                     LOG.error("%s", str(exc))
                     raise BackupError(str(exc))
 
 def write_manifest(schema, open_stream, ext):
     """Write real database names => encoded names to MANIFEST.txt"""
-    manifest_fileobj = open_stream('MANIFEST.txt', 'w', method='none')
+    if sys.version_info > (3, 0):
+        manifest_fileobj = open_stream('MANIFEST.txt', 'w', method='none')
+    else:
+        manifest_fileobj = open_stream('MANIFEST.txt', 'wb', method='none')
+
     try:
         manifest = csv.writer(manifest_fileobj,
                               dialect=csv.excel_tab,

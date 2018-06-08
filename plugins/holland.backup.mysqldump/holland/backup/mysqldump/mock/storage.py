@@ -1,4 +1,4 @@
-import __builtin__
+import builtins
 
 __all__ = (
     'file', 'open',
@@ -8,8 +8,7 @@ __all__ = (
 
 from warnings import warn
 
-original_file = __builtin__.file
-original_open = __builtin__.open
+original_open = builtins.open
 
 
 # bad for introspection?
@@ -76,16 +75,16 @@ The preferred way to open a file is with the builtin open() function."""
 
     _closed = False
     _mode = 'r'
-    
+
     def __init__(self, name, mode='r'):
         "x.__init__(...) initializes x; see x.__class__.__doc__ for signature"
-        if not isinstance(name, basestring):
+        if not isinstance(name, str):
             raise TypeError('File name argument must be str got: %s' %
                              type(name))
-        if not isinstance(mode, basestring):
-            raise TypeError('File mode argument must be str got: %s' % 
+        if not isinstance(mode, str):
+            raise TypeError('File mode argument must be str got: %s' %
                             type(mode))
-            
+
         self._name = name
         self._mode = mode
         self._position = 0
@@ -95,13 +94,13 @@ The preferred way to open a file is with the builtin open() function."""
         self._fileno = get_new_fileno()
         self._in_iter = False
         self._softspace = 0
-        
+
         if mode not in ALL_MODES:
             raise ValueError("The only supported modes are r(+)(b), w(+)(b) "
                              "and a(+)(b), not %r" % mode)
         if name == '':
             raise IOError("No such file or directory: ''")
-        
+
         if mode in READ_MODES and mode[0] not in ('a', 'w'):
             self._open_read()
         elif mode in WRITE_MODES:
@@ -112,8 +111,8 @@ The preferred way to open a file is with the builtin open() function."""
         else:
             # double check and remove this branch!
             raise AssertionError('whoops - not possible, surely??')
-    
-    
+
+
     def _open_read(self):
         if not backend.CheckForFile(self.name):
             raise IOError('No such file or directory: %r' % self.name)
@@ -121,25 +120,25 @@ The preferred way to open a file is with the builtin open() function."""
         if not self._binary:
             data = data.replace('\r\n', '\n')
         self._data = data
-    
-        
+
+
     def _open_write(self):
         backend.SaveFile(self.name, '')
-        
-    
+
+
     def _open_append(self):
         if backend.CheckForFile(self.name):
             self._open_read()
             self._position = len(self._data)
         else:
             self._open_write()
-    
-    
+
+
     def _check_int_argument(self, arg):
         if isinstance(arg, float):
             arg = int(arg)
             warn(DeprecationWarning('Integer argument expected got float'))
-        elif not isinstance(arg, (int, long)):
+        elif not isinstance(arg, int):
             raise TypeError('Integer argument expected. Got %s' % type(arg))
         return arg
 
@@ -157,25 +156,25 @@ The preferred way to open a file is with the builtin open() function."""
         if self._in_iter:
             raise ValueError('Mixing iteration and read methods would '
                              'lose data')
-        
+
         pos = self._position
         if pos == 0 and self.mode not in WRITE_MODES:
             # can't do this when we are in a mixed read / write mode like r+
             # could do this on every read, not just when pos is 0?
             self._open_read()
-        
+
         if size is DEFAULT:
             size = len(self._data)
         else:
             size = self._check_int_argument(size)
             if size < 0:
                 size = len(self._data)
-        
+
         data = self._data[pos: pos + size]
         self._position += len(data)
         return data
-    
-    
+
+
     def write(self, data):
         """write(str) -> None.  Write string str to file.
 
@@ -187,20 +186,20 @@ the file on disk reflects the data written."""
             raise ValueError('I/O operation on closed file')
 
         self._softspace = 0
-        
+
         if not data:
             return
         if not self._binary:
             data = data.replace('\n', '\r\n')
-        
+
         position = self._position
         start = self._data[:position]
         padding = (position - len(start)) * '\x00'
         end = self._data[position + len(data):]
-        self._data = start + padding + data + end
+        self._data = str(start) + str(padding) + str(data) + str(end)
         self._position = position + len(data)
-    
-        
+
+
     def close(self):
         """close() -> None or (perhaps) an integer.  Close the file.
 
@@ -221,13 +220,13 @@ may return an exit status upon closing."""
         if self.closed:
             state = 'closed'
         return '<%s file %r mode %r>' % (state, self.name, self.mode)
-        
-    
+
+
     def __del__(self):
         "alias for close()"
         self.close()
 
-        
+
     def seek(self, position, whence=0):
         """seek(offset[, whence]) -> None.  Move to new file position.
 
@@ -243,18 +242,18 @@ Note that not all file objects are seekable."""
         whence = self._check_int_argument(whence)
         if not 0 <= whence <= 2:
             raise IOError('Invalid Argument')
-        
+
         if whence == 1:
             position = self._position + position
         elif whence == 2:
             position = len(self._data) + position
-            
+
         if position < 0:
             raise IOError('Invalid Argument')
         self._in_iter = False
         self._position = position
 
-        
+
     def tell(self):
         "tell() -> current file position, an integer (may be a long integer)."
         return self._position
@@ -271,20 +270,20 @@ Note that not all file objects are seekable."""
         "isatty() -> true or false.  True if the file is connected to a tty device."
         return False
 
-    
+
     def fileno(self):
         """fileno() -> integer "file descriptor".
 
 This is needed for lower-level file interfaces, such os.read()."""
         return self._fileno
 
-    
+
     def __iter__(self):
         "x.__iter__() <==> iter(x)"
         return self
 
-    
-    def next(self):
+
+    def __next__(self):
         "x.next() -> the next value, or raise StopIteration"
         if self.mode in WRITE_MODES:
             raise IOError('Bad file descriptor')
@@ -292,8 +291,8 @@ This is needed for lower-level file interfaces, such os.read()."""
         if self._position >= len(self._data):
             raise StopIteration
         return self.readline()
-    
-    
+
+
     def readline(self, size=DEFAULT):
         """readline([size]) -> next line from the file, as a string.
 
@@ -302,20 +301,20 @@ number of bytes to return (an incomplete line may be returned then).
 Return an empty string at EOF."""
         if self.mode in WRITE_MODES:
             raise IOError('Bad file descriptor')
-        
+
         if size is not DEFAULT:
             size = self._check_int_argument(size)
             if size < 0:
                 # treat negative integers the same as DEFAULT
                 size = DEFAULT
-        
+
         if self._position >= len(self._data):
             return ''
-        
+
         position = self._position
         remaining = self._data[position:]
         poz = remaining.find('\n')
-        
+
         if poz == -1:
             if size is DEFAULT or size > len(remaining):
                 self._position = len(self._data)
@@ -323,11 +322,11 @@ Return an empty string at EOF."""
             actual = remaining[:size]
             self._position += len(actual)
             return actual
-        
+
         if size is DEFAULT:
             self._position = position + poz + 1
             return remaining[:poz + 1]
-        
+
         actual = remaining[:poz + 1]
         if len(actual) <= size:
             self._position += len(actual)
@@ -344,7 +343,7 @@ The optional size argument, if given, is an approximate bound on the
 total number of bytes in the lines returned."""
         if self.mode in WRITE_MODES:
             raise IOError('Bad file descriptor')
-        
+
         # argument actually ignored
         if size is not DEFAULT:
             self._check_int_argument(size)
@@ -352,8 +351,8 @@ total number of bytes in the lines returned."""
         result = list(self)
         self._in_iter = False
         return result
-    
-    
+
+
     def xreadlines(self):
         """xreadlines() -> returns self.
 
@@ -361,17 +360,17 @@ For backward compatibility. File objects now include the performance
 optimizations previously implemented in the xreadlines module."""
         return self
 
-    
+
     def _set_softspace(self, value):
         self._softspace = self._check_int_argument(value)
-    
+
     def _get_softspace(self):
         return self._softspace
-    
-    softspace = property(_get_softspace, _set_softspace, 
+
+    softspace = property(_get_softspace, _set_softspace,
                          doc="flag indicating that a space needs to be printed; used by print")
-    
-    
+
+
     def truncate(self, size=DEFAULT):
         """truncate([size]) -> None.  Truncate the file to at most size bytes.
 
@@ -387,8 +386,8 @@ Size defaults to the current file position, as returned by tell()."""
         data = self._data[:size]
         self._data = data + (size - len(data)) * '\x00'
         self.flush()
-        
-    
+
+
     def writelines(self, sequence):
         """writelines(sequence_of_strings) -> None.  Write the strings to the file.
 
@@ -396,24 +395,24 @@ Note that newlines are not added.  The sequence can be any iterable object
 producing strings. This is equivalent to calling write() for each string."""
         if self.mode not in WRITE_MODES:
             raise IOError('Bad file descriptor')
-        
+
         if getattr(sequence, '__iter__', None) is None:
             raise TypeError('writelines() requires an iterable argument')
-        
+
         for line in sequence:
             self.write(line)
-    
-            
+
+
     def __enter__(self):
         "__enter__() -> self."
         return self
-    
+
 
     def __exit__(self, *excinfo):
         "__exit__(*excinfo) -> None.  Closes the file."
         self.close()
 
-    
+
 
 def open(name, mode='r', bufsize=None):
     """open(name[, mode]) -> file object
@@ -427,20 +426,20 @@ def mkdir(path, mode=None):
 
 def replace_builtins():
     "replace file and open in the builtin module"
-    __builtin__.file =  file
-    __builtin__.open = open
+    builtins.file =  file
+    builtins.open = open
 
 def restore_builtins():
     "restore the original file and open to the builtin module"
-    __builtin__.file =  original_file
-    __builtin__.open = original_open
+    builtins.file =  original_file
+    builtins.open = original_open
 
-    
+
 _store = {}
 
 class backend(object):
     "Example backend."
-    
+
     def CheckForFile(filename):
         return filename in _store
     CheckForFile = staticmethod(CheckForFile)

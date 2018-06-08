@@ -1,4 +1,5 @@
 """This module provides backports for older python releases"""
+from six import with_metaclass
 
 import re
 
@@ -79,10 +80,8 @@ class _TemplateMetaclass(type):
                 }
         cls.pattern = re.compile(pattern, re.IGNORECASE | re.VERBOSE)
 
-
-class Template(object):
+class Template(with_metaclass(_TemplateMetaclass, object)):
     """A string class for supporting $-substitutions."""
-    __metaclass__ = _TemplateMetaclass
 
     delimiter = '$'
     idpattern = r'[_a-z][_a-z0-9]*'

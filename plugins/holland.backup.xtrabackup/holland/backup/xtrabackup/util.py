@@ -5,6 +5,7 @@ holland.backup.xtrabackup.util
 Utility methods used by the xtrabackup plugin
 """
 
+from __future__ import print_function
 import codecs
 import tempfile
 import logging
@@ -31,7 +32,7 @@ def generate_defaults_file(defaults_file, include=(), auth_opts=None):
             for path in include:
                 path = expanduser(path)
                 LOG.info("  + Added !include %s", path)
-                print >>fileobj, '!include ' + path
+                print('!include ' + path, file=fileobj)
 
             if auth_opts:
                 need_client_section = True
@@ -41,12 +42,12 @@ def generate_defaults_file(defaults_file, include=(), auth_opts=None):
                         continue
                     if need_client_section:
                         LOG.info("  + Added [client] section with credentials from [mysql:client] section")
-                        print >>fileobj, "[client]"
+                        print("[client]", file=fileobj)
                         need_client_section = False
-                    print >>fileobj, '%s = %s' % (key, value)
+                    print('%s = %s' % (key, value), file=fileobj)
         finally:
             fileobj.close()
-    except IOError, exc:
+    except IOError as exc:
         raise BackupError("Failed to create %s: [%d] %s" %
                           (defaults_file, exc.errno, exc.strerror))
 
@@ -59,7 +60,7 @@ def run_xtrabackup(args, stdout, stderr):
     LOG.info("  > %s 2 > %s", stdout.name, stderr.name)
     try:
         process = Popen(args, stdout=stdout, stderr=stderr, close_fds=True)
-    except OSError, exc:
+    except OSError as exc:
         # Failed to find innobackupex executable
         raise BackupError("%s failed: %s" % (args[0], exc.strerror))
 
@@ -105,7 +106,7 @@ def apply_xtrabackup_logfile(xb_cfg, backupdir):
     LOG.info("Executing: %s", cmdline)
     try:
         process = Popen(args, stdout=PIPE, stderr=STDOUT, close_fds=True)
-    except OSError, exc:
+    except OSError as exc:
         raise BackupError("Failed to run %s: [%d] %s",
                           cmdline, exc.errno, exc.strerror)
 
@@ -151,7 +152,7 @@ def execute_pre_command(pre_command, **kwargs):
                         stderr=STDOUT,
                         shell=True,
                         close_fds=True)
-    except OSError, exc:
+    except OSError as exc:
         # missing executable
         raise BackupError("pre-command %s failed: %s" %
                           (pre_command, exc.strerror))
@@ -170,11 +171,11 @@ def add_xtrabackup_defaults(defaults_path, **kwargs):
     try:
         try:
             # spurious newline for readability
-            print >>fileobj
-            print >>fileobj, "[xtrabackup]"
-            for key, value in kwargs.iteritems():
-                print >>fileobj, "%s = %s" % (key, value)
-        except IOError, exc:
+            print(file=fileobj)
+            print("[xtrabackup]", file=fileobj)
+            for key, value in list(kwargs.items()):
+                print("%s = %s" % (key, value), file=fileobj)
+        except IOError as exc:
             raise BackupError("Error writing xtrabackup defaults to %s" %
                               defaults_path)
     finally:
@@ -195,7 +196,7 @@ def build_xb_args(config, basedir, defaults_file=None):
     safe_slave_backup = config['safe-slave-backup']
     no_lock = config['no-lock']
     # filter additional options to remove any empty values
-    extra_opts = filter(None, config['additional-options'])
+    extra_opts = [_f for _f in config['additional-options'] if _f]
 
     args = [
         innobackupex,
@@ -222,3 +223,26 @@ def build_xb_args(config, basedir, defaults_file=None):
     if basedir:
         args.append(basedir)
     return args
+
+def xtrabackup_version():
+    xtrabackup_binary = 'xtrabackup'
+    if not isabs(xtrabackup_binary):
+        try:
+            xtrabackup_binary = which(xtrabackup_binary)
+        except WhichError:
+            raise BackupError("Failed to find xtrabackup binary")
+    xb_version = [xtrabackup_binary, '--version']
+    cmdline = list2cmdline(xb_version)
+    LOG.info("Executing: %s", cmdline)
+    try:
+        process = Popen(xb_version, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    except OSError as exc:
+        raise BackupError("Failed to run %s: [%d] %s",
+                          cmdline, exc.errno, exc.strerror)
+
+    for line in process.stdout:
+        LOG.info("%s", line.rstrip().decode('UTF-8'))
+    process.wait()
+    if process.returncode != 0:
+        raise BackupError("%s returned failure status [%d]" %
+                          (cmdline, process.returncode))

@@ -42,8 +42,7 @@ class SQLitePlugin(object):
     def check(self):
         LOG.info("Checking that SQLite backups can run.")
         if not os.path.exists(self.sqlite_bin):
-            raise BackupError, \
-                "SQLite binary [%s] doesn't exist!" % self.sqlite_bin    
+            raise BackupError("SQLite binary [%s] doesn't exist!" % self.sqlite_bin)    
                 
         for db in self.config['sqlite']['databases']:
             # sometimes picks up empty string ('')
@@ -69,7 +68,7 @@ class SQLitePlugin(object):
                 self.databases.append(db)
 
         if len(self.databases) == 0 and len(self.invalid_databases) == 0:
-            raise BackupError, "No SQLite databases to backup!"
+            raise BackupError("No SQLite databases to backup!")
             
     def estimate_backup_size(self):
         """
@@ -121,5 +120,5 @@ class SQLitePlugin(object):
 
         # Raise for invalid databases after we successfully backup the others
         if len(self.invalid_databases) > 0:
-            raise BackupError, "Invalid database(s): %s" % self.invalid_databases
+            raise BackupError("Invalid database(s): %s" % self.invalid_databases)
             

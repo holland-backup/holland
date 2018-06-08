@@ -1,5 +1,5 @@
 import logging
-from StringIO import StringIO
+from io import StringIO
 from textwrap import dedent
 from holland.backup.mysqldump.mysql.option import *
 from holland.backup.mysqldump.mock.storage import replace_builtins, restore_builtins

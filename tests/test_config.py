@@ -33,7 +33,7 @@ class TestHollandConfig(unittest.TestCase):
             'logging.filename' : '/dev/null'
         }
 
-        for key, value in cfgentry_tests.items():
+        for key, value in list(cfgentry_tests.items()):
             self.assertEqual(hollandcfg.lookup(key), value)
 
     def test_backupset(self):

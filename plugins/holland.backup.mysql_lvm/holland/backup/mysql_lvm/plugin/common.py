@@ -1,10 +1,12 @@
 
 """Utility functions to help out the mysql-lvm plugin"""
+from __future__ import print_function
 import os
 import errno
 import shutil
 import tempfile
 import logging
+import copy
 from holland.core.exceptions import BackupError
 from holland.core.util.fmt import format_bytes
 from holland.lib.mysql import PassiveMySQLClient, MySQLError, \
@@ -19,14 +21,13 @@ def connect_simple(config):
     """
     try:
         mysql_config = build_mysql_config(config)
-        sanitized = {k:v for k,v in mysql_config.items()}
-        if 'password' in mysql_config.keys():
-            sanitized['password'] = "[REDACTED]"
-        LOG.debug("mysql_config => %r", sanitized)
         connection = connect(mysql_config['client'], PassiveMySQLClient)
+        sanitized = copy.deepcopy(mysql_config)
+        sanitized['client']['password'] = "[REDACTED]"
+        LOG.debug("mysql_config => %s", sanitized)
         connection.connect()
         return connection
-    except MySQLError, exc:
+    except MySQLError as exc:
         raise BackupError("[%d] %s" % exc.args)
 
 def cleanup_tempdir(path):
@@ -74,7 +75,7 @@ def build_snapshot(config, logical_volume, suppress_tmpdir=False):
                          int(logical_volume.vg_free_count),
                          format_bytes(int(logical_volume.vg_free_count)*extent_size, precision=4))
                 snapshot_size = int(logical_volume.vg_free_count)
-        except ValueError, exc:
+        except ValueError as exc:
             raise BackupError("Problem parsing snapshot-size %s" % exc)
 
     mountpoint = config['snapshot-mountpoint']
@@ -87,7 +88,7 @@ def build_snapshot(config, logical_volume, suppress_tmpdir=False):
         try:
             os.makedirs(mountpoint)
             LOG.info("Created mountpoint %s", mountpoint)
-        except OSError, exc:
+        except OSError as exc:
             # silently ignore if the mountpoint already exists
             if exc.errno != errno.EEXIST:
                 raise BackupError("Failure creating snapshot mountpoint: %s" %

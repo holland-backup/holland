@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import time
 import shlex
@@ -48,9 +49,9 @@ class TarArchiveAction(object):
         if pre_args or post_args:
             warning_readme = os.path.join(archive_dirname, "NONSTD_TAR.txt")
             warning_log = open('warning_readme', 'w')
-            print >>warning_log, ("This tar file was generated with non-std "
-                                  "args:")
-            print >>warning_log, list2cmdline(argv)
+            print(("This tar file was generated with non-std "
+                                  "args:"), file=warning_log)
+            print(list2cmdline(argv), file=warning_log)
         archive_log = os.path.join(archive_dirname, 'archive.log')
         process = Popen(argv,
                         preexec_fn=os.setsid,
@@ -64,7 +65,7 @@ class TarArchiveAction(object):
 
         try:
             self.archive_stream.close()
-        except IOError, exc:
+        except IOError as exc:
             LOG.error("tar output stream %s failed: %s",
                       self.archive_stream.name, exc)
             raise BackupError(str(exc))

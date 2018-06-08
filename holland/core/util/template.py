@@ -1,7 +1,7 @@
 """
 Backport of string.Template from python2.4+
 """
-
+from future.utils import with_metaclass
 import re as _re
 
 class _multimap:
@@ -44,9 +44,8 @@ class _TemplateMetaclass(type):
         cls.pattern = _re.compile(pattern, _re.IGNORECASE | _re.VERBOSE)
 
 
-class Template(object):
+class Template(with_metaclass(_TemplateMetaclass, object)):
     """A string class for supporting $-substitutions."""
-    __metaclass__ = _TemplateMetaclass
 
     delimiter = '$'
     idpattern = r'[_a-z][_a-z0-9]*'

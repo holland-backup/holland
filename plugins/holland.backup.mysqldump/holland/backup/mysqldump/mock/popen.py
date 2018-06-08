@@ -1,9 +1,9 @@
 """Mock subprocess.Popen"""
 
-from mocker import *
+from .mocker import *
 
 def _debug_wait(*args, **kwargs):
-    print "Waiting(args=%r, kwargs=%r)" % (args, kwargs)
+    print("Waiting(args=%r, kwargs=%r)" % (args, kwargs))
     return 0
 
 def mock_subprocess(mocker):

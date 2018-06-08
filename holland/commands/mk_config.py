@@ -1,13 +1,14 @@
 """
 Command support for generating backupset configs
 """
+from __future__ import print_function
 
 import os
 import sys
 import tempfile
 import logging
 import subprocess
-from StringIO import StringIO
+from io import StringIO
 
 from holland.core.command import Command, option
 from holland.core.plugin import load_first_entrypoint, PluginLoadError
@@ -62,7 +63,7 @@ def _report_errors(cfg, errors):
             param = ' '.join((section, '[missing section]'))
         if error == False:
             error = 'Missing value or section'
-        print >>sys.stderr, param, ' = ', error
+        print(param, ' = ', error, file=sys.stderr)
 
 def confirm(prompt=None, resp=False):
     """prompts for yes or no response from the user. Returns True for yes and
@@ -92,11 +93,11 @@ def confirm(prompt=None, resp=False):
         prompt = '%s ([%s] or %s): ' % (prompt, 'n', 'y')
 
     while True:
-        ans = raw_input(prompt)
+        ans = input(prompt)
         if not ans:
             return resp
         if ans not in ['y', 'Y', 'n', 'N']:
-            print >>sys.stderr, 'please enter y or n.'
+            print('please enter y or n.', file=sys.stderr)
             continue
         if ans == 'y' or ans == 'Y':
             return True
@@ -149,7 +150,7 @@ class MkConfig(Command):
                 config[section_name][key] = ''
                 config[section_name].comments[key].append('REQUIRED')
             elif error:
-                print >>sys.stderr, "Bad configspec generated error", error
+                print("Bad configspec generated error", error, file=sys.stderr)
 
         pending_comments = []
         for section in list(config):
@@ -197,12 +198,12 @@ class MkConfig(Command):
 
     def run(self, cmd, opts, plugin_type):
         if opts.name and opts.provider:
-            print >>sys.stderr, "Can't specify a name for a global provider config"
+            print("Can't specify a name for a global provider config", file=sys.stderr)
             return 1
 
         try:
             plugin_cls = load_first_entrypoint('holland.backup', plugin_type)
-        except PluginLoadError, exc:
+        except PluginLoadError as exc:
             logging.info("Failed to load backup plugin %r: %s",
                          plugin_type, exc)
             return 1
@@ -210,7 +211,7 @@ class MkConfig(Command):
         try:
             cfgspec = sys.modules[plugin_cls.__module__].CONFIGSPEC
         except:
-            print >>sys.stderr, "Could not load config-spec from plugin %r" % plugin_type
+            print("Could not load config-spec from plugin %r" % plugin_type, file=sys.stderr)
             return 1
 
         base_config = """
@@ -221,7 +222,8 @@ class MkConfig(Command):
         purge-policy            = after-backup
         estimated-size-factor   = 1.0
         """.lstrip().splitlines()
-        cfg = ConfigObj(base_config, configspec=cfgspec, list_values=True,stringify=True)
+        cfg = ConfigObj(base_config, configspec=cfgspec, list_values=True,
+                stringify=True)
         cfg['holland:backup']['plugin'] = plugin_type
         self._cleanup_config(cfg, skip_comments=opts.minimal)
 
@@ -229,7 +231,7 @@ class MkConfig(Command):
             done = False
             editor = _find_editor()
             if not editor:
-                print >>sys.stderr, "Could not find a valid editor"
+                print("Could not find a valid editor", file=sys.stderr)
                 return 1
 
             tmpfileobj = tempfile.NamedTemporaryFile()
@@ -240,15 +242,15 @@ class MkConfig(Command):
                 if status != 0:
                     if not confirm("Editor exited with non-zero status[%d]. "
                                    "Would you like to retry?" % status):
-                        print >>sys.stderr, "Aborting"
+                        print("Aborting", file=sys.stderr)
                         return 1
                     else:
                         continue
                 try:
                     cfg.reload()
-                except ParseError, exc:
-                    print >>sys.stderr, "%s : %s" % \
-                    (exc.msg, exc.line)
+                except ParseError as exc:
+                    print("%s : %s" % \
+                    (exc.msg, exc.line), file=sys.stderr)
                 else:
                     errors = cfg.validate(validator,preserve_errors=True)
                     if errors is True:
@@ -258,19 +260,27 @@ class MkConfig(Command):
                         _report_errors(cfg, errors)
 
                 if not confirm('There were configuration errors. Continue?'):
-                    print >>sys.stderr, "Aborting"
+                    print("Aborting", file=sys.stderr)
                     return 1
             tmpfileobj.close()
 
         if not opts.name and not opts.file:
-            cfg.write(sys.stdout)
+            buf = getattr(sys.stdout, 'buffer', sys.stdout)
+            cfg.write(buf)
+            buf.flush()
 
         if opts.file:
-            print >>sys.stderr, "Saving config to %r" % opts.file
-            cfg.write(open(opts.file, 'w'))
+            print("Saving config to %r" % opts.file, file=sys.stderr)
+            fh = open(opts.file, 'w')
+            buf = getattr(fh, 'buffer',fh)
+            cfg.write(buf)
+            buf.flush()
         elif opts.name:
             base_dir = os.path.dirname(hollandcfg.filename)
             path = os.path.join(base_dir, 'backupsets', opts.name + '.conf')
-            print >>sys.stderr, "Saving config to %r" % path
-            cfg.write(open(path, 'w'))
+            print("Saving config to %r" % path, file=sys.stderr)
+            fh = open(path, 'w')
+            buf = getattr(fh, 'buffer', fh)
+            cfg.write(buf)
+            buf.flush()
         return 0

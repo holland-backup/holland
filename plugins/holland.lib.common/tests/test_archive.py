@@ -17,7 +17,7 @@ def test_dir_archive():
     global tmpdir
     axv = DirArchive(os.path.join(tmpdir, 'dir'))
     name_list = []
-    for num in xrange(1, 16):
+    for num in range(1, 16):
         fd, filename = tempfile.mkstemp(dir=tmpdir)
         os.close(fd)
         basename = os.path.basename(filename)
@@ -33,7 +33,7 @@ def test_tar_archive():
     axv = TarArchive(os.path.join(tmpdir, 'tar'))
     name_list = []
 
-    for num in xrange(1, 16):
+    for num in range(1, 16):
         fd, filename = tempfile.mkstemp(dir=tmpdir)
         os.close(fd)
         basename = os.path.basename(filename)
@@ -49,7 +49,7 @@ def test_zip_archive():
     axv = ZipArchive(os.path.join(tmpdir, 'zip'))
     name_list = []
 
-    for num in xrange(1, 16):
+    for num in range(1, 16):
         fd, filename = tempfile.mkstemp(dir=tmpdir)
         os.close(fd)
         basename = os.path.basename(filename)

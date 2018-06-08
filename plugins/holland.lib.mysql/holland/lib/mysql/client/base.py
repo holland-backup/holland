@@ -116,14 +116,14 @@ class MySQLClient(object):
         cursor = self.cursor()
         try:
             cursor.execute(sql)
-        except MySQLError, exc:
+        except MySQLError as exc:
             LOG.error("MySQL reported an error while running %s. [%d] %s", 
                       sql, *exc.args)
             raise
         names = [info[0].lower() for info in cursor.description]
         result = []
         for row in cursor:
-            row = dict(zip(names, row))
+            row = dict(list(zip(names, row)))
             row['database'] = database
             row['data_size'] = (row.pop('data_length') or 0)
             row['index_size'] = (row.pop('index_length') or 0)
@@ -140,7 +140,7 @@ class MySQLClient(object):
                                 row['comment'] or '')
             else:
                 row['engine'] = row['engine'].lower()
-            for key in row.keys():
+            for key in list(row.keys()):
                 valid_keys = [
                     'database',
                     'name',
@@ -175,7 +175,7 @@ class MySQLClient(object):
         cursor.execute(sql, (database,))
         names = [info[0] for info in cursor.description]
         all_rows = cursor.fetchall()
-        result = [dict(zip(names, row)) for row in all_rows]
+        result = [dict(list(zip(names, row))) for row in all_rows]
         cursor.close()
         return result
 
@@ -190,7 +190,7 @@ class MySQLClient(object):
                 return self._show_table_metadata50(database)
             else:
                 return self._show_table_metadata51(database)
-        except MySQLError, exc:
+        except MySQLError as exc:
             exc.args = (exc.args[0], exc.args[1].decode('utf8'))
             raise
 
@@ -257,7 +257,7 @@ class MySQLClient(object):
                 if cursor.execute('SHOW CREATE VIEW `%s`.`%s`' %
                                   (schema, name)):
                     return cursor.fetchone()[1]
-            except MySQLError, exc:
+            except MySQLError as exc:
                 LOG.warning("!!! SHOW CREATE VIEW failed for `%s`.`%s`. "
                             "The view likely references columns that no "
                             "longer exist in the underlying tables.",
@@ -291,7 +291,7 @@ class MySQLClient(object):
                              """)
                 if cursor.execute(sql, (schema, name)):
                     return cursor.fetchone()[0]
-            except MySQLError, exc:
+            except MySQLError as exc:
                 LOG.debug("INFORMATION_SCHEMA.VIEWS(%s,%s) failed: [%d] %s ",
                         schema, name, *exc.args)
             return None
@@ -334,7 +334,7 @@ class MySQLClient(object):
             if not slave_status:
                 return None
             else:
-                return dict(zip(keys, slave_status))
+                return dict(list(zip(keys, slave_status)))
         finally:
             cursor.close()
 
@@ -350,7 +350,7 @@ class MySQLClient(object):
         if not master_status:
             return None
         else:
-            return dict(zip(keys, master_status))
+            return dict(list(zip(keys, master_status)))
 
     def start_slave(self):
         """Run START SLAVE on the connected MySQL instance"""
@@ -520,9 +520,12 @@ def connect(config, client_class=AutoMySQLClient):
             continue
         try:
             # normalize the value. port => int
-            value = value_conv.get(key, unicode)(config[key])
+            value = value_conv.get(key, str)(config[key])
             # convert my.cnf parameters to what MySQLdb expects
-            args[cnf_to_mysqldb[key]] = value
+            if isinstance(value, bytes):
+                args[cnf_to_mysqldb[key]] = value.decode('utf-8')
+            else:
+                 args[cnf_to_mysqldb[key]] = str(value)
         except KeyError:
             LOG.warn("Skipping unknown parameter %s", key)
     # also, always use utf8

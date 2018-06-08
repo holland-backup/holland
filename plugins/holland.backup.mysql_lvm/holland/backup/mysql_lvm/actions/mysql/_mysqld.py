@@ -1,9 +1,11 @@
 """Common mysqld bootstrapping functionality"""
 
+from __future__ import print_function
+from __future__ import unicode_literals
 import os
 import signal
 import logging
-from cStringIO import StringIO
+from io import StringIO
 from subprocess import Popen, STDOUT, list2cmdline
 from holland.core.exceptions import BackupError
 from holland.lib.which import which, WhichError
@@ -94,18 +96,18 @@ def generate_server_config(config, path):
         'pid-file',
         'port',
     ]
-    print >>conf_data, "[mysqld]"
-    for key, value in config.iteritems():
+    print("[mysqld]", file=conf_data)
+    for key, value in config.items():
         if key.replace('_', '-') not in valid_params:
             LOG.warning("Ignoring mysqld config parameter %s", key)
             continue
-        print >>conf_data, "%s = %s" % (key, value)
-    print >>conf_data, "# not used for --bootstrap but here for completeness"
-    print >>conf_data, "port = 3307"
-    print >>conf_data, "loose-skip-ndbcluster"
-    print >>conf_data, "skip-networking"
-    print >>conf_data, "skip-slave-start"
-    print >>conf_data, "skip-log-bin"
+        print("%s = %s" % (key, value), file=conf_data)
+    print("# not used for --bootstrap but here for completeness", file=conf_data)
+    print("port = 3307", file=conf_data)
+    print("loose-skip-ndbcluster", file=conf_data)
+    print("skip-networking", file=conf_data)
+    print("skip-slave-start", file=conf_data)
+    print("skip-log-bin", file=conf_data)
     text = conf_data.getvalue()
     LOG.debug("Generating config: %s", text)
     open(path, 'w').write(text)

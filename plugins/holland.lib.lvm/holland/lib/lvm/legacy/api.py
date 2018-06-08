@@ -4,7 +4,7 @@ import os
 import csv
 import logging
 from subprocess import Popen, PIPE, list2cmdline, call
-from cStringIO import StringIO
+from io import StringIO
 
 LOG = logging.getLogger(__name__)
 
@@ -286,4 +286,4 @@ def lvm_dict(keys, values):
     stream = StringIO(values)
     kwargs = dict(delimiter=',', skipinitialspace=True)
     for row in csv.reader(stream, **kwargs):
-        yield dict(zip(keys, row))
+        yield dict(list(zip(keys, row)))

@@ -1,6 +1,6 @@
-from dir_archive import DirArchive
-from tar_archive import TarArchive
-from zip_archive import ZipArchive
+from .dir_archive import DirArchive
+from .tar_archive import TarArchive
+from .zip_archive import ZipArchive
 
 __all__ = [
     'DirArchive',

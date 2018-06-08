@@ -9,7 +9,7 @@ from holland.core.config.checks import is_logging_level
 HOLLAND_VERSION = get_distribution('holland').version
 HOLLAND_BANNER = """
 Holland Backup v%s
-Copyright (c) 2008-2016 Rackspace US, Inc.
+Copyright (c) 2008-2018 Rackspace US, Inc.
 More info available at http://hollandbackup.org
 
 [[[[[[[]]]]]]] [[[[[[[]]]]]]]

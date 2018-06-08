@@ -1,6 +1,6 @@
-from config import hollandcfg, setup_config, load_backupset_config, \
+from .config import hollandcfg, setup_config, load_backupset_config, \
                    BaseConfig, ConfigError
-from configobj import ConfigObj, ParseError, ConfigObjError
+from .configobj import ConfigObj, ParseError, ConfigObjError
 
 __all__ = [
     'hollandcfg',

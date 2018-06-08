@@ -88,7 +88,7 @@ def purge_backupset(backupset, force=False, all_backups=False):
         try:
             config = hollandcfg.backupset(backupset.name)
             config.validate_config(CONFIGSPEC, suppress_warnings=True)
-        except (IOError, ConfigError), exc:
+        except (IOError, ConfigError) as exc:
             LOG.error("Failed to load backupset '%s': %s", backupset.name, exc)
             LOG.error("Aborting, because I could not tell how many backups to "
                       "preserve.")

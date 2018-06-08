@@ -69,16 +69,16 @@ class XtrabackupPlugin(object):
     def estimate_backup_size(self):
         try:
             client = MySQL.from_defaults(self.defaults_path)
-        except MySQL.MySQLError, exc:
+        except MySQL.MySQLError as exc:
             raise BackupError('Failed to connect to MySQL [%d] %s' % exc.args)
         try:
             try:
                 datadir = client.var('datadir')
                 return directory_size(datadir)
-            except MySQL.MySQLError, exc:
+            except MySQL.MySQLError as exc:
                 raise BackupError("Failed to find mysql datadir: [%d] %s" %
                                   exc.args)
-            except OSError, exc:
+            except OSError as exc:
                 raise BackupError('Failed to calculate directory size: [%d] %s'
                                   % (exc.errno, exc.strerror))
         finally:
@@ -89,7 +89,7 @@ class XtrabackupPlugin(object):
         path = join(self.target_directory, 'xtrabackup.log')
         try:
             return open(path, 'a')
-        except IOError, exc:
+        except IOError as exc:
             raise BackupError('[%d] %s' % (exc.errno, exc.strerror))
 
     def open_xb_stdout(self):
@@ -110,7 +110,7 @@ class XtrabackupPlugin(object):
                                    method=zconfig['method'],
                                    level=zconfig['level'],
                                    extra_args=zconfig['options'])
-            except OSError, exc:
+            except OSError as exc:
                 raise BackupError("Unable to create output file: %s" % exc)
         else:
             return open('/dev/null', 'w')
@@ -132,7 +132,7 @@ class XtrabackupPlugin(object):
         LOG.debug("* Verifying via command: %s", cmdline)
         try:
             process = Popen(args, stdout=PIPE, stderr=STDOUT, close_fds=True)
-        except OSError, exc:
+        except OSError as exc:
             raise BackupError("Failed to find xtrabackup binary")
         stdout = process.stdout.read()
         process.wait()
@@ -145,6 +145,7 @@ class XtrabackupPlugin(object):
                               (cmdline, process.returncode))
 
     def backup(self):
+        util.xtrabackup_version()
         if self.dry_run:
             self.dryrun()
             return
@@ -163,7 +164,7 @@ class XtrabackupPlugin(object):
             try:
                 try:
                     util.run_xtrabackup(args, stdout, stderr)
-                except Exception, exc:
+                except Exception as exc:
                     LOG.info("!! %s", exc)
                     for line in open(join(self.target_directory, 'xtrabackup.log'), 'r'):
                         LOG.error("    ! %s", line.rstrip())
@@ -171,7 +172,7 @@ class XtrabackupPlugin(object):
             finally:
                 try:
                     stdout.close()
-                except IOError, e:
+                except IOError as e:
                     LOG.error("Error when closing %s: %s", stdout.name, e)
                     if exc is None:
                         raise

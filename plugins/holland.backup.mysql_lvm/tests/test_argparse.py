@@ -26,7 +26,7 @@ import holland.backup.lvm.cli.argparse as argparse
 __test__ = False
 
 try:
-    from StringIO import StringIO
+    from io import StringIO
 except ImportError:
     from io import StringIO
 
@@ -60,8 +60,8 @@ class TestCase(unittest.TestCase):
     def assertEqual(self, obj1, obj2):
         if obj1 != obj2:
             print('')
-            print(repr(obj1))
-            print(repr(obj2))
+            print((repr(obj1)))
+            print((repr(obj2)))
             print(obj1)
             print(obj2)
         super(TestCase, self).assertEqual(obj1, obj2)
@@ -580,7 +580,7 @@ class TestOptionalsChoices(ParserTestCase):
 
     argument_signatures = [
         Sig('-f', choices='abc'),
-        Sig('-g', type=int, choices=range(5))]
+        Sig('-g', type=int, choices=list(range(5)))]
     failures = ['a', '-f d', '-fad', '-ga', '-g 6']
     successes = [
         ('', NS(f=None, g=None)),
@@ -1083,7 +1083,7 @@ class TestPositionalsChoicesString(ParserTestCase):
 class TestPositionalsChoicesInt(ParserTestCase):
     """Test a set of integer choices"""
 
-    argument_signatures = [Sig('spam', type=int, choices=range(20))]
+    argument_signatures = [Sig('spam', type=int, choices=list(range(20)))]
     failures = ['', '--foo', 'h', '42', 'ef']
     successes = [
         ('4', NS(spam=4)),
@@ -1738,8 +1738,8 @@ class TestAddSubparsers(TestCase):
         except ArgumentParserError:
             err = sys.exc_info()[1]
             if err.message != expected_help:
-                print(repr(expected_help))
-                print(repr(err.message))
+                print((repr(expected_help)))
+                print((repr(err.message)))
             self.assertEqual(err.message, expected_help)
 
     def test_subparser1_help(self):
@@ -1785,7 +1785,7 @@ class TestPositionalsGroups(TestCase):
         parser.add_argument('baz')
         expected = NS(foo='1', bar='2', baz='3')
         result = parser.parse_args('1 2 3'.split())
-        self.failUnlessEqual(expected, result)
+        self.assertEqual(expected, result)
 
     def test_group_first(self):
         parser = ErrorRaisingArgumentParser()
@@ -1795,7 +1795,7 @@ class TestPositionalsGroups(TestCase):
         parser.add_argument('baz')
         expected = NS(foo='1', bar='2', baz='3')
         result = parser.parse_args('1 2 3'.split())
-        self.failUnlessEqual(expected, result)
+        self.assertEqual(expected, result)
 
     def test_interleaved_groups(self):
         parser = ErrorRaisingArgumentParser()
@@ -1807,7 +1807,7 @@ class TestPositionalsGroups(TestCase):
         group.add_argument('frell')
         expected = NS(foo='1', bar='2', baz='3', frell='4')
         result = parser.parse_args('1 2 3 4'.split())
-        self.failUnlessEqual(expected, result)
+        self.assertEqual(expected, result)
 
 # ===================
 # Parent parser tests
@@ -2516,11 +2516,11 @@ class TestHelpFormattingMetaclass(type):
                 expected_text = getattr(tester, self.func_suffix)
                 expected_text = textwrap.dedent(expected_text)
                 if expected_text != parser_text:
-                    print(repr(expected_text))
-                    print(repr(parser_text))
+                    print((repr(expected_text)))
+                    print((repr(parser_text)))
                     for char1, char2 in zip(expected_text, parser_text):
                         if char1 != char2:
-                            print('first diff: %r %r' % (char1, char2))
+                            print(('first diff: %r %r' % (char1, char2)))
                             break
                 tester.assertEqual(expected_text, parser_text)
 
@@ -3624,7 +3624,7 @@ class TestInvalidArgumentConstructors(TestCase):
             e = sys.exc_info()[1]
             expected = 'unknown action'
             msg = 'expected %r, found %r' % (expected, e)
-            self.failUnless(expected in str(e), msg)
+            self.assertTrue(expected in str(e), msg)
 
     def test_multiple_dest(self):
         parser = argparse.ArgumentParser()
@@ -3635,7 +3635,7 @@ class TestInvalidArgumentConstructors(TestCase):
             e = sys.exc_info()[1]
             expected = 'dest supplied twice for positional argument'
             msg = 'expected %r, found %r' % (expected, e)
-            self.failUnless(expected in str(e), msg)
+            self.assertTrue(expected in str(e), msg)
 
     def test_no_argument_actions(self):
         for action in ['store_const', 'store_true', 'store_false',
@@ -3953,10 +3953,10 @@ class TestNamespace(TestCase):
         self.assertNotEqual(ns1, ns4)
         self.assertNotEqual(ns2, ns3)
         self.assertNotEqual(ns2, ns4)
-        self.failUnless(ns1 != ns3)
-        self.failUnless(ns1 != ns4)
-        self.failUnless(ns2 != ns3)
-        self.failUnless(ns2 != ns4)
+        self.assertTrue(ns1 != ns3)
+        self.assertTrue(ns1 != ns4)
+        self.assertTrue(ns2 != ns3)
+        self.assertTrue(ns2 != ns4)
 
 
 # ===================
@@ -3985,7 +3985,7 @@ class TestArgumentError(TestCase):
     def test_argument_error(self):
         msg = "my error here"
         error = argparse.ArgumentError(None, msg)
-        self.failUnlessEqual(str(error), msg)
+        self.assertEqual(str(error), msg)
 
 # =======================
 # ArgumentTypeError tests
@@ -4005,7 +4005,7 @@ class TestArgumentError(TestCase):
         except ArgumentParserError:
             expected = 'usage: PROG x\nPROG: error: argument x: spam!\n'
             msg = str(sys.exc_info()[1])
-            self.failUnlessEqual(expected, msg)
+            self.assertEqual(expected, msg)
         else:
             self.fail()
 
@@ -4019,8 +4019,8 @@ class TestParseKnownArgs(TestCase):
         parser = argparse.ArgumentParser()
         parser.add_argument('--foo')
         args, extras = parser.parse_known_args('--foo F --bar --baz'.split())
-        self.failUnlessEqual(NS(foo='F'), args)
-        self.failUnlessEqual(['--bar', '--baz'], extras)
+        self.assertEqual(NS(foo='F'), args)
+        self.assertEqual(['--bar', '--baz'], extras)
 
     def test_mixed(self):
         parser = argparse.ArgumentParser()
@@ -4030,8 +4030,8 @@ class TestParseKnownArgs(TestCase):
 
         argv = ["B", "C", "--foo", "-v", "3", "4"]
         args, extras = parser.parse_known_args(argv)
-        self.failUnlessEqual(NS(v=3, spam=True, badger="B"), args)
-        self.failUnlessEqual(["C", "--foo", "4"], extras)
+        self.assertEqual(NS(v=3, spam=True, badger="B"), args)
+        self.assertEqual(["C", "--foo", "4"], extras)
 
 # ============================
 # from argparse import * tests
@@ -4041,7 +4041,7 @@ class TestImportStar(TestCase):
 
     def test(self):
         for name in argparse.__all__:
-            self.failUnless(hasattr(argparse, name))
+            self.assertTrue(hasattr(argparse, name))
 
 
 if __name__ == '__main__':

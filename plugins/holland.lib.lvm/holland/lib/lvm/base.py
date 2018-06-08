@@ -161,6 +161,9 @@ class LogicalVolume(Volume):
             raise LookupError("No LogicalVolume could be found "
                               "for pathspec %r" %
                               pathspec)
+        except Exception as ex:
+            raise OSError("unable to look up path %s" % ex)
+
     lookup = classmethod(lookup)
 
     def lookup_from_fspath(cls, path):
@@ -201,7 +204,7 @@ class LogicalVolume(Volume):
 
         try:
             lvsnapshot(self.device_name(), name, size)
-        except LVMCommandError, exc:
+        except LVMCommandError as exc:
             for line in exc.error.splitlines():
                 LOG.error("%s", line)
             raise
@@ -228,7 +231,7 @@ class LogicalVolume(Volume):
         """
         try:
             mount(self.device_name(), path, options)
-        except LVMCommandError, exc:
+        except LVMCommandError as exc:
             for line in exc.error.splitlines():
                 LOG.error("%s", line)
             raise
@@ -237,7 +240,7 @@ class LogicalVolume(Volume):
         """Unmount this volume, if mounted"""
         try:
             umount(self.device_name())
-        except LVMCommandError, exc:
+        except LVMCommandError as exc:
             for line in exc.error.splitlines():
                 LOG.error("%s", line)
             raise
@@ -252,7 +255,7 @@ class LogicalVolume(Volume):
         """
         try:
             lvremove(self.device_name())
-        except LVMCommandError, exc:
+        except LVMCommandError as exc:
             for line in exc.error.splitlines():
                 LOG.error("%s", line)
             raise
@@ -290,7 +293,7 @@ class LogicalVolume(Volume):
             device_info, = blkid(self.device_name())
             LOG.debug("Looked up device_info => %r", device_info)
             return device_info['type']
-        except (LVMCommandError, ValueError), exc:
+        except (LVMCommandError, ValueError) as exc:
             LOG.debug("Failed looking up filesystem for %s => %r",
                       self.device_name(), exc, exc_info=True)
             raise LookupError()

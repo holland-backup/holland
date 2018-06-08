@@ -2,6 +2,7 @@
 
 http://dev.mysql.com/doc/refman/5.1/en/option-files.html
 """
+from __future__ import print_function
 import os
 import re
 import codecs
@@ -32,7 +33,7 @@ def load_options(filename):
     cfg = INIConfig()
     try:
         cfg._readfp(open(filename, 'r'))
-    except ParsingError, exc:
+    except ParsingError as exc:
         LOG.debug("Skipping unparsable lines")
         for lineno, line in exc.errors:
             LOG.debug("Ignored line %d: %s", lineno, line.rstrip())
@@ -106,8 +107,8 @@ def write_options(config, filename):
             if '"' in config[section][key]:
                 config[section][key] = quote(config[section][key])
 
-    if isinstance(filename, basestring):
+    if isinstance(filename, str):
         filename = codecs.open(filename, 'w', 'utf8')
-    data = unicode(config)
-    print >>filename, data
+    data = str(config)
+    print(data, file=filename)
     filename.close()

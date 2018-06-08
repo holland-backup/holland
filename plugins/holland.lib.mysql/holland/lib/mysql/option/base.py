@@ -2,12 +2,14 @@
 
 http://dev.mysql.com/doc/refman/5.1/en/option-files.html
 """
+from __future__ import print_function
 import os, sys
 import re
 import errno
 import codecs
 import logging
 import subprocess
+import six
 from holland.lib.mysql.option.parser import OptionFile
 
 LOG = logging.getLogger(__name__)
@@ -17,7 +19,7 @@ def merge_options(*defaults_files):
     defaults_config = dict(client={})
     def merge(dst_dict, src_dict):
         """Merge two dictionaries non-destructively"""
-        for key, val in src_dict.items():
+        for key, val in list(src_dict.items()):
             if (key in dst_dict and isinstance(dst_dict[key], dict) and
                                 isinstance(val, dict)):
                 merge(dst_dict[key], val)
@@ -48,13 +50,15 @@ def quote(value):
     return '"' + value.replace('"', '\\"') + '"'
 
 def write_options(config, filename):
-    if isinstance(filename, basestring):
+    if isinstance(filename, six.string_types):
         filename = codecs.open(filename, 'w', 'utf8')
+    else:
+        raise TypeError("Filename isn't a string")
     for section in config:
-        print >>filename, "[%s]" % section
+        print("[%s]" % section, file=filename)
         for key in config[section]:
-            value = unicode(config[section][key])
-            print >>filename, "%s = %s" % (key, quote(value))
+            value = str(config[section][key])
+            print("%s = %s" % (key, quote(value)), file=filename)
     filename.close()
 
 def build_mysql_config(mysql_config):
@@ -99,6 +103,6 @@ def process_password_file(path):
         password = open(path, 'r').read().rstrip()
         LOG.debug("Loaded password file %s", path)
         return password
-    except IOError, exc:
+    except IOError as exc:
         LOG.error("Failed to load password file %s: %s", path, str(exc))
         raise

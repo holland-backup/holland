@@ -2,8 +2,8 @@ import re
 import os
 import random
 import unittest
-import ConfigParser
-from StringIO import StringIO
+import configparser
+from io import StringIO
 from holland.backup.mysqldump.util import compat, ini
 
 # TODO:
@@ -96,19 +96,19 @@ class test_fuzz(unittest.TestCase):
                 s = '\n'.join(good_lines)
                 cc = compat.RawConfigParser()
                 cc.readfp(StringIO(s))
-                cc_py = ConfigParser.RawConfigParser()
+                cc_py = configparser.RawConfigParser()
                 cc_py.readfp(StringIO(s))
                 # compare the two configparsers
                 self.assertEqualSorted(cc_py.sections(), cc.sections())
-                self.assertEqualSorted(cc_py.defaults().items(), cc.defaults().items())
+                self.assertEqualSorted(list(cc_py.defaults().items()), list(cc.defaults().items()))
                 for sec in cc_py.sections():
                     self.assertEqualSorted(cc_py.options(sec), cc.options(sec))
                     for opt in cc_py.options(sec):
                         self.assertEqual(cc_py.get(sec, opt), cc.get(sec, opt))
             except AssertionError:
                 fname = 'fuzz-test-iter-%d.ini' % fuzz_iter
-                print 'Fuzz test failed at iteration', fuzz_iter
-                print 'Writing out failing INI file as', fname
+                print('Fuzz test failed at iteration', fuzz_iter)
+                print('Writing out failing INI file as', fname)
                 f = open(fname, 'w')
                 f.write(s)
                 f.close()

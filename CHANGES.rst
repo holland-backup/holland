@@ -8,6 +8,47 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.1.0 - May 8, 2018
+---------------------
+
+holland
++++++++
+
+holland
++++++++
+
+- Update Holland to work on Python 3. It's now using compatibility library to support Python version > 2.6
+- Update packaged version of ConfigObj to 5.0.6 
+- holland now has a few external dependencies: 
+  * future 
+  * six 
+- Implemented fix for broken stop-slave function on MySQL 5.7+ (Fixes GH#185 jacripe)
+- Remove holland.backup.maatkit and holland.backup.mysqlhotcopy from active backup list
+- Add 'format' option to 'logging' in /etc/holland/holland.conf (GH#99).
+  This uses the current log formatter if 'format' not defined.
+
+holland-mysqldump
++++++++++++++++++
+
+- Add dir archive-method (GH Pull #184 chder)
+- bin-log-position will now record the masters position even if stop-slave isn't enabled
+- Update stop/start slave fuctions
+
+holland-xtrabackup
++++++++++++++++++
+
+- Print out xtrabackup version number
+
+holland-mariabackup
++++++++++++++++++
+
+- Add plugin to allow use of mariabackup binary
+
+holland-mongodb
++++++++++++++++++
+
+- Add plugin to allow holland to backup mongodb
+
 1.0.14 - Nov 17, 2016
 ---------------------
 

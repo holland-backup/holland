@@ -1,5 +1,5 @@
 import unittest
-from StringIO import StringIO
+from io import StringIO
 
 from holland.backup.mysqldump.util import ini
 from holland.backup.mysqldump.util import compat
@@ -196,13 +196,13 @@ but = also me
         self.assertEqual(p._data.find('section2').find('just').value, 'kidding')
 
         itr = p._data.finditer('section1')
-        v = itr.next()
+        v = next(itr)
         self.assertEqual(v.find('help').value, 'yourself')
         self.assertEqual(v.find('but').value, 'also me')
-        v = itr.next()
+        v = next(itr)
         self.assertEqual(v.find('help').value, 'me')
         self.assertEqual(v.find('I\'m').value, 'desperate')
-        self.assertRaises(StopIteration, itr.next)
+        self.assertRaises(StopIteration, itr.__next__)
 
         self.assertRaises(KeyError, p._data.find, 'section')
         self.assertRaises(KeyError, p._data.find('section2').find, 'ahem')

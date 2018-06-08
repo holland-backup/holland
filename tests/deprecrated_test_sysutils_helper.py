@@ -6,7 +6,7 @@ import string
 import random
 import logging
 import logging.handlers as handlers
-import md5
+from hashlib import md5
 from shutil import rmtree
 
 # FIXME: This used to test holland.helpers which was
@@ -53,13 +53,13 @@ class Test(object):
         fd,file_path = tempfile.mkstemp(prefix='holland-test-')
         safe_path = h.protected_path(file_path)
         expected_path = "%s.0" % file_path
-        self.assertEquals(safe_path == expected_path, True)
+        self.assertEqual(safe_path == expected_path, True)
         
         # dir
         dir_path = tempfile.mkdtemp(prefix='holland-test-')
         safe_path = h.protected_path(dir_path)
         expected_path = "%s.0" % dir_path
-        self.assertEquals(safe_path == expected_path, True)
+        self.assertEqual(safe_path == expected_path, True)
         
         # clean up
         os.remove(file_path)
@@ -73,7 +73,7 @@ class Test(object):
             os.remove(file_path)
             dir_path = os.path.realpath(dir_path)
             data = ''
-            for i in xrange(1024**2):
+            for i in range(1024**2):
                 data = data + random.choice(string.letters)
         
             stream = h.get_compression_stream(output_path=file_path, mode=c_mode)
@@ -104,7 +104,7 @@ class Test(object):
         
         # Create and compress the file
         handle = os.fdopen(fd, 'w')
-        for i in xrange(1024**2):
+        for i in range(1024**2):
             handle.write(random.choice(string.letters))
         handle.close()
         comp_path = h.compress_path(
@@ -136,14 +136,14 @@ class Test(object):
     def test_mount_info(self):
         self.assertRaises(TypeError, h.mount_info)
         if platform.system() != 'Linux':
-            print "Skipping Test For This Platform (%s)" % platform.system()
+            print("Skipping Test For This Platform (%s)" % platform.system())
             return False
             
     def test_which(self):
         # No arguments given
         self.assertRaises(TypeError, h.which)
         if platform.system() == 'Windows':
-            print "Skipping Test For This Platform (%s)" % platform.system()
+            print("Skipping Test For This Platform (%s)" % platform.system())
             return False
         # Common utility test
         self.assertEqual(h.which('ls'), '/bin/ls')
@@ -155,7 +155,7 @@ class Test(object):
         # No arguments given
         self.assertRaises(TypeError, h.relpath)
         if platform.system() == 'Windows':
-            print "Skipping Test For This Platform (%s)" % platform.system()
+            print("Skipping Test For This Platform (%s)" % platform.system())
             return False
         # Same Path
         self.assertEqual(h.relpath('test', 'test'), '')        

@@ -24,7 +24,7 @@ def ensure_dir(dir_path):
             os.makedirs(dir_path)
             LOG.debug("created directory %s" % dir_path)
             return True
-        except OSError, e:
+        except OSError as e:
             # FIX ME: Need error codes/etc so this will exit(<code>) or raise
             # an appropriate holland exception
             LOG.error("os.makedirs(%s): %s" % (dir_path, e))
@@ -154,6 +154,6 @@ def directory_size(path):
             try:
                 sz = getsize(join(root,name))
                 result = result + sz
-            except OSError, exc:
+            except OSError as exc:
                 pass
     return result
