@@ -2,7 +2,8 @@ import logging
 import os
 import os.path
 import subprocess
-import urllib
+import urllib.request, urllib.parse, urllib.error
+from io import open
 
 from functools import partial
 
@@ -60,10 +61,10 @@ class MongoDump(object):
         uri = "mongodb://"
         username = self.config["mongodump"].get("username")
         if username:
-            uri += urllib.quote_plus(username)
+            uri += urllib.parse.quote_plus(username)
             password = self.config["mongodump"].get("password")
             if password:
-                uri += ":" + urllib.quote_plus(password)
+                uri += ":" + urllib.parse.quote_plus(password)
             uri += '@'
         uri += self.config["mongodump"].get("host")
         client = MongoClient(uri)
@@ -96,7 +97,7 @@ class MongoDump(object):
         else:
             LOG.info("MongoDump command: %s" % subprocess.list2cmdline(command))
             logfile = open(os.path.join(self.target_directory, "mongodump.log"), "w")
-            p = subprocess.Popen(command, stderr=logfile)
+            p = subprocess.Popen(command, stdout=logfile, stderr=logfile)
             ret = p.wait()
             
             if ret != 0:
@@ -105,14 +106,16 @@ class MongoDump(object):
             zopts = self.config['compression']
             for root, _, files in os.walk(self.target_directory):
                 for f in files:
+                    if '.log' in f or '.conf' in f:
+                        continue
                     path = os.path.join(root, f)
+                    LOG.info("Compressing file %s" % path)
                     ostream = open_stream(path, 'w',
                             method=zopts['method'],
                             level=zopts['level'],
                             extra_args="")
                     with open(path, 'rb') as f:
-                        for chunk in iter(partial(f.read, 4 * 1024), ''):
-                            ostream.write(chunk)
+                        ostream.write(f.read())
                     ostream.close()
                     os.remove(path)
 
