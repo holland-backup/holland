@@ -181,7 +181,7 @@ class MySQLDumpPlugin(object):
                      raise BackupError("stop-slave enabled, but replication is "
                                        "not running")
                 _stop_slave(self.client, self.config)
-	    elif self.config['mysqldump']['bin-log-position']:
+            elif self.config['mysqldump']['bin-log-position']:
                 self.config['mysql:replication'] = {}
                 repl_cfg = self.config['mysql:replication']
                 try:
