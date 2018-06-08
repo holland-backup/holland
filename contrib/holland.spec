@@ -39,7 +39,7 @@ Summary:        Pluggable Backup Framework
 Group:          Applications/Archiving
 License:        BSD
 URL:            http://hollandbackup.org
-Source0:        http://hollandbackup.org/releases/stable/1.0/%{name}-%{version}.tar.gz
+Source0:        http://hollandbackup.org/releases/stable/1.1/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
