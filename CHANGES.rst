@@ -31,11 +31,19 @@ holland-mysqldump
 +++++++++++++++++
 
 - Add dir archive-method (GH Pull #184 chder)
+- bin-log-position will now record the masters position even if stop-slave isn't enabled
+- Update stop/start slave fuctions
 
 holland-xtrabackup
 +++++++++++++++++
 
 - Print out xtrabackup version number
+
+holland-mariabackup
++++++++++++++++++
+
+- Add plugin to allow use of mariabackup binary
+
 
 1.0.14 - Nov 17, 2016
 ---------------------
