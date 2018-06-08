@@ -5,3 +5,4 @@ holland.backup.example
 holland.backup.mysqldump
 holland.backup.mysql_lvm
 holland.backup.xtrabackup
+holland.backup.mongodump

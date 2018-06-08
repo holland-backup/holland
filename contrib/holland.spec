@@ -30,6 +30,7 @@
 %bcond_without  pgdump
 %bcond_without  sqlite
 %bcond_without  xtrabackup
+%bcond_without  mongodump
 
 Name:           holland
 Version:        %{holland_version}
@@ -154,6 +155,17 @@ plugin requires Percona XtraBackup and runs the provided
 /usr/bin/innobackupex script.
 %endif
 
+%if %{with mongodump}
+%package mongodump
+Summary: MongoDump Backup Provider Plugin for Holland
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+
+%description mongodump
+MongoDB Backup Plugin for Holland
+%endif
+
+
 %if %{with tar}
 %package tar
 Summary: tar plugin for Holland
@@ -272,6 +284,12 @@ cd plugins/holland.backup.xtrabackup
 cd -
 %endif
 
+%if %{with mongodump}
+cd plugins/holland.backup.mongodump
+%{__python} setup.py build
+cd -
+%endif
+
 %if %{with tar}
 cd plugins/holland.backup.tar
 %{__python} setup.py build
@@ -377,6 +395,15 @@ cd plugins/holland.backup.xtrabackup
 cd -
 install -m 0640 config/providers/xtrabackup.conf %{buildroot}%{_sysconfdir}/holland/providers/
 %endif
+
+%if %{with mongodump}
+# plugin : holland.backup.mongodump
+cd plugins/holland.backup.mongodump
+%{__python} setup.py install -O1 --skip-build --root %{buildroot}
+cd -
+install -m 0640 config/providers/mongodump.conf %{buildroot}%{_sysconfdir}/holland/providers/
+%endif
+
 
 %if %{with tar}
 # plugin : holland.backup.tar
@@ -531,6 +558,16 @@ rm -rf %{buildroot}
 %{python_sitelib}/holland.backup.xtrabackup-%{version}-*-nspkg.pth
 %{python_sitelib}/holland.backup.xtrabackup-%{version}-*.egg-info
 %config(noreplace) %{_sysconfdir}/holland/providers/xtrabackup.conf
+%endif
+
+%if %{with mongodump}
+%files mongodump
+%defattr(-,root,root,-)
+%doc plugins/holland.backup.mongodump/{README,LICENSE}
+%{python_sitelib}/holland/backup/mongodump.py*
+%{python_sitelib}/holland.backup.mongodump-%{version}-*-nspkg.pth
+%{python_sitelib}/holland.backup.mongodump-%{version}-*.egg-info
+%config(noreplace) %{_sysconfdir}/holland/providers/mongodump.conf
 %endif
 
 %if %{with tar}
