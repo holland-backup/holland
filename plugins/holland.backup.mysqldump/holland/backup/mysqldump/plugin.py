@@ -180,8 +180,17 @@ class MySQLDumpPlugin(object):
                 elif slave_status['slave_sql_running'] != 'Yes':
                      raise BackupError("stop-slave enabled, but replication is "
                                        "not running")
-                self.config.setdefault('mysql:replication', {})
-                _stop_slave(self.client, self.config['mysql:replication'])
+                _stop_slave(self.client, self.config)
+	    elif self.config['mysqldump']['bin-log-position']:
+                self.config['mysql:replication'] = {}
+                repl_cfg = self.config['mysql:replication']
+                try:
+                    master_info = self.client.show_master_status()
+                    if master_info:
+                        repl_cfg['master_log_file'] = master_info['file']
+                        repl_cfg['master_log_pos'] = master_info['position']
+                except MySQLError as exc:
+                    raise BackupError("Failed to acquire master status [%d] %s" % exc.args)
             self._backup()
         finally:
             if self.config['mysqldump']['stop-slave'] and \
@@ -352,58 +361,66 @@ def validate_mysqldump_options(mysqldump, options):
         except MyOptionError as exc:
             LOG.warning(str(exc))
 
-
-def _stop_slave(client, config=None):
+def _stop_slave(client, config):
     """Stop MySQL replication"""
     try:
         client.stop_slave(sql_thread_only=True)
         LOG.info("Stopped slave")
+        config['mysql:replication'] = {}
+        repl_cfg = config['mysql:replication']
     except MySQLError as exc:
         raise BackupError("Failed to stop slave[%d]: %s" % exc.args)
-    if config is not None:
-        try:
-            slave_info = client.show_slave_status()
-            if slave_info:
-                # update config with replication info
-                config['slave_master_log_pos'] = slave_info['exec_master_log_pos']
-                config['slave_master_log_file'] = slave_info['relay_master_log_file']
-        except MySQLError as exc:
-            raise BackupError("Failed to acquire slave status[%d]: %s" % \
-                                exc.args)
-        try:
-            master_info = client.show_master_status()
-            if master_info:
-                config['master_log_file'] = master_info['file']
-                config['master_log_pos'] = master_info['position']
-        except MySQLError as exc:
-            raise BackupError("Failed to acquire master status [%d] %s" % exc.args)
+
+    try:
+        slave_info = client.show_slave_status()
+        if slave_info:
+            # update config with replication info
+            log_file = slave_info['relay_master_log_file']
+            log_pos = slave_info['exec_master_log_pos']
+            repl_cfg['slave_master_log_file'] = log_file
+            repl_cfg['slave_master_log_pos'] = log_pos
+    except MySQLError as exc:
+        raise BackupError("Failed to acquire slave status[%d]: %s" % \
+                            exc.args)
+    try:
+        master_info = client.show_master_status()
+        if master_info:
+            repl_cfg['master_log_file'] = master_info['file']
+            repl_cfg['master_log_pos'] = master_info['position']
+    except MySQLError as exc:
+        raise BackupError("Failed to acquire master status [%d] %s" % exc.args)
 
     LOG.info("MySQL Replication has been stopped.")
 
 def _start_slave(client, config=None):
     """Start MySQL replication"""
-    try:
-        slave_info = client.show_slave_status()
-        if slave_info and slave_info['exec_master_log_pos'] != config['slave_master_log_pos']:
-            LOG.warning("Sanity check on slave status failed.  "
-                    "Previously recorded %s:%s but currently found %s:%s",
-                    config['slave_master_log_file'], config['slave_master_log_pos'],
-                    slave_info['relay_master_log_file'], slave_info['exec_master_log_pos'])
-            LOG.warning("ALERT! Slave position changed during backup!")
-    except MySQLError as exc:
-        LOG.warning("Failed to sanity check replication[%d]: %s",
-                         *exc.args)
 
-    try:
-        master_info = client.show_master_status()
-        if master_info and master_info['position'] != config['master_log_pos']:
-            LOG.warning("Sanity check on master status failed.  "
-                    "Previously recorded %s:%s but currently found %s:%s",
-                    config['master_log_file'], config['master_log_pos'],
-                    master_info['file'], master_info['position'])
-            LOG.warning("ALERT! Binary log position changed during backup!")
-    except MySQLError as exc:
-        LOG.warning("Failed to sanity check master status. [%d] %s", *exc.args)
+    # Skip sanity check on slave coords if we didn't actually record any coords
+    # This might happen if mysqld goes away between STOP SLAVE and SHOW SLAVE
+    # STATUS.
+    if config:
+        try:
+            slave_info = client.show_slave_status()
+            if slave_info and slave_info['exec_master_log_pos'] != config['slave_master_log_pos']:
+                LOG.warning("Sanity check on slave status failed.  "
+                        "Previously recorded %s:%d but currently found %s:%d",
+                        config['slave_master_log_file'], config['slave_master_log_pos'],
+                        slave_info['relay_master_log_file'], slave_info['exec_master_log_pos'])
+                LOG.warning("ALERT! Slave position changed during backup!")
+        except MySQLError as exc:
+            LOG.warning("Failed to sanity check replication[%d]: %s",
+                             *exc.args)
+
+        try:
+            master_info = client.show_master_status()
+            if master_info and master_info['position'] != config['master_log_pos']:
+                LOG.warning("Sanity check on master status failed.  "
+                        "Previously recorded %s:%s but currently found %s:%s",
+                        config['master_log_file'], config['master_log_pos'],
+                        master_info['file'], master_info['position'])
+                LOG.warning("ALERT! Binary log position changed during backup!")
+        except MySQLError as exc:
+            LOG.warning("Failed to sanity check master status. [%d] %s", *exc.args)
 
     try:
         client.start_slave()
