@@ -25,12 +25,12 @@
 %bcond_with     example
 %bcond_with     sphinxdocs
 %bcond_with     mysqlhotcopy
-%bcond_with     maatkit
 %bcond_with     tar
 %bcond_without  pgdump
 %bcond_without  sqlite
 %bcond_without  xtrabackup
 %bcond_without  mongodump
+%bcond_without  mariabackup
 
 Name:           holland
 Version:        %{holland_version}
@@ -290,6 +290,12 @@ cd plugins/holland.backup.mongodump
 cd -
 %endif
 
+%if %{with mariabackup}
+cd plugins/holland.backup.mariabackup
+%{__python} setup.py build
+cd -
+%endif
+
 %if %{with tar}
 cd plugins/holland.backup.tar
 %{__python} setup.py build
@@ -404,6 +410,13 @@ cd -
 install -m 0640 config/providers/mongodump.conf %{buildroot}%{_sysconfdir}/holland/providers/
 %endif
 
+%if %{with mariabackup}
+# plugin : holland.backup.mariabackup
+cd plugins/holland.backup.mariabackup
+%{__python} setup.py install -O1 --skip-build --root %{buildroot}
+cd -
+install -m 0640 config/providers/mariabackup.conf %{buildroot}%{_sysconfdir}/holland/providers/
+%endif
 
 %if %{with tar}
 # plugin : holland.backup.tar
@@ -570,6 +583,17 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/holland/providers/mongodump.conf
 %endif
 
+
+%if %{with mariabackup}
+%files mariabackup
+%defattr(-,root,root,-)
+%doc plugins/holland.backup.mariabackup/{README,LICENSE}
+%{python_sitelib}/holland/backup/mariabackup/
+%{python_sitelib}/holland.backup.mariabackup-%{version}-*-nspkg.pth
+%{python_sitelib}/holland.backup.mariabackup-%{version}-*.egg-info
+%config(noreplace) %{_sysconfdir}/holland/providers/mariabackup.conf
+%endif
+
 %if %{with tar}
 %files tar
 %defattr(-,root,root,-)
@@ -581,6 +605,9 @@ rm -rf %{buildroot}
 %endif
 
 %changelog
+* Fri Jun 08 2018 Steven Soulen <steven@soulen.net> - 1.1.0-1
+- Latest sources from upstream
+
 * Tue Mar 01 2016 Andrew Garner <andrew.garner@rackspace.com> - 1.0.14-1
 - Latest sources from upstream
 

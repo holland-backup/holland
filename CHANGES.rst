@@ -8,7 +8,7 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
-1.1.0 - May 5, 2018
+1.1.0 - May 8, 2018
 ---------------------
 
 holland
@@ -44,6 +44,10 @@ holland-mariabackup
 
 - Add plugin to allow use of mariabackup binary
 
+holland-mongodb
++++++++++++++++++
+
+- Add plugin to allow holland to backup mongodb
 
 1.0.14 - Nov 17, 2016
 ---------------------
