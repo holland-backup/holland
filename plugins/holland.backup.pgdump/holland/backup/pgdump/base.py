@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Backup functions for pg_dump"""
 
+from __future__ import print_function
 # Python stdlib
 import os
 import shlex

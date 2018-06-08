@@ -79,18 +79,6 @@ Requires: %{name} = %{version}-%{release}
 %description random
 Random Backup Provider Plugin for Holland
 
-%if %{with maatkit}
-%package maatkit
-Summary: Holland mk-parallel-dump plugin
-Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}, %{name}-common = %{version}-%{release}
-Requires: maatkit
-
-%description maatkit
-This plugin provides support for holland to perform MySQL backups using the
-mk-parallel-dump script from the Maatkit toolkit.
-%endif
-
 %package mysqldump
 Summary: Logical mysqldump backup plugin for Holland
 License: GPLv2
@@ -129,7 +117,7 @@ and to generate a tar archive of the raw data directory.
 
 %if %{with pgdump}
 %package    pgdump
-Summary: Holland LVM snapshot backup plugin for MySQL
+Summary: pgdump plugin for Holland
 License: GPLv2
 Group: Development/Libraries
 Provides: %{name}-pgdump = %{version}-%{release}
@@ -177,6 +165,21 @@ Requires: tar
 
 %description tar
 This package provides a Holland plugin for creating tar files
+%endif
+
+%if %{with mariabackup}
+%package mariabackup
+Summary: Holland plugin for Mariabackup
+License: GPLv2
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
+Requires: MariaDB-backup
+
+%description mariabackup
+This package provides a Holland plugin for MariaDB-backup. This
+plugin requires MariaDB-backup and runs the provided
+/usr/bin/mariabackup.
 %endif
 
 %prep
