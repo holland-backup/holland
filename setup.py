@@ -22,6 +22,7 @@ setup(name="holland",
       install_requires=[
          #'configobj', # currently this is bundled internally
          'future',
+         'setuptools',
          'six'
       ],
       entry_points="""
