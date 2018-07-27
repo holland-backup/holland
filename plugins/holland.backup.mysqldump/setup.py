@@ -23,7 +23,7 @@ setup(name='holland.backup.mysqldump',
         'holland >= 0.9.6',
       ],
       install_requires=[
-        # 'nose', # Not required, but needed if you want to run nose tests...
+        'configparser'
       ],
       extras_require = {
         'mysql' : 'holland.lib.mysql',
