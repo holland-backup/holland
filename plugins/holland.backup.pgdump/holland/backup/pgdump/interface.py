@@ -39,7 +39,7 @@ level = integer(min=0, default=1)
 options = string(default="")
 
 [pgauth]
-username = string(default=None)
+username = string(default='postgres')
 password = string(default=None)
 hostname = string(default=None)
 port = integer(default=None)
