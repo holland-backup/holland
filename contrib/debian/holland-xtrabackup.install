@@ -1,3 +1,0 @@
-debian/tmp/usr/lib/python*.*/*-packages/holland.backup.xtrabackup-*.egg-info
-debian/tmp/usr/lib/python*.*/*-packages/holland/backup/xtrabackup/
-config/providers/xtrabackup.conf etc/holland/providers/

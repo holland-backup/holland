@@ -1,7 +1,0 @@
-holland.lib.common common
-holland.lib.mysql mysql 
-holland.backup.maatkit maatkit
-holland.backup.mysqlhotcopy mysqlhotcopy
-holland.backup.example example
-holland.backup.mysqldump mysqldump
-holland.commands.mysql mysqlcmds

@@ -1,6 +1,0 @@
-debian/tmp/usr/lib/python*.*/*-packages/holland.backup.mysql_lvm-*.egg-info
-debian/tmp/usr/lib/python*.*/*-packages/holland/backup/mysql_lvm/
-debian/tmp/usr/lib/python*.*/*-packages/holland.lib.lvm-*.egg-info
-debian/tmp/usr/lib/python*.*/*-packages/holland/lib/lvm/
-config/providers/mysql-lvm.conf etc/holland/providers/
-config/providers/mysqldump-lvm.conf etc/holland/providers/

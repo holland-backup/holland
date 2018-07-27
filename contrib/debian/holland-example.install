@@ -1,3 +1,0 @@
-debian/tmp/usr/lib/python*.*/*-packages/holland.backup.example-*.egg-info
-debian/tmp/usr/lib/python*.*/*-packages/holland/backup/example.py*
-config/providers/example.conf etc/holland/providers/

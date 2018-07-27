@@ -1,3 +1,0 @@
-debian/tmp/usr/lib/python*.*/*-packages/holland.backup.mariabackup-*.egg-info
-debian/tmp/usr/lib/python*.*/*-packages/holland/backup/mariabackup/
-config/providers/mariabackup.conf etc/holland/providers/
