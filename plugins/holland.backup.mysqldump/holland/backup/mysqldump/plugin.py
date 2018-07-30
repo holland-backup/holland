@@ -14,8 +14,6 @@ from holland.lib.mysql import include_glob, exclude_glob, \
 from holland.lib.mysql import DatabaseIterator, MetadataTableIterator, \
                               SimpleTableIterator
 from holland.backup.mysqldump.base import start
-from holland.backup.mysqldump.util import INIConfig, update_config
-from holland.backup.mysqldump.util.ini import OptionLine, CommentLine
 from holland.lib.mysql.option import load_options, \
                                      write_options, \
                                      build_mysql_config

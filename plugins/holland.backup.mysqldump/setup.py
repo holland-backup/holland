@@ -23,7 +23,7 @@ setup(name='holland.backup.mysqldump',
         'holland >= 0.9.6',
       ],
       install_requires=[
-        'configparser'
+        #'configparser'
       ],
       extras_require = {
         'mysql' : 'holland.lib.mysql',
