@@ -2,7 +2,7 @@ import logging
 import os
 import os.path
 import subprocess
-import urllib.request, urllib.parse, urllib.error
+from six.moves import urllib
 from io import open
 
 from functools import partial
@@ -99,7 +99,7 @@ class MongoDump(object):
             logfile = open(os.path.join(self.target_directory, "mongodump.log"), "w")
             p = subprocess.Popen(command, stdout=logfile, stderr=logfile)
             ret = p.wait()
-            
+
             if ret != 0:
                 raise BackupError("Mongodump returned %d" % ret)
 

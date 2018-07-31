@@ -1,7 +1,0 @@
-/var/log/holland/holland.log {
-    rotate 5
-    weekly
-    compress
-    notifempty
-    missingok
-}

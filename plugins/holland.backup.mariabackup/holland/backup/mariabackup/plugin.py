@@ -38,7 +38,7 @@ level               = integer(min=0, max=9, default=1)
 
 [mysql:client]
 defaults-extra-file = force_list(default=list('~/.my.cnf'))
-user                = string(default=None)
+user                = string(default='root')
 password            = string(default=None)
 socket              = string(default=None)
 host                = string(default=None)

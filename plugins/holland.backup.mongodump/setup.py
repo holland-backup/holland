@@ -16,6 +16,9 @@ setup(name='holland.backup.mongodump',
                                       'tests.*']),
       namespace_packages=['holland', 'holland.backup'],
       zip_safe=True,
+      install_requires=[
+        'pymongo'
+      ],
       # holland looks for plugins in holland.backup
       entry_points="""
       [holland.backup]

@@ -1,60 +1,46 @@
-FIXME: This is rough and to the point.... needs fluff.
+RHEL/Centos
+*Install base packages
+# yum install holland holland-common
+* Install plugin(s)
+# yum install holland-{plugin name}
 
+Debian / Ubuntu
+*Install base packages
+# apt-get install holland holland-common
+* Install plugin(s)
+# apt-get install holland-{plugin name}
 
-UNPACK THE SOURCE:
+Manual
+* Clone repo
+# git clone https://github.com/holland-backup/holland.git ${TARGET}/holland
 
-        you@linuxbox ~]$ tar -zxvf holland-x.y.z.tar.gz
+* Change directory and pull in submodules
+# cd ${TARGET}/holland
+# git submodule update --init --recursive
 
+* Install base
+** Requires Python Setuptool
+# python setup.py install
 
-LOCAL DEVELOPMENT INSTALLATION:
+* Create documentation 
+** Requires make and Sphinx > 1.7
+# cd ${TARGET}/holland/docs && make man
+# cp ${TARGET}/holland/build/man/holland.1 /usr/share/man/man1/
 
-        you@linuxbox ~] cd ./holland-x.y.z
-        you@linuxbox holland-x.y.z] ./scripts/mkvirtenv.sh
+* Install common plugins
+# cd ${TARGET}/holland/plugins/holland.lib.common/
+# python setup.py install
 
-    Optionally, for target testing...  add the --no-deps option to force
-    holland to rely on system dependencies (such as MySQL-python).
+* Most plugins require the holland.lib.mysql plugin
+** The MySQldb connector requires gcc, mysql-devel, and python-devel
+# cd ${TARGET}/holland/plugins/holland.lib.mysql/
+# python setup.py install
 
+* Install other plugins
+# cd ../holland.backup.{plugin name}
+# python setup.py install
 
-SOURCE INSTALLATION:
-
-    Install Holland Core:
-
-        you@linuxbox ~]$ cd ./holland-x.y.z/holland-core
-        you@linuxbox holland-core]$ sudo python setup.py install
-
-
-    Install Holland Core Plugins:
-
-        you@linuxbox holland-x.y.z]$ cd plugins/holland.lib.common
-        you@linuxbox holland.lib.common]$ sudo python setup.py install
-
-        you@linuxbox holland-x.y.z]$ cd plugins/holland.lib.mysql
-        you@linuxbox holland.lib.mysql]$ sudo python setup.py install
-
-
-    Install Optional Plugins (see plugins/ACTIVE):
-
-        you@linuxbox holland-x.y.z]$ cd plugins/<plugin_dir>
-        you@linuxbox holland.<plugin_dir>]$ sudo python setup.py install
-
-
-
-UBUNTU INSTALLATION:
-
-    you@linuxbox holland-x.y.z]$ cp -a contrib/ubuntu/ubuntu.jaunty debian
-    you@linuxbox holland-x.y.z]$ dpkg-buildpackage -us -uc
-
-
-
-REDHAT/FEDORA/CENTOS/ETC INSTALLATION:
-
-    root@linuxbox ~]# cp -a holland-x.y.z/contrib/holland.spec /usr/src/redhat/SPECS
-    root@linuxbox ~]# cp -a holland-x.y.z.tar.gz /usr/src/redhat/SOURCES
-    root@linuxbox ~]# cd /usr/src/redhat
-    root@linuxbox /usr/src/redhat]# rpmbuild -ba SPECS/holland.spec
-
-    Alternatively you can use a build script:
-
-    you@linuxbox ~]$ tar -zxvf holland-x.y.z
-    you@linuxbox ~]$ cd holland-x.y.z
-    you@linuxbox ~]$ python scripts/build_rpms.py
+* Setup configuration files
+# mkdir -p /etc/holland/providers /etc/holland/backupsets /var/log/holland /var/spool/holland
+# cp ${TARGET}/holland/config/holland.conf /etc/holland/
+# cp ${TARGET}/holland/config/providers/* /etc/holland/providers/

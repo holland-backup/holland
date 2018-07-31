@@ -95,8 +95,7 @@ def run_mariabackup(args, stdout, stderr):
         raise BackupError("Terminated")
 
     if process.returncode != 0:
-        # innobackupex exited with non-zero status
-        raise BackupError("innobackupex exited with failure status [%d]" %
+        raise BackupError("mariabackup  exited with failure status [%d]" %
                           process.returncode)
 
 def apply_mariabackup_logfile(mb_cfg, backupdir):
