@@ -19,7 +19,7 @@ from holland.lib.mysql.option import build_mysql_config
 from holland.lib.archive import create_archive
 from holland.core.util.path import format_bytes, disk_free
 from holland.core.config.configobj import ConfigObj, ParseError
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 
 LOG = logging.getLogger(__name__)
 

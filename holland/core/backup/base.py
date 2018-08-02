@@ -1,3 +1,7 @@
+"""
+Define how backup plugins will be called
+"""
+
 import os
 import sys
 import time
@@ -15,6 +19,9 @@ class BackupError(Exception):
     """Error during a backup"""
 
 class BackupPlugin(object):
+    """
+    Define a backup plugin
+    """
     def __init__(self, name, config, target_directory, dry_run=False):
         self.name = name
         self.config = config
@@ -22,52 +29,75 @@ class BackupPlugin(object):
         self.dry_run = dry_run
 
     def estimate_backup_size(self):
+        """
+        placeholad
+        """
         raise NotImplementedError()
 
     def backup(self):
+        """
+        placeholad
+        """
         raise NotImplementedError()
 
     def info(self):
+        """
+        placeholad
+        """
         raise NotImplementedError()
 
     def configspec(self):
+        """
+        placeholad
+        """
         raise NotImplementedError()
 
 
 def load_plugin(name, config, path, dry_run):
-        try:
-            plugin_cls = load_backup_plugin(config['holland:backup']['plugin'])
-        except KeyError as exc:
-            raise BackupError("No plugin defined for backupset '%s'.", name)
-        except PluginLoadError as exc:
-            raise BackupError(str(exc))
+    """
+    Method to load plugins
+    """
+    try:
+        plugin_cls = load_backup_plugin(config['holland:backup']['plugin'])
+    except KeyError as exc:
+        raise BackupError("No plugin defined for backupset '%s'.", name)
+    except PluginLoadError as exc:
+        raise BackupError(str(exc))
 
-
-        try:
-            return plugin_cls(name=name,
-                              config=config,
-                              target_directory=path,
-                              dry_run=dry_run)
-        except (KeyboardInterrupt, SystemExit):
-            raise
-        except Exception as exc:
-            LOG.debug("Error while initializing %r : %s",
-                      plugin_cls, exc, exc_info=True)
-            raise BackupError("Error initializing %s plugin: %s" %
-                              (config['holland:backup']['plugin'],
-                               str(exc))
-                             )
+    try:
+        return plugin_cls(name=name,
+                          config=config,
+                          target_directory=path,
+                          dry_run=dry_run)
+    except (KeyboardInterrupt, SystemExit):
+        raise
+    except Exception as exc:
+        LOG.debug("Error while initializing %r : %s",
+                  plugin_cls, exc, exc_info=True)
+        raise BackupError("Error initializing %s plugin: %s" %
+                          (config['holland:backup']['plugin'],
+                           str(exc))
+                         )
 
 
 class BackupRunner(object):
+    """
+    Run backup
+    """
     def __init__(self, spool):
         self.spool = spool
         self._registry = {}
 
     def register_cb(self, event, callback):
+        """
+        create callback
+        """
         self._registry.setdefault(event, []).append(callback)
 
     def apply_cb(self, event, *args, **kwargs):
+        """
+        Catch Callback
+        """
         for callback in self._registry.get(event, []):
             try:
                 callback(event, *args, **kwargs)
@@ -85,6 +115,8 @@ class BackupRunner(object):
 
         :raises: BackupError if a backup fails
         """
+        #  pylint: disable=too-many-statements
+        #  pylint: disable=too-many-branches
 
         for i in range(MAX_SPOOL_RETRIES):
             try:
@@ -93,7 +125,6 @@ class BackupRunner(object):
             except OSError as exc:
                 if exc.errno != errno.EEXIST:
                     raise BackupError("Failed to create spool: %s" % exc)
-                sys.exc_clear()
                 LOG.debug("Failed to create spool.  Retrying in %d seconds.", i+1)
                 time.sleep(i+1)
         else:
@@ -139,8 +170,8 @@ class BackupRunner(object):
             LOG.info("Final on-disk backup size %s", format_bytes(final_size))
             if estimated_size > 0:
                 LOG.info("%.2f%% of estimated size %s",
-                     (final_size / estimated_size)*100.0,
-                     format_bytes(estimated_size))
+                         (final_size / estimated_size)*100.0,
+                         format_bytes(estimated_size))
 
             spool_entry.config['holland:backup']['on-disk-size'] = final_size
             spool_entry.flush()
@@ -161,7 +192,7 @@ class BackupRunner(object):
 
         if sys.exc_info() != (None, None, None):
             self.apply_cb('failed-backup', spool_entry)
-            raise
+            raise BackupError("Failed backup: %s" % name)
         else:
             self.apply_cb('after-backup', spool_entry)
 
@@ -211,6 +242,9 @@ class BackupRunner(object):
         return True
 
     def check_available_space(self, plugin, spool_entry, dry_run=False):
+        """
+        calculate available space before performing backup
+        """
         available_bytes = disk_free(spool_entry.path)
 
         estimated_bytes_required = float(plugin.estimate_backup_size())
@@ -229,13 +263,13 @@ class BackupRunner(object):
         if available_bytes <= adjusted_bytes_required:
             if not (config['purge-on-demand'] and
                     self.free_required_space(spool_entry.backupset,
-                                         adjusted_bytes_required,
-                                         dry_run)):
+                                             adjusted_bytes_required,
+                                             dry_run)):
                 msg = ("Insufficient Disk Space. %s required, "
                        "but only %s available on %s") % (
-                       format_bytes(adjusted_bytes_required),
-                       format_bytes(available_bytes),
-                       self.spool.path)
+                           format_bytes(adjusted_bytes_required),
+                           format_bytes(available_bytes),
+                           self.spool.path)
                 LOG.error(msg)
                 if not dry_run:
                     raise BackupError(msg)

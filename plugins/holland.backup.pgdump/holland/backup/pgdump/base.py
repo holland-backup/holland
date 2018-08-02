@@ -13,7 +13,7 @@ import subprocess
 import psycopg2 as dbapi
 import psycopg2.extensions
 
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 # holland-core has a few nice utilities such as format_bytes
 from holland.core.util.fmt import format_bytes
 # Holland general compression functions

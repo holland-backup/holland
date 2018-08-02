@@ -4,11 +4,13 @@ import time
 import errno
 import fcntl
 import logging
-from holland.core.command import Command, option, run
+from holland.core.command import Command, run
+"""
+Commvault command entry point
+"""
 from holland.core.backup import BackupRunner, BackupError
-from holland.core.exceptions import BackupError
 from holland.core.config import hollandcfg, ConfigError
-from holland.core.spool import spool
+from holland.core.spool import SPOOL
 from holland.core.util.fmt import format_interval, format_bytes
 from holland.core.util.path import disk_free, disk_capacity, getmount
 from holland.core.util.lock import Lock, LockError
@@ -32,16 +34,30 @@ class Backup(Command):
         'bk'
     ]
 
-    options = [
-        option('--abort-immediately', action='store_true',
-                help="Abort on the first backupset that fails."),
-        option('--dry-run', '-n', action='store_true',
-                help="Print backup commands without executing them."),
-        option('--no-lock', '-f', action='store_true', default=False,
-                help="Run even if another copy of Holland is running.")
+    args = [
+        ['--abort-immediately'],
+        ['--dry-run', '-n'],
+        ['--no-lock', '-f']
     ]
-
+    kargs = [
+        {
+            'action':'store_true',
+            'help':'Abort on the first backupset that fails.'
+        },
+        {
+            'action':'store_true',
+            'help':'Print backup commands without executing them.'
+        },
+        {
+            'action':'store_true',
+            'default':False,
+            'help':'Run even if another copy of Holland is running.'
+        }
+    ]
     description = 'Run backups for active backupsets'
+
+    def __init_(self):
+        Command.__init__(self)
 
     def run(self, cmd, opts, *backupsets):
         if not backupsets:
@@ -54,7 +70,7 @@ class Backup(Command):
             LOG.info("Nothing to backup")
             return 1
 
-        runner = BackupRunner(spool)
+        runner = BackupRunner(SPOOL)
 
         # dry-run implies no-lock
         if opts.dry_run:
@@ -162,7 +178,7 @@ class PurgeManager(object):
         if event == 'after-backup' and purge_policy != 'after-backup':
             return
 
-        backupset = spool.find_backupset(entry.backupset)
+        backupset = SPOOL.find_backupset(entry.backupset)
         if not backupset:
             LOG.info("Nothing to purge")
             return

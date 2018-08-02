@@ -1,7 +1,7 @@
 import logging
 import os
 from subprocess import Popen, list2cmdline
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 from holland.lib.compression import open_stream
 from tempfile import TemporaryFile
 

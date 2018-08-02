@@ -1,74 +1,35 @@
-import os, sys
-import optparse
+"""This file defines the default options available
+ and the entry point for holland command"""
+
+import os
+import sys
 import logging
-from holland.core.plugin import iter_entry_points, get_distribution
+from pkg_resources import get_distribution
 from holland.core.util.bootstrap import bootstrap
-from holland.core.command import run
+from holland.core.command import run, parse_sys, print_help
 from holland.core.config.checks import is_logging_level
 
-HOLLAND_VERSION = get_distribution('holland').version
-HOLLAND_BANNER = """
-Holland Backup v%s
-Copyright (c) 2008-2018 Rackspace US, Inc.
-More info available at http://hollandbackup.org
-
-[[[[[[[]]]]]]] [[[[[[[]]]]]]]
-[[[[[[[]]]]]]]       [[[[[[[]]]]]]]
-[[[[[[[]]]]]]] [[[[[[[]]]]]]]
-[[[[[[[]]]]]]] [[[[[[[]]]]]]]
-
-""" % HOLLAND_VERSION
-
 LOGGER = logging.getLogger(__name__)
-
-holland_conf = '/etc/holland/holland.conf'
-if sys.platform.startswith('freebsd'):
-    holland_conf = '/usr/local' + holland_conf
-
-## global parser
-parser = optparse.OptionParser(add_help_option=False,version=HOLLAND_BANNER)
-parser.add_option('-h', '--help', action='store_true',
-                  help="Show help")
-parser.add_option('-v', '--verbose', action='store_const', const='info',
-                    dest='log_level',
-                    help="Log verbose output")
-parser.add_option('-d', '--debug', action='store_const', const='debug',
-                    dest='log_level',
-                    help="Log debug output")
-parser.add_option('-c', '--config-file', metavar="<file>",
-                  help="Read configuration from the given file")
-parser.add_option('-q', '--quiet',  action='store_true',
-                  help="Don't log to console")
-parser.add_option('-l', '--log-level', type='choice', metavar='<log-level>',
-                  choices=['critical', 'error','warning','info', 'debug'],
-                  help="Specify the log level. "
-                       "One of: critical,error,warning,info,debug")
-parser.set_defaults(log_level=None,
-                    quiet=False,
-                    config_file=os.getenv('HOLLAND_CONFIG',
-                                          holland_conf)
-                   )
-parser.disable_interspersed_args()
+HOLLAND_VERSION = get_distribution('holland').version
 
 # main entrypoint for holland's cmdshell 'hl'
 def main():
-    opts, args = parser.parse_args(sys.argv[1:])
+    """The main entrypoint for holland's cmdshell
+    """
+
+    if len(sys.argv) < 2:
+        print_help()
+        sys.exit(1)
+
+    opts, args = parse_sys(sys.argv[1:])
 
     logging.raiseExceptions = bool(opts.log_level == 'debug')
-
-    if opts.log_level:
+    if 'log_level' in opts:
         opts.log_level = is_logging_level(opts.log_level)
 
-    if not args:
-        args = ['help']
-
-    if opts.help or args[0] == 'help':
-        if args[0] == 'help':
-            args = args[1:]
-        return run(['help'] + args)
 
     # Bootstrap the environment
     bootstrap(opts)
 
     LOGGER.info("Holland %s started with pid %d", HOLLAND_VERSION, os.getpid())
-    return run(args)
+    return run(opts, args)

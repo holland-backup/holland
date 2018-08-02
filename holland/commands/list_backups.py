@@ -1,7 +1,7 @@
 import os
 import textwrap
-from holland.core.command import Command, option
-from holland.core.spool import spool
+from holland.core.command import Command
+from holland.core.spool import SPOOL
 from holland.core.config import hollandcfg
 from holland.core.plugin import load_backup_plugin
 
@@ -17,9 +17,14 @@ class ListBackups(Command):
         'lb'
     ]
     description = 'List available backups'
-    options = [
-        option('-v', '--verbose', action='store_true',
-                help="Verbose output")
+    args = [
+        ['-v', '--verbose']
+    ]
+    kargs = [
+        {
+           'action':'store_true',
+           'help':"Verbose output"
+        }
     ]
 
     def print_table(self, table):
@@ -32,7 +37,7 @@ class ListBackups(Command):
             print(fmt % tuple(row))
 
     def run(self, cmd, opts):
-        backup_list = [x for x in spool.list_backups()]
+        backup_list = [x for x in SPOOL.list_backups()]
         if not backup_list:
             print("No backups")
             return 0
@@ -48,7 +53,7 @@ class ListBackups(Command):
             if not plugin_name:
                 print("Skipping broken backup: %s" % backup.name)
                 continue
-            print("\t%s" % backup.name) 
+            print("\t%s" % backup.name)
             if opts.verbose:
                 print("\t", backup.info())
                 plugin = load_backup_plugin(plugin_name)

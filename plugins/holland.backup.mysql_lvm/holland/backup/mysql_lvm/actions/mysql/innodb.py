@@ -6,7 +6,7 @@ import signal
 import logging
 from io import StringIO
 from subprocess import Popen, STDOUT, list2cmdline
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 from ._mysqld import locate_mysqld_exe, generate_server_config, MySQLServer
 
 LOG = logging.getLogger(__name__)

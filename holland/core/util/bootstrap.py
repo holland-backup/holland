@@ -11,7 +11,7 @@ import warnings
 from holland.core.plugin import add_plugin_dir
 from holland.core.config import hollandcfg, setup_config as _setup_config
 from holland.core.log import setup_console_logging, setup_file_logging, clear_root_handlers
-from holland.core.spool import spool
+from holland.core.spool import SPOOL
 
 LOGGER = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ def setup_logging(opts):
             if hollandcfg.lookup('logging.format'):
                 setup_file_logging(filename=str(hollandcfg.lookup('logging.filename')),
                                    level=log_level,
-                                   format=hollandcfg.lookup(str('logging.format')))
+                                   msg_format=hollandcfg.lookup(str('logging.format')))
             else:
                 setup_file_logging(filename=str(hollandcfg.lookup('logging.filename')),
                                    level=log_level)
@@ -87,4 +87,4 @@ def bootstrap(opts):
     # Setup plugin directories
     setup_plugins()
     # Setup spool
-    spool.path = hollandcfg.lookup('holland.backup-directory')
+    SPOOL.path = hollandcfg.lookup('holland.backup-directory')

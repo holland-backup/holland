@@ -4,7 +4,7 @@ import shlex
 import signal
 import logging
 from subprocess import list2cmdline, Popen, CalledProcessError
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 
 LOG = logging.getLogger(__name__)
 

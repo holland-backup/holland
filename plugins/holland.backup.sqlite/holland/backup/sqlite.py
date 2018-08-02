@@ -5,7 +5,7 @@ import logging
 from subprocess import Popen, PIPE
 
 from holland.lib.compression import open_stream
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 
 LOG = logging.getLogger(__name__)
 

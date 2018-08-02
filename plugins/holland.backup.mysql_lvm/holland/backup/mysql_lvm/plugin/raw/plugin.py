@@ -4,7 +4,7 @@ import os
 import logging
 import tempfile
 from holland.core.util.path import directory_size, format_bytes
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 from holland.lib.lvm import LogicalVolume, CallbackFailuresError, \
                             LVMCommandError, relpath, getmount
 from holland.lib.mysql.client import MySQLError

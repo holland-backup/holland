@@ -16,6 +16,8 @@ class ListPlugins(Command):
     ]
     description = 'List installed plugins'
 
+    args = []
+    kargs = []
 
     def print_table(self, table):
         header = table[0]

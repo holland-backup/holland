@@ -10,7 +10,7 @@ import logging
 import subprocess
 from io import StringIO
 
-from holland.core.command import Command, option
+from holland.core.command import Command
 from holland.core.plugin import load_first_entrypoint, PluginLoadError
 from holland.core.config.configobj import ConfigObj, flatten_errors, ParseError
 from holland.core.config import hollandcfg
@@ -120,18 +120,33 @@ class MkConfig(Command):
         'mc'
     ]
 
-    options = [
-        option('--name',
-                help='Name of the backupset'),
-        option('--edit', action='store_true',
-                help='Edit the generated config'),
-        option('--provider', action='store_true',
-                help='Generate a provider config'),
-        option('--file', '-f',
-                help='Save the final config to the specified file'),
-        option('--minimal', '-m', action='store_true', default=False,
-               help="Do not include comment from a backup "
-                    "plugin's configspec"),
+    args = [
+        ['--name'],
+        ['--edit'],
+        ['--provider'],
+        ['--file', '-f'],
+        ['--minimal', '-m']
+    ]
+    kargs = [
+        {
+            'help':'Name of the backupset',
+            'action':'store_true'
+        },
+        {
+            'help':'Edit the generated config',
+            'action':'store_true'
+        },
+        {
+            'help':'Generate a provider config'
+        },
+        {
+            'help':'Save the final config to the specified file',
+            'action':'store_true',
+            'default':False
+        },
+        {
+            'help':'Do not include comment from a backupplugin\'s configspec'
+        }
     ]
 
     description = 'Generate a config file for a backup plugin'

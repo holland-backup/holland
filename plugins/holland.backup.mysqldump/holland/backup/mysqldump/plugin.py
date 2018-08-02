@@ -5,7 +5,7 @@ import os
 import re
 import codecs
 import logging
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 from holland.lib.compression import open_stream, lookup_compression
 from holland.lib.mysql import MySQLSchema, connect, MySQLError
 from holland.lib.mysql import include_glob, exclude_glob, \

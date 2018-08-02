@@ -25,7 +25,7 @@ def is_octal(value, min_val=None, max_val=None):
     """
     if not isinstance(value, str):
         return validate.is_integer(value, min_val, max_val)
-        
+
     try:
         value = int(value, 8)
     except ValueError:
@@ -44,15 +44,15 @@ def is_logging_level(value):
         'error'     : logging.ERROR,
         'critical'  : logging.CRITICAL
     }
-    
+
     try:
         level = value.lower().strip()
     except:
         raise validate.VdtTypeError(value)
-    
+
     if not std_levels.get(level):
         raise validate.ValidateError(value)
-    
+
     return std_levels.get(level)
 
 def is_cmdline(value):

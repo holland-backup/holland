@@ -1,5 +1,5 @@
 import logging
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 from holland.lib.mysql import MySQLError
 
 LOG = logging.getLogger(__name__)
