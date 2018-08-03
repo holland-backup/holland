@@ -8,6 +8,18 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.1.1 - Aug 17, 2018
+---------------------
+
+holland
++++++++
+
+- Remove unused files and modules
+- Move from optparse to argparse
+- Remove help command as this functionality is built into argparse
+- Update code base to pass pylint checks
+
+
 1.1.0 - May 8, 2018
 ---------------------
 

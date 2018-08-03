@@ -1,5 +1,7 @@
-import os
-import sys
+"""
+Command to delete old backups
+"""
+
 import logging
 import itertools
 from holland.core.command import Command
@@ -67,11 +69,11 @@ class Purge(Command):
             backups = HOLLANDCFG.lookup('holland.backupsets')
 
         if not backups:
-            LOG.warn("Nothing to purge")
+            LOG.warnning("Nothing to purge")
             return 0
 
         if not opts.force:
-            LOG.warn("Running in dry-run mode.  Use --execute to do a real purge.")
+            LOG.warnning("Running in dry-run mode.  Use --execute to do a real purge.")
 
         for name in backups:
             if '/' not in name:
@@ -120,12 +122,12 @@ def purge_backupset(backupset, force=False, all_backups=False):
     LOG.info("Retaining up to %d backup%s",
              retention_count, 's'[0:bool(retention_count)])
     backups = []
-    bytes = 0
+    size = 0
     backup_list = backupset.list_backups(reverse=True)
     for backup in itertools.islice(backup_list, retention_count, None):
         backups.append(backup)
         config = backup.config['holland:backup']
-        bytes += int(config['on-disk-size'])
+        size += int(config['on-disk-size'])
 
     LOG.info("    %d total backups", len(backup_list))
     for backup in backup_list:
@@ -136,7 +138,7 @@ def purge_backupset(backupset, force=False, all_backups=False):
     LOG.info("    %d backups to purge", len(backups))
     for backup in backups:
         LOG.info("        - %s", backup.path)
-    LOG.info("    %s total to purge", format_bytes(bytes))
+    LOG.info("    %s total to purge", format_bytes(size))
 
     if force:
         count = 0

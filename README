@@ -13,11 +13,6 @@ for more details.
 holland-core bundles a few third party libraries
 including:
 ConfigObj 5.0.6
-backports from the python stdlib:
-- logging
-- subprocess.py
-- zipfile.py
-- optparse.py
 
 Each of these are under their respective licenses.
 Please see LICENSE for more information.

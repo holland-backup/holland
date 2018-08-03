@@ -1,18 +1,16 @@
-import os, sys
-from subprocess import Popen, PIPE
-import time
-import errno
-import fcntl
+"""
+Define backup command
+"""
+
 import logging
+from subprocess import Popen, PIPE
 from string import Template
 from holland.core.command import Command
-"""
-Commvault command entry point
-"""
+# Commvault command entry point
 from holland.core.backup import BackupRunner, BackupError
 from holland.core.config import HOLLANDCFG, ConfigError
 from holland.core.spool import SPOOL
-from holland.core.util.fmt import format_interval, format_bytes
+from holland.core.util.fmt import format_bytes
 from holland.core.util.path import disk_free, disk_capacity, getmount
 from holland.core.util.lock import Lock, LockError
 
@@ -133,23 +131,29 @@ class Backup(Command):
         return error
 
 def purge_backup(event, entry):
+    """
+    Delete old backups
+    """
     if entry.config['holland:backup']['auto-purge-failures']:
         entry.purge()
-        LOG.info("Purged failed backup: %s", entry.name)
+        LOG.info("Purged failed backup: %s, %s", entry.name, event)
     else:
         LOG.info("auto-purge-failures not enabled. Failed backup not purged.")
 
 def call_hooks(event, entry):
+    """
+    Rerun pre or post hooks
+    """
     hook = event + "-command"
 
     if entry.config['holland:backup'][hook] is not None:
         cmd = entry.config['holland:backup'][hook]
         try:
             cmd = Template(cmd).safe_substitute(
-                        hook=hook,
-                        backupset=entry.backupset,
-                        backupdir=entry.path
-            )
+                hook=hook,
+                backupset=entry.backupset,
+                backupdir=entry.path
+                )
             LOG.info(" [%s]> %s", hook, cmd)
             process = Popen(cmd,
                             shell=True,
@@ -170,6 +174,9 @@ def call_hooks(event, entry):
     return 0
 
 class PurgeManager(object):
+    """
+    Find and clean up old backups
+    """
     def __call__(self, event, entry):
         purge_policy = entry.config['holland:backup']['purge-policy']
 
@@ -197,7 +204,11 @@ class PurgeManager(object):
         self.purge_backupset(backupset, retention_count)
         backupset.update_symlinks()
 
-    def purge_backupset(self, backupset, retention_count):
+    @staticmethod
+    def purge_backupset(backupset, retention_count):
+        """
+        Purge backups, and log the number of purged backups
+        """
         purge_count = 0
         for backup in backupset.purge(retention_count):
             purge_count += 1
@@ -209,11 +220,14 @@ class PurgeManager(object):
             LOG.info("%d backups purged", purge_count)
 
 def report_low_space(event, entry):
+    """
+    Check free diskspace
+    """
     total_space = disk_capacity(entry.path)
     free_space = disk_free(entry.path)
     if free_space < 0.10*total_space:
-        LOG.warning("Extremely low free space on %s's filesystem (%s).",
-                    entry.path,
+        LOG.warning("%s: Extremely low free space on %s's filesystem (%s).",
+                    event, entry.path,
                     getmount(entry.path))
         LOG.warning("%s of %s [%.2f%%] remaining",
                     format_bytes(free_space),

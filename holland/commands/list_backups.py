@@ -1,8 +1,10 @@
-import os
-import textwrap
+"""
+Define List Backup Command
+"""
+
+import sys
 from holland.core.command import Command
 from holland.core.spool import SPOOL
-from holland.core.config import HOLLANDCFG
 from holland.core.plugin import load_backup_plugin
 
 class ListBackups(Command):
@@ -22,21 +24,27 @@ class ListBackups(Command):
     ]
     kargs = [
         {
-           'action':'store_true',
-           'help':"Verbose output"
+            'action':'store_true',
+            'help':"Verbose output"
         }
     ]
 
-    def print_table(self, table):
-        header = table[0]
+    @staticmethod
+    def print_table(table):
+        """
+        Format data and print data
+        """
         rest = table[1:]
         fmt = "%-28s %-9s %-16s %s"
-        print(fmt % tuple(header))
-        print("-"*80)
         for row in rest:
             print(fmt % tuple(row))
 
-    def run(self, cmd, opts):
+    def run(self, cmd, opts, *args):
+        """
+        get backup informantion and call print table
+        """
+        if args:
+            print("The list-backup command takes no arguments", file=sys.stderr)
         backup_list = [x for x in SPOOL.list_backups()]
         if not backup_list:
             print("No backups")

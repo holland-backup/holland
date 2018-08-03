@@ -1,5 +1,9 @@
+"""
+Unused restore command
+"""
+
 import logging
-from holland.core.command import Command, option
+from holland.core.command import Command
 from holland.core.plugin import load_first_entrypoint
 from holland.core.spool import SPOOL
 
@@ -32,8 +36,10 @@ class Restore(Command):
     args = [
         '--dry-run', '-n'
     ]
-    kargs= [
-        {'help':"Print what restore actually would do without actually running the restore"}
+    kargs = [
+        {
+            'help':"Print what restore actually would do without actually running the restore"
+        }
     ]
 
     description = 'Restore data from an existing Holland Backup'
@@ -41,13 +47,13 @@ class Restore(Command):
         Command.__init__(self)
         self.optparser.disable_interspersed_args()
 
-    def run(self, cmd, opts, backup_name, *restore_options):
-        backup = SPOOL.find_backup(backup_name)
+    def run(self, cmd, opts, *args):
+        backup = SPOOL.find_backup(args[0])
         if not backup:
-            logging.error("No backup found named %s", backup_name)
+            logging.error("No backup found named %s", args[0])
             return 1
         config = backup.config
         plugin_name = config.get('holland:backup', {}).get('plugin')
         plugin = load_first_entrypoint('holland.restore', plugin_name)(backup)
-        plugin.dispatch([plugin_name]  + list(restore_options))
+        plugin.dispatch([plugin_name]  + list(args))
         return 1
