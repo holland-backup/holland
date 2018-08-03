@@ -13,9 +13,9 @@ from io import StringIO
 from holland.core.command import Command
 from holland.core.plugin import load_first_entrypoint, PluginLoadError
 from holland.core.config.configobj import ConfigObj, flatten_errors, ParseError
-from holland.core.config import hollandcfg
+from holland.core.config import HOLLANDCFG
 from holland.core.config.validate import Validator
-from holland.core.config.checks import validator
+from holland.core.config.checks import VALIDATOR
 
 LOGGER = logging.getLogger(__name__)
 
@@ -130,7 +130,6 @@ class MkConfig(Command):
     kargs = [
         {
             'help':'Name of the backupset',
-            'action':'store_true'
         },
         {
             'help':'Edit the generated config',
@@ -156,7 +155,7 @@ class MkConfig(Command):
     #   run through and flag required parameters with a 'REQUIRED' comment
     #   run through and comment out default=None parameters
     def _cleanup_config(self, config, skip_comments=False):
-        errors = config.validate(validator, preserve_errors=True,copy=True)
+        errors = config.validate(VALIDATOR, preserve_errors=True,copy=True)
         # First flag any required parameters
         for entry in flatten_errors(config, errors):
             section_list, key, error = entry
@@ -291,7 +290,7 @@ class MkConfig(Command):
             cfg.write(buf)
             buf.flush()
         elif opts.name:
-            base_dir = os.path.dirname(hollandcfg.filename)
+            base_dir = os.path.dirname(HOLLANDCFG.filename)
             path = os.path.join(base_dir, 'backupsets', opts.name + '.conf')
             print("Saving config to %r" % path, file=sys.stderr)
             fh = open(path, 'w')

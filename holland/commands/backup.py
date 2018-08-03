@@ -4,17 +4,17 @@ import time
 import errno
 import fcntl
 import logging
+from string import Template
 from holland.core.command import Command, run
 """
 Commvault command entry point
 """
 from holland.core.backup import BackupRunner, BackupError
-from holland.core.config import hollandcfg, ConfigError
+from holland.core.config import HOLLANDCFG, ConfigError
 from holland.core.spool import SPOOL
 from holland.core.util.fmt import format_interval, format_bytes
 from holland.core.util.path import disk_free, disk_capacity, getmount
 from holland.core.util.lock import Lock, LockError
-from holland.core.util.pycompat import Template
 
 LOG = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ class Backup(Command):
 
     def run(self, cmd, opts, *backupsets):
         if not backupsets:
-            backupsets = hollandcfg.lookup('holland.backupsets')
+            backupsets = HOLLANDCFG.lookup('holland.backupsets')
 
         # strip empty items from backupsets list
         backupsets = [name for name in backupsets if name]
@@ -95,7 +95,7 @@ class Backup(Command):
         LOG.info("--- Starting %s run ---", opts.dry_run and 'dry' or 'backup')
         for name in backupsets:
             try:
-                config = hollandcfg.backupset(name)
+                config = HOLLANDCFG.backupset(name)
                 # ensure we have at least an empty holland:backup section
                 config.setdefault('holland:backup', {})
             except (SyntaxError, IOError) as exc:

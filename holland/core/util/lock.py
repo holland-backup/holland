@@ -1,6 +1,5 @@
 """A simple fcntl/flock implementation"""
 
-from os import getpid
 from fcntl import flock, LOCK_EX, LOCK_UN, LOCK_NB
 
 class LockError(Exception):
@@ -34,6 +33,7 @@ class Lock(object):
             return True
 
     def is_locked(self):
+        """Check for lock"""
         return self.lock is not None
 
     def release(self):

@@ -5,14 +5,14 @@ Configuration API support
 import os
 import logging
 from .configobj import ConfigObj, Section, flatten_errors, get_extra_values
-from .checks import validator
+from .checks import VALIDATOR
 
 LOGGER = logging.getLogger(__name__)
 
 CONFIG_SUFFIX = '.conf'
 
 # Main Holland configspec
-CONFIGSPEC ="""
+CONFIGSPEC = """
 [holland]
 tmpdir              = string(default=None)
 plugin-dirs         = coerced_list(default=list('/usr/share/holland/plugins'))
@@ -28,10 +28,12 @@ format              = string(default=None)
 """.splitlines()
 
 class ConfigError(Exception):
+    """
+    Define  exceptoin for configuration errors
+    """
     pass
 
 class BaseConfig(ConfigObj):
-
     """
     Provides basic configuration support.  This
     is a subclass of ConfigObj but adds a few
@@ -40,15 +42,16 @@ class BaseConfig(ConfigObj):
 
     def __init__(self, path, configspec=None, file_error=True):
         ConfigObj.__init__(self,
-                            path,
-                            file_error=file_error,
-                            interpolation=False,
-                            write_empty_values=True,
-                            encoding='utf8',
-                            default_encoding='utf8',
-                            configspec={})
+                           path,
+                           file_error=file_error,
+                           interpolation=False,
+                           write_empty_values=True,
+                           encoding='utf8',
+                           default_encoding='utf8',
+                           configspec={})
 
-    def _canonicalize(self, section, key):
+    @staticmethod
+    def _canonicalize(section, key):
         """Rewrite all keys so that underscores are normalized to dashes"""
         section.rename(key, str(key.replace('_', '-')))
 
@@ -61,7 +64,7 @@ class BaseConfig(ConfigObj):
         Validate this config with the given configspec
         """
         self._handle_configspec(configspec)
-        errors = self.validate(validator, preserve_errors=True)
+        errors = self.validate(VALIDATOR, preserve_errors=True)
         for entry in flatten_errors(self, errors):
             section_list, key, error = entry
             if not error:
@@ -73,11 +76,12 @@ class BaseConfig(ConfigObj):
         # validation errors
         if not suppress_warnings:
             for sections, name in get_extra_values(self):
-                LOGGER.warn("Unknown parameter '%s' in section '%s'",
-                            name, ".".join(sections))
+                LOGGER.warning("Unknown parameter '%s' in section '%s'",
+                               name, ".".join(sections))
 
         if errors is not True:
-            raise ConfigError("Configuration errors were encountered while validating %r" % self.filename)
+            raise ConfigError("Configuration errors were encountered while validating %r"
+                              % self.filename)
         return errors
 
     def lookup(self, key, safe=True):
@@ -99,7 +103,7 @@ class BaseConfig(ConfigObj):
         if not result and not safe:
             raise KeyError('%r not found (%r)' % (key, parts[count]))
         if isinstance(result, bytes):
-                return result.decode('utf-8')
+            return result.decode('utf-8')
         return result
 
 class BackupConfig(BaseConfig):
@@ -121,8 +125,8 @@ class BackupConfig(BaseConfig):
                 providercfg.walk(self._canonicalize, call_on_sections=True)
                 self.merge(providercfg)
             except IOError as ex:
-                LOGGER.warning("Failed to load config for provider %r (%s)" %
-                                    (provider, ex))
+                LOGGER.warning("Failed to load config for provider %r (%s)",
+                               provider, ex)
         self.merge(basecfg)
         self.filename = basecfg.filename
 
@@ -159,6 +163,9 @@ class GlobalConfig(BaseConfig):
         return BackupConfig(path)
 
     def hook_config(self, name):
+        """
+        This doesn't appear to be called anywhere and I'm not sure what it's for
+        """
         for section_name in self:
             if not isinstance(self[section_name], Section):
                 continue
@@ -167,27 +174,28 @@ class GlobalConfig(BaseConfig):
                 if hook_name == name:
                     return BaseConfig(self[section_name])
 
-hollandcfg = GlobalConfig(None)
+HOLLANDCFG = GlobalConfig(None)
 
 def load_backupset_config(name):
-    return hollandcfg.backupset(name)
+    """
+    Pass name into class
+    """
+    return HOLLANDCFG.backupset(name)
 
 def setup_config(config_file):
     """
-    Configure the default hollandcfg instance in this module
+    Configure the default HOLLANDCFG instance in this module
     """
-    global hollandcfg
-
     if not config_file:
         LOGGER.debug("load_config called with not configuration file")
-        hollandcfg.validate_config(CONFIGSPEC)
-        print(hollandcfg)
+        HOLLANDCFG.validate_config(CONFIGSPEC)
+        print(HOLLANDCFG)
         return
 
     config_file = os.path.abspath(config_file)
     LOGGER.debug("Loading %r", config_file)
-    hollandcfg.clear()
-    hollandcfg.filename = config_file
-    hollandcfg.reload()
-    hollandcfg.validate_config(CONFIGSPEC)
-    hollandcfg.configdir = os.path.dirname(config_file)
+    HOLLANDCFG.clear()
+    HOLLANDCFG.filename = config_file
+    HOLLANDCFG.reload()
+    HOLLANDCFG.validate_config(CONFIGSPEC)
+    HOLLANDCFG.configdir = os.path.dirname(config_file)

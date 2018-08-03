@@ -321,7 +321,7 @@ class Backup(object):
         """
         get plugin info
         """
-        from holland.core.util.template import Template
+        from string import Template
         from textwrap import dedent
         tmpl = Template("""
         backup-plugin   = ${plugin}

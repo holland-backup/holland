@@ -48,7 +48,6 @@ def run(opts, args=None):
         print_help()
         return 1
 
-
 def parse_sys(args):
     """
     Load plugins and parse command line

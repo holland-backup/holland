@@ -2,7 +2,7 @@ import os
 import textwrap
 from holland.core.command import Command
 from holland.core.spool import SPOOL
-from holland.core.config import hollandcfg
+from holland.core.config import HOLLANDCFG
 from holland.core.plugin import load_backup_plugin
 
 class ListBackups(Command):

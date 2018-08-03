@@ -33,7 +33,7 @@ setup(name="holland",
 
       # Holland subcommands
       [holland.commands]
-      help = holland.commands.help:Help
+      #help = holland.commands.help:Help
       listplugins = holland.commands.list_plugins:ListPlugins
       listbackups = holland.commands.list_backups:ListBackups
       backup = holland.commands.backup:Backup

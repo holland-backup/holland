@@ -3,7 +3,7 @@ import sys
 import logging
 import itertools
 from holland.core.command import Command
-from holland.core.config import hollandcfg, ConfigError
+from holland.core.config import HOLLANDCFG, ConfigError
 from holland.core.spool import SPOOL, CONFIGSPEC
 from holland.core.util.fmt import format_bytes
 
@@ -63,8 +63,8 @@ class Purge(Command):
 
         if not backups:
             LOG.info("No backupsets specified - using backupsets from %s",
-                     hollandcfg.filename)
-            backups = hollandcfg.lookup('holland.backupsets')
+                     HOLLANDCFG.filename)
+            backups = HOLLANDCFG.lookup('holland.backupsets')
 
         if not backups:
             LOG.warn("Nothing to purge")
@@ -105,7 +105,7 @@ def purge_backupset(backupset, force=False, all_backups=False):
         retention_count = 0
     else:
         try:
-            config = hollandcfg.backupset(backupset.name)
+            config = HOLLANDCFG.backupset(backupset.name)
             config.validate_config(CONFIGSPEC, suppress_warnings=True)
         except (IOError, ConfigError) as exc:
             LOG.error("Failed to load backupset '%s': %s", backupset.name, exc)
