@@ -115,9 +115,6 @@ class BackupRunner(object):
 
         :raises: BackupError if a backup fails
         """
-        #  pylint: disable=too-many-statements
-        #  pylint: disable=too-many-branches
-
         for i in range(MAX_SPOOL_RETRIES):
             try:
                 spool_entry = self.spool.add_backup(name)

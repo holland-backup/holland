@@ -5,7 +5,7 @@ import errno
 import fcntl
 import logging
 from string import Template
-from holland.core.command import Command, run
+from holland.core.command import Command
 """
 Commvault command entry point
 """

@@ -8,13 +8,11 @@ import sys
 import tempfile
 import logging
 import subprocess
-from io import StringIO
 
 from holland.core.command import Command
 from holland.core.plugin import load_first_entrypoint, PluginLoadError
 from holland.core.config.configobj import ConfigObj, flatten_errors, ParseError
 from holland.core.config import HOLLANDCFG
-from holland.core.config.validate import Validator
 from holland.core.config.checks import VALIDATOR
 
 LOGGER = logging.getLogger(__name__)
@@ -33,13 +31,11 @@ def which(cmd, search_path=None):
         cmd_path = os.path.join(name, cmd)
         if os.access(cmd_path, os.X_OK):
             return cmd_path
-    else:
-        return None
 
 def _find_editor():
     candidates = [
-        os.getenv('VISUAL',''),
-        os.getenv('EDITOR',''),
+        os.getenv('VISUAL', ''),
+        os.getenv('EDITOR', ''),
         '/usr/bin/editor',
         'vim',
         'vi',
@@ -50,8 +46,6 @@ def _find_editor():
         logging.debug("%r => %r", command, real_cmd)
         if real_cmd:
             return real_cmd
-    else:
-        return None
 
 def _report_errors(cfg, errors):
     for entry in flatten_errors(cfg, errors):
@@ -61,7 +55,7 @@ def _report_errors(cfg, errors):
             pass
         else:
             param = ' '.join((section, '[missing section]'))
-        if error == False:
+        if not error:
             error = 'Missing value or section'
         print(param, ' = ', error, file=sys.stderr)
 
@@ -115,7 +109,6 @@ class MkConfig(Command):
     """
 
     name = 'mk-config'
-
     aliases = [
         'mc'
     ]
@@ -154,8 +147,9 @@ class MkConfig(Command):
     # After initial validation:
     #   run through and flag required parameters with a 'REQUIRED' comment
     #   run through and comment out default=None parameters
-    def _cleanup_config(self, config, skip_comments=False):
-        errors = config.validate(VALIDATOR, preserve_errors=True,copy=True)
+    @staticmethod
+    def _cleanup_config(config, skip_comments=False):
+        errors = config.validate(VALIDATOR, preserve_errors=True, copy=True)
         # First flag any required parameters
         for entry in flatten_errors(config, errors):
             section_list, key, error = entry
@@ -176,7 +170,7 @@ class MkConfig(Command):
                 comments = pending_comments + comments
                 config.comments[section] = comments
                 del pending_comments[:]
-            for idx, (key, value) in enumerate(config[section].items()):
+            for key, value in config[section].items():
                 if value is None:
                     if not skip_comments:
                         pending_comments.extend(config[section].comments.get(key, []))
@@ -194,7 +188,7 @@ class MkConfig(Command):
                         config[section].comments[key] = comments
                         del pending_comments[:]
                     if value is True or value is False:
-                        config[section][key] = ['no','yes'][value]
+                        config[section][key] = 'yes' if value else 'no'
 
         if pending_comments:
             if skip_comments:
@@ -210,22 +204,26 @@ class MkConfig(Command):
         except IndexError:
             pass
 
-    def run(self, cmd, opts, plugin_type):
+    def run(self, cmd, opts, *plugin_type):
+        if not plugin_type:
+            print("Missing plugin name", file=sys.stderr)
+            return 1
         if opts.name and opts.provider:
             print("Can't specify a name for a global provider config", file=sys.stderr)
             return 1
 
         try:
-            plugin_cls = load_first_entrypoint('holland.backup', plugin_type)
+            plugin_cls = load_first_entrypoint('holland.backup', plugin_type[0])
         except PluginLoadError as exc:
             logging.info("Failed to load backup plugin %r: %s",
-                         plugin_type, exc)
+                         plugin_type[0], exc)
             return 1
 
         try:
             cfgspec = sys.modules[plugin_cls.__module__].CONFIGSPEC
-        except:
-            print("Could not load config-spec from plugin %r" % plugin_type, file=sys.stderr)
+        except BaseException as ex:
+            print("Could not load config-spec from plugin %r, %s"
+                  % (plugin_type[0], ex), file=sys.stderr)
             return 1
 
         base_config = """
@@ -237,8 +235,8 @@ class MkConfig(Command):
         estimated-size-factor   = 1.0
         """.lstrip().splitlines()
         cfg = ConfigObj(base_config, configspec=cfgspec, list_values=True,
-                stringify=True)
-        cfg['holland:backup']['plugin'] = plugin_type
+                        stringify=True)
+        cfg['holland:backup']['plugin'] = plugin_type[0]
         self._cleanup_config(cfg, skip_comments=opts.minimal)
 
         if opts.edit:
@@ -266,7 +264,7 @@ class MkConfig(Command):
                     print("%s : %s" % \
                     (exc.msg, exc.line), file=sys.stderr)
                 else:
-                    errors = cfg.validate(validator,preserve_errors=True)
+                    errors = cfg.validate(VALIDATOR, preserve_errors=True)
                     if errors is True:
                         done = True
                         continue
@@ -285,16 +283,16 @@ class MkConfig(Command):
 
         if opts.file:
             print("Saving config to %r" % opts.file, file=sys.stderr)
-            fh = open(opts.file, 'w')
-            buf = getattr(fh, 'buffer',fh)
+            filehandle = open(opts.file, 'w')
+            buf = getattr(filehandle, 'buffer', filehandle)
             cfg.write(buf)
             buf.flush()
         elif opts.name:
             base_dir = os.path.dirname(HOLLANDCFG.filename)
             path = os.path.join(base_dir, 'backupsets', opts.name + '.conf')
             print("Saving config to %r" % path, file=sys.stderr)
-            fh = open(path, 'w')
-            buf = getattr(fh, 'buffer', fh)
+            filehandle = open(path, 'w')
+            buf = getattr(filehandle, 'buffer', filehandle)
             cfg.write(buf)
             buf.flush()
         return 0
