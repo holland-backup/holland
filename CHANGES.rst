@@ -8,7 +8,7 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
-1.1.1 - Aug 17, 2018
+1.1.1 - Aug 6, 2018
 ---------------------
 
 holland
@@ -18,6 +18,10 @@ holland
 - Move from optparse to argparse
 - Remove help command as this functionality is built into argparse
 - Update code base to pass pylint checks
+- Add historic-size option under 'holland:backup' in backupset, this will use the last
+  backups size to estimate the next backup size. Holland will default to the current estimate
+  method if it can't determine what the last values were, or if the database size has changed
+  drastically
 
 
 1.1.0 - May 8, 2018
