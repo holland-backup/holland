@@ -2,6 +2,7 @@
 Print list of installed plugins
 """
 
+from __future__ import print_function
 import sys
 from holland.core.command import Command
 from holland.core.plugin import iter_plugins
