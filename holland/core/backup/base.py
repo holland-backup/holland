@@ -10,6 +10,7 @@ import logging
 from holland.core.plugin import PluginLoadError, load_backup_plugin
 from holland.core.util.path import directory_size, disk_free
 from holland.core.util.fmt import format_bytes, format_interval
+from holland.core.spool import Backup
 
 MAX_SPOOL_RETRIES = 5
 
@@ -238,24 +239,74 @@ class BackupRunner(object):
                  format_bytes(disk_free(os.path.join(self.spool.path, name))))
         return True
 
+    def historic_required_space(self, plugin, spool_entry, estimated_bytes_required):
+        """
+        Use size reported in 'newest' backup to predict backup size
+        If this fails return a value less than zero and use the estimated-size-factor
+        """
+        config = plugin.config['holland:backup']
+        if not config['historic-size']:
+            return -1.0
+
+        historic_size_factor = config['historic-size-factor']
+
+        old_backup_config = os.path.join(self.spool.path, spool_entry.backupset, 'newest')
+        if not os.path.exists(old_backup_config):
+            LOG.debug("Missing backup.conf from last backup")
+            return -1.0
+
+        old_backup = Backup(old_backup_config, spool_entry.backupset, 'newest')
+        old_backup.load_config()
+
+        if old_backup.config['holland:backup']['estimated-size-factor'] and \
+            old_backup.config['holland:backup']['on-disk-size']:
+            size_required = old_backup.config['holland:backup']['on-disk-size']
+            old_estimate = old_backup.config['holland:backup']['estimated-size']
+        else:
+            LOG.debug("The last backup's configuration was missing the \
+                ['holland:backup']['on-disk-size'] or ['holland:backup']['estimated-size']")
+            return -1.0
+
+        LOG.info("Using Predictive Space Estimate: Checking for information in %s",
+                 old_backup.config.filename)
+        LOG.info("Last backup used %s", format_bytes(size_required))
+        if estimated_bytes_required > (old_estimate * historic_size_factor):
+            LOG.warning("The new backup estimate is %s times the size of \
+                the currnet estimate: %s > (%s * %s). Default back to 'estimated-size-factor'",
+                        historic_size_factor, estimated_bytes_required,
+                        old_estimate, historic_size_factor)
+            return -1.0
+        else:
+            LOG.debug("The old and new backup estimate are roughly the same size, \
+                use old backup size for new size estimate")
+        return size_required * float(config['historic-estimated-size-factor'])
+
     def check_available_space(self, plugin, spool_entry, dry_run=False):
         """
         calculate available space before performing backup
         """
         available_bytes = disk_free(spool_entry.path)
-
         estimated_bytes_required = float(plugin.estimate_backup_size())
+        spool_entry.config['holland:backup']['estimated-size'] = estimated_bytes_required
         LOG.info("Estimated Backup Size: %s",
                  format_bytes(estimated_bytes_required))
 
-        config = plugin.config['holland:backup']
-        adjustment_factor = float(config['estimated-size-factor'])
-        adjusted_bytes_required = (estimated_bytes_required*adjustment_factor)
+        adjusted_bytes_required = self.historic_required_space(plugin, spool_entry,
+                                                               estimated_bytes_required)
 
-        if adjusted_bytes_required != estimated_bytes_required:
-            LOG.info("Adjusting estimated size by %.2f to %s",
-                     adjustment_factor,
-                     format_bytes(adjusted_bytes_required))
+        config = plugin.config['holland:backup']
+        if adjusted_bytes_required < 0:
+            adjustment_factor = float(config['estimated-size-factor'])
+            adjusted_bytes_required = (estimated_bytes_required*adjustment_factor)
+
+            if adjusted_bytes_required != estimated_bytes_required:
+                LOG.info("Adjusting estimated size by %.2f to %s",
+                         adjustment_factor,
+                         format_bytes(adjusted_bytes_required))
+        else:
+            adjustment_factor = float(config['historic-estimated-size-factor'])
+            LOG.info("Adjusting estimated size to last backup total * %s: %s",
+                     adjustment_factor, format_bytes(adjusted_bytes_required))
 
         if available_bytes <= adjusted_bytes_required:
             if not (config['purge-on-demand'] and

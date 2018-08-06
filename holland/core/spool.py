@@ -242,6 +242,9 @@ purge-on-demand         = boolean(default=no)
 before-backup-command   = string(default=None)
 after-backup-command    = string(default=None)
 failed-backup-command   = string(default=None)
+historic-size           = boolean(default=yes)
+historic-size-factor    = float(default=1.5)
+historic-estimated-size-factor = float(default=1.1)
 """.splitlines()
 
 class Backup(object):
