@@ -267,7 +267,7 @@ class BackupRunner(object):
                 ['holland:backup']['on-disk-size'] or ['holland:backup']['estimated-size']")
             return -1.0
 
-        LOG.info("Using Predictive Space Estimate: Checking for information in %s",
+        LOG.info("Using Historic Space Estimate: Checking for information in %s",
                  old_backup.config.filename)
         LOG.info("Last backup used %s", format_bytes(size_required))
         if estimated_bytes_required > (old_estimate * historic_size_factor):

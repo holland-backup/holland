@@ -1,18 +1,23 @@
+"""
+Dir Archive
+"""
 from __future__ import print_function
 import os
 import shutil
+import logging
 
+LOGGER = logging.getLogger(__name__)
 class DirArchive(object):
     """
-    Read, write, access directory archives.  Treats a directory like an 
+    Read, write, access directory archives.  Treats a directory like an
     archive.
     """
     def __init__(self, path, mode=None):
         """
         Initialize a DirArchive.
-        
+
         Arguments:
-        
+
         path -- Path to the archive directory
         mode -- Archive mode.  Default: None (unused, here for compatiblity)
         """
@@ -24,9 +29,9 @@ class DirArchive(object):
     def add_file(self, path, name):
         """
         Add a file to the archive.
-        
+
         Arguments:
-        
+
         path -- Path to file for which to add to archive.
         name -- Name of dest file
         """
@@ -39,9 +44,9 @@ class DirArchive(object):
     def add_string(self, string, name):
         """
         Add a string to the archive, saved as a file.
-        
+
         Arguments:
-        
+
         string  -- String to add to archive.
         name    -- Name of file to create string as.
         """
@@ -72,9 +77,9 @@ class DirArchive(object):
     def extract(self, name, dest):
         """
         Extract a member from the archive.
-        
+
         Arguments:
-        
+
         name -- Name of the member to extract.
         dest -- Destination path to extract the member to.
         """
@@ -88,16 +93,16 @@ class DirArchive(object):
         import subprocess
         status = subprocess.call(['gzip', '-1', '--recursive', self.path])
         if status != 0:
-            LOGGER.error("Failed to compress %r" % self.path)
-            
+            LOGGER.error("Failed to compress %r", self.path)
+
 if __name__ == '__main__':
     import time
-    now = time.time()
-    xv = DirArchive('backup/')
-    xv.add_string("[mysqldump]\nignore-table=mysql.user\n", "my.cnf")
-    xv.add_string("blah", "test/test.MYD")
-    xv.add_file("user.frm", "mysql/user.frm")
-    xv.add_file("user.MYD", "mysql/user.MYD")
-    xv.add_file("user.MYI", "mysql/user.MYI")
-    xv.close()
-    print((time.time() - now), "seconds")
+    NOW = time.time()
+    XV = DirArchive('backup/')
+    XV.add_string("[mysqldump]\nignore-table=mysql.user\n", "my.cnf")
+    XV.add_string("blah", "test/test.MYD")
+    XV.add_file("user.frm", "mysql/user.frm")
+    XV.add_file("user.MYD", "mysql/user.MYD")
+    XV.add_file("user.MYI", "mysql/user.MYI")
+    XV.close()
+    print((time.time() - NOW), "seconds")
