@@ -271,11 +271,11 @@ class BackupRunner(object):
                  old_backup.config.filename)
         LOG.info("Last backup used %s", format_bytes(size_required))
         if estimated_bytes_required > (old_estimate * historic_size_factor):
-            LOG.warning("The new backup estimate is %s times the size of "
+            LOG.warning("The new backup estimate is at least %s times the size of "
                         "the currnet estimate: %s > (%s * %s). Default back"
                         " to 'estimated-size-factor'",
-                        historic_size_factor, estimated_bytes_required,
-                        old_estimate, historic_size_factor)
+                        historic_size_factor, format_bytes(estimated_bytes_required),
+                        format_bytes(old_estimate), historic_size_factor)
             return -1.0
         else:
             LOG.debug("The old and new backup estimate are roughly the same size, "
