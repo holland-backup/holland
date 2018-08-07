@@ -3,12 +3,9 @@
 http://dev.mysql.com/doc/refman/5.1/en/option-files.html
 """
 from __future__ import print_function
-import os, sys
-import re
-import errno
+import os
 import codecs
 import logging
-import subprocess
 import six
 from holland.lib.mysql.option.parser import OptionFile
 
@@ -20,8 +17,8 @@ def merge_options(*defaults_files):
     def merge(dst_dict, src_dict):
         """Merge two dictionaries non-destructively"""
         for key, val in list(src_dict.items()):
-            if (key in dst_dict and isinstance(dst_dict[key], dict) and
-                                isinstance(val, dict)):
+            if key in dst_dict and isinstance(dst_dict[key], dict) and \
+                isinstance(val, dict):
                 merge(dst_dict[key], val)
             else:
                 dst_dict[key] = val
@@ -32,11 +29,11 @@ def merge_options(*defaults_files):
             merge(defaults_config, _my_config)
         except IOError:
             if not os.path.exists(config):
-                LOG.warn("No such file or directory: '%s'", config)
+                LOG.warning("No such file or directory: '%s'", config)
             else:
                 raise
 
-    return { 'client' : defaults_config['client'] }
+    return {'client' : defaults_config['client']}
 
 def load_options(path):
     """Load mysql option file from path"""
@@ -50,6 +47,7 @@ def quote(value):
     return '"' + value.replace('"', '\\"') + '"'
 
 def write_options(config, filename):
+    """Write out options"""
     if isinstance(filename, six.string_types):
         filename = codecs.open(filename, 'w', 'utf8')
     else:
