@@ -31,25 +31,25 @@ class BackupPlugin(object):
 
     def estimate_backup_size(self):
         """
-        placeholad
+        placeholder
         """
         raise NotImplementedError()
 
     def backup(self):
         """
-        placeholad
+        placeholder
         """
         raise NotImplementedError()
 
     def info(self):
         """
-        placeholad
+        placeholder
         """
         raise NotImplementedError()
 
     def configspec(self):
         """
-        placeholad
+        placeholder
         """
         raise NotImplementedError()
 
