@@ -6,7 +6,6 @@ setup(name='holland.lib.mysql',
       version=version,
       description="Holland MySQL Support",
       install_requires=[
-          'mysqlclient'
       ],
       long_description="""
         Provides convenience methods for MySQL
