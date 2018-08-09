@@ -1,6 +1,5 @@
 """MySQLdb.Connection wrappers"""
 
-import sys
 import re
 import logging
 from textwrap import dedent
@@ -33,8 +32,8 @@ def flatten_list(a_list):
     """
     # isinstance check to ensure we're not iterating over characters
     # in a string
-    return sum([isinstance(item, (list, tuple)) and list(item) or [item]
-                    for item in a_list], [])
+    return sum([isinstance(item, (list, tuple)) and list(item) or [item] \
+        for item in a_list], [])
 
 class MySQLClient(object):
     """MySQLdb Helper
@@ -112,12 +111,12 @@ class MySQLClient(object):
         :param database: database to extract metadata from
         :returns: list of dictionaries, one dictionary per table
         """
-        sql = "SHOW TABLE STATUS FROM `%s`" % database.replace('`','``')
+        sql = "SHOW TABLE STATUS FROM `%s`" % database.replace('`', '``')
         cursor = self.cursor()
         try:
             cursor.execute(sql)
         except MySQLError as exc:
-            LOG.error("MySQL reported an error while running %s. [%d] %s", 
+            LOG.error("MySQL reported an error while running %s. [%d] %s",
                       sql, *exc.args)
             raise
         names = [info[0].lower() for info in cursor.description]
@@ -130,11 +129,11 @@ class MySQLClient(object):
             # coerce null engine to 'view' as necessary
             if row['engine'] is None:
                 row['engine'] = 'view'
-                if 'references invalid table' in (row['comment'] or ''):
-                    LOG.warning("Invalid view %s.%s: %s", 
+                if 'references invalid table' in row['comment'] or '':
+                    LOG.warning("Invalid view %s.%s: %s",
                                 row['database'], row['name'],
                                 row['comment'] or '')
-                if 'Incorrect key file' in (row['comment'] or ''):
+                if 'Incorrect key file' in row['comment'] or '':
                     LOG.warning("Invalid table %s.%s: %s",
                                 row['database'], row['name'],
                                 row['comment'] or '')
@@ -186,10 +185,10 @@ class MySQLClient(object):
         :returns: list of dicts, one dict per table
         """
         try:
-            if self.server_version() < (5,1):
+            if self.server_version() < (5, 1):
                 return self._show_table_metadata50(database)
-            else:
-                return self._show_table_metadata51(database)
+
+            return self._show_table_metadata51(database)
         except MySQLError as exc:
             exc.args = (exc.args[0], exc.args[1].decode('utf8'))
             raise
@@ -211,24 +210,26 @@ class MySQLClient(object):
         """
         sql = "SHOW %sTABLES FROM `%s`" % \
             (['', 'FULL '][int(full)],
-             database.replace('`','``'))
+             database.replace('`', '``'))
         cursor = self.cursor()
         cursor.execute(sql)
         try:
             if full:
                 return [(table, kind) for table, kind in cursor]
-            else:
-                return [table for table in cursor]
+            return [table for table in cursor]
         finally:
             cursor.close()
 
-    def show_table_status(self, database):
+    def show_table_status(self, database=None):
         """SHOW TABLE STATUS
 
         :param database: database to extract table status from
         :returns: list of tuples
         """
-        sql = "SHOW TABLE STATUS"
+        if database:
+            sql = "SHOW TABLE STATUS FROM %s" % database
+        else:
+            sql = "SHOW TABLE STATUS"
         cursor = self.cursor()
         cursor.execute(sql)
         try:
@@ -293,7 +294,7 @@ class MySQLClient(object):
                     return cursor.fetchone()[0]
             except MySQLError as exc:
                 LOG.debug("INFORMATION_SCHEMA.VIEWS(%s,%s) failed: [%d] %s ",
-                        schema, name, *exc.args)
+                          schema, name, *exc.args)
             return None
         finally:
             cursor.close()
@@ -333,8 +334,7 @@ class MySQLClient(object):
 
             if not slave_status:
                 return None
-            else:
-                return dict(list(zip(keys, slave_status)))
+            return dict(list(zip(keys, slave_status)))
         finally:
             cursor.close()
 
@@ -349,8 +349,7 @@ class MySQLClient(object):
 
         if not master_status:
             return None
-        else:
-            return dict(list(zip(keys, master_status)))
+        return dict(list(zip(keys, master_status)))
 
     def start_slave(self):
         """Run START SLAVE on the connected MySQL instance"""
@@ -404,9 +403,9 @@ class MySQLClient(object):
         rather than globally.
         """
         sql = "SET %(scope)s %(variable)s = %(value)r" % \
-            { 'scope' : self.SCOPE[session],
-              'variable' : key,
-              'value' : value
+            {'scope' : self.SCOPE[session],
+             'variable' : key,
+             'value' : value
             }
         cursor = self.cursor()
         cursor.execute(sql)
@@ -419,9 +418,9 @@ class MySQLClient(object):
         returns a numeric tuple: major, minor, revision versions (respectively)
         """
         version = self.get_server_info()
-        m = re.match(r'^(\d+)\.(\d+)\.(\d+)', version)
-        if m:
-            return tuple([int(v) for v in m.groups()])
+        match = re.match(r'^(\d+)\.(\d+)\.(\d+)', version)
+        if match:
+            return tuple([int(v) for v in match.groups()])
         else:
             raise MySQLError("Could not match server version: %r" % version)
 
@@ -525,8 +524,8 @@ def connect(config, client_class=AutoMySQLClient):
             if isinstance(value, bytes):
                 args[cnf_to_mysqldb[key]] = value.decode('utf-8')
             else:
-                 args[cnf_to_mysqldb[key]] = str(value)
+                args[cnf_to_mysqldb[key]] = str(value)
         except KeyError:
-            LOG.warn("Skipping unknown parameter %s", key)
+            LOG.warning("Skipping unknown parameter %s", key)
     # also, always use utf8
     return client_class(charset='utf8', **args)

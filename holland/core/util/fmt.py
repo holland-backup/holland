@@ -1,5 +1,11 @@
+"""
+Format day, byt, number, and log objects
+"""
+
 def format_interval(seconds):
-    """ Format an integer number of seconds to a human readable string."""
+    """
+    Format an integer number of seconds to a human readable string.
+    """
     units = [
         (('week', 'weeks'), 604800),
         (('day', 'days'), 86400),
@@ -9,33 +15,38 @@ def format_interval(seconds):
     ]
     result = []
     for names, value in units:
-        n, seconds = divmod(seconds, value)
-        if n > 0:
-            result.append('%d %s' % (n, names[n > 1]))
+        num, seconds = divmod(seconds, value)
+        if num > 0:
+            result.append('%d %s' % (num, names[num > 1]))
     if seconds:
         result.append("%.2f %s" % (seconds, ['second', 'seconds'][seconds != 1.0]))
     return ', '.join(result)
 
 def format_datetime(epoch):
+    """
+    Define standard datetime string
+    """
     from time import strftime, localtime
     return strftime("%a %b %d %Y %I:%M:%S%p", localtime(epoch))
 
-def format_bytes(bytes, precision=2):
-    """Format an integer number of bytes to a human readable string."""
+def format_bytes(input_bytes, precision=2):
+    """
+    Format an integer number of input_bytes to a human readable string.
+    """
     import math
 
-    if bytes < 0:
+    if input_bytes < 0:
         raise ArithmeticError("Only Positive Integers Allowed")
 
-    if bytes != 0:
-        exponent = float(math.floor(math.log(bytes, 1024)))
+    if input_bytes != 0:
+        exponent = float(math.floor(math.log(input_bytes, 1024)))
     else:
         exponent = float(0)
 
     return "%.*f%s" % (
         precision,
-        float(bytes) / (1024 ** exponent),
-        ['B','KB','MB','GB','TB','PB','EB','ZB','YB'][int(exponent)]
+        float(input_bytes) / (1024 ** exponent),
+        ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'][int(exponent)]
     )
 
 def format_loglevel(str_level):

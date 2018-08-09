@@ -4,7 +4,7 @@ import sys
 import csv
 import errno
 import logging
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 from holland.lib.safefilename import encode
 from holland.backup.mysqldump.command import ALL_DATABASES, MySQLDumpError
 from holland.backup.mysqldump.mock.env import MockEnvironment

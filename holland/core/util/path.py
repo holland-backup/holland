@@ -7,9 +7,6 @@ Utility functions
 # and generally useful.
 
 import os
-import sys
-import stat
-import time
 import logging
 
 LOG = logging.getLogger(__name__)
@@ -22,12 +19,12 @@ def ensure_dir(dir_path):
     if not os.path.exists(dir_path):
         try:
             os.makedirs(dir_path)
-            LOG.debug("created directory %s" % dir_path)
+            LOG.debug("created directory %s", dir_path)
             return True
-        except OSError as e:
+        except OSError as ex:
             # FIX ME: Need error codes/etc so this will exit(<code>) or raise
             # an appropriate holland exception
-            LOG.error("os.makedirs(%s): %s" % (dir_path, e))
+            LOG.error("os.makedirs(%s): %s", dir_path, ex)
             raise
     return False
 
@@ -47,7 +44,6 @@ def protected_path(path):
         >>> new_path
         '/tmp.0'
     """
-    log = logging.getLogger(__name__)
     safety = 0
     safe_path = path
     while True:
@@ -58,33 +54,35 @@ def protected_path(path):
         safety = safety + 1
     return safe_path
 
-def format_bytes(bytes, precision=2):
+def format_bytes(input_bytes, precision=2):
     """
-    Format an integer number of bytes to a human
+    Format an integer number of input_bytes to a human
     readable string.
 
-    If bytes is negative, this method raises ArithmeticError
+    If input_bytes is negative, this method raises ArithmeticError
     """
     import math
 
-    if bytes < 0:
+    if input_bytes < 0:
         raise ArithmeticError("Only Positive Integers Allowed")
 
-    if bytes != 0:
-        exponent = math.floor(math.log(bytes, 1024))
+    if input_bytes != 0:
+        exponent = math.floor(math.log(input_bytes, 1024))
     else:
         exponent = 0
 
     return "%.*f%s" % (
         precision,
-        bytes / (1024 ** exponent),
-        ['B','KB','MB','GB','TB','PB','EB','ZB','YB'][int(exponent)]
+        input_bytes / (1024 ** exponent),
+        ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'][int(exponent)]
     )
 
 
 def normpath(path):
-    from os.path import normpath, abspath
-    return abspath(normpath(path))
+    """
+    Normalize Path
+    """
+    return os.path.abspath(os.path.normpath(path))
 
 def relpath(path, start=os.curdir):
     """Return a relative version of a path"""
@@ -122,7 +120,7 @@ def getmount(path):
 def disk_capacity(target_path):
     """Find the total capacity of the filesystem that target_path is on
 
-    :returns: integer number of bytes
+    :returns: integer number of input_bytes
     """
     path = getmount(target_path)
     info = os.statvfs(path)
@@ -134,7 +132,7 @@ def disk_free(target_path):
     Path must exist.
     This method does not take into account quotas
 
-    returns the size in bytes potentially available
+    returns the size in input_bytes potentially available
     to a non privileged user
     """
     path = getmount(target_path)
@@ -145,15 +143,17 @@ def directory_size(path):
     """
     Find the size of all files in a directory, recursively
 
-    Returns the size in bytes on success
+    Returns the size in input_bytes on success
     """
     from os.path import join, getsize
     result = 0
     for root, dirs, files in os.walk(path):
         for name in files:
             try:
-                sz = getsize(join(root,name))
-                result = result + sz
-            except OSError as exc:
+                size = getsize(join(root, name))
+                result = result + size
+            except OSError:
                 pass
+        for name in dirs:
+            LOG.debug('Debug: Database backups writen to %s/%s', root, name)
     return result

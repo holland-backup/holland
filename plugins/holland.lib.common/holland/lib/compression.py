@@ -1,11 +1,15 @@
+"""
+Common Compression utils
+"""
+
 import os
 import logging
 import errno
 import subprocess
-from . import which
 import shlex
 import io
 from tempfile import TemporaryFile
+from . import which
 
 LOG = logging.getLogger(__name__)
 
@@ -36,9 +40,9 @@ def lookup_compression(method):
         argv = shlex.split(cmd)
         try:
             return [which.which(argv[0])] + argv[1:], ext
-        except which.WhichError as e:
-            raise OSError("No command found for compression method '%s'" %
-                    method)
+        except which.WhichError as ex:
+            raise OSError("No command found for compression method '%s': %s" %
+                          method, ex)
     except KeyError:
         raise OSError("Unsupported compression method '%s'" % method)
 
@@ -53,23 +57,39 @@ class CompressionInput(object):
                                     stdin=self.fileobj.fileno(),
                                     stdout=subprocess.PIPE,
                                     bufsize=bufsize)
-        self.fd = self.pid.stdout.fileno()
+        self.filehandle = self.pid.stdout.fileno()
         self.name = path
         self.closed = False
+        self.mode = mode
 
     def fileno(self):
-        return self.fd
+        """
+        fileno
+        """
+        return self.filehandle
 
     def read(self, size):
-        return os.read(self.fd, size)
+        """
+        read
+        """
+        return os.read(self.filehandle, size)
 
     def __next__(self):
+        """
+        next
+        """
         return next(self.pid.stdout)
 
     def __iter__(self):
+        """
+        iter stdout
+        """
         return iter(self.pid.stdout)
 
     def close(self):
+        """
+        close filehandle
+        """
         import signal
         os.kill(self.pid.pid, signal.SIGTERM)
         self.fileobj.close()
@@ -89,7 +109,7 @@ class CompressionOutput(object):
         self.inline = inline
         if not inline:
             self.fileobj = io.open(os.path.splitext(path)[0], mode)
-            self.fd = self.fileobj.fileno()
+            self.filehandle = self.fileobj.fileno()
         else:
             self.fileobj = io.open(path, 'w')
             if level:
@@ -103,17 +123,26 @@ class CompressionOutput(object):
                                         stdin=subprocess.PIPE,
                                         stdout=self.fileobj.fileno(),
                                         stderr=self.stderr)
-            self.fd = self.pid.stdin.fileno()
+            self.filehandle = self.pid.stdin.fileno()
         self.name = path
         self.closed = False
 
     def fileno(self):
-        return self.fd
+        """
+        Return filehandle
+        """
+        return self.filehandle
 
     def write(self, data):
-        return os.write(self.fd, data)
+        """
+        writeout to filehandle
+        """
+        return os.write(self.filehandle, data)
 
     def close(self):
+        """
+        Close filehandle
+        """
         self.closed = True
         if not self.inline:
             argv = list(self.argv)
@@ -126,9 +155,9 @@ class CompressionOutput(object):
             self.fileobj = io.open(self.fileobj.name, 'r')
             cmp_f = io.open(self.name, 'w')
             LOG.debug("Running %r < %r[%d] > %r[%d]",
-                         argv, self.fileobj.name, self.fileobj.fileno(),
-                         cmp_f.name, cmp_f.fileno())
-            pid = subprocess.Popen(args,
+                      argv, self.fileobj.name, self.fileobj.fileno(),
+                      cmp_f.name, cmp_f.fileno())
+            pid = subprocess.Popen(argv,
                                    stdin=self.fileobj.fileno(),
                                    stdout=cmp_f.fileno())
             status = pid.wait()
@@ -142,14 +171,16 @@ class CompressionOutput(object):
             try:
                 if status != 0:
                     for line in stderr:
-                        if not line.strip(): continue
+                        if not line.strip():
+                            continue
                         LOG.error("%s: %s", self.argv[0], line.rstrip())
                     raise IOError(errno.EPIPE,
-                              "Compression program '%s' exited with status %d" %
-                                (self.argv[0], status))
+                                  "Compression program '%s' exited with status %d" %
+                                  (self.argv[0], status))
                 else:
                     for line in stderr:
-                        if not line.strip(): continue
+                        if not line.strip():
+                            continue
                         LOG.info("%s: %s", self.argv[0], line.rstrip())
             finally:
                 stderr.close()
@@ -194,7 +225,7 @@ def open_stream(path,
                 extra_args=None):
     """
     Opens a compressed data stream, and returns a file descriptor type object
-    that acts much like os.open() does.  If no method is passed, or the 
+    that acts much like os.open() does.  If no method is passed, or the
     compression level is 0, simply returns a file descriptor from open().
 
     Arguments:

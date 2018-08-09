@@ -1,3 +1,3 @@
-import holland.core.backports.logging as logging
+import logging
 
 logging.basicConfig(level=logging.DEBUG)

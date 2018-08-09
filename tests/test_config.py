@@ -2,7 +2,7 @@ import os
 import shutil
 import tempfile
 import unittest
-from holland.core.config import hollandcfg, setup_config
+from holland.core.config import HOLLANDCFG, setup_config
 
 class TestHollandConfig(unittest.TestCase):
     def setUp(self):
@@ -34,7 +34,7 @@ class TestHollandConfig(unittest.TestCase):
         }
 
         for key, value in list(cfgentry_tests.items()):
-            self.assertEqual(hollandcfg.lookup(key), value)
+            self.assertEqual(HOLLANDCFG.lookup(key), value)
 
     def test_backupset(self):
         pass

@@ -11,6 +11,8 @@
 #    see <http://bobcat.origo.ethz.ch/wiki/Licence>.
 #
 
+# pylint: skip-file
+
 """Codec class for safe filenames.  Safe filenames work on all important
 filesystems, i.e., they don't contain special or dangerous characters, and
 they don't assume that filenames are treated case-sensitively.

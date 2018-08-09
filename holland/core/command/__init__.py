@@ -1,42 +1,56 @@
+"""
+Setup functions to import commnad plugins
+"""
+
 from __future__ import print_function
 import os
 import sys
 import logging
-from .command import Command, option, StopOptionProcessing
 from holland.core.plugin import get_commands
+from .command import Command, PARSER
 
 __all__ = [
     'Command',
-    'option',
-    'StopOptionProcessing',
-    'run'
+    'run',
+    'PARSER'
 ]
 
 LOGGER = logging.getLogger(__name__)
 
-def run(args=None):
-    if args is None:
-        args = sys.argv[1:]
-
-    # Run the requested command
-    commands = get_commands()
-
-    if not args:
-        args = ['help']
-
-    command_name = args[0]
-
-    if command_name not in commands:
-        print("No such command: %r" % command_name, file=sys.stderr)
-        return os.EX_UNAVAILABLE
-    else:
+def setup_commands():
+    """
+    Load plugins
+    """
+    commands = get_commands(include_aliases=False)
+    for command_name in commands:
         cmdobj = commands[command_name]()
-        try:
-            return cmdobj.dispatch(args)
-        except KeyboardInterrupt:
-            LOGGER.info("Interrupt")
-            return os.EX_SOFTWARE
-        except Exception as e:
-            LOGGER.debug("Command %r failed: %r", exc_info=True)
-            print("Command %r failed: %r" % (command_name, e), file=sys.stderr)
-            return os.EX_SOFTWARE
+    return cmdobj
+
+def print_help():
+    """
+    log command args and then display help
+    """
+    setup_commands()
+    PARSER.print_help(sys.stderr)
+
+def run(opts, args=None):
+    """
+    Run the target command
+    """
+    commands = get_commands()
+    cmdobj = commands[opts.command]()
+    try:
+        return cmdobj.dispatch(opts, args)
+    except KeyboardInterrupt:
+        LOGGER.info("Interrupt")
+        return os.EX_SOFTWARE
+    except BaseException:
+        print_help()
+        return 1
+
+def parse_sys(args):
+    """
+    Load plugins and parse command line
+    """
+    setup_commands()
+    return PARSER.parse_known_args(args)

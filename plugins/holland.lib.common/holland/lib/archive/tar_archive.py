@@ -1,3 +1,7 @@
+"""
+Tar Archive
+"""
+
 import os
 import pwd
 import grp
@@ -28,9 +32,9 @@ class TarArchive(object):
     def __init__(self, path, mode='w:gz'):
         """
         Initialize a TarArchive.
-        
+
         Arguments:
-        
+
         path -- Path to the archive file
         mode -- Archive mode.  Default: w:gz (write + gzip) (see tarfile)
         """
@@ -41,9 +45,9 @@ class TarArchive(object):
     def add_file(self, path, name):
         """
         Add a file to the archive.
-        
+
         Arguments:
-        
+
         path -- Path to file for which to add to archive.
         name -- Name of file (for tarinfo)
         """
@@ -56,9 +60,9 @@ class TarArchive(object):
     def add_string(self, string, name):
         """
         Add a string to the archive (fake file).
-        
+
         Arguments:
-        
+
         string  -- String to add to the archive.
         name    -- Name of the file to save string as.
         """
@@ -77,9 +81,9 @@ class TarArchive(object):
     def extract(self, name, dest):
         """
         Extract a member from an archive to 'dest' path.
-        
+
         Arguments:
-        
+
         name -- Name of the member in the archive to extract.
         dest -- Path to extract member to.
         """
@@ -92,12 +96,12 @@ class TarArchive(object):
         self.archive.close()
 
 if __name__ == '__main__':
-    now = time.time()
-    xv = TarArchive('foo.tgz', 'w:gz')
-    xv.add_string("[mysqldump]\nignore-table=mysql.user\n", "my.cnf")
-    xv.add_string("blah", "test/test.MYD")
-    xv.add_file("user.frm", "mysql/user.frm")
-    xv.add_file("user.MYD", "mysql/user.MYD")
-    xv.add_file("user.MYI", "mysql/user.MYI")
-    xv.close()
-    print((time.time() - now), "seconds")
+    NOW = time.time()
+    XV = TarArchive('foo.tgz', 'w:gz')
+    XV.add_string("[mysqldump]\nignore-table=mysql.user\n", "my.cnf")
+    XV.add_string("blah", "test/test.MYD")
+    XV.add_file("user.frm", "mysql/user.frm")
+    XV.add_file("user.MYD", "mysql/user.MYD")
+    XV.add_file("user.MYI", "mysql/user.MYI")
+    XV.close()
+    print((time.time() - NOW), "seconds")

@@ -5,6 +5,8 @@
 # Home:
 #   http://trentm.com/projects/which/
 
+# pylint: skip-file
+
 r"""Find the full path to commands.
 
 which(command, path=None, verbose=0, exts=None)
@@ -18,7 +20,7 @@ whichall(command, path=None, verbose=0, exts=None)
 whichgen(command, path=None, verbose=0, exts=None)
     Return a generator which will yield full paths to all matches of the
     given command on the path.
-    
+
 By default the PATH environment variable is searched (as well as, on
 Windows, the AppPaths key in the registry), but a specific 'path' list
 to search may be specified as well.  On Windows, the PATHEXT environment
@@ -133,12 +135,12 @@ def _cull(potential, matches, verbose=0):
             matches.append(potential)
             return potential
 
-        
+
 #---- module API
 
 def whichgen(command, path=None, verbose=0, exts=None):
     """Return a generator of full paths to the given command.
-    
+
     "command" is a the name of the executable to search for.
     "path" is an optional alternate path list to search. The default it
         to use the PATH environment variable.
@@ -226,7 +228,7 @@ def whichgen(command, path=None, verbose=0, exts=None):
 def which(command, path=None, verbose=0, exts=None):
     """Return the full path to the first match of the given command on
     the path.
-    
+
     "command" is a the name of the executable to search for.
     "path" is an optional alternate path list to search. The default it
         to use the PATH environment variable.
@@ -250,7 +252,7 @@ def which(command, path=None, verbose=0, exts=None):
 
 def whichall(command, path=None, verbose=0, exts=None):
     """Return a list of full paths to all matches of the given command
-    on the path.  
+    on the path.
 
     "command" is a the name of the executable to search for.
     "path" is an optional alternate path list to search. The default it

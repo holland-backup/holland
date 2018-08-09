@@ -147,7 +147,7 @@ class MySQLPathInfo(tuple):
 
 
 from holland.core.util.path import getmount
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 def is_subdir(path, start):
     """Check if path is a subdirectory or some starting path"""
     path = os.path.abspath(path)

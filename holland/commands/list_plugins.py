@@ -1,5 +1,9 @@
-import os
-import textwrap
+"""
+Print list of installed plugins
+"""
+
+from __future__ import print_function
+import sys
 from holland.core.command import Command
 from holland.core.plugin import iter_plugins
 
@@ -16,8 +20,14 @@ class ListPlugins(Command):
     ]
     description = 'List installed plugins'
 
+    args = []
+    kargs = []
 
-    def print_table(self, table):
+    @staticmethod
+    def print_table(table):
+        """
+        Format and print table
+        """
         header = table[0]
         rest = table[1:]
         fmt = "%-12s %-15s %-9s %-16s %s"
@@ -26,19 +36,21 @@ class ListPlugins(Command):
         for row in rest:
             print(fmt % tuple(row))
 
-    def run(self, cmd, opts):
+    def run(self, cmd, opts, *args):
+        if args:
+            print("The list-plugin command takes no arguments", file=sys.stderr)
         table_header = ["Plugin-Type", "Plugin-Name", "Version", "Author", "Summary"]
         table = []
 
         for plugin, metainfo in iter_plugins('holland.backup'):
             row = ['backup', plugin]
-            for key in ['version','author','summary']:
+            for key in ['version', 'author', 'summary']:
                 row.append(metainfo.get(key, '-'))
             table.append(row)
 
         for plugin, metainfo in iter_plugins('holland.commands'):
             row = ['command', plugin]
-            for key in ['version','author','summary']:
+            for key in ['version', 'author', 'summary']:
                 row.append(metainfo.get(key, '-'))
             table.append(row)
         table.sort()

@@ -5,7 +5,7 @@ import os
 import re
 import codecs
 import logging
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 from holland.lib.compression import open_stream, lookup_compression
 from holland.lib.mysql import MySQLSchema, connect, MySQLError
 from holland.lib.mysql import include_glob, exclude_glob, \
@@ -263,11 +263,13 @@ class MySQLDumpPlugin(object):
         compression_method = method or self.config['compression']['method']
         compression_level = self.config['compression']['level']
         compression_options = self.config['compression']['options']
+        compression_inline = self.config['compression']['inline']
         stream = open_stream(path,
                              mode,
                              compression_method,
                              compression_level,
-                             extra_args=compression_options)
+                             extra_args=compression_options,
+                             inline=compression_inline)
         return stream
 
     def info(self):

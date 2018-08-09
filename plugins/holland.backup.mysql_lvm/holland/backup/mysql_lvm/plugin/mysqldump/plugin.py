@@ -8,7 +8,7 @@ from holland.lib.lvm import LogicalVolume, CallbackFailuresError, \
 from holland.lib.mysql.client import MySQLError
 from holland.core.util.fmt import format_bytes
 from holland.core.util.path import directory_size
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 from holland.backup.mysql_lvm.plugin.common import build_snapshot, \
                                                    connect_simple
 from holland.backup.mysql_lvm.plugin.mysqldump.util import setup_actions

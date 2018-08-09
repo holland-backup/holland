@@ -3,12 +3,12 @@ Utilities to manage spool directory
 """
 
 import os
-import sys
 import time
 import errno
 import logging
 import itertools
 import shutil
+from past.builtins import cmp
 from holland.core.config import BaseConfig
 
 LOGGER = logging.getLogger(__name__)
@@ -41,11 +41,9 @@ class Spool(object):
             backupset = self.find_backupset(backupset_name)
             if backupset:
                 return backupset.find_backup(timestamp)
-            else:
-                return None
-        except ValueError as e:
-            LOGGER.warning("Invalid backup name: %s", name)
-            return None
+        except ValueError as ex:
+            LOGGER.warning("Invalid backup name: %s, Error: %s", name, ex)
+        return None
 
     def add_backup(self, backupset_name):
         """
@@ -91,7 +89,7 @@ class Spool(object):
         if not os.path.exists(self.path):
             return []
 
-        backupsets= []
+        backupsets = []
         dirs = []
         if name:
             if not os.path.exists(os.path.join(self.path, name)):
@@ -104,7 +102,7 @@ class Spool(object):
         backupsets = [Backupset(dir, os.path.join(self.path, dir)) \
                       for dir in dirs]
 
-        backupsets.sort(key = lambda x: x.name)
+        backupsets.sort(key=lambda x: x.name)
 
         if reverse:
             backupsets.reverse()
@@ -112,20 +110,35 @@ class Spool(object):
         return backupsets
 
     def list_backups(self, backupset_name=None):
+        """
+        Get list of backups
+        """
         for backupset in self.list_backupsets(backupset_name):
             for backup in backupset.list_backups():
                 yield backup
 
     def __iter__(self):
+        """
+        pass to list_backupsets
+        """
         return iter(self.list_backupsets())
 
 
 class Backupset(object):
+    """
+    Define backupset
+    """
     def __init__(self, name, path):
+        """
+        A backupset should have a name and a path
+        """
         self.name = name
         self.path = path
 
     def find_backup(self, name):
+        """
+        Create list of backups
+        """
         backups = self.list_backups(name)
         if not backups:
             return None
@@ -142,6 +155,9 @@ class Backupset(object):
         return backup
 
     def purge(self, retention_count=0):
+        """
+        Delete old backup
+        """
         if retention_count < 0:
             raise ValueError("Invalid retention count %s" % retention_count)
         for backup in itertools.islice(self.list_backups(reverse=True), retention_count, None):
@@ -162,17 +178,17 @@ class Backupset(object):
         if name:
             path = os.path.join(self.path, name)
             return [Backup(path, self.name, name) for x in range(1)
-                        if os.path.exists(path)]
+                    if os.path.exists(path)]
 
         dirs = [backup for backup in os.listdir(self.path)
-                   if os.path.isdir(os.path.join(self.path, backup))
-                    and backup not in ('oldest', 'newest')]
+                if os.path.isdir(os.path.join(self.path, backup))
+                and backup not in ('oldest', 'newest')]
 
         backup_list = [Backup(os.path.join(self.path, dir),
                               self.name,
                               dir) for dir in dirs]
 
-        backup_list.sort(key = lambda x: x.name)
+        backup_list.sort(key=lambda x: x.name)
         if reverse:
             backup_list.reverse()
 
@@ -226,6 +242,9 @@ purge-on-demand         = boolean(default=no)
 before-backup-command   = string(default=None)
 after-backup-command    = string(default=None)
 failed-backup-command   = string(default=None)
+historic-size           = boolean(default=yes)
+historic-size-factor    = float(default=1.5)
+historic-estimated-size-factor = float(default=1.1)
 """.splitlines()
 
 class Backup(object):
@@ -247,6 +266,9 @@ class Backup(object):
             self.validate_config()
 
     def validate_config(self):
+        """
+        Validate configuration
+        """
         self.config.validate_config(CONFIGSPEC, suppress_warnings=True)
 
     def load_config(self):
@@ -256,12 +278,11 @@ class Backup(object):
         self.config.reload()
         self.validate_config()
 
-    def purge(self, data_only=False):
+    def purge(self):
         """
-        Purge this backup.
+        Purge the entire backup directory
         """
-        assert(os.path.realpath(self.path) != '/')
-        # purge the entire backup directory
+        assert os.path.realpath(self.path) != '/'
         try:
             shutil.rmtree(self.path)
         except OSError as exc:
@@ -300,8 +321,11 @@ class Backup(object):
         return cfg
 
     def info(self):
-        from holland.core.util.template import Template
-        from textwrap import dedent, wrap
+        """
+        get plugin info
+        """
+        from string import Template
+        from textwrap import dedent
         tmpl = Template("""
         backup-plugin   = ${plugin}
         backup-started  = ${start-time}
@@ -309,12 +333,15 @@ class Backup(object):
         estimated size  = ${estimated-size}
         on-disk size    = ${on-disk-size}
         """)
-        str = tmpl.safe_substitute(self._formatted_config())
-        str = "\t" + dedent(str).lstrip()
-        str = "\n\t\t".join(str.splitlines())
-        return str
+        info_str = tmpl.safe_substitute(self._formatted_config())
+        info_str = "\t" + dedent(str).lstrip()
+        info_str = "\n\t\t".join(str.splitlines())
+        return info_str
 
     def __str__(self):
+        """
+        format plugin info
+        """
         from textwrap import dedent
         from holland.core.util.fmt import format_bytes, format_datetime
 
@@ -338,4 +365,4 @@ class Backup(object):
 
     __repr__ = __str__
 
-spool = Spool()
+SPOOL = Spool()

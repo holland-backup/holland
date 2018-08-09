@@ -1,9 +1,13 @@
+"""
+Tar Backup Plugin
+"""
+
 import logging
 import os
 from subprocess import Popen, list2cmdline
-from holland.core.exceptions import BackupError
-from holland.lib.compression import open_stream
 from tempfile import TemporaryFile
+from holland.core.backup import BackupError
+from holland.lib.compression import open_stream
 
 LOG = logging.getLogger(__name__)
 
@@ -20,6 +24,9 @@ level  = integer(min=0, max=9, default=1)
 """.splitlines()
 
 class TarPlugin(object):
+    """
+    Define Tar Backup method
+    """
     def __init__(self, name, config, target_directory, dry_run=False):
         """Create a new TarPlugin instance
 
@@ -39,17 +46,22 @@ class TarPlugin(object):
         self.config.validate_config(CONFIGSPEC)
 
     def estimate_backup_size(self):
+        """
+        Estimate how large the backup will be
+        """
         total_size = 0
         for dirpath, dirnames, filenames in os.walk(self.config['tar']['directory']):
-            for f in filenames:
-                fp = os.path.join(dirpath, f)
+            for files in filenames:
+                filepointer = os.path.join(dirpath, files)
                 # verify the symlink and such exist before trying to get its size
-                if os.path.exists(fp):
-                    total_size += os.path.getsize(fp)
+                if os.path.exists(filepointer):
+                    total_size += os.path.getsize(filepointer)
+            LOG.debug('Debug: Checking size of %s directories in %s', len(dirnames), dirpath)
         return total_size
 
     def _open_stream(self, path, mode, method=None):
-        """Open a stream through the holland compression api, relative to
+        """
+        Open a stream through the holland compression api, relative to
         this instance's target directory
         """
         compression_method = method or self.config['compression']['method']
@@ -63,6 +75,9 @@ class TarPlugin(object):
         return stream
 
     def backup(self):
+        """
+        Create backup
+        """
         if self.dry_run:
             return
         if not os.path.exists(self.config['tar']['directory']) \

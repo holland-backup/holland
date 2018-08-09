@@ -7,72 +7,76 @@ They initialize things like logging and the config system.
 import os
 import sys
 import logging
-import warnings
 from holland.core.plugin import add_plugin_dir
-from holland.core.config import hollandcfg, setup_config as _setup_config
+from holland.core.config import HOLLANDCFG, setup_config as _setup_config
 from holland.core.log import setup_console_logging, setup_file_logging, clear_root_handlers
-from holland.core.spool import spool
+from holland.core.spool import SPOOL
 
 LOGGER = logging.getLogger(__name__)
 
 def setup_config(opts):
+    """
+    Setup Config
+    """
     if not opts.quiet:
         debug = opts.log_level == 'debug'
-        setup_console_logging(level=[logging.INFO,logging.DEBUG][debug])
+        setup_console_logging(level=[logging.INFO, logging.DEBUG][debug])
     try:
         _setup_config(opts.config_file)
-    except IOError as e:
-        LOGGER.error("Failed to load holland config: %s", e)
+    except IOError as ex:
+        LOGGER.error("Failed to load holland config: %s", ex)
         sys.exit(os.EX_CONFIG)
 
-def log_warnings(message, category, filename, lineno, file=None, line=None):
-    WARNLOG = logging.getLogger("Python")
-    logging.debug("message=%s message=%r category=%r", message, message, category)
-    warning_string = warnings.formatwarning(message,
-                                            category,
-                                            filename,
-                                            lineno)
-    WARNLOG.debug("%s", warning_string)
-
 def setup_logging(opts):
+    """
+    Setup log file
+    """
     clear_root_handlers()
     if hasattr(opts, 'log_level'):
-        log_level = opts.log_level or hollandcfg.lookup('logging.level')
+        log_level = opts.log_level or HOLLANDCFG.lookup('logging.level')
     else:
-        log_level = hollandcfg.lookup('logging.level')
+        log_level = HOLLANDCFG.lookup('logging.level')
 
-    if (not opts.quiet):
+    if not opts.quiet:
         setup_console_logging(level=log_level)
 
-    if hollandcfg.lookup('logging.filename'):
+    if HOLLANDCFG.lookup('logging.filename'):
         try:
-            if hollandcfg.lookup('logging.format'):
-                setup_file_logging(filename=str(hollandcfg.lookup('logging.filename')),
+            if HOLLANDCFG.lookup('logging.format'):
+                setup_file_logging(filename=str(HOLLANDCFG.lookup('logging.filename')),
                                    level=log_level,
-                                   format=hollandcfg.lookup(str('logging.format')))
+                                   msg_format=HOLLANDCFG.lookup(str('logging.format')))
             else:
-                setup_file_logging(filename=str(hollandcfg.lookup('logging.filename')),
+                setup_file_logging(filename=str(HOLLANDCFG.lookup('logging.filename')),
                                    level=log_level)
         except IOError as exc:
-            LOGGER.warn("Skipping file logging: %s", exc)
-
-    # Monkey patch in routing warnings through logging
-    old_showwarning = warnings.showwarning
-    warnings.showwarning = log_warnings
+            LOGGER.warning("Skipping file logging: %s", exc)
 
 def setup_umask():
-    os.umask(hollandcfg.lookup('holland.umask'))
+    """
+    get file umask
+    """
+    os.umask(HOLLANDCFG.lookup('holland.umask'))
 
 def setup_path():
-    if hollandcfg.lookup('holland.path'):
-        os.putenv('PATH', hollandcfg.lookup('holland.path'))
-        os.environ['PATH'] = hollandcfg.lookup('holland.path')
+    """
+    Lookup config file path
+    """
+    if HOLLANDCFG.lookup('holland.path'):
+        os.putenv('PATH', HOLLANDCFG.lookup('holland.path'))
+        os.environ['PATH'] = HOLLANDCFG.lookup('holland.path')
 
 def setup_plugins():
-    for location in hollandcfg.lookup('holland.plugin-dirs'):
+    """
+    Setup plugins
+    """
+    for location in HOLLANDCFG.lookup('holland.plugin-dirs'):
         add_plugin_dir(location)
 
 def bootstrap(opts):
+    """
+    Called by main() to setup everything
+    """
     # Setup the configuration
     setup_config(opts)
     # use umask setting
@@ -80,11 +84,11 @@ def bootstrap(opts):
     # Setup logging per config
     setup_logging(opts)
     # setup tmpdir
-    if hollandcfg.lookup('holland.tmpdir'):
-        os.environ['TMPDIR'] = str(hollandcfg.lookup('holland.tmpdir'))
+    if HOLLANDCFG.lookup('holland.tmpdir'):
+        os.environ['TMPDIR'] = str(HOLLANDCFG.lookup('holland.tmpdir'))
     # configure our PATH
     setup_path()
     # Setup plugin directories
     setup_plugins()
     # Setup spool
-    spool.path = hollandcfg.lookup('holland.backup-directory')
+    SPOOL.path = HOLLANDCFG.lookup('holland.backup-directory')

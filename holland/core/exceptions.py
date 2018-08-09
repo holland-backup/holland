@@ -2,7 +2,6 @@
 Standard public exceptions that are raised by
 the various APIs in holland-core
 """
-from holland.core.backup import BackupError
 
 class ConfigError(Exception):
     """Configuration error"""

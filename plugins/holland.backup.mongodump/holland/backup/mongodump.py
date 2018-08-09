@@ -9,7 +9,7 @@ from functools import partial
 
 from pymongo import MongoClient
 
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 from holland.lib.compression import open_stream
 
 

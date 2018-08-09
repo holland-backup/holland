@@ -7,7 +7,7 @@ import shutil
 import tempfile
 import logging
 import copy
-from holland.core.exceptions import BackupError
+from holland.core.backup import BackupError
 from holland.core.util.fmt import format_bytes
 from holland.lib.mysql import PassiveMySQLClient, MySQLError, \
                               build_mysql_config, connect

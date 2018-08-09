@@ -1,4 +1,4 @@
-RHEL/Centos
+RHEL/Centos from EPEL
 *Install base packages
 # yum install holland holland-common
 * Install plugin(s)
