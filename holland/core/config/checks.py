@@ -7,8 +7,8 @@ import shlex
 from builtins import str as text
 from holland.core.util.fmt import format_loglevel
 try:
-    from validate import Validator
-except BaseException:
+    from configobj.validate import Validator
+except ImportError:
     from . import validate as validate
     from .validate import Validator
 

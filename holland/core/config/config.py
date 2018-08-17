@@ -6,7 +6,7 @@ import os
 import logging
 try:
     from .configobj import ConfigObj, Section, flatten_errors, get_extra_values
-except BaseException:
+except ImportError:
     from configobj import ConfigObj, Section, flatten_errors, get_extra_values
 from .checks import VALIDATOR
 
