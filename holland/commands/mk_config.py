@@ -11,9 +11,13 @@ import subprocess
 
 from holland.core.command import Command
 from holland.core.plugin import load_first_entrypoint, PluginLoadError
-from holland.core.config.configobj import ConfigObj, flatten_errors, ParseError
 from holland.core.config import HOLLANDCFG
 from holland.core.config.checks import VALIDATOR
+
+try:
+    from holland.core.config.configobj import ConfigObj, flatten_errors, ParseError
+except BaseException:
+    from configobj import ConfigObj, flatten_errors, ParseError
 
 LOGGER = logging.getLogger(__name__)
 
