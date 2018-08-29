@@ -114,7 +114,7 @@ class Snapshot(object):
 
         self._apply_callbacks('finish', self)
         if sys.exc_info()[1]:
-            raise
+            raise #pylint: disable= misplaced-bare-raise
 
     def error(self, snapshot, exc):
         """Handle an error during the snapshot process"""
@@ -136,8 +136,8 @@ class Snapshot(object):
                     snapshot.remove()
                     LOG.info("Removed snapshot %s on cleanup",
                              snapshot.device_name())
-            except LVMCommandError as exc:
-                LOG.error("Failed to remove snapshot %s", exc)
+            except LVMCommandError as ex:
+                LOG.error("Failed to remove snapshot %s", ex)
 
         return self.finish()
 
@@ -180,4 +180,3 @@ class CallbackFailuresError(Exception):
     def __init__(self, errors):
         Exception.__init__(self, errors)
         self.errors = errors
-
