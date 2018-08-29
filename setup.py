@@ -21,7 +21,6 @@ setup(name="holland",
       test_suite='tests',
       install_requires=[
          #'configobj', # currently this is bundled internally
-         'future',
          'setuptools',
          'six'
          #'argparse'   #Not built into python2.6
