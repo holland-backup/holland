@@ -110,7 +110,7 @@ class XtrabackupPlugin(object):
                                    method=zconfig['method'],
                                    level=zconfig['level'],
                                    extra_args=zconfig['options'],
-                                   extra_args=zconfig['inline'])
+                                   inline=zconfig['inline'])
             except OSError as exc:
                 raise BackupError("Unable to create output file: %s" % exc)
         else:
