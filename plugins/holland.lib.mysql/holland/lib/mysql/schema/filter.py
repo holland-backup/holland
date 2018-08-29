@@ -55,8 +55,7 @@ class IncludeFilter(BaseFilter):
         for _pattern in self.patterns:
             if re.match(_pattern, item, self._re_options) is not None:
                 return False
-        else:
-            return True
+        return True
 
 class ExcludeFilter(BaseFilter):
     """Exclude objects that match any filter"""
@@ -65,8 +64,7 @@ class ExcludeFilter(BaseFilter):
         for _pattern in self.patterns:
             if re.match(_pattern, item, self._re_options) is not None:
                 return True
-        else:
-            return False
+        return False
 
 def exclude_glob(*pattern):
     """Create an exclusion filter from a glob pattern"""
@@ -86,7 +84,7 @@ def include_glob_qualified(*pattern):
     """Create an inclusion filter from glob patterns
 
     Additionally ensure the pattern is for a qualified table name.
-    If not '.' is found in the name, this implies an implicit *. 
+    If not '.' is found in the name, this implies an implicit *.
     before the name
     """
     result = []
@@ -108,4 +106,4 @@ def exclude_glob_qualified(*pattern):
         if '.' not in pat:
             pat = '*.' + pat
         result.append(pat)
-    return exclude_glob(*result) 
+    return exclude_glob(*result)
