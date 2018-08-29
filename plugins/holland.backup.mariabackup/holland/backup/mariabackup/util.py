@@ -41,7 +41,8 @@ def generate_defaults_file(defaults_file, include=(), auth_opts=None):
                     if value is None:
                         continue
                     if need_client_section:
-                        LOG.info("  + Added [client] section with credentials from [mysql:client] section")
+                        LOG.info("  + Added [client] section with credentials \
+                            from [mysql:client] section")
                         print("[client]", file=fileobj)
                         need_client_section = False
                     print('%s = %s' % (key, value), file=fileobj)
@@ -54,6 +55,7 @@ def generate_defaults_file(defaults_file, include=(), auth_opts=None):
     return defaults_file
 
 def mariabackup_version():
+    """Check Mariabackup version"""
     mariabackup_binary = 'mariabackup'
     if not isabs(mariabackup_binary):
         try:
@@ -142,7 +144,7 @@ def apply_mariabackup_logfile(mb_cfg, backupdir):
 def determine_stream_method(stream):
     """Calculate the stream option from the holland config"""
     stream = stream.lower()
-    if stream in ('mbstream','xbstream'):
+    if stream in ('mbstream', 'xbstream'):
         return 'xbstream'
     if stream in ('no', '0', 'false'):
         return None
@@ -178,13 +180,14 @@ def execute_pre_command(pre_command, **kwargs):
                           (pre_command, exc.strerror))
 
     for line in process.stdout:
-        LOG.info("  >> %s", process.pid, line)
+        LOG.info("  >> %s", line)
     returncode = process.wait()
     if returncode != 0:
         raise BackupError("pre-command exited with failure status [%d]" %
                           returncode)
 
 def add_mariabackup_defaults(defaults_path, **kwargs):
+    """Add default config options"""
     if not kwargs:
         return
     fileobj = open(defaults_path, 'a')
@@ -195,7 +198,7 @@ def add_mariabackup_defaults(defaults_path, **kwargs):
             print("[mariabackup]", file=fileobj)
             for key, value in kwargs.items():
                 print("%s = %s" % (key, value), file=fileobj)
-        except IOError as exc:
+        except IOError:
             raise BackupError("Error writing mariabackup defaults to %s" %
                               defaults_path)
     finally:
