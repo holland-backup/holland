@@ -360,6 +360,7 @@ class Backup(object):
         )
 
     def __cmp__(self, other):
+        cmp = lambda x, y: (x > y) - (x < y)
         return cmp(self.config['holland:backup']['start-time'],
                    other.config['holland:backup']['start-time'])
 
