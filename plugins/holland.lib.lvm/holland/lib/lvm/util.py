@@ -17,7 +17,7 @@ __all__ = [
 
 def getmount(path):
     """Return the mount point of a path
-    
+
     :param path: path to find the mountpoint for
 
     :returns: str mounpoint path
@@ -33,7 +33,7 @@ def getmount(path):
 
 def getdevice(mountpoint):
     """Return the device name for the given mountpoint
-    
+
     This method should return the "top" device for the last device
     mounted on path, in case there are multiple stacked mounts
 
@@ -90,19 +90,19 @@ def format_bytes(nbytes, precision=2):
 
     if nbytes != 0:
         exponent = int(log(abs(nbytes), 1024))
-    else:       
+    else:
         exponent = 0
 
     return "%.*f%s" % (
         precision,
         float(nbytes) / (1024 ** exponent),
-        ['Bytes','KB','MB','GB','TB','PB','EB','ZB','YB'][int(exponent)]
+        ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'][int(exponent)]
     )
 
 
 def parse_bytes(units_string):
     """Parse an LVM size string into bytes
-    
+
     :returns: integer number of bytes
     """
 

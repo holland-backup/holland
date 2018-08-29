@@ -34,9 +34,10 @@ role = string(default=None)
 additional-options = string(default=None)
 
 [compression]
-method = option('gzip', 'gzip-rsyncable', 'bzip2', 'pbzip2', 'lzop', 'lzma', 'pigz', 'none', default='gzip')
-level = integer(min=0, default=1)
-options = string(default="")
+method              = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', default=gzip)
+inline              = boolean(default=yes)
+options             = string(default="")
+level               = integer(min=0, max=9, default=1)
 
 [pgauth]
 username = string(default=None)

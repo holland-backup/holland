@@ -70,7 +70,8 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
                                         'w',
                                         method=config['compression']['method'],
                                         level=config['compression']['level'],
-                                        extra_args=config['compression']['options'])
+                                        extra_args=config['compression']['options'],
+                                        inline=config['compression']['inline'])
         except OSError as exc:
             raise BackupError("Unable to create archive file '%s': %s" %
                           (os.path.join(spooldir, 'backup.tar'), exc))

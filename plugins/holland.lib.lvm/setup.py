@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.1.2'
+version = '1.1.3'
 
 setup(name='holland.lib.lvm',
       version=version,
@@ -12,7 +12,7 @@ setup(name='holland.lib.lvm',
       author_email='holland-devel@googlegroups.com',
       url='http://www.hollandbackup.org/',
       license='GPLv2',
-      packages=find_packages(exclude=['ez_setup', 
+      packages=find_packages(exclude=['ez_setup',
                                       'examples',
                                       'tests',
                                       'tests.*',]),

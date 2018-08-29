@@ -8,7 +8,6 @@ import errno
 import logging
 import itertools
 import shutil
-from past.builtins import cmp
 from holland.core.config import BaseConfig
 
 LOGGER = logging.getLogger(__name__)
@@ -224,6 +223,7 @@ class Backupset(object):
         return "%s [%s]" % (self.name, self.path)
 
     def __cmp__(self, other):
+        cmp = lambda x, y: (x > y) - (x < y)
         return cmp(self.name, other.name)
 
 CONFIGSPEC = """
@@ -360,6 +360,7 @@ class Backup(object):
         )
 
     def __cmp__(self, other):
+        cmp = lambda x, y: (x > y) - (x < y)
         return cmp(self.config['holland:backup']['start-time'],
                    other.config['holland:backup']['start-time'])
 

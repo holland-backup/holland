@@ -6,8 +6,11 @@ a validate.py Validator instance
 import shlex
 from builtins import str as text
 from holland.core.util.fmt import format_loglevel
-from . import validate as validate
-from .validate import Validator
+try:
+    from configobj.validate import Validator
+except ImportError:
+    from . import validate as validate
+    from .validate import Validator
 
 def is_coerced_list(value, min_val=None, max_val=None):
     """

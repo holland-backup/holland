@@ -4,8 +4,8 @@ import os
 import re
 import csv
 import logging
-from io import StringIO
-from subprocess import Popen, PIPE, STDOUT, list2cmdline
+from io import StringIO #pylint: disable=unused-import
+from subprocess import Popen, PIPE, list2cmdline
 
 from holland.lib.lvm.constants import PVS_ATTR, VGS_ATTR, LVS_ATTR
 from holland.lib.lvm.errors import LVMCommandError
@@ -210,7 +210,7 @@ def parse_blkid_format(text):
     for line in text.splitlines():
         device, values = blkid_cre.match(line).group('device', 'values')
         key_values = [(key.lower(), value) for key, value
-                                            in values_cre.findall(values)]
+                      in values_cre.findall(values)]
         yield dict(key_values, device=device)
 
 def mount(device, path, options=None, vfstype=None):
@@ -251,7 +251,7 @@ def umount(*path):
                     preexec_fn=os.setsid,
                     close_fds=True)
 
-    stdout, stderr =  process.communicate()
+    stdout, stderr = process.communicate()
 
     if process.returncode != 0:
         cmd_str = list2cmdline(['umount'] + list(path))

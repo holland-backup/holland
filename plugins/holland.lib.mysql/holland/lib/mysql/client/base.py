@@ -437,6 +437,7 @@ class PassiveMySQLClient(MySQLClient):
         self._connection = None
         self._args = args
         self._kwargs = kwargs
+        super(PassiveMySQLClient, self).__init__()
 
     def connect(self):
         """Connect to MySQL using the connection parameters this instance
@@ -493,7 +494,6 @@ def connect(config, client_class=AutoMySQLClient):
     # map standard my.cnf parameters to
     # what MySQLdb.connect expects
     # http://mysql-python.sourceforge.net/MySQLdb.html#mysqldb
-    #FIXME: SSL is more complicated than just a single param string
     cnf_to_mysqldb = {
         'user' : 'user', # same
         'password' : 'passwd', # weird
@@ -506,8 +506,6 @@ def connect(config, client_class=AutoMySQLClient):
 
     value_conv = {
         'port' : int,
-        # XXX: MySQLdb doesn't handle unicode credentials well
-        #      These are encoded to utf8 byte strings as a result
         'user' : lambda s: s.encode('utf8'),
         'password' : lambda s: s.encode('utf8'),
     }

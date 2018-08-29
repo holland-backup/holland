@@ -1,11 +1,10 @@
 """High-level Object Oriented LVM API"""
 
 import os
-import signal
 import logging
 from holland.lib.lvm.raw import pvs, vgs, lvs, lvsnapshot, lvremove, \
                                 mount, umount, blkid
-from holland.lib.lvm.util import getdevice, SignalManager
+from holland.lib.lvm.util import getdevice
 from holland.lib.lvm.errors import LVMCommandError
 
 LOG = logging.getLogger(__name__)
@@ -21,7 +20,7 @@ class Volume(object):
         if cls is Volume:
             raise NotImplementedError('Volume is an abstract base class and '
                                       'should not be directly instantiated')
-        return super(Volume, cls).__new__(cls)
+        return super(Volume, cls).__new__(cls, attributes)
 
     def __init__(self, attributes=()):
         self.attributes = dict(attributes)
@@ -38,6 +37,7 @@ class Volume(object):
 
         raise NotImplementedError()
 
+    @classmethod
     def lookup(cls, pathspec):
         """Lookup a volume for the pathspec given
 
@@ -47,8 +47,8 @@ class Volume(object):
         :returns: Volume instance
         """
         raise NotImplementedError()
-    lookup = classmethod(lookup)
 
+    @classmethod
     def search(cls, pathspec=None):
         """Search for volumes for the pathspec given
 
@@ -58,7 +58,6 @@ class Volume(object):
         :returns: iterable of Volume instances
         """
         raise NotImplementedError()
-    search = classmethod(search)
 
     def __repr__(self):
         return '%s()' % (self.__class__.__name__,)
@@ -70,6 +69,7 @@ class PhysicalVolume(Volume):
         """Reload this PhysicalVolume"""
         self.attributes, = pvs(self.pv_name)
 
+    @classmethod
     def lookup(cls, pathspec):
         """Lookup a physical volume for the pathspec given
 
@@ -85,8 +85,7 @@ class PhysicalVolume(Volume):
             raise LookupError("No PhysicalVolume could be found for "
                               "pathspec %r" %
                               pathspec)
-    lookup = classmethod(lookup)
-
+    @classmethod
     def search(cls, pathspec=None):
         """Search for volumes matching ``pathspec``
 
@@ -98,7 +97,6 @@ class PhysicalVolume(Volume):
 
         for volume in pvs(pathspec):
             yield cls(volume)
-    search = classmethod(search)
 
     def __repr__(self):
         return "%s(device=%r)" % (self.__class__.__name__, self.pv_name)
@@ -110,6 +108,7 @@ class VolumeGroup(Volume):
         """Reload this VolumeGroup"""
         self.attributes, = vgs(self.vg_name)
 
+    @classmethod
     def lookup(cls, pathspec):
         """Lookup a volume group for ``pathspec``
 
@@ -124,8 +123,8 @@ class VolumeGroup(Volume):
         except (LVMCommandError, ValueError):
             raise LookupError("No VolumeGroup could be found for pathspec %r" %
                               pathspec)
-    lookup = classmethod(lookup)
 
+    @classmethod
     def search(cls, pathspec=None):
         """Search for volume groups matching ``pathspec``
 
@@ -137,7 +136,6 @@ class VolumeGroup(Volume):
 
         for volume in vgs(pathspec):
             yield cls(volume)
-    search = classmethod(search)
 
     def __repr__(self):
         return '%s(vg_name=%s)' % (self.__class__.__name__, self.vg_name)
@@ -145,6 +143,7 @@ class VolumeGroup(Volume):
 class LogicalVolume(Volume):
     """LVM Logical Volume representation"""
 
+    @classmethod
     def lookup(cls, pathspec):
         """Lookup a logical volume for ``pathspec``
 
@@ -164,8 +163,8 @@ class LogicalVolume(Volume):
         except Exception as ex:
             raise OSError("unable to look up path %s" % ex)
 
-    lookup = classmethod(lookup)
 
+    @classmethod
     def lookup_from_fspath(cls, path):
         """Lookup a logical volume for the filesystem path ``path``
 
@@ -173,8 +172,8 @@ class LogicalVolume(Volume):
         """
         device = getdevice(path)
         return cls.lookup(device)
-    lookup_from_fspath = classmethod(lookup_from_fspath)
 
+    @classmethod
     def search(cls, pathspec=None):
         """Search for logical volumes matching ``pathspec``
 
@@ -186,7 +185,6 @@ class LogicalVolume(Volume):
 
         for volume in lvs(pathspec):
             yield cls(volume)
-    search = classmethod(search)
 
     def reload(self):
         """Reload the data for this LogicalVolume"""
@@ -220,8 +218,7 @@ class LogicalVolume(Volume):
             dev = line.split()[0]
             if os.path.realpath(dev) == real_device_path:
                 return True
-        else:
-            return False
+        return False
 
     def mount(self, path, options=None):
         """Mount this volume on the specified path

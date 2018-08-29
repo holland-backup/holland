@@ -5,7 +5,6 @@ holland.mysql.xtrabackup
 Backup plugin implementation to provide support for Percona XtraBackup.
 """
 
-import sys
 import logging
 from os.path import join
 from holland.core.backup import BackupError
@@ -46,6 +45,7 @@ port                = integer(min=0, default=None)
 """.splitlines()
 
 class XtrabackupPlugin(object):
+    """plugin for backuping database using xtrabackup"""
     #: control connection to mysql server
     mysql = None
 
@@ -67,6 +67,7 @@ class XtrabackupPlugin(object):
         self.defaults_path = defaults_path
 
     def estimate_backup_size(self):
+        """Return estimated backup size"""
         try:
             client = MySQL.from_defaults(self.defaults_path)
         except MySQL.MySQLError as exc:
@@ -109,7 +110,8 @@ class XtrabackupPlugin(object):
                 return open_stream(archive_path, 'w',
                                    method=zconfig['method'],
                                    level=zconfig['level'],
-                                   extra_args=zconfig['options'])
+                                   extra_args=zconfig['options'],
+                                   inline=zconfig['inline'])
             except OSError as exc:
                 raise BackupError("Unable to create output file: %s" % exc)
         else:
@@ -117,10 +119,11 @@ class XtrabackupPlugin(object):
 
 
     def dryrun(self):
+        """Perform test backup"""
         from subprocess import Popen, list2cmdline, PIPE, STDOUT
         xb_cfg = self.config['xtrabackup']
         args = util.build_xb_args(xb_cfg, self.target_directory,
-                self.defaults_path)
+                                  self.defaults_path)
         LOG.info("* xtrabackup command: %s", list2cmdline(args))
         args = [
             'xtrabackup',
@@ -132,7 +135,7 @@ class XtrabackupPlugin(object):
         LOG.debug("* Verifying via command: %s", cmdline)
         try:
             process = Popen(args, stdout=PIPE, stderr=STDOUT, close_fds=True)
-        except OSError as exc:
+        except OSError:
             raise BackupError("Failed to find xtrabackup binary")
         stdout = process.stdout.read()
         process.wait()
@@ -145,6 +148,7 @@ class XtrabackupPlugin(object):
                               (cmdline, process.returncode))
 
     def backup(self):
+        """Perform Backup"""
         util.xtrabackup_version()
         if self.dry_run:
             self.dryrun()
@@ -172,12 +176,11 @@ class XtrabackupPlugin(object):
             finally:
                 try:
                     stdout.close()
-                except IOError as e:
-                    LOG.error("Error when closing %s: %s", stdout.name, e)
+                except IOError as ex:
+                    LOG.error("Error when closing %s: %s", stdout.name, ex)
                     if exc is None:
                         raise
         finally:
             stderr.close()
         if xb_cfg['apply-logs']:
             util.apply_xtrabackup_logfile(xb_cfg, args[-1])
-

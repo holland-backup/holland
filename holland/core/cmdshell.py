@@ -27,6 +27,9 @@ def main():
     if 'log_level' in opts:
         opts.log_level = is_logging_level(opts.log_level)
 
+    if opts.command is None:
+        print_help()
+        sys.exit(1)
 
     # Bootstrap the environment
     bootstrap(opts)

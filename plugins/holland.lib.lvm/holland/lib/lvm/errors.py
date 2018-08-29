@@ -5,14 +5,14 @@ class SnapshotError(Exception):
 
 class LVMCommandError(Exception):
     """Error occurred while running a lvm command
-    
+
     :attribute cmd: The command that was being run
     :attribute status: exit status of the command
     :attribute error: stderr output of the command
     """
 
     def __init__(self, cmd, status, error):
-        error = error and error.strip() or ''
+        error = (error.strip() if error else '')
         Exception.__init__(self, cmd, status, error)
         self.cmd = cmd
         self.status = status

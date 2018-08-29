@@ -2,6 +2,7 @@
 
 import time
 import logging
+import re
 from holland.lib.mysql.client import MySQLError
 
 LOG = logging.getLogger(__name__)
@@ -113,8 +114,8 @@ class MySQLSchema(object):
                          database name. This iterator must yield `Table`
                          instances from the requested database.
 
-        :param fast_iterate: Optional. Skips table iteration when there are no 
-                             useful filters - include pattern = *, 
+        :param fast_iterate: Optional. Skips table iteration when there are no
+                             useful filters - include pattern = *,
                              exclude pattern = ''
         """
         for database in db_iter():
@@ -127,14 +128,15 @@ class MySQLSchema(object):
             # 1) we are matching all tables (using default pattern)
             # 2) we are matching all engines (using default pattern)
             # 3) caller does not require table iteration
-            if fast_iterate and (len(self._table_filters) == 2 and
-                self._table_filters[0].patterns == ['.*\\..*$'] and
-                self._table_filters[1].patterns == []) and \
-                (len(self._engine_filters) == 2 and
-                self._engine_filters[0].patterns == ['.*$'] and
-                self._engine_filters[1].patterns == []):
-                    # optimize case where we have no table level filters
-                    continue
+            #pylint: disable=too-many-boolean-expressions
+            if fast_iterate and (len(self._table_filters) == 2 and \
+                self._table_filters[0].patterns == ['.*\\..*$'] and \
+                    self._table_filters[1].patterns == []) and \
+                        (len(self._engine_filters) == 2 and \
+                            self._engine_filters[0].patterns == ['.*$'] and \
+                                self._engine_filters[1].patterns == []):
+                # optimize case where we have no table level filters
+                continue
 
             try:
                 for table in tbl_iter(database.name):
@@ -144,7 +146,7 @@ class MySQLSchema(object):
                         table.excluded = True
                     database.add_table(table)
             except MySQLError as exc:
-                # mimic mysqldump behavior here and skip any databases that 
+                # mimic mysqldump behavior here and skip any databases that
                 # are not readable
                 if exc.args[0] == 1018:
                     continue
@@ -162,7 +164,7 @@ class Database(object):
 
     def __init__(self, name):
         self.name = name
-        self.tables  = []
+        self.tables = []
         self.excluded = False
 
     def add_table(self, tableobj):
@@ -196,7 +198,7 @@ class Database(object):
         """
         return sum([table.size for table in self.tables
                     if not table.excluded
-                        and table.engine not in ('mrg_myisam', 'federated') ])
+                    and table.engine not in ('mrg_myisam', 'federated')])
     size = property(size)
 
     def __str__(self):
@@ -217,11 +219,13 @@ class Table(object):
                  'excluded',
                 )
 
-    def __init__(self, database,
-                       name,
-                       data_size,
-                       index_size,
-                       engine):
+    def __init__(self,
+                 database,
+                 name,
+                 data_size,
+                 index_size,
+                 engine):
+        """Init Table"""
         self.database = database
         self.name = name
         self.data_size = int(data_size)
@@ -230,20 +234,22 @@ class Table(object):
         self.excluded = False
 
     def size(self):
+        """Return size of table"""
         return self.data_size + self.index_size
     size = property(size)
 
     def is_transactional(self):
+        """Return if the table is transactional"""
         return self.engine in TRANSACTIONAL_ENGINES
     is_transactional = property(is_transactional)
 
     def __str__(self):
-        return "%sTable(name=%r, data_size=%s, " + \
-               "index_size=%s, engine=%s, txn=%s)" % \
+        data_size = "%.2fMB" % (self.data_size / 1024.0**2)
+        index_size = "%.2fMB" % (self.index_size / 1024.0**2)
+        return "%sTable(name=%r, data_size=%s, \
+               index_size=%s, engine=%s, txn=%s)" % \
                 (self.excluded and "[EXCL]" or "",
-                 self.name,
-                 "%.2fMB" % (self.data_size / 1024.0**2),
-                 "%.2fMB" % (self.index_size / 1024.0**2),
+                 self.name, data_size, index_size,
                  self.engine,
                  str(self.is_transactional)
                 )
@@ -299,8 +305,6 @@ class MetadataTableIterator(TableIterator):
         for metadata in self.client.show_table_metadata(database):
             yield Table(**metadata)
 
-import re
-
 class SimpleTableIterator(MetadataTableIterator):
     """Iterator over tables returns by the client instance
 
@@ -309,7 +313,7 @@ class SimpleTableIterator(MetadataTableIterator):
 
     SHOW CREATE TABLE is only used for engine lookup in MySQL 5.0.
     """
-    
+
     ENGINE_PCRE = re.compile(r'^[)].*ENGINE=(\S+)', re.M)
 
     def __init__(self, client, record_engines=False):
@@ -321,6 +325,7 @@ class SimpleTableIterator(MetadataTableIterator):
         """
         self.client = client
         self.record_engines = record_engines
+        super(SimpleTableIterator, self).__init__()
 
     def _faster_mysql51_metadata(self, database):
         sql = ("SELECT TABLE_SCHEMA AS `database`, "
@@ -345,8 +350,8 @@ class SimpleTableIterator(MetadataTableIterator):
         raise ValueError("Failed to lookup storage engine")
 
     def __call__(self, database):
-        if self.client.server_version >= (5,1):
-            for metadata in self._faster_mysql51_metadata():
+        if self.client.server_version >= (5, 1):
+            for metadata in self._faster_mysql51_metadata(database):
                 yield Table(**metadata)
         else:
             for table, kind in self.client.show_tables(database, full=True):

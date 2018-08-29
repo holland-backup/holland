@@ -1,12 +1,11 @@
+"""Proform backup of MongoDB database"""
+
 import logging
 import os
 import os.path
 import subprocess
+from io import open # pylint: disable=redefined-builtin
 from six.moves import urllib
-from io import open
-
-from functools import partial
-
 from pymongo import MongoClient
 
 from holland.core.backup import BackupError
@@ -25,8 +24,10 @@ password = string(default=None)
 authenticationDatabase = string(default=None)
 
 [compression]
-method = option('gzip', 'gzip-rsyncable', 'bzip2', 'pbzip2', 'lzop', 'lzma', 'pigz', 'none', default='gzip')
-level = integer(min=0, default=1)
+method              = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', default=gzip)
+inline              = boolean(default=yes)
+options             = string(default="")
+level               = integer(min=0, max=9, default=1)
 """.splitlines()
 
 class MongoDump(object):
@@ -69,9 +70,9 @@ class MongoDump(object):
         uri += self.config["mongodump"].get("host")
         client = MongoClient(uri)
         dbs = client.database_names()
-        for db in dbs:
-            c = client[db]
-            tup = c.command("dbstats")
+        for database in dbs:
+            client = client[database]
+            tup = client.command("dbstats")
             ret += int(tup["storageSize"])
         # Give an upper estimate to make sure that we have enough disk space
         return ret * 2
@@ -86,40 +87,40 @@ class MongoDump(object):
             command += ["-u", username]
             password = self.config["mongodump"].get("password")
             if password:
-                # TODO: find a better way to inform the password
                 command += ["-p", password]
         command += ["--host", self.config["mongodump"].get("host")]
         command += ["--out", self.target_directory]
 
         if self.dry_run:
             LOG.info("[Dry run] MongoDump Plugin - test backup run")
-            LOG.info("MongoDump command: %s" % subprocess.list2cmdline(command))
+            LOG.info("MongoDump command: %s", subprocess.list2cmdline(command))
         else:
-            LOG.info("MongoDump command: %s" % subprocess.list2cmdline(command))
+            LOG.info("MongoDump command: %s", subprocess.list2cmdline(command))
             logfile = open(os.path.join(self.target_directory, "mongodump.log"), "w")
-            p = subprocess.Popen(command, stdout=logfile, stderr=logfile)
-            ret = p.wait()
+            proc = subprocess.Popen(command, stdout=logfile, stderr=logfile)
+            ret = proc.wait()
 
             if ret != 0:
                 raise BackupError("Mongodump returned %d" % ret)
 
             zopts = self.config['compression']
             for root, _, files in os.walk(self.target_directory):
-                for f in files:
-                    if '.log' in f or '.conf' in f:
+                for file_object in files:
+                    if '.log' in file_object or '.conf' in file_object:
                         continue
-                    path = os.path.join(root, f)
-                    LOG.info("Compressing file %s" % path)
+                    path = os.path.join(root, file_object)
+                    LOG.info("Compressing file %s", path)
                     ostream = open_stream(path, 'w',
-                            method=zopts['method'],
-                            level=zopts['level'],
-                            extra_args="")
-                    with open(path, 'rb') as f:
-                        ostream.write(f.read())
+                                          method=zopts['method'],
+                                          level=zopts['level'],
+                                          extra_args=zopts['options'],
+                                          inline=zopts['inline'])
+                    with open(path, 'rb') as file_object:
+                        ostream.write(file_object.read())
                     ostream.close()
                     os.remove(path)
-
-    def info(self):
+    @staticmethod
+    def info():
         """Provide extra information about the backup this plugin produced
 
         :returns: str. A textual string description the backup referenced by

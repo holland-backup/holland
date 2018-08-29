@@ -4,7 +4,10 @@ Configuration API support
 
 import os
 import logging
-from .configobj import ConfigObj, Section, flatten_errors, get_extra_values
+try:
+    from .configobj import ConfigObj, Section, flatten_errors, get_extra_values
+except ImportError:
+    from configobj import ConfigObj, Section, flatten_errors, get_extra_values
 from .checks import VALIDATOR
 
 LOGGER = logging.getLogger(__name__)
@@ -48,7 +51,7 @@ class BaseConfig(ConfigObj):
                            write_empty_values=True,
                            encoding='utf8',
                            default_encoding='utf8',
-                           configspec={})
+                           configspec=configspec)
 
     @staticmethod
     def _canonicalize(section, key):

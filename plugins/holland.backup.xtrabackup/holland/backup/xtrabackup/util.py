@@ -41,7 +41,8 @@ def generate_defaults_file(defaults_file, include=(), auth_opts=None):
                     if value is None:
                         continue
                     if need_client_section:
-                        LOG.info("  + Added [client] section with credentials from [mysql:client] section")
+                        LOG.info("  + Added [client] section with credentials \
+                            from [mysql:client] section")
                         print("[client]", file=fileobj)
                         need_client_section = False
                     print('%s = %s' % (key, value), file=fileobj)
@@ -158,13 +159,14 @@ def execute_pre_command(pre_command, **kwargs):
                           (pre_command, exc.strerror))
 
     for line in process.stdout:
-        LOG.info("  >> %s", process.pid, line)
+        LOG.info("  >> %s", line)
     returncode = process.wait()
     if returncode != 0:
         raise BackupError("pre-command exited with failure status [%d]" %
                           returncode)
 
 def add_xtrabackup_defaults(defaults_path, **kwargs):
+    """get defaults for xtrabackup"""
     if not kwargs:
         return
     fileobj = open(defaults_path, 'a')
@@ -175,7 +177,7 @@ def add_xtrabackup_defaults(defaults_path, **kwargs):
             print("[xtrabackup]", file=fileobj)
             for key, value in list(kwargs.items()):
                 print("%s = %s" % (key, value), file=fileobj)
-        except IOError as exc:
+        except IOError:
             raise BackupError("Error writing xtrabackup defaults to %s" %
                               defaults_path)
     finally:
@@ -225,6 +227,7 @@ def build_xb_args(config, basedir, defaults_file=None):
     return args
 
 def xtrabackup_version():
+    """Get xtrabackup version"""
     xtrabackup_binary = 'xtrabackup'
     if not isabs(xtrabackup_binary):
         try:
