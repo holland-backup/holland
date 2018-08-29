@@ -67,11 +67,13 @@ class TarPlugin(object):
         compression_method = method or self.config['compression']['method']
         compression_level = self.config['compression']['level']
         compression_options = self.config['compression']['options']
+        compression_inline = self.config['compression']['inline']
         stream = open_stream(path,
                              mode,
                              compression_method,
                              compression_level,
-                             extra_args=compression_options)
+                             extra_args=compression_options,
+                             inline=compression_inline)
         return stream
 
     def backup(self):

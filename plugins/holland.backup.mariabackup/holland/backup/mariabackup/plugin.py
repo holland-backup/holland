@@ -109,7 +109,8 @@ class MariabackupPlugin(object):
                 return open_stream(archive_path, 'w',
                                    method=zconfig['method'],
                                    level=zconfig['level'],
-                                   extra_args=zconfig['options'])
+                                   extra_args=zconfig['options'],
+                                   inline=zconfig['inline'])
             except OSError as exc:
                 raise BackupError("Unable to create output file: %s" % exc)
         else:

@@ -15,9 +15,10 @@ databases = force_list(default=list())
 binary = string(default=/usr/bin/sqlite3)
 
 [compression]
-method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzop', default='gzip')
-inline = boolean(default=yes)
-level = integer(min=0, max=9, default=1)
+method              = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', default=gzip)
+inline              = boolean(default=yes)
+options             = string(default="")
+level               = integer(min=0, max=9, default=1)
 """.splitlines()
 
 class SQLitePlugin(object):
@@ -94,7 +95,9 @@ class SQLitePlugin(object):
         """
 
         zopts = (self.config['compression']['method'],
-                 int(self.config['compression']['level']))
+                 int(self.config['compression']['level']),
+                 self.config['compression']['options'],
+                 self.config['compression']['inline'])
         LOG.info("SQLite binary is [%s]", self.sqlite_bin)
         for database in self.databases:
             path = os.path.abspath(os.path.expanduser(database))

@@ -24,8 +24,10 @@ password = string(default=None)
 authenticationDatabase = string(default=None)
 
 [compression]
-method = option('gzip', 'gzip-rsyncable', 'bzip2', 'pbzip2', 'lzop', 'lzma', 'pigz', 'none', default='gzip')
-level = integer(min=0, default=1)
+method              = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', default=gzip)
+inline              = boolean(default=yes)
+options             = string(default="")
+level               = integer(min=0, max=9, default=1)
 """.splitlines()
 
 class MongoDump(object):
@@ -111,7 +113,8 @@ class MongoDump(object):
                     ostream = open_stream(path, 'w',
                                           method=zopts['method'],
                                           level=zopts['level'],
-                                          extra_args="")
+                                          extra_args=zopts['options'],
+                                          inline=zopts['inline'])
                     with open(path, 'rb') as file_object:
                         ostream.write(file_object.read())
                     ostream.close()
