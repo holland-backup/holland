@@ -4,7 +4,7 @@ version = '1.1.3'
 
 setup(name='holland.backup.random',
       version=version,
-      description=" Back up random directory",
+      description="Back up data from /dev/random",
       long_description="""\
       Uses /dev/random. A bit more of an example then holland.backup.example
       """,
