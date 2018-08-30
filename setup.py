@@ -20,7 +20,7 @@ setup(name="holland",
       zip_safe=True,
       test_suite='tests',
       install_requires=[
-         #'configobj', # currently this is bundled internally
+         'configobj>=4.6.0',
          'future',
          'setuptools',
          'six'
