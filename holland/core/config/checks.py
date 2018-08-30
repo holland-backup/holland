@@ -8,7 +8,6 @@ from builtins import str as text
 from holland.core.util.fmt import format_loglevel
 # Required for EL6
 try:
-    import configobj.validate
     from configobj.validate import Validator
 except ImportError:
     import validate

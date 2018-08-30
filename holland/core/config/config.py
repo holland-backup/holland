@@ -3,9 +3,7 @@ Configuration API support
 """
 
 import os
-import sys
 import logging
-from distutils.version import LooseVersion
 # get_extra_values was added in configobj 4.7. EL6 ships with 4.6
 # Try to import this and remove get_extra_values if it doesn't work
 try:
