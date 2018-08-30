@@ -3,11 +3,16 @@ Configuration API support
 """
 
 import os
+import sys
 import logging
+from distutils.version import LooseVersion
+# get_extra_values was added in configobj 4.7. EL6 ships with 4.6
+# Try to import this and remove get_extra_values if it doesn't work
 try:
-    from .configobj import ConfigObj, Section, flatten_errors, get_extra_values
-except ImportError:
     from configobj import ConfigObj, Section, flatten_errors, get_extra_values
+except ImportError:
+    from configobj import ConfigObj, Section, flatten_errors
+
 from .checks import VALIDATOR
 
 LOGGER = logging.getLogger(__name__)
@@ -77,10 +82,14 @@ class BaseConfig(ConfigObj):
 
         # warn about any unknown parameters before we potentially abort on
         # validation errors
+        # get_extra_values is not available in EL6 version of configobj
         if not suppress_warnings:
-            for sections, name in get_extra_values(self):
-                LOGGER.warning("Unknown parameter '%s' in section '%s'",
-                               name, ".".join(sections))
+            try:
+                for sections, name in get_extra_values(self):
+                    LOGGER.warning("Unknown parameter '%s' in section '%s'",
+                                   name, ".".join(sections))
+            except NameError:
+                pass
 
         if errors is not True:
             raise ConfigError("Configuration errors were encountered while validating %r"
