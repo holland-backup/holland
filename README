@@ -10,10 +10,6 @@ holland-core, the basic backup framework is licensed
 under the New-BSD ("3-clause") license.  See LICENSE
 for more details.
 
-holland-core bundles a few third party libraries
-including:
-ConfigObj 5.0.6
-
 Each of these are under their respective licenses.
 Please see LICENSE for more information.
 
