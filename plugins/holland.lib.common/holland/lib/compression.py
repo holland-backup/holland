@@ -213,7 +213,7 @@ def stream_info(path, method=None, level=None):
 
 def _parse_args(value):
     """Convert a cmdline string to a list"""
-    if isinstance(value, str):
+    if not isinstance(value, str):
         value = value.encode('utf8')
     return shlex.split(value)
 
