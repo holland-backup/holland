@@ -437,7 +437,6 @@ class PassiveMySQLClient(MySQLClient):
         self._connection = None
         self._args = args
         self._kwargs = kwargs
-        super(PassiveMySQLClient, self).__init__()
 
     def connect(self):
         """Connect to MySQL using the connection parameters this instance
