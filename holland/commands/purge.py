@@ -69,11 +69,11 @@ class Purge(Command):
             backups = HOLLANDCFG.lookup('holland.backupsets')
 
         if not backups:
-            LOG.warnning("Nothing to purge")
+            LOG.warning("Nothing to purge")
             return 0
 
         if not opts.force:
-            LOG.warnning("Running in dry-run mode.  Use --execute to do a real purge.")
+            LOG.warning("Running in dry-run mode.  Use --execute to do a real purge.")
 
         for name in backups:
             if '/' not in name:
