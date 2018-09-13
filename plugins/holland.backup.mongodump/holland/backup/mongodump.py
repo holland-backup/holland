@@ -22,6 +22,7 @@ host = string(default=None)
 username = string(default=None)
 password = string(default=None)
 authenticationDatabase = string(default=None)
+additional-options = force_list(default=list())
 
 [compression]
 method              = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', default=gzip)
@@ -71,8 +72,8 @@ class MongoDump(object):
         client = MongoClient(uri)
         dbs = client.database_names()
         for database in dbs:
-            client = client[database]
-            tup = client.command("dbstats")
+            db = client[database]
+            tup = db.command("dbstats")
             ret += int(tup["storageSize"])
         # Give an upper estimate to make sure that we have enough disk space
         return ret * 2
@@ -90,6 +91,9 @@ class MongoDump(object):
                 command += ["-p", password]
         command += ["--host", self.config["mongodump"].get("host")]
         command += ["--out", self.target_directory]
+        add_options = self.config["mongodump"].get("additional-options")
+        if add_options:
+            command.extend(add_options)
 
         if self.dry_run:
             LOG.info("[Dry run] MongoDump Plugin - test backup run")
@@ -107,6 +111,8 @@ class MongoDump(object):
             for root, _, files in os.walk(self.target_directory):
                 for file_object in files:
                     if '.log' in file_object or '.conf' in file_object:
+                        continue
+                    if '.gz' in file_object:
                         continue
                     path = os.path.join(root, file_object)
                     LOG.info("Compressing file %s", path)
