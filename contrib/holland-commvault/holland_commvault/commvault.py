@@ -8,7 +8,7 @@ import resource
 
 from holland.core.util.bootstrap import bootstrap
 from holland.commands.backup import Backup
-from holland.core.command import run
+from holland.core.command import run, parse_sys
 from holland.core.cmdshell import HOLLAND_VERSION
 from holland.core.util.fmt import format_loglevel
 from .argparse import ArgumentParser, Action
@@ -73,7 +73,7 @@ def main():
         verbose=False,
     )
 
-    args, largs = parser.parse_known_args(argv)
+    args, largs = parser.parse_known_args(sys.argv[1:])
 
     bootstrap(args)
 
@@ -88,9 +88,12 @@ def main():
         logging.debug("Failed to raise RLIMIT_NOFILE: %s", exc)
 
     if args.log_level:
-        args.log_level = format_loglevel(opts.log_level)
+        args.log_level = format_loglevel(opts)
 
-    if run(['backup'] + args.bksets):
+    args.command = 'backup'
+    args.dry_run = 0
+    args.no_lock = 0
+    if run(args, largs):
         return 1
     else:
         return 0
