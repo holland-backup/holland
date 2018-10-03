@@ -48,11 +48,11 @@ def main():
     parser = ArgumentParser()
     parser.add_argument("--config-file", "-c", metavar="<file>",
                         help="Read configuration from the given file")
-    parser.add_argument("--log-level", "-l", type='choice',
-                        choices=['critical','error','warning','info',
-                                 'debug'],
-                        help="Specify the log level."
-                       )
+
+    parser.add_argument('-l', '--log-level', metavar='<log-level>',
+                        choices=['critical', 'error', 'warning', 'info', 'debug'],
+                        help="Specify the log level. "
+                        "One of: critical,error,warning,info,debug")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Don't log to console")
     parser.add_argument("--verbose", "-v", action="store_true",
@@ -74,6 +74,8 @@ def main():
     )
 
     args, largs = parser.parse_known_args(sys.argv[1:])
+    if args.log_level:
+        args.log_level = format_loglevel(args.log_level)
 
     bootstrap(args)
 
@@ -87,8 +89,7 @@ def main():
     except (ValueError, resource.error) as exc:
         logging.debug("Failed to raise RLIMIT_NOFILE: %s", exc)
 
-    if args.log_level:
-        args.log_level = format_loglevel(opts)
+
 
     args.command = 'backup'
     args.dry_run = 0
