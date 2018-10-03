@@ -8,7 +8,7 @@ import resource
 
 from holland.core.util.bootstrap import bootstrap
 from holland.commands.backup import Backup
-from holland.core.command import run
+from holland.core.command import run, parse_sys
 from holland.core.cmdshell import HOLLAND_VERSION
 from holland.core.util.fmt import format_loglevel
 from .argparse import ArgumentParser, Action
@@ -48,11 +48,11 @@ def main():
     parser = ArgumentParser()
     parser.add_argument("--config-file", "-c", metavar="<file>",
                         help="Read configuration from the given file")
-    parser.add_argument("--log-level", "-l", type='choice',
-                        choices=['critical','error','warning','info',
-                                 'debug'],
-                        help="Specify the log level."
-                       )
+
+    parser.add_argument('-l', '--log-level', metavar='<log-level>',
+                        choices=['critical', 'error', 'warning', 'info', 'debug'],
+                        help="Specify the log level. "
+                        "One of: critical,error,warning,info,debug")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Don't log to console")
     parser.add_argument("--verbose", "-v", action="store_true",
@@ -73,7 +73,9 @@ def main():
         verbose=False,
     )
 
-    args, largs = parser.parse_known_args(argv)
+    args, largs = parser.parse_known_args(sys.argv[1:])
+    if args.log_level:
+        args.log_level = format_loglevel(args.log_level)
 
     bootstrap(args)
 
@@ -87,10 +89,12 @@ def main():
     except (ValueError, resource.error) as exc:
         logging.debug("Failed to raise RLIMIT_NOFILE: %s", exc)
 
-    if args.log_level:
-        args.log_level = format_loglevel(opts.log_level)
 
-    if run(['backup'] + args.bksets):
+
+    args.command = 'backup'
+    args.dry_run = 0
+    args.no_lock = 0
+    if run(args, largs):
         return 1
     else:
         return 0
