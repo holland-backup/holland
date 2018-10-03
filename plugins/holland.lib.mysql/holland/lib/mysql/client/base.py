@@ -517,7 +517,7 @@ def connect(config, client_class=AutoMySQLClient):
         try:
             # normalize the value. port => int
             if 'port' in key:
-	        continue
+                continue
             value = value_conv.get(key, str)(config[key])
             # convert my.cnf parameters to what MySQLdb expects
             if isinstance(value, bytes):
