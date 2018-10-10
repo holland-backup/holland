@@ -56,6 +56,7 @@ pre-args = string(default=None)
 method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzop', 'gpg', default='gzip')
 options = string(default="")
 level = integer(min=0, max=9, default=1)
+inline = boolean(default=yes)
 
 [mysql:client]
 # default: ~/.my.cnf
@@ -78,7 +79,8 @@ socket = string(default=None)
 """.splitlines()
 
 class MysqlLVMBackup(object):
-    """A Holland Backup plugin suitable for performing LVM snapshots of a 
+    """
+    A Holland Backup plugin suitable for performing LVM snapshots of a
     filesystem underlying a live MySQL instance.
 
     This plugin produces tar archives of a MySQL data directory.
