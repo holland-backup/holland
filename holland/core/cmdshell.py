@@ -23,6 +23,8 @@ def main():
 
     opts, args = parse_sys(sys.argv[1:])
 
+    if args:
+        args = args[0].split(',')
     logging.raiseExceptions = bool(opts.log_level == 'debug')
     if 'log_level' in opts:
         opts.log_level = is_logging_level(opts.log_level)

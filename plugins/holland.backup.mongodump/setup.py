@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '1.1.7'
+version = '1.1.8'
 
 setup(name='holland.backup.mongodump',
       version=version,

@@ -325,7 +325,6 @@ class SimpleTableIterator(MetadataTableIterator):
         """
         self.client = client
         self.record_engines = record_engines
-        super(SimpleTableIterator, self).__init__()
 
     def _faster_mysql51_metadata(self, database):
         sql = ("SELECT TABLE_SCHEMA AS `database`, "

@@ -503,27 +503,18 @@ def connect(config, client_class=AutoMySQLClient):
         'compress' : 'compress'
     }
 
-    value_conv = {
-        'port' : int,
-        'user' : lambda s: s.encode('utf8'),
-        'password' : lambda s: s.encode('utf8'),
-    }
-
     args = {}
-    for key in config:
+    for key, value in config.items():
         # skip undefined values
         if config.get(key) is None:
             continue
         try:
-            # normalize the value. port => int
             if 'port' in key:
-                continue
-            value = value_conv.get(key, str)(config[key])
-            # convert my.cnf parameters to what MySQLdb expects
-            if isinstance(value, bytes):
+                args[cnf_to_mysqldb[key]] = int(value)
+            elif isinstance(value, bytes):
                 args[cnf_to_mysqldb[key]] = value.decode('utf-8')
             else:
-                args[cnf_to_mysqldb[key]] = str(value)
+                args[cnf_to_mysqldb[key]] = value
         except KeyError:
             LOG.warning("Skipping unknown parameter %s", key)
     # also, always use utf8
