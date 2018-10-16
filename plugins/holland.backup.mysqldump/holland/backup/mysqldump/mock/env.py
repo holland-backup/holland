@@ -1,13 +1,54 @@
 import logging
-from .mocker import Mocker, ANY, CONTAINS, ARGS, KWARGS, MATCH
+from unittest.mock import Mock, ANY
 from . import storage
 from ._subprocess import PopenMock
 
 LOG = logging.getLogger(__name__)
 
+
+class SpecialArgument(object):
+    """Base for special arguments for matching parameters."""
+
+    def __init__(self, object=None):
+        self.object = object
+
+    def __repr__(self):
+        if self.object is None:
+            return self.__class__.__name__
+        else:
+            return "%s(%r)" % (self.__class__.__name__, self.object)
+
+    def matches(self, other):
+        return True
+
+    def __eq__(self, other):
+        return type(other) == type(self) and self.object == other.object
+
+
+class ARGS(SpecialArgument):
+    """Matches zero or more positional arguments."""
+
+ARGS = ARGS()
+
+
+class KWARGS(SpecialArgument):
+    """Matches zero or more keyword arguments."""
+
+KWARGS = KWARGS()
+
+
+class MATCH(SpecialArgument):
+
+    def matches(self, other):
+        return bool(self.object(other))
+
+    def __eq__(self, other):
+        return type(other) == type(self) and self.object is other.object
+
+
 class MockEnvironment(object):
     def __init__(self):
-        self.mocker = Mocker()
+        self.mocker = Mock()
         _setup_fileio(self.mocker)
         _setup_mysqlclient(self.mocker)
         _setup_subprocess(self.mocker)
