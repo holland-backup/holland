@@ -1,0 +1,13 @@
+---
+language: python
+python:
+  - "2.6"
+  - "2.7"
+  - "3.6"
+sudo: required
+services:
+  - mysql
+install:
+  - pip install --user -r mysqldb
+  - python setup.py -q install
+script: ./scripts/travis_ci.sh
