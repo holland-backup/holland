@@ -3,7 +3,7 @@
 
 for i in `ls -d plugins/holland.*`
 do
-    cd ${i}
+    cd ~travis/holland-backup/holland/${i}
     python setup.py install 2>>/dev/null >>/dev/null
     exit_code=$?
 	if [ $exit_code -ne  0 ]
@@ -13,8 +13,8 @@ do
     fi
 done
 mkdir -p /etc/holland/providers /etc/holland/backupsets /var/log/holland /var/spool/holland
-cp /holland/config/holland.conf /etc/holland/
-cp /holland/config/providers/* /etc/holland/providers/
+cp ~travis/holland-backup/holland/config/holland.conf /etc/holland/
+cp ~travis/holland-backup/holland/config/providers/* /etc/holland/providers/
 
 
 CMDS=(
