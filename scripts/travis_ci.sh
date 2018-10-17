@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 
 for i in `ls -d plugins/holland.*`
@@ -12,6 +12,15 @@ do
         exit $exit_code
     fi
 done
+cd $TRAVIS_BUILD_DIR/contrib/holland-commvault/
+python setup.py install 2>>/dev/null >>/dev/null
+exit_code=$?
+if [ $exit_code -ne  0 ]
+then
+    echo "Failed installing holland_commvault"
+    exit $exit_code
+fi
+
 mkdir -p /etc/holland/providers /etc/holland/backupsets /var/log/holland /var/spool/holland
 cp $TRAVIS_BUILD_DIR/config/holland.conf /etc/holland/
 cp $TRAVIS_BUILD_DIR/config/providers/* /etc/holland/providers/
