@@ -1,5 +1,6 @@
 #!/bin/bash -x
 
+source ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/activate
 
 for i in `ls -d plugins/holland.*`
 do
@@ -28,10 +29,10 @@ cp $TRAVIS_BUILD_DIR/config/providers/* /etc/holland/providers/
 
 python_version=$(python -c "import platform;print(platform.python_version())")
 CMDS=(
-"~/virtualenv/python${python_version}/bin/holland mc --name mysqldump mysqldump"
-"~/virtualenv/python${python_version}/bin/holland bk mysqldump --dry-run"
-"~/virtualenv/python${python_version}/bin/holland bk mysqldump"
-"~/virtualenv/python${python_version}/bin/holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001 --bkset mysqldump"
+"holland mc --name mysqldump mysqldump"
+"holland bk mysqldump --dry-run"
+"holland bk mysqldump"
+"holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001 --bkset mysqldump"
 )
 
 for command in "${CMDS[@]}"
