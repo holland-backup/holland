@@ -4,7 +4,7 @@
 for i in `ls -d plugins/holland.*`
 do
     cd $TRAVIS_BUILD_DIR/${i}
-    python setup.py install 2>>/dev/null >>/dev/null
+    python setup.py install --prefix=/usr/bin/ 2>>/dev/null >>/dev/null
     exit_code=$?
 	if [ $exit_code -ne  0 ]
     then
@@ -13,7 +13,7 @@ do
     fi
 done
 cd $TRAVIS_BUILD_DIR/contrib/holland-commvault/
-python setup.py install 2>>/dev/null >>/dev/null
+python setup.py install --prefix=/usr/bin/ 2>>/dev/null >>/dev/null
 exit_code=$?
 if [ $exit_code -ne  0 ]
 then
