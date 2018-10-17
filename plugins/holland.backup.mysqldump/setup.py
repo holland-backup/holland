@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.1.8'
+version = '1.1.9'
 
 setup(name='holland.backup.mysqldump',
       version=version,
@@ -23,7 +23,8 @@ setup(name='holland.backup.mysqldump',
         'holland >= 0.9.6',
       ],
       install_requires=[
-        #'configparser'
+       #'mock' EL6 python 2.6
+       #'unittest' python 2.7+
       ],
       extras_require = {
         'mysql' : 'holland.lib.mysql',

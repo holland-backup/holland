@@ -1,5 +1,9 @@
 import logging
-from unittest.mock import Mock, ANY
+#For 2.7 or newer use unittest.mock
+try:
+    from unittest.mock import Mock, ANY
+except ImportError:
+    from mock import Mock, ANY
 from . import storage
 from ._subprocess import PopenMock
 

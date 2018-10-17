@@ -8,6 +8,23 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.1.9 - Oct 17, 2018
+---------------------
+
+holland
++++++++
+
+- Remove mock bundled library from holland.backup.mysqldump
+
+1.1.8 - Oct, 2018
+---------------------
+
+holland
++++++++
+
+- Bug fix release
+
+
 1.1.1 - Aug 6, 2018
 ---------------------
 
