@@ -8,6 +8,8 @@ sudo: required
 services:
   - mysql
 install:
-  - pip install --user -r mysqldb
+  - pip install -q mysqlclient
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then travis_retry pip install mock; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then travis_retry pip install mock; fi
   - python setup.py -q install
 script: ./scripts/travis_ci.sh
