@@ -1,0 +1,15 @@
+---
+language: python
+python:
+  - "2.6"
+  - "2.7"
+  - "3.6"
+sudo: required
+services:
+  - mysql
+install:
+  - pip install -q mysqlclient
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then travis_retry pip install mock; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then travis_retry pip install mock; fi
+  - python setup.py install
+script: sudo ./scripts/travis_ci.sh
