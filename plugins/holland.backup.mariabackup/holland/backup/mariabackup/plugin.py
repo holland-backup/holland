@@ -30,10 +30,10 @@ additional-options  = force_list(default=list())
 pre-command         = string(default=None)
 
 [compression]
-method              = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', default=gzip)
-inline              = boolean(default=yes)
-options             = string(default="")
-level               = integer(min=0, max=9, default=1)
+method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', 'zstd', default='gzip')
+inline = boolean(default=yes)
+options = string(default="")
+level = integer(min=0, max=9, default=1)
 
 [mysql:client]
 defaults-extra-file = force_list(default=list('~/.my.cnf'))
