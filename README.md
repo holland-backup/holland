@@ -22,6 +22,8 @@ https://github.com/holland-backup/holland-backup.github.com
 
 Building man pages:
 Using the following command to pull in this repo from the repo directory 
+```
 $  git submodule update --init –recursive
 $ cd docs
 $ make man
+```
