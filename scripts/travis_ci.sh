@@ -27,10 +27,10 @@ cp $TRAVIS_BUILD_DIR/config/providers/* /etc/holland/providers/
 
 
 CMDS=(
-"holland mc --name mysqldump mysqldump"
-"holland bk mysqldump --dry-run"
-"holland bk mysqldump"
-"holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001 --bkset mysqldump"
+"/usr/bin/holland mc --name mysqldump mysqldump"
+"/usr/bin/holland bk mysqldump --dry-run"
+"/usr/bin/holland bk mysqldump"
+"/usr/bin/holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001 --bkset mysqldump"
 )
 
 for command in "${CMDS[@]}"
