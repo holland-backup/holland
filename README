@@ -1,6 +1,8 @@
 Holland README
 ==============
 
+[![Build Status](https://travis-ci.org/holland-backup/holland.svg?branch=master)](https://travis-ci.org/holland-backup/holland)
+
 Holland is a backup framework that supports multiple
 pluggable backup implementations.
 
