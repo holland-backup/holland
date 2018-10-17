@@ -1,11 +1,11 @@
-#!/bin/bash -x
+#!/bin/bash
 
 source ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/activate
 
 for i in `ls -d plugins/holland.*`
 do
     cd $TRAVIS_BUILD_DIR/${i}
-    python setup.py install 2>>/dev/null >>/dev/null
+    python setup.py install
     exit_code=$?
 	if [ $exit_code -ne  0 ]
     then
@@ -13,8 +13,9 @@ do
         exit $exit_code
     fi
 done
+
 cd $TRAVIS_BUILD_DIR/contrib/holland-commvault/
-python setup.py install 2>>/dev/null >>/dev/null
+python setup.py install
 exit_code=$?
 if [ $exit_code -ne  0 ]
 then
@@ -27,7 +28,6 @@ cp $TRAVIS_BUILD_DIR/config/holland.conf /etc/holland/
 cp $TRAVIS_BUILD_DIR/config/providers/* /etc/holland/providers/
 
 
-python_version=$(python -c "import platform;print(platform.python_version())")
 CMDS=(
 "holland mc --name mysqldump mysqldump"
 "holland bk mysqldump --dry-run"
@@ -37,7 +37,7 @@ CMDS=(
 
 for command in "${CMDS[@]}"
 do
-    $command 2>>/dev/null >>/dev/null
+    $command
     exit_code=$?
 	if [ $exit_code -ne  0 ]
     then
