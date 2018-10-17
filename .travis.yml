@@ -8,6 +8,9 @@ sudo: required
 services:
   - mysql
 before_install:
+  - wget https://repo.percona.com/apt/percona-release_0.1-6.$(lsb_release -sc)_all.deb
+  - sudo dpkg -i percona-release_0.1-6.$(lsb_release -sc)_all.deb
+  - sudo apt-get update
   - sudo apt-get install percona-xtrabackup-24
 install:
   - pip install -q mysqlclient
