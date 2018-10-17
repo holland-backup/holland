@@ -8,7 +8,7 @@ sudo: required
 services:
   - mysql
 before_install:
-  - sudo apt-get install percona-xtrabackup
+  - sudo apt-get install percona-xtrabackup-24
 install:
   - pip install -q mysqlclient
   - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then travis_retry pip install mock; fi
