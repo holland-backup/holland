@@ -32,7 +32,7 @@ CMDS=(
 "holland mc --name mysqldump mysqldump"
 "holland bk mysqldump --dry-run"
 "holland bk mysqldump"
-"holland mc --name mysqldump xtrabackup"
+"holland mc --name xtrabackup xtrabackup"
 "holland bk xtrabackup --dry-run"
 "holland bk xtrabackup"
 "holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001 --bkset mysqldump"
