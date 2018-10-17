@@ -23,8 +23,8 @@ setup(name='holland.backup.mysqldump',
         'holland >= 0.9.6',
       ],
       install_requires=[
-       #'mock' EL6 python 2.6
-       #'unittest' python 2.7+
+       #'mock' python 2.*
+       #'unittest' python  > 3.3
       ],
       extras_require = {
         'mysql' : 'holland.lib.mysql',
