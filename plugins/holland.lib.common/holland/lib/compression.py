@@ -24,6 +24,7 @@ COMPRESSION_METHODS = {
     'lzop'  : ('lzop', '.lzo'),
     'lzma'  : ('xz', '.xz'),
     'gpg'   : ('gpg -e --batch --no-tty', '.gpg'),
+    'zstd'  : ('zstd', '.zst'),
 }
 
 def lookup_compression(method):

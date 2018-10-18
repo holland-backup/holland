@@ -53,7 +53,7 @@ post-args = string(default=None)
 pre-args = string(default=None)
 
 [compression]
-method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzop', 'gpg', default='gzip')
+method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', 'zstd', default='gzip')
 options = string(default="")
 level = integer(min=0, max=9, default=1)
 inline = boolean(default=yes)
