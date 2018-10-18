@@ -11,6 +11,7 @@ from holland.lib.mysql.client import MySQLError
 from holland.backup.mysql_lvm.plugin.common import build_snapshot, \
                                                    connect_simple
 from holland.backup.mysql_lvm.plugin.raw.util import setup_actions
+from holland.lib.compression import COMPRESSION_CONFIG_STRING
 
 LOG = logging.getLogger(__name__)
 
@@ -52,12 +53,6 @@ exclude = force_list(default='mysql.sock')
 post-args = string(default=None)
 pre-args = string(default=None)
 
-[compression]
-method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', 'zstd', default='gzip')
-options = string(default="")
-level = integer(min=0, max=9, default=1)
-inline = boolean(default=yes)
-
 [mysql:client]
 # default: ~/.my.cnf
 defaults-file = string(default='~/.my.cnf')
@@ -76,7 +71,10 @@ host = string(default=None)
 port = integer(default=None)
 # default: none
 socket = string(default=None)
-""".splitlines()
+""" + COMPRESSION_CONFIG_STRING
+
+CONFIGSPEC = CONFIGSPEC.splitlines()
+
 
 class MysqlLVMBackup(object):
     """

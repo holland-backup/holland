@@ -6,7 +6,7 @@ import re
 import codecs
 import logging
 from holland.core.backup import BackupError
-from holland.lib.compression import open_stream, lookup_compression
+from holland.lib.compression import open_stream, lookup_compression, COMPRESSION_CONFIG_STRING
 from holland.lib.mysql import MySQLSchema, connect, MySQLError
 from holland.lib.mysql import include_glob, exclude_glob, \
                               include_glob_qualified, \
@@ -56,12 +56,6 @@ additional-options  = force_list(default=list())
 
 estimate-method = string(default='plugin')
 
-[compression]
-method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', 'zstd', default='gzip')
-options = string(default="")
-inline = boolean(default=yes)
-level  = integer(min=0, max=9, default=1)
-
 [mysql:client]
 defaults-extra-file = force_list(default=list('~/.my.cnf'))
 user                = string(default=None)
@@ -69,7 +63,9 @@ password            = string(default=None)
 socket              = string(default=None)
 host                = string(default=None)
 port                = integer(min=0, default=None)
-""".splitlines()
+""" + COMPRESSION_CONFIG_STRING
+
+CONFIGSPEC = CONFIGSPEC.splitlines()
 
 class MySQLDumpPlugin(object):
     """MySQLDump Backup Plugin interface for Holland"""

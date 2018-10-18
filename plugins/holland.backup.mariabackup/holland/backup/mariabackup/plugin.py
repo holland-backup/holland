@@ -9,7 +9,7 @@ import logging
 from os.path import join
 from holland.core.backup import BackupError
 from holland.core.util.path import directory_size
-from holland.lib.compression import open_stream
+from holland.lib.compression import open_stream, COMPRESSION_CONFIG_STRING
 from holland.backup.mariabackup.mysql import MySQL
 from holland.backup.mariabackup import util
 
@@ -29,12 +29,6 @@ tmpdir              = string(default=None)
 additional-options  = force_list(default=list())
 pre-command         = string(default=None)
 
-[compression]
-method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', 'zstd', default='gzip')
-inline = boolean(default=yes)
-options = string(default="")
-level = integer(min=0, max=9, default=1)
-
 [mysql:client]
 defaults-extra-file = force_list(default=list('~/.my.cnf'))
 user                = string(default='root')
@@ -42,7 +36,9 @@ password            = string(default=None)
 socket              = string(default=None)
 host                = string(default=None)
 port                = integer(min=0, default=None)
-""".splitlines()
+""" + COMPRESSION_CONFIG_STRING
+
+CONFIGSPEC = CONFIGSPEC.splitlines()
 
 class MariabackupPlugin(object):
     """control connection to mysql server"""
