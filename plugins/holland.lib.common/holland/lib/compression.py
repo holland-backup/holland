@@ -9,8 +9,8 @@ import subprocess
 import shlex
 import io
 from tempfile import TemporaryFile
-import shutil
-import sys
+from holland.lib.which import which
+
 
 LOG = logging.getLogger(__name__)
 
@@ -49,20 +49,7 @@ def lookup_compression(method):
     try:
         cmd, ext = COMPRESSION_METHODS[method]
         argv = shlex.split(cmd)
-        try:
-            full_path = shutil.which(argv[0])
-            if full_path:
-                return [full_path] + argv[1:], ext
-        except AttributeError:
-            #shutil.which was added in python 3.3
-            for path in sys.path:
-                try:
-                    if any(path.startswith(argv[0]) for path in os.listdir(path)):
-                        return [os.path.join(path, argv[0])] + argv[1:], ext
-                except OSError:
-                    pass
-        raise OSError("No command found for compression method '%s'" %
-                      method)
+        return [which(argv[0])] + argv[1:], ext
     except KeyError:
         raise OSError("Unsupported compression method '%s'" % method)
 

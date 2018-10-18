@@ -13,7 +13,7 @@ from string import Template
 from os.path import join, isabs, expanduser
 from subprocess import Popen, PIPE, STDOUT, list2cmdline
 from holland.core.backup import BackupError
-from holland.lib.which import which, WhichError
+from holland.lib.which import which
 
 LOG = logging.getLogger(__name__)
 
@@ -58,10 +58,7 @@ def mariabackup_version():
     """Check Mariabackup version"""
     mariabackup_binary = 'mariabackup'
     if not isabs(mariabackup_binary):
-        try:
-            mariabackup_binary = which(mariabackup_binary)
-        except WhichError:
-            raise BackupError("Failed to find mariabackup binary")
+        mariabackup_binary = which(mariabackup_binary)
     mb_version = [mariabackup_binary, '--version']
     cmdline = list2cmdline(mb_version)
     LOG.info("Executing: %s", cmdline)
@@ -116,10 +113,7 @@ def apply_mariabackup_logfile(mb_cfg, backupdir):
 
     innobackupex = mb_cfg['innobackupex']
     if not isabs(innobackupex):
-        try:
-            innobackupex = which(innobackupex)
-        except WhichError:
-            raise BackupError("Failed to find innobackupex script")
+        innobackupex = which(innobackupex)
     args = [
         innobackupex,
         '--prepare',
@@ -207,10 +201,7 @@ def build_mb_args(config, basedir, defaults_file=None):
     """Build the commandline for mariabackup"""
     innobackupex = config['innobackupex']
     if not isabs(innobackupex):
-        try:
-            innobackupex = which(innobackupex)
-        except WhichError:
-            raise BackupError("Failed to find innobackupex script")
+        innobackupex = which(innobackupex)
 
     ibbackup = config['ibbackup']
     stream = determine_stream_method(config['stream'])
