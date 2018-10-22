@@ -14,9 +14,9 @@ def which(cmd):
             return full_path
     except AttributeError:
             #shutil.which was added in python 3.3
-            for path in sys.path:
+            for path in os.environ['PATH'].split(':'):
                 try:
-                    if any(path.startswith(cmd) for path in os.listdir(path)):
+                    if any(ls.startswith(cmd) for ls in os.listdir(path)):
                         return os.path.join(path, cmd)
                 except OSError:
                     pass
