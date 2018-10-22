@@ -1,9 +1,9 @@
 import logging
 #For 2.7 or newer use unittest.mock
 try:
-    from unittest.mock import Mock, ANY
+    from unittest.mock import MagicMock, ANY
 except ImportError:
-    from mock import Mock, ANY
+    from mock import MagicMock, ANY
 from . import storage
 from ._subprocess import PopenMock
 
@@ -52,7 +52,7 @@ class MATCH(SpecialArgument):
 
 class MockEnvironment(object):
     def __init__(self):
-        self.mocker = Mock()
+        self.mocker = MagicMock()
         _setup_fileio(self.mocker)
         _setup_mysqlclient(self.mocker)
         _setup_subprocess(self.mocker)
