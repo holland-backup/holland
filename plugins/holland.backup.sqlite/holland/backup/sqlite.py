@@ -4,7 +4,7 @@ import os
 import logging
 from subprocess import Popen, PIPE
 
-from holland.lib.compression import open_stream
+from holland.lib.compression import open_stream, COMPRESSION_CONFIG_STRING
 from holland.core.backup import BackupError
 
 LOG = logging.getLogger(__name__)
@@ -13,13 +13,10 @@ CONFIGSPEC = """
 [sqlite]
 databases = force_list(default=list())
 binary = string(default=/usr/bin/sqlite3)
+""" + COMPRESSION_CONFIG_STRING
 
-[compression]
-method              = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', default=gzip)
-inline              = boolean(default=yes)
-options             = string(default="")
-level               = integer(min=0, max=9, default=1)
-""".splitlines()
+CONFIGSPEC = CONFIGSPEC.splitlines()
+
 
 class SQLitePlugin(object):
     """Define Plugin to backup SQLite"""

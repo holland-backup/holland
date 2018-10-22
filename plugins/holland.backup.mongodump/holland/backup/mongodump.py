@@ -9,7 +9,7 @@ from six.moves import urllib
 from pymongo import MongoClient
 
 from holland.core.backup import BackupError
-from holland.lib.compression import open_stream
+from holland.lib.compression import open_stream, COMPRESSION_CONFIG_STRING
 
 
 LOG = logging.getLogger(__name__)
@@ -23,13 +23,9 @@ username = string(default=None)
 password = string(default=None)
 authenticationDatabase = string(default=None)
 additional-options = force_list(default=list())
+""" + COMPRESSION_CONFIG_STRING
 
-[compression]
-method              = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', default=gzip)
-inline              = boolean(default=yes)
-options             = string(default="")
-level               = integer(min=0, max=9, default=1)
-""".splitlines()
+CONFIGSPEC = CONFIGSPEC.splitlines()
 
 class MongoDump(object):
     "MongoDB backup plugin for holland"

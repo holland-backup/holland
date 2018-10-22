@@ -13,9 +13,10 @@ from string import Template
 from os.path import join, isabs, expanduser
 from subprocess import Popen, PIPE, STDOUT, list2cmdline
 from holland.core.backup import BackupError
-from holland.lib.which import which, WhichError
+from holland.lib.which import which
 
 LOG = logging.getLogger(__name__)
+
 
 def generate_defaults_file(defaults_file, include=(), auth_opts=None):
     """Generate a mysql options file
@@ -93,10 +94,7 @@ def apply_xtrabackup_logfile(xb_cfg, backupdir):
 
     innobackupex = xb_cfg['innobackupex']
     if not isabs(innobackupex):
-        try:
-            innobackupex = which(innobackupex)
-        except WhichError:
-            raise BackupError("Failed to find innobackupex script")
+        innobackupex = which(innobackupex)
     args = [
         innobackupex,
         '--apply-log',
@@ -186,10 +184,7 @@ def build_xb_args(config, basedir, defaults_file=None):
     """Build the commandline for xtrabackup"""
     innobackupex = config['innobackupex']
     if not isabs(innobackupex):
-        try:
-            innobackupex = which(innobackupex)
-        except WhichError:
-            raise BackupError("Failed to find innobackupex script")
+        innobackupex = which(innobackupex)
 
     ibbackup = config['ibbackup']
     stream = determine_stream_method(config['stream'])
@@ -230,10 +225,7 @@ def xtrabackup_version():
     """Get xtrabackup version"""
     xtrabackup_binary = 'xtrabackup'
     if not isabs(xtrabackup_binary):
-        try:
-            xtrabackup_binary = which(xtrabackup_binary)
-        except WhichError:
-            raise BackupError("Failed to find xtrabackup binary")
+        xtrabackup_binary = which(xtrabackup_binary)
     xb_version = [xtrabackup_binary, '--version']
     cmdline = list2cmdline(xb_version)
     LOG.info("Executing: %s", cmdline)

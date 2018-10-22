@@ -9,7 +9,8 @@ import subprocess
 import shlex
 import io
 from tempfile import TemporaryFile
-from . import which
+from holland.lib.which import which
+
 
 LOG = logging.getLogger(__name__)
 
@@ -27,6 +28,15 @@ COMPRESSION_METHODS = {
     'zstd'  : ('zstd', '.zst'),
 }
 
+COMPRESSION_CONFIG_STRING='''
+[compression]
+method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', 'zstd', default='gzip')
+options = string(default="")
+inline = boolean(default=yes)
+level  = integer(min=0, max=9, default=1)
+'''
+
+
 def lookup_compression(method):
     """
     Looks up the passed compression method in supported COMPRESSION_METHODS
@@ -39,11 +49,7 @@ def lookup_compression(method):
     try:
         cmd, ext = COMPRESSION_METHODS[method]
         argv = shlex.split(cmd)
-        try:
-            return [which.which(argv[0])] + argv[1:], ext
-        except which.WhichError as ex:
-            raise OSError("No command found for compression method '%s': %s" %
-                          method, ex)
+        return [which(argv[0])] + argv[1:], ext
     except KeyError:
         raise OSError("Unsupported compression method '%s'" % method)
 

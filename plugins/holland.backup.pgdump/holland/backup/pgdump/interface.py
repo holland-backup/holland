@@ -15,6 +15,7 @@ from holland.backup.pgdump.base import backup_pgsql, dry_run, \
                                        dbapi, \
                                        pg_databases, \
                                        get_connection, get_db_size
+from holland.lib.compression import COMPRESSION_CONFIG_STRING
 
 LOG = logging.getLogger(__name__)
 
@@ -33,18 +34,15 @@ format = option('plain','tar','custom', default='custom')
 role = string(default=None)
 additional-options = string(default=None)
 
-[compression]
-method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', 'zstd', default='gzip')
-inline = boolean(default=yes)
-options = string(default="")
-level = integer(min=0, max=9, default=1)
-
 [pgauth]
 username = string(default=None)
 password = string(default=None)
 hostname = string(default=None)
 port = integer(default=None)
-""".splitlines()
+""" + COMPRESSION_CONFIG_STRING
+
+CONFIGSPEC = CONFIGSPEC.splitlines()
+
 
 class PgDump(object):
     """
