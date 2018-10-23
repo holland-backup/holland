@@ -262,7 +262,7 @@ def backup_pgsql(backup_directory, config, databases):
     for dbname in databases:
         format = config['pgdump']['format']
 
-        dump_name, _ = encode_safe(dbname)
+        dump_name = encode_safe(dbname)
         if dump_name != dbname:
             LOG.warn("Encoded database %s as filename %s", dbname, dump_name)
 
