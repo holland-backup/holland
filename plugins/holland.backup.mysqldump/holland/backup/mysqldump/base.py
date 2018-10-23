@@ -56,7 +56,7 @@ def start(mysqldump,
             # add --flush-logs only to the last mysqldump run
             if flush_logs and count == last:
                 more_options.append('--flush-logs')
-            db_name = encode(db.name)[0]
+            db_name = encode(db.name)
             if db_name != db.name:
                 LOG.warning("Encoding file-name for database %s to %s", db.name, db_name)
             try:
