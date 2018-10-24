@@ -7,12 +7,13 @@ import codecs
 import logging
 from holland.core.backup import BackupError
 from holland.lib.compression import open_stream, lookup_compression, COMPRESSION_CONFIG_STRING
-from holland.lib.mysql import MySQLSchema, connect, MySQLError
-from holland.lib.mysql import include_glob, exclude_glob, \
+from holland.lib.mysql import MySQLSchema, connect, MySQLError, \
+                              include_glob, exclude_glob, \
                               include_glob_qualified, \
-                              exclude_glob_qualified
-from holland.lib.mysql import DatabaseIterator, MetadataTableIterator, \
+                              exclude_glob_qualified, \
+                              DatabaseIterator, MetadataTableIterator, \
                               SimpleTableIterator
+from holland.lib.mysql.client.base import MYSQL_CLIENT_CONFIG_STRING
 from holland.backup.mysqldump.base import start
 from holland.lib.mysql.option import load_options, \
                                      write_options, \
@@ -55,15 +56,7 @@ file-per-database   = boolean(default=yes)
 additional-options  = force_list(default=list())
 
 estimate-method = string(default='plugin')
-
-[mysql:client]
-defaults-extra-file = force_list(default=list('~/.my.cnf'))
-user                = string(default=None)
-password            = string(default=None)
-socket              = string(default=None)
-host                = string(default=None)
-port                = integer(min=0, default=None)
-""" + COMPRESSION_CONFIG_STRING
+""" + MYSQL_CLIENT_CONFIG_STRING + COMPRESSION_CONFIG_STRING
 
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
