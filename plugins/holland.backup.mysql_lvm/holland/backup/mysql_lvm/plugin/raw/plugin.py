@@ -8,6 +8,7 @@ from holland.core.backup import BackupError
 from holland.lib.lvm import LogicalVolume, CallbackFailuresError, \
                             LVMCommandError, relpath, getmount
 from holland.lib.mysql.client import MySQLError
+from holland.lib.mysql.client.base import MYSQL_CLIENT_CONFIG_STRING
 from holland.backup.mysql_lvm.plugin.common import build_snapshot, \
                                                    connect_simple
 from holland.backup.mysql_lvm.plugin.raw.util import setup_actions
@@ -52,26 +53,7 @@ tmpdir                  = string(default=None)
 exclude = force_list(default='mysql.sock')
 post-args = string(default=None)
 pre-args = string(default=None)
-
-[mysql:client]
-# default: ~/.my.cnf
-defaults-file = string(default='~/.my.cnf')
-defaults-extra-file = force_list(default=list('~/.my.cnf'))
-
-# default: current user
-user = string(default=None)
-
-# default: none
-password = string(default=None)
-
-# default: localhost
-host = string(default=None)
-
-# default: 3306
-port = integer(default=None)
-# default: none
-socket = string(default=None)
-""" + COMPRESSION_CONFIG_STRING
+""" + MYSQL_CLIENT_CONFIG_STRING + COMPRESSION_CONFIG_STRING
 
 CONFIGSPEC = CONFIGSPEC.splitlines()
 

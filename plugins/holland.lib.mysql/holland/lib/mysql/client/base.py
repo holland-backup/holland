@@ -22,6 +22,16 @@ __all__ = [
     'OperationalError',
 ]
 
+MYSQL_CLIENT_CONFIG_STRING = '''
+[mysql:client]
+defaults-extra-file = force_list(default=list('~/.my.cnf'))
+user                = string(default=None)
+password            = string(default=None)
+socket              = string(default=None)
+host                = string(default=None)
+port                = integer(min=0, default=None)
+'''
+
 def flatten_list(a_list):
     """Given a list of sequences, return a flattened list
 

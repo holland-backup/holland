@@ -12,6 +12,7 @@ from holland.core.util.path import directory_size
 from holland.lib.compression import open_stream, COMPRESSION_CONFIG_STRING
 from holland.backup.mariabackup.mysql import MySQL
 from holland.backup.mariabackup import util
+from holland.lib.mysql.client.base import MYSQL_CLIENT_CONFIG_STRING
 
 LOG = logging.getLogger(__name__)
 
@@ -28,15 +29,7 @@ no-lock             = boolean(default=no)
 tmpdir              = string(default=None)
 additional-options  = force_list(default=list())
 pre-command         = string(default=None)
-
-[mysql:client]
-defaults-extra-file = force_list(default=list('~/.my.cnf'))
-user                = string(default='root')
-password            = string(default=None)
-socket              = string(default=None)
-host                = string(default=None)
-port                = integer(min=0, default=None)
-""" + COMPRESSION_CONFIG_STRING
+""" + MYSQL_CLIENT_CONFIG_STRING + COMPRESSION_CONFIG_STRING
 
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
