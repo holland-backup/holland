@@ -32,6 +32,11 @@ def main():
     if opts.command is None:
         print_help()
         sys.exit(1)
+       
+    # set LANG to C for parsing of lvs and vgs
+    # patch from https://bugs.launchpad.net/holland-backup/+bug/1256121/comments/1
+    os.environ['LANG'] = 'C'
+    os.environ['LC_ALL'] = 'C'
 
     # Bootstrap the environment
     bootstrap(opts)
