@@ -20,7 +20,7 @@ class Volume(object):
         if cls is Volume:
             raise NotImplementedError('Volume is an abstract base class and '
                                       'should not be directly instantiated')
-        return super(Volume, cls).__new__(cls, attributes)
+        return super(Volume, cls).__new__(cls)
 
     def __init__(self, attributes=()):
         self.attributes = dict(attributes)
@@ -153,13 +153,13 @@ class LogicalVolume(Volume):
         :returns: LogicalVolume instance
         """
         try:
-            volume, = lvs(pathspec)
+            volume,  = lvs(pathspec)
             return cls(volume)
-        except (LVMCommandError, ValueError):
+        except (LVMCommandError, ValueError) as ex:
             #XX: Perhaps we should be more specific :)
             raise LookupError("No LogicalVolume could be found "
-                              "for pathspec %r" %
-                              pathspec)
+                              "for pathspec %r, %s" %
+                              (pathspec, ex))
         except Exception as ex:
             raise OSError("unable to look up path %s" % ex)
 

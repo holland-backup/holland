@@ -113,7 +113,8 @@ class MysqlLVMBackup(object):
             raise BackupError("Failed to lookup logical volume for %s: %s" %
                               (datadir, str(exc)))
         except Exception as ex:
-            LOG.debug(ex)
+            raise BackupError("Failed to lookup logical volume for %s: %s" %
+                              (datadir, str(ex)))
 
         # create a snapshot manager
         snapshot = build_snapshot(self.config['mysql-lvm'], volume,
