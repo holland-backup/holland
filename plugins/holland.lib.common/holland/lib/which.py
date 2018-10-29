@@ -16,8 +16,9 @@ def which(cmd):
             #shutil.which was added in python 3.3
             for path in os.environ['PATH'].split(':'):
                 try:
-                    if any(ls.startswith(cmd) for ls in os.listdir(path)):
-                        return os.path.join(path, cmd)
+                    for ls in os.listdir(path):
+                        if cmd == ls:
+                            return os.path.join(path, cmd)
                 except OSError:
                     pass
-    raise BackupError("No command found for compression method '%s'" % cmd)
+    raise BackupError("No command found '%s'" % cmd)
