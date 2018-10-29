@@ -16,10 +16,10 @@ def locate_mysqld_exe(config):
     mysqld_candidates = config.pop('mysqld-exe')
     for candidate in mysqld_candidates:
         if os.path.isfile(candidate):
-	    return candidate
-	try:
-	    return which(candidate)
-	except BackupError:
+            return candidate
+        try:
+            return which(candidate)
+        except BackupError:
             pass
     raise BackupError("Failed to find mysqld binary")
 
