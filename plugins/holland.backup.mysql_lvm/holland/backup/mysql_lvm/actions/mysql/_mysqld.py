@@ -15,14 +15,12 @@ LOG = logging.getLogger(__name__)
 def locate_mysqld_exe(config):
     mysqld_candidates = config.pop('mysqld-exe')
     for candidate in mysqld_candidates:
-        if os.path.isabs(candidate):
-            path = [os.path.dirname(candidate)]
-            candidate = os.path.basename(candidate)
-        else:
-            path = None # use environ[PATH]
-        LOG.debug("Searching for %s on path %s",
-                  candidate, path or os.environ['PATH'])
-        return which(candidate)
+        if os.path.isfile(candidate):
+	    return candidate
+	try:
+	    return which(candidate)
+	except BackupError:
+            pass
     raise BackupError("Failed to find mysqld binary")
 
 class MySQLServer(object):
