@@ -22,7 +22,7 @@ def locate_mysqld_exe(config):
             path = None # use environ[PATH]
         LOG.debug("Searching for %s on path %s",
                   candidate, path or os.environ['PATH'])
-        return which(candidate, path)
+        return which(candidate)
     raise BackupError("Failed to find mysqld binary")
 
 class MySQLServer(object):

@@ -15,7 +15,7 @@ __all__ = [
     'SignalManager',
 ]
 
-def getmount(path):
+def getmount(getpath):
     """Return the mount point of a path
 
     :param path: path to find the mountpoint for
@@ -23,7 +23,7 @@ def getmount(path):
     :returns: str mounpoint path
     """
 
-    path = os.path.realpath(path)
+    path = os.path.realpath(getpath)
 
     while path != os.path.sep:
         if os.path.ismount(path):
