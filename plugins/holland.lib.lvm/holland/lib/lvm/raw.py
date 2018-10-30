@@ -2,7 +2,6 @@
 
 import os
 import re
-import csv
 import logging
 from io import StringIO #pylint: disable=unused-import
 from subprocess import Popen, PIPE, list2cmdline
