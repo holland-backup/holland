@@ -31,8 +31,9 @@ def connect_simple(config):
         raise BackupError("[%d] %s" % exc.args)
 
 def cleanup_tempdir(path):
-    LOG.info("Removing temporary mountpoint %s", path)
-    shutil.rmtree(path)
+    if os.path.exists(path):
+        LOG.info("Removing temporary mountpoint %s", path)
+        shutil.rmtree(path)
 
 def build_snapshot(config, logical_volume, suppress_tmpdir=False):
     """Create a snapshot process for running through the various steps

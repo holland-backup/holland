@@ -293,7 +293,7 @@ class LogicalVolume(Volume):
         except (LVMCommandError, ValueError) as exc:
             LOG.debug("Failed looking up filesystem for %s => %r",
                       self.device_name(), exc, exc_info=True)
-            raise LookupError()
+            raise
 
     def __repr__(self):
         return '%s(device=%r)' % (self.__class__.__name__, self.device_name())
