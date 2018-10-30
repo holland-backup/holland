@@ -2,7 +2,6 @@
 
 import os
 import re
-import csv
 import logging
 from io import StringIO #pylint: disable=unused-import
 from subprocess import Popen, PIPE, list2cmdline
@@ -24,7 +23,7 @@ def pvs(*physical_volumes):
         '--noheadings',
         '--nosuffix',
         '--units=b',
-        '--separator=,',
+        '--separator=;',
         '--options=%s' % ','.join(PVS_ATTR),
     ]
     pvs_args.extend(list(physical_volumes))
@@ -52,7 +51,7 @@ def vgs(*volume_groups):
         '--noheadings',
         '--nosuffix',
         '--units=b',
-        '--separator=,',
+        '--separator=;',
         '--options=%s' % ','.join(VGS_ATTR),
     ]
     vgs_args.extend(list(volume_groups))
@@ -83,7 +82,7 @@ def lvs(*volume_groups):
         '--noheadings',
         '--nosuffix',
         '--units=b',
-        '--separator=,',
+        '--separator=;',
         '--options=%s' % ','.join(LVS_ATTR),
     ]
     lvs_args.extend(list(volume_groups))
@@ -101,8 +100,8 @@ def lvs(*volume_groups):
 
 def parse_lvm_format(keys, values):
     """Convert LVM tool output into a dictionary"""
-    for row in csv.reader(values.splitlines(), delimiter=',', skipinitialspace=True):
-        yield dict(zip(keys, row))
+    #Replace comma with dot so floats are handled correctly
+    yield dict(zip(keys, values.replace(',', '.').split(';')))
 
 def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
     """Create a snapshot of an existing logical volume

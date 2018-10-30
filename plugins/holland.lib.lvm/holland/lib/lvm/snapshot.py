@@ -59,7 +59,12 @@ class Snapshot(object):
         try:
             self._apply_callbacks('pre-mount', self, snapshot)
             options = None
-            if snapshot.filesystem() == 'xfs':
+            try:
+                fs = snapshot.filesystem()
+            except Exception:
+                return self.error(snapshot, 'Failed looking up filesystem')
+
+            if fs == 'xfs':
                 LOG.info("xfs filesystem detected on %s. "
                          "Using mount -o nouuid",
                          snapshot.device_name())
@@ -132,6 +137,10 @@ class Snapshot(object):
                     snapshot.unmount()
                     LOG.info("Unmounting snapshot %s on cleanup",
                              snapshot.device_name())
+            except LVMCommandError as ex:
+                LOG.error("Failed to unmount snapshot %s", ex)
+
+            try:
                 if snapshot.exists():
                     snapshot.remove()
                     LOG.info("Removed snapshot %s on cleanup",
@@ -165,7 +174,7 @@ class Snapshot(object):
         callback_list = [callback[1] for callback in callback_list]
         for callback in callback_list:
             try:
-                LOG.debug("Calling %s", callback)
+                LOG.debug("Calling %s", event)
                 callback(event, *args, **kwargs)
             except:
                 LOG.debug("Callback %r failed for event %s",
