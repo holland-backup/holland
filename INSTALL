@@ -4,11 +4,21 @@ RHEL/Centos from EPEL
 * Install plugin(s)
 # yum install holland-{plugin name}
 
-Debian / Ubuntu
-*Install base packages
-# apt-get install holland holland-common
-* Install plugin(s)
-# apt-get install holland-{plugin name}
+Ubuntu
+*Install package from OBS
+# . /etc/os-release
+# echo "deb https://download.opensuse.org/repositories/home:/holland-backup/x${NAME}_${VERSION_ID}/ ./" >> /etc/apt/sources.list
+# wget -qO -  https://download.opensuse.org/repositories/home:/holland-backup/x${NAME}_${VERSION_ID}/Release.key |apt-key add -
+# apt-get update
+# apt-get install holland {python3-mysqldb, python3-pymongo, ext...)
+
+Debian
+*Install package from OBS
+# . /etc/os-release
+# echo "deb http://download.opensuse.org/repositories/home:/holland-backup/Debian_${VERSION_ID}.0/ ./" >> /etc/apt/sources.list 
+# wget -qO -  https://download.opensuse.org/repositories/home:/holland-backup/Debian_${VERSION_ID}.0/Release.key |apt-key add -
+# apt-get update
+# apt-get install holland {python3-mysqldb, python3-pymongo, ext...)
 
 Manual
 * Clone repo
