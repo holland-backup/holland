@@ -1,17 +1,20 @@
 ---
 language: python
-sudo: required
 matrix:
-  indclude:
-      - os: linux
-        dist: xenial
-        python: 3.7
-      - os: linux
-        python: 3.6
-      - os: linux
-        python: 2.7
-      - os: linux
-        python: 2.6
+  include:
+    - os: linux
+      dist: xenial
+      sudo: required
+      python: 3.7
+    - os: linux
+      sudo: required
+      python: 3.6
+    - os: linux
+      sudo: required
+      python: 2.7
+    - os: linux
+      sudo: required
+      python: 2.6
 services:
   - mysql
 before_install:
