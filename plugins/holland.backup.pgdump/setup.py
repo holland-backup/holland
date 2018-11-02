@@ -16,8 +16,7 @@ setup(name='holland.backup.pgdump',
                                       'tests.*']),
       namespace_packages=['holland', 'holland.backup'],
       zip_safe=True,
-      psycopg2
-      install_requires=[ "psycopg2" ],
+      install_requires=['psycopg2' ],
       # holland looks for plugins in holland.backup
       entry_points="""
       [holland.backup]
