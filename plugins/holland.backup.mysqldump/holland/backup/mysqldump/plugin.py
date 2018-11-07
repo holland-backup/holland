@@ -52,6 +52,9 @@ max-allowed-packet  = string(default=128M)
 bin-log-position    = boolean(default=no)
 
 file-per-database   = boolean(default=yes)
+#arg-per-database is only used if file-per-database is true
+## takes a json object {"table1": "--arg", "table2": "--arg"}
+arg-per-database    = string(default={})
 
 additional-options  = force_list(default=list())
 
@@ -240,7 +243,8 @@ class MySQLDumpPlugin(object):
                   lock_method=config['lock-method'],
                   file_per_database=config['file-per-database'],
                   open_stream=self._open_stream,
-                  compression_ext=ext)
+                  compression_ext=ext,
+                  arg_per_database=config['arg-per-database'])
         except MySQLDumpError as exc:
             raise BackupError(str(exc))
 
