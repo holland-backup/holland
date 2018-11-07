@@ -4,6 +4,7 @@ import sys
 import csv
 import errno
 import logging
+import json
 from holland.core.backup import BackupError
 from holland.lib.safefilename import encode
 from holland.backup.mysqldump.command import ALL_DATABASES, MySQLDumpError
@@ -27,7 +28,8 @@ def start(mysqldump,
           lock_method='auto-detect',
           file_per_database=True,
           open_stream=open,
-          compression_ext=''):
+          compression_ext='',
+          arg_per_database=None):
     """Run a mysqldump backup"""
     if not schema and file_per_database:
         raise BackupError("file_per_database specified without a valid schema")
@@ -47,6 +49,8 @@ def start(mysqldump,
             write_manifest(schema, open_stream, compression_ext)
 
     if file_per_database:
+        if arg_per_database:
+            arg_per_database = json.loads(arg_per_database)
         flush_logs = '--flush-logs' in mysqldump.options
         if flush_logs:
             mysqldump.options.remove('--flush-logs')
@@ -65,6 +69,8 @@ def start(mysqldump,
                 raise BackupError("Failed to open output stream %s: %s" %
                                   ( db_name + '.sql' + compression_ext, str(exc)))
             try:
+                if db_name in arg_per_database:
+                    more_options.append(arg_per_database[db_name])
                 mysqldump.run([db.name], stream, more_options)
             finally:
                 try:
