@@ -130,18 +130,19 @@ class MkConfig(Command):
         },
         {
             'help':'Edit the generated config',
-            'action':'store_true'
+            'action':'store_true',
+            'default': False
         },
         {
             'help':'Generate a provider config'
         },
         {
-            'help':'Save the final config to the specified file',
-            'action':'store_true',
-            'default':False
+            'help':'Save the final config to the specified file'
         },
         {
-            'help':'Do not include comment from a backupplugin\'s configspec'
+            'help':'Do not include comment from a backupplugin\'s configspec',
+            'action':'store_true',
+            'default': False
         }
     ]
 
