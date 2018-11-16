@@ -22,11 +22,10 @@ class MySQLDumpDispatchAction(object):
         mysqld_exe = locate_mysqld_exe(self.mysqld_config)
 
         mysqld_log = self.mysqld_config['log-error']
-        path = os.path.dirname(os.path.abspath(mysqld_log))
         uid = pwd.getpwnam(self.mysqld_config['user'])
         if not mysqld_log:
             mysqld_log =  'holland_lvm.log'
-        elif not os.path.exists(path):
+        elif not os.path.exists(os.path.dirname(os.path.abspath(mysqld_log))):
             path = os.path.dirname(os.path.abspath(mysqld_log))
             LOG.debug("Create directory %s", path)
             os.mkdir(path)
