@@ -83,7 +83,11 @@ def setup_actions(snapshot, config, client, datadir, spooldir, plugin):
     act = MySQLDumpDispatchAction(plugin, mysqld_config)
     snapshot.register('post-mount', act, priority=100)
 
-    errlog_src = os.path.join(datadir, 'holland_lvm.log')
+    log_file = mysqld_config['log-error']
+    if os.path.isfile(os.path.join(datadir, log_file)):
+        errlog_src = os.path.join(datadir, log_file)
+    else:
+        errlog_src = log_file
     errlog_dst = os.path.join(spooldir, 'holland_lvm.log')
     snapshot.register('pre-unmount',
                       lambda *args, **kwargs: shutil.copyfile(errlog_src,

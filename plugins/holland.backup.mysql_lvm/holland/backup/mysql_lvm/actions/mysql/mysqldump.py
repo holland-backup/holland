@@ -4,6 +4,7 @@ import os
 import time
 import signal
 import logging
+import pwd
 from holland.lib.mysql import connect, MySQLError, PassiveMySQLClient
 from ._mysqld import generate_server_config, MySQLServer, locate_mysqld_exe
 
@@ -20,8 +21,21 @@ class MySQLDumpDispatchAction(object):
         # find a mysqld executable to use
         mysqld_exe = locate_mysqld_exe(self.mysqld_config)
 
-        if not self.mysqld_config['log-error']:
-            self.mysqld_config['log-error'] =  'holland_lvm.log'
+        mysqld_log = self.mysqld_config['log-error']
+        path = os.path.dirname(os.path.abspath(mysqld_log))
+        uid = pwd.getpwnam(self.mysqld_config['user'])
+        if not mysqld_log:
+            mysqld_log =  'holland_lvm.log'
+        elif not os.path.exists(path):
+            path = os.path.dirname(os.path.abspath(mysqld_log))
+            LOG.debug("Create directory %s", path)
+            os.mkdir(path)
+            os.chown(path, uid[2], uid[3])
+        elif not os.path.isfile(mysqld_log):
+            LOG.debug("Touch file %s", mysqld_log)
+            os.mknod(mysqld_log)
+            os.chown(mysqld_log, uid[2], uid[3])
+
         socket = os.path.join(datadir, 'holland_mysqldump.sock')
         self.mysqld_config['socket'] = socket
         # patch up socket in plugin
