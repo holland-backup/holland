@@ -40,11 +40,14 @@ user                    = string(default='mysql')
 innodb-buffer-pool-size = string(default=128M)
 key-buffer-size         = string(default=16M)
 tmpdir                  = string(default=None)
+#Set mysql error log location. This can be helpful in debugging mysqld errorrs
+#Note that the mysql user will need write premissions to the target location
+log-error               = string(default=None)
 
 """.splitlines() + MySQLDumpPlugin.CONFIGSPEC
 
 class MysqlDumpLVMBackup(object):
-    """A Holland Backup plugin suitable for performing LVM snapshots of a 
+    """A Holland Backup plugin suitable for performing LVM snapshots of a
     filesystem underlying a live MySQL instance.
 
     This plugin produces tar archives of a MySQL data directory.
@@ -72,7 +75,7 @@ class MysqlDumpLVMBackup(object):
     def configspec(self):
         """INI Spec for the configuration values this plugin supports"""
         return self.CONFIGSPEC
-    
+
     def backup(self):
         """Run a backup by running through a LVM snapshot against the device
         the MySQL datadir resides on

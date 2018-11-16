@@ -20,7 +20,8 @@ class MySQLDumpDispatchAction(object):
         # find a mysqld executable to use
         mysqld_exe = locate_mysqld_exe(self.mysqld_config)
 
-        self.mysqld_config['log-error'] = 'holland_lvm.log'
+        if not self.mysqld_config['log-error']:
+            self.mysqld_config['log-error'] =  'holland_lvm.log'
         socket = os.path.join(datadir, 'holland_mysqldump.sock')
         self.mysqld_config['socket'] = socket
         # patch up socket in plugin
