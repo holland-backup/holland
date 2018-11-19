@@ -155,7 +155,7 @@ class BackupRunner(object):
             LOG.warning("Backup aborted by interrupt")
             spool_entry.config['holland:backup']['failed'] = True
             raise
-        except Exception as ex:
+        except BaseException  as ex:
             LOG.warning(ex)
             spool_entry.config['holland:backup']['failed'] = True
         else:
