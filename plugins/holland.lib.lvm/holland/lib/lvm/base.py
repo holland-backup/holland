@@ -16,6 +16,7 @@ class Volume(object):
     of its subclasses such as PhysicalVolume, VolumeGroup or LogicalVolume
     """
 
+    #pylint: disable=unused-argument
     def __new__(cls, attributes=()):
         if cls is Volume:
             raise NotImplementedError('Volume is an abstract base class and '
@@ -153,7 +154,7 @@ class LogicalVolume(Volume):
         :returns: LogicalVolume instance
         """
         try:
-            volume,  = lvs(pathspec)
+            volume, = lvs(pathspec)
             return cls(volume)
         except (LVMCommandError, ValueError) as ex:
             #XX: Perhaps we should be more specific :)
