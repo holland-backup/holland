@@ -158,7 +158,6 @@ class BackupRunner(object):
         except Exception as ex:
             LOG.warning(ex)
             spool_entry.config['holland:backup']['failed'] = True
-            raise
         else:
             spool_entry.config['holland:backup']['failed'] = False
 
