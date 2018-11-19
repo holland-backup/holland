@@ -1,14 +1,15 @@
+"""Copy datadir from snapshot without creating a tar file """
+
 import os
 import time
-import shlex
 import signal
 import logging
 from subprocess import list2cmdline, Popen, CalledProcessError
-from holland.core.backup import BackupError
 
 LOG = logging.getLogger(__name__)
 
 class DirArchiveAction(object):
+    """Copy datadir"""
     def __init__(self, snap_datadir, backup_datadir, config):
         self.snap_datadir = snap_datadir
         self.backup_datadir = backup_datadir

@@ -31,6 +31,7 @@ def connect_simple(config):
         raise BackupError("[%d] %s" % exc.args)
 
 def cleanup_tempdir(path):
+    """Delete tmpdir created for mounting snapshot"""
     if os.path.exists(path):
         LOG.info("Removing temporary mountpoint %s", path)
         shutil.rmtree(path)
@@ -55,7 +56,7 @@ def build_snapshot(config, logical_volume, suppress_tmpdir=False):
             raise BackupError("Insufficient free extents on %s "
                               "to create snapshot (free extents = %s)" %
                               (logical_volume.device_name(),
-                              logical_volume.vg_free_count))
+                               logical_volume.vg_free_count))
     else:
         try:
             _snapshot_size = snapshot_size
@@ -106,4 +107,5 @@ def log_final_snapshot_size(event, snapshot):
     snap_percent = float(snapshot.snap_percent)/100
     snap_size = float(snapshot.lv_size)
     LOG.info("Final LVM snapshot size for %s is %s",
-        snapshot.device_name(), format_bytes(snap_size*snap_percent))
+             snapshot.device_name(), format_bytes(snap_size*snap_percent))
+    LOG.DEBUG("Logged during event:", event)

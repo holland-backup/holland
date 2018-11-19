@@ -2,7 +2,6 @@
 
 import os
 import logging
-import tempfile
 from holland.core.util.path import directory_size, format_bytes
 from holland.core.backup import BackupError
 from holland.lib.lvm import LogicalVolume, CallbackFailuresError, \
@@ -135,29 +134,27 @@ class MysqlLVMBackup(object):
         try:
             snapshot.start(volume)
         except CallbackFailuresError as exc:
-            # XXX: one of our actions failed.  Log this better
             for callback, error in exc.errors:
-                LOG.error("%s", error)
+                LOG.error("%s: %s", callback, error)
             raise BackupError("Error occurred during snapshot process. Aborting.")
         except LVMCommandError as exc:
             # Something failed in the snapshot process
             raise BackupError(str(exc))
-        except Exception as ex:
+        except BaseException as ex:
             LOG.debug(ex)
 
     def _dry_run(self, volume, snapshot, datadir):
         """Implement dry-run for LVM snapshots.
         """
         LOG.info("* Would snapshot source volume %s/%s as %s/%s (size=%s)",
-             volume.vg_name,
-             volume.lv_name,
-             volume.vg_name,
-             snapshot.name,
-             format_bytes(snapshot.size*int(volume.vg_extent_size)))
+                 volume.vg_name,
+                 volume.lv_name,
+                 volume.vg_name,
+                 snapshot.name,
+                 format_bytes(snapshot.size*int(volume.vg_extent_size)))
         LOG.info("* Would mount on %s",
-             snapshot.mountpoint or 'generated temporary directory')
+                 snapshot.mountpoint or 'generated temporary directory')
 
-        snapshot_mountpoint = snapshot.mountpoint or tempfile.gettempdir()
         if getmount(self.target_directory) == getmount(datadir):
             LOG.error("Backup directory %s is on the same filesystem as "
                       "the source logical volume %s.",

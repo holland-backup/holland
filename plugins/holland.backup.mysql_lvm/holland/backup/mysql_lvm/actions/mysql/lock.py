@@ -1,8 +1,11 @@
+"""Mange Database locking"""
+
 import logging
 
 LOG = logging.getLogger(__name__)
 
 class FlushAndLockMySQLAction(object):
+    """Lock Database"""
     def __init__(self, client, extra_flush=True):
         self.client = client
         self.extra_flush = extra_flush

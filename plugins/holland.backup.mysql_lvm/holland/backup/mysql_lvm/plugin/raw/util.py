@@ -1,6 +1,5 @@
 """Utility functions to help out the mysql-lvm plugin"""
 import os
-import shutil
 import tempfile
 import logging
 from holland.core.backup import BackupError
@@ -61,20 +60,20 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
             os.mkdir(backup_datadir)
         except OSError as exc:
             raise BackupError("Unable to create archive directory '%s': %s" %
-                            (backup_datadir, exc))
+                              (backup_datadir, exc))
         act = DirArchiveAction(snap_datadir, backup_datadir, config['tar'])
         snapshot.register('post-mount', act, priority=50)
     else:
         try:
             archive_stream = open_stream(os.path.join(spooldir, 'backup.tar'),
-                                        'w',
-                                        method=config['compression']['method'],
-                                        level=config['compression']['level'],
-                                        extra_args=config['compression']['options'],
-                                        inline=config['compression']['inline'])
+                                         'w',
+                                         method=config['compression']['method'],
+                                         level=config['compression']['level'],
+                                         extra_args=config['compression']['options'],
+                                         inline=config['compression']['inline'])
         except OSError as exc:
             raise BackupError("Unable to create archive file '%s': %s" %
-                          (os.path.join(spooldir, 'backup.tar'), exc))
+                              (os.path.join(spooldir, 'backup.tar'), exc))
         act = TarArchiveAction(snap_datadir, archive_stream, config['tar'])
         snapshot.register('post-mount', act, priority=50)
 

@@ -11,6 +11,7 @@ from ._mysqld import generate_server_config, MySQLServer, locate_mysqld_exe
 LOG = logging.getLogger(__name__)
 
 class MySQLDumpDispatchAction(object):
+    """Setup environment for mysqldump"""
     def __init__(self, mysqldump_plugin, mysqld_config):
         self.mysqldump_plugin = mysqldump_plugin
         self.mysqld_config = mysqld_config
@@ -24,7 +25,7 @@ class MySQLDumpDispatchAction(object):
         mysqld_log = self.mysqld_config['log-error']
         uid = pwd.getpwnam(self.mysqld_config['user'])
         if not mysqld_log:
-            mysqld_log =  'holland_lvm.log'
+            mysqld_log = 'holland_lvm.log'
         elif not os.path.exists(os.path.dirname(os.path.abspath(mysqld_log))):
             path = os.path.dirname(os.path.abspath(mysqld_log))
             LOG.debug("Create directory %s", path)
@@ -64,6 +65,7 @@ class MySQLDumpDispatchAction(object):
             mysqld.stop() # we dont' really care about the exit code, if mysqldump ran smoothly :)
 
 def wait_for_mysqld(config, mysqld):
+    """Wait for new mysql instance to come online"""
     client = connect(config, PassiveMySQLClient)
     LOG.debug("connect via client %r", config['socket'])
     while mysqld.process.poll() is None:

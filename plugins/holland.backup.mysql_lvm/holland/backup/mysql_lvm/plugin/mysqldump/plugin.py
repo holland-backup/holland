@@ -1,13 +1,13 @@
 """MySQL LVM snapshot backups"""
 
+#pylint: disable=no-name-in-module
+#pylint: disable=import-error
+
 import os
-import tempfile
 import logging
 from holland.lib.lvm import LogicalVolume, CallbackFailuresError, \
                             LVMCommandError, relpath, getmount
-from holland.lib.mysql.client import MySQLError
 from holland.core.util.fmt import format_bytes
-from holland.core.util.path import directory_size
 from holland.core.backup import BackupError
 from holland.backup.mysql_lvm.plugin.common import build_snapshot, \
                                                    connect_simple
@@ -86,7 +86,7 @@ class MysqlDumpLVMBackup(object):
         LOG.info("Backing up %s via snapshot", datadir)
         # lookup the logical volume mysql's datadir sits on
         try:
-             volume = LogicalVolume.lookup_from_fspath(datadir)
+            volume = LogicalVolume.lookup_from_fspath(datadir)
         except LookupError as exc:
             raise BackupError("Failed to lookup logical volume for %s: %s" %
                               (datadir, str(exc)))
@@ -101,24 +101,24 @@ class MysqlDumpLVMBackup(object):
             # calculate where the datadirectory on the snapshot will be located
             rpath = relpath(datadir, getmount(datadir))
             snap_datadir = os.path.abspath(os.path.join(snapshot.mountpoint or
-            '/tmp', rpath))
+                                                        '/tmp', rpath))
 
-            LOG.debug("Snap Datadir: %s" % snap_datadir)
+            LOG.debug("Snap Datadir: %s", snap_datadir)
             # setup actions to perform at each step of the snapshot process
             setup_actions(snapshot=snapshot,
                           config=self.config,
                           client=self.client,
                           datadir=snap_datadir,
-                        spooldir=self.target_directory,
-                        plugin=self.mysqldump_plugin)
-        except Exception as ex:
+                          spooldir=self.target_directory,
+                          plugin=self.mysqldump_plugin)
+        except BaseException as ex:
             LOG.debug(ex)
 
         if self.config['mysqldump']['bin-log-position']:
-            LOG.warn("bin-log-position is not supported with mysqldump-lvm.")
-            LOG.warn("Replication status will be saved to the "
-                     "[mysql:replication] section in %s",
-                    self.config.filename)
+            LOG.warning("bin-log-position is not supported with mysqldump-lvm.")
+            LOG.warning("Replication status will be saved to the "
+                        "[mysql:replication] section in %s",
+                        self.config.filename)
             self.config['mysqldump']['bin-log-position'] = False
 
         if self.dry_run:
@@ -129,9 +129,8 @@ class MysqlDumpLVMBackup(object):
         try:
             snapshot.start(volume)
         except CallbackFailuresError as exc:
-            # XXX: one of our actions failed.  Log this better
             for callback, error in exc.errors:
-                LOG.error("%s", error)
+                LOG.error("%s: %s", callback, error)
             raise BackupError("Error occurred during snapshot process. Aborting.")
         except LVMCommandError as exc:
             # Something failed in the snapshot process
@@ -141,15 +140,14 @@ class MysqlDumpLVMBackup(object):
         """Implement dry-run for LVM snapshots.
         """
         LOG.info("* Would snapshot source volume %s/%s as %s/%s (size=%s)",
-             volume.vg_name,
-             volume.lv_name,
-             volume.vg_name,
-             snapshot.name,
-             format_bytes(snapshot.size*int(volume.vg_extent_size)))
+                 volume.vg_name,
+                 volume.lv_name,
+                 volume.vg_name,
+                 snapshot.name,
+                 format_bytes(snapshot.size*int(volume.vg_extent_size)))
         LOG.info("* Would mount on %s",
-             snapshot.mountpoint or 'generated temporary directory')
+                 snapshot.mountpoint or 'generated temporary directory')
 
-        snapshot_mountpoint = snapshot.mountpoint or tempfile.gettempdir()
         if getmount(self.target_directory) == getmount(datadir):
             LOG.error("Backup directory %s is on the same filesystem as "
                       "the source logical volume %s.",

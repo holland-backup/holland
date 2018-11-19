@@ -3,16 +3,10 @@ import os
 import shutil
 import tempfile
 import logging
-from holland.core.backup import BackupError
-from holland.core.util.fmt import format_bytes
-from holland.lib.mysql import PassiveMySQLClient, MySQLError, \
-                              build_mysql_config, connect
-from holland.lib.lvm import Snapshot, parse_bytes
 from holland.backup.mysql_lvm.actions import FlushAndLockMySQLAction, \
                                              RecordMySQLReplicationAction, \
                                              MySQLDumpDispatchAction
-from holland.backup.mysql_lvm.plugin.common import log_final_snapshot_size, \
-                                                   connect_simple
+from holland.backup.mysql_lvm.plugin.common import log_final_snapshot_size
 from holland.backup.mysql_lvm.plugin.innodb import MySQLPathInfo, check_innodb
 
 LOG = logging.getLogger(__name__)
