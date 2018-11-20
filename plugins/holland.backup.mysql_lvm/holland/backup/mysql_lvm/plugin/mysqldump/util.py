@@ -78,11 +78,15 @@ def setup_actions(snapshot, config, client, datadir, spooldir, plugin):
     snapshot.register('post-mount', act, priority=100)
 
     log_file = mysqld_config['log-error']
-    if os.path.isfile(os.path.join(datadir, log_file)):
-        errlog_src = os.path.join(datadir, log_file)
+    if log_file:
+        if os.path.exists(log_file):
+            errlog_src = log_file
+        else:
+            errlog_src = os.path.join(datadir, log_file)
     else:
-        errlog_src = log_file
+        errlog_src = os.path.join(datadir, 'holland_lvm.log')
     errlog_dst = os.path.join(spooldir, 'holland_lvm.log')
+    LOG.info("Saving mysqld log file to %s", errlog_dst)
     snapshot.register('pre-unmount',
                       lambda *args, **kwargs: shutil.copyfile(errlog_src,
                                                               errlog_dst)

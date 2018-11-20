@@ -32,10 +32,6 @@ class MySQLDumpDispatchAction(object):
             LOG.debug("Create directory %s", path)
             os.mkdir(path)
             os.chown(path, uid[2], uid[3])
-        elif not os.path.isfile(mysqld_log):
-            LOG.debug("Touch file %s", mysqld_log)
-            os.mknod(mysqld_log)
-            os.chown(mysqld_log, uid[2], uid[3])
 
         socket = os.path.join(datadir, 'holland_mysqldump.sock')
         self.mysqld_config['socket'] = socket
