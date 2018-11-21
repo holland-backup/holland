@@ -3,16 +3,10 @@ import os
 import shutil
 import tempfile
 import logging
-from holland.core.backup import BackupError
-from holland.core.util.fmt import format_bytes
-from holland.lib.mysql import PassiveMySQLClient, MySQLError, \
-                              build_mysql_config, connect
-from holland.lib.lvm import Snapshot, parse_bytes
 from holland.backup.mysql_lvm.actions import FlushAndLockMySQLAction, \
                                              RecordMySQLReplicationAction, \
                                              MySQLDumpDispatchAction
-from holland.backup.mysql_lvm.plugin.common import log_final_snapshot_size, \
-                                                   connect_simple
+from holland.backup.mysql_lvm.plugin.common import log_final_snapshot_size
 from holland.backup.mysql_lvm.plugin.innodb import MySQLPathInfo, check_innodb
 
 LOG = logging.getLogger(__name__)
@@ -83,8 +77,16 @@ def setup_actions(snapshot, config, client, datadir, spooldir, plugin):
     act = MySQLDumpDispatchAction(plugin, mysqld_config)
     snapshot.register('post-mount', act, priority=100)
 
-    errlog_src = os.path.join(datadir, 'holland_lvm.log')
+    log_file = mysqld_config['log-error']
+    if log_file:
+        if os.path.exists(log_file):
+            errlog_src = log_file
+        else:
+            errlog_src = os.path.join(datadir, log_file)
+    else:
+        errlog_src = os.path.join(datadir, 'holland_lvm.log')
     errlog_dst = os.path.join(spooldir, 'holland_lvm.log')
+    LOG.info("Saving mysqld log file to %s", errlog_dst)
     snapshot.register('pre-unmount',
                       lambda *args, **kwargs: shutil.copyfile(errlog_src,
                                                               errlog_dst)

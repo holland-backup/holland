@@ -60,11 +60,11 @@ class Snapshot(object):
             self._apply_callbacks('pre-mount', self, snapshot)
             options = None
             try:
-                fs = snapshot.filesystem()
-            except Exception:
+                filesystem = snapshot.filesystem()
+            except BaseException:
                 return self.error(snapshot, 'Failed looking up filesystem')
 
-            if fs == 'xfs':
+            if filesystem == 'xfs':
                 LOG.info("xfs filesystem detected on %s. "
                          "Using mount -o nouuid",
                          snapshot.device_name())

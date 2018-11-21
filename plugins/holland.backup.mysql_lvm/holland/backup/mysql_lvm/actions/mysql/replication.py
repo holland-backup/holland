@@ -1,3 +1,5 @@
+"""Handle replication during backups"""
+
 import logging
 from holland.core.backup import BackupError
 from holland.lib.mysql import MySQLError
@@ -5,6 +7,7 @@ from holland.lib.mysql import MySQLError
 LOG = logging.getLogger(__name__)
 
 class RecordMySQLReplicationAction(object):
+    """Connect to MySQL"""
     def __init__(self, client, config):
         self.client = client
         self.config = config
@@ -14,6 +17,7 @@ class RecordMySQLReplicationAction(object):
         record_slave_status(self.client, self.config)
 
 def record_master_status(client, config):
+    """Save status from master """
     try:
         LOG.debug("Executing SHOW MASTER STATUS")
         master_status = client.show_master_status()
@@ -23,7 +27,7 @@ def record_master_status(client, config):
             config['master_log_file'] = binlog
             config['master_log_pos'] = position
             LOG.info("Recorded binlog = %s position = %s",
-                    binlog, position)
+                     binlog, position)
         else:
             LOG.info("This MySQL server does not have binary logs enabled. "
                      "Nothing to record from SHOW MASTER STATUS.")
@@ -32,6 +36,7 @@ def record_master_status(client, config):
                           "status [%d] %s" % exc.args)
 
 def record_slave_status(client, config):
+    """Save status from slave """
     try:
         LOG.debug("Executing SHOW SLAVE STATUS")
         slave_status = client.show_slave_status()
@@ -42,7 +47,7 @@ def record_slave_status(client, config):
             config['slave_master_log_pos'] = position
             LOG.info("Recorded slave replication status: "
                      "master_binlog = %s master_position = %s",
-                    binlog, position)
+                     binlog, position)
         else:
             LOG.info("This MySQL server is not a slave. "
                      "Nothing to record from SHOW SLAVE STATUS")

@@ -1,3 +1,5 @@
+"""Create tar of datadir on the LVM snapshot"""
+
 from __future__ import print_function
 import os
 import time
@@ -10,6 +12,7 @@ from holland.core.backup import BackupError
 LOG = logging.getLogger(__name__)
 
 class TarArchiveAction(object):
+    """Create tar file"""
     def __init__(self, snap_datadir, archive_stream, config):
         self.snap_datadir = snap_datadir
         self.archive_stream = archive_stream
@@ -48,9 +51,9 @@ class TarArchiveAction(object):
         archive_dirname = os.path.dirname(self.archive_stream.name)
         if pre_args or post_args:
             warning_readme = os.path.join(archive_dirname, "NONSTD_TAR.txt")
-            warning_log = open('warning_readme', 'w')
+            warning_log = open(warning_readme, 'w')
             print(("This tar file was generated with non-std "
-                                  "args:"), file=warning_log)
+                   "args:"), file=warning_log)
             print(list2cmdline(argv), file=warning_log)
         archive_log = os.path.join(archive_dirname, 'archive.log')
         process = Popen(argv,

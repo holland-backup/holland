@@ -2,21 +2,12 @@
 Path utility functions to inspect MySQL files
 """
 import os
+from os.path import isabs, join, realpath, abspath
 import logging
-from os.path import isabs, join, realpath, abspath, splitext
+from operator import itemgetter
 from holland.core.util.path import relpath
-try:
-    from operator import itemgetter
-except ImportError:
-    def itemgetter(*items):
-        if len(items) == 1:
-            item = items[0]
-            def g(obj):
-                return obj[item]
-        else:
-            def g(obj):
-                return tuple(obj[item] for item in items)
-        return g
+from holland.core.util.path import getmount
+from holland.core.backup import BackupError
 
 LOG = logging.getLogger(__name__)
 
@@ -27,30 +18,43 @@ class MySQLPathInfo(tuple):
 
     __slots__ = ()
 
-    _fields = ('datadir', 'innodb_log_group_home_dir', 'innodb_log_files_in_group', 'innodb_data_home_dir', 'innodb_data_file_path', 'abs_tablespace_paths')
+    _fields = ('datadir', 'innodb_log_group_home_dir', 'innodb_log_files_in_group',
+               'innodb_data_home_dir', 'innodb_data_file_path', 'abs_tablespace_paths')
 
-    def __new__(_cls, datadir, innodb_log_group_home_dir, innodb_log_files_in_group, innodb_data_home_dir, innodb_data_file_path, abs_tablespace_paths):
-        return tuple.__new__(_cls, (datadir, innodb_log_group_home_dir, innodb_log_files_in_group, innodb_data_home_dir, innodb_data_file_path, abs_tablespace_paths))
+    def __new__(cls, datadir, innodb_log_group_home_dir, innodb_log_files_in_group,
+                innodb_data_home_dir, innodb_data_file_path, abs_tablespace_paths):
+        return tuple.__new__(cls, (datadir, innodb_log_group_home_dir,
+                                   innodb_log_files_in_group, innodb_data_home_dir,
+                                   innodb_data_file_path, abs_tablespace_paths))
 
-    #@classmethod
-    def _make(cls, iterable, new=tuple.__new__, len=len):
+    @classmethod
+    def _make(cls, iterable, new=tuple.__new__):
         'Make a new MySQLPathInfo object from a sequence or iterable'
         result = new(cls, iterable)
         if len(result) != 6:
             raise TypeError('Expected 6 arguments, got %d' % len(result))
         return result
-    _make = classmethod(_make)
 
     def __repr__(self):
-        return 'MySQLPathInfo(datadir=%r, innodb_log_group_home_dir=%r, innodb_log_files_in_group=%r, innodb_data_home_dir=%r, innodb_data_file_path=%r, abs_tablespace_paths=%r)' % self
+        return 'MySQLPathInfo(datadir=%r, innodb_log_group_home_dir=%r, \
+                innodb_log_files_in_group=%r, innodb_data_home_dir=%r, \
+                innodb_data_file_path=%r, abs_tablespace_paths=%r)' % self
 
-    def _asdict(t):
+    @staticmethod
+    def _asdict(tmp):
         'Return a new dict which maps field names to their values'
-        return {'datadir': t[0], 'innodb_log_group_home_dir': t[1], 'innodb_log_files_in_group': t[2], 'innodb_data_home_dir': t[3], 'innodb_data_file_path': t[4], 'abs_tablespace_paths': t[5]}
+        return {'datadir': tmp[0], 'innodb_log_group_home_dir': tmp[1],
+                'innodb_log_files_in_group': tmp[2], 'innodb_data_home_dir': tmp[3],
+                'innodb_data_file_path': tmp[4], 'abs_tablespace_paths': tmp[5]}
 
-    def _replace(_self, **kwds):
+    def _replace(self, **kwds):
         'Return a new MySQLPathInfo object replacing specified fields with new values'
-        result = _self._make(list(map(kwds.pop, ('datadir', 'innodb_log_group_home_dir', 'innodb_log_files_in_group', 'innodb_data_home_dir', 'innodb_data_file_path', 'abs_tablespace_paths'), _self)))
+        result = self._make(list(map(kwds.pop, ('datadir',
+                                                'innodb_log_group_home_dir',
+                                                'innodb_log_files_in_group',
+                                                'innodb_data_home_dir',
+                                                'innodb_data_file_path',
+                                                'abs_tablespace_paths'), self)))
         if kwds:
             raise ValueError('Got unexpected field names: %r' % list(kwds.keys()))
         return result
@@ -65,7 +69,7 @@ class MySQLPathInfo(tuple):
     innodb_data_file_path = property(itemgetter(4))
     abs_tablespace_paths = property(itemgetter(5))
 
-    #@classmethod
+    @classmethod
     def from_mysql(cls, mysql):
         """Create a MySQLPathInfo instance from a live MySQL connection"""
         ibd_homedir = mysql.show_variable('innodb_data_home_dir')
@@ -78,7 +82,6 @@ class MySQLPathInfo(tuple):
             innodb_data_file_path=mysql.show_variable('innodb_data_file_path'),
             abs_tablespace_paths=abs_tablespace_paths
         )
-    from_mysql = classmethod(from_mysql)
 
     def get_innodb_logdir(self):
         """Determine the directory for innodb's log files"""
@@ -114,7 +117,7 @@ class MySQLPathInfo(tuple):
         for logid in range(self.innodb_log_files_in_group):
             yield join(basedir, 'ib_logfile' + str(logid))
 
-    #@staticmethod
+    @staticmethod
     def remap_path(path, mountpoint):
         """Remap a path to a new mountpoint
 
@@ -123,7 +126,6 @@ class MySQLPathInfo(tuple):
         """
         rpath = relpath(path, getmount(path))
         return os.path.join(mountpoint, rpath)
-    remap_path = staticmethod(remap_path)
 
     def remap_tablespaces(self, mountpoint):
         """Remap innodb-data-file-path paths to a new mountpoint
@@ -134,7 +136,6 @@ class MySQLPathInfo(tuple):
         """
         innodb_data_home_dir = self.innodb_data_home_dir
         innodb_data_file_path = self.innodb_data_file_path
-        basedir = self.get_innodb_datadir()
         spec_list = []
         for spec in innodb_data_file_path.split(';'):
             name, rest = spec.split(':', 1)
@@ -145,9 +146,6 @@ class MySQLPathInfo(tuple):
         return ';'.join(spec_list)
 
 
-
-from holland.core.util.path import getmount
-from holland.core.backup import BackupError
 def is_subdir(path, start):
     """Check if path is a subdirectory or some starting path"""
     path = os.path.abspath(path)
@@ -157,7 +155,9 @@ def is_subdir(path, start):
         path, end = os.path.split(path)
     return path == start
 
+
 def check_innodb(pathinfo, ensure_subdir_of_datadir=False):
+    """Check that all tablespaces are in the datadir and filesystem"""
     is_unsafe_for_lvm = False
     is_unsafe_for_physical_backups = False
     datadir = realpath(pathinfo.datadir)
@@ -180,9 +180,9 @@ def check_innodb(pathinfo, ensure_subdir_of_datadir=False):
                   "as the MySQL datadir %s", ib_logdir, datadir)
         is_unsafe_for_lvm = True
     if ensure_subdir_of_datadir and not is_subdir(ib_logdir, datadir):
-            LOG.error("innodb-log-group-home-dir %s is not a subdirectory of "
-                      "the datadir %s.", ib_logdir, datadir)
-            is_unsafe_for_physical_backups = True
+        LOG.error("innodb-log-group-home-dir %s is not a subdirectory of "
+                  "the datadir %s.", ib_logdir, datadir)
+        is_unsafe_for_physical_backups = True
 
     if is_unsafe_for_lvm:
         raise BackupError("One or more InnoDB file paths are not on the same "

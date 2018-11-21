@@ -4,12 +4,14 @@ import os
 import time
 import signal
 import logging
+import pwd
 from holland.lib.mysql import connect, MySQLError, PassiveMySQLClient
 from ._mysqld import generate_server_config, MySQLServer, locate_mysqld_exe
 
 LOG = logging.getLogger(__name__)
 
 class MySQLDumpDispatchAction(object):
+    """Setup environment for mysqldump"""
     def __init__(self, mysqldump_plugin, mysqld_config):
         self.mysqldump_plugin = mysqldump_plugin
         self.mysqld_config = mysqld_config
@@ -20,8 +22,25 @@ class MySQLDumpDispatchAction(object):
         # find a mysqld executable to use
         mysqld_exe = locate_mysqld_exe(self.mysqld_config)
 
-        if not self.mysqld_config['log-error']:
-            self.mysqld_config['log-error'] =  'holland_lvm.log'
+        mysqld_log = self.mysqld_config['log-error']
+        uid = pwd.getpwnam(self.mysqld_config['user'])
+
+        #Three possible inputs here
+        # - None: default to holland_lvm.log
+        # - File name: This has the same effect as using holland_lvm.log. MySQL will put
+        #   this file into the datadir. It will be copied to spool and then purged
+        # - Complete Path: Allows user to save a separate instance of the mysqld log file in a
+        #   location that won't be pruged by Holland
+        try:
+            if '/' in mysqld_log:
+                path = os.path.dirname(os.path.abspath(mysqld_log))
+                if not os.path.exists(os.path.dirname(os.path.abspath(mysqld_log))):
+                    LOG.debug("Create directory %s", path)
+                    os.mkdir(path)
+                    os.chown(path, uid[2], uid[3])
+        except TypeError:
+            mysqld_log = self.mysqld_config['log-error'] = 'holland_lvm.log'
+
         socket = os.path.join(datadir, 'holland_mysqldump.sock')
         self.mysqld_config['socket'] = socket
         # patch up socket in plugin
@@ -51,6 +70,7 @@ class MySQLDumpDispatchAction(object):
             mysqld.stop() # we dont' really care about the exit code, if mysqldump ran smoothly :)
 
 def wait_for_mysqld(config, mysqld):
+    """Wait for new mysql instance to come online"""
     client = connect(config, PassiveMySQLClient)
     LOG.debug("connect via client %r", config['socket'])
     while mysqld.process.poll() is None:
