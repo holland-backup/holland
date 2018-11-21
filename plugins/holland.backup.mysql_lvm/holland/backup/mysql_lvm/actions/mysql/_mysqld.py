@@ -64,7 +64,7 @@ class MySQLServer(object):
         return self.returncode
 
     def kill(self, signum):
-        """forcibly stop new database"""
+        """Forcibly stop new database"""
         os.kill(self.process.pid, signum)
 
     def kill_safe(self, signum):
