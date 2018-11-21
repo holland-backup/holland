@@ -25,7 +25,8 @@ class MySQLDumpDispatchAction(object):
         mysqld_log = self.mysqld_config['log-error']
         uid = pwd.getpwnam(self.mysqld_config['user'])
         if not mysqld_log:
-            mysqld_log = 'holland_lvm.log'
+            mysqld_log = self.mysqld_config['log-error'] = 'holland_lvm.log'
+``
             self.mysqld_config['log-error'] = mysqld_log
         elif not os.path.exists(os.path.dirname(os.path.abspath(mysqld_log))):
             path = os.path.dirname(os.path.abspath(mysqld_log))
