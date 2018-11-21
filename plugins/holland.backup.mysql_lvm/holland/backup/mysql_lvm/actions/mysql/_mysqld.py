@@ -68,7 +68,7 @@ class MySQLServer(object):
         os.kill(self.process.pid, signum)
 
     def kill_safe(self, signum):
-        """Try to stop new databse"""
+        """Try to stop new database"""
         try:
             self.kill(signum)
         except OSError:
