@@ -75,7 +75,7 @@ class MySQLServer(object):
             pass
 
     def restart(self):
-        """Gracefully restart databse"""
+        """Gracefully restart database"""
         self.stop()
         self.start()
 
