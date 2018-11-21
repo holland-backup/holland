@@ -1,4 +1,4 @@
-"""Mange Database locking"""
+"""Manage Database locking"""
 
 import logging
 
