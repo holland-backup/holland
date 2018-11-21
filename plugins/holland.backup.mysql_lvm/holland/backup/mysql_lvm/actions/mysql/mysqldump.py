@@ -24,14 +24,23 @@ class MySQLDumpDispatchAction(object):
 
         mysqld_log = self.mysqld_config['log-error']
         uid = pwd.getpwnam(self.mysqld_config['user'])
-        if not mysqld_log:
+        """
+        Three possible inputs here
+         - None: default to holland_lvm.log
+         - File name: This has the same effect as using holland_lvm.log. MySQL will put
+           this file into the datadir. It will be copied to spool and then purged
+         - Complete Path: Allows user to save a separate instance of the mysqld log file in a
+           location that won't be pruged by Holland
+        """
+        try:
+            if '/' in mysqld_log:
+                path = os.path.dirname(os.path.abspath(mysqld_log))
+                if not os.path.exists(os.path.dirname(os.path.abspath(mysqld_log))):
+                   LOG.debug("Create directory %s", path)
+                   os.mkdir(path)
+                   os.chown(path, uid[2], uid[3])
+        except TypeError:
             mysqld_log = self.mysqld_config['log-error'] = 'holland_lvm.log'
-``
-        elif not os.path.exists(os.path.dirname(os.path.abspath(mysqld_log))):
-            path = os.path.dirname(os.path.abspath(mysqld_log))
-            LOG.debug("Create directory %s", path)
-            os.mkdir(path)
-            os.chown(path, uid[2], uid[3])
 
         socket = os.path.join(datadir, 'holland_mysqldump.sock')
         self.mysqld_config['socket'] = socket
