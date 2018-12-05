@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import re
 import os
 import random

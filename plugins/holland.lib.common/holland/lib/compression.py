@@ -28,7 +28,7 @@ COMPRESSION_METHODS = {
     'zstd'  : ('zstd', '.zst'),
 }
 
-COMPRESSION_CONFIG_STRING='''
+COMPRESSION_CONFIG_STRING = '''
 [compression]
 method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', 'zstd', default='gzip')
 options = string(default="")
@@ -244,14 +244,13 @@ def open_stream(path,
     """
     if not method or method == 'none' or level == 0:
         return io.open(path, mode)
-    else:
-        argv, path = stream_info(path, method)
-        if extra_args:
-            argv += _parse_args(extra_args)
-        if mode == 'r':
-            return CompressionInput(path, mode, argv=argv)
-        elif mode == 'w':
-            return CompressionOutput(path, mode, argv=argv, level=level,
-                                     inline=inline)
-        else:
-            raise IOError("invalid mode: %s" % mode)
+
+    argv, path = stream_info(path, method)
+    if extra_args:
+        argv += _parse_args(extra_args)
+    if mode == 'r':
+        return CompressionInput(path, mode, argv=argv)
+    if mode == 'w':
+        return CompressionOutput(path, mode, argv=argv, level=level,
+                                 inline=inline)
+    raise IOError("invalid mode: %s" % mode)

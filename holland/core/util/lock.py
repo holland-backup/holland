@@ -21,7 +21,7 @@ class Lock(object):
         """Acquire a lock on the path associated with this lock object"""
 
         if self.is_locked():
-            return
+            return None
 
         try:
             self.lock = open(self.path, 'r')

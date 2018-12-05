@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 from holland.backup.mysqldump.mysql.dump import *
 from nose.tools import assert_equals, assert_raises
 

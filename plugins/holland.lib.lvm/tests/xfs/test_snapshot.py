@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import shutil
 from nose.tools import *
 from holland.lib.lvm import LogicalVolume
@@ -10,7 +12,7 @@ class TestSnapshot(object):
 
     def teardown(self):
         shutil.rmtree(self.tmpdir)
- 
+
     def test_snapshot_fsm(self):
         lv = LogicalVolume.lookup('%s/%s' % (TEST_VG, TEST_LV))
         name = lv.lv_name + '_snapshot'
@@ -42,7 +44,7 @@ class TestSnapshot(object):
         def bad_callback(event, *args, **kwargs):
             raise Exception("Oooh nooo!")
 
-        for evt in ('initialize', 'pre-snapshot', 'post-snapshot', 
+        for evt in ('initialize', 'pre-snapshot', 'post-snapshot',
                     'pre-mount', 'post-mount', 'pre-unmount', 'post-unmount',
                     'pre-remove', 'post-remove', 'finish'):
             snapshot.register(evt, bad_callback)

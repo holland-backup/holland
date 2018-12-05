@@ -75,6 +75,7 @@ class MySQLSchema(object):
         for _filter in self._database_filters:
             if _filter(name):
                 return True
+        return None
 
     def is_table_filtered(self, name):
         """Check if the table name is filtered by any table filters
@@ -87,6 +88,7 @@ class MySQLSchema(object):
         for _filter in self._table_filters:
             if _filter(name):
                 return True
+        return None
 
     def is_engine_filtered(self, name):
         """Check if the engine name is filtered by any engine filters
@@ -100,6 +102,7 @@ class MySQLSchema(object):
         for _filter in self._engine_filters:
             if _filter(name):
                 return True
+        return None
 
     def refresh(self, db_iter, tbl_iter, fast_iterate=False):
         """Summarize the schema by walking over the given database and table
@@ -189,6 +192,7 @@ class Database(object):
         for tableobj in self.tables:
             if not tableobj.is_transactional:
                 return False
+        return None
 
     def size(self):
         """Size of all non-excluded objects in this database
@@ -323,6 +327,7 @@ class SimpleTableIterator(MetadataTableIterator):
         :param client: `MySQLClient` instance to use to iterate over objects in
         the specified database
         """
+        super(SimpleTableIterator, self).__init__()
         self.client = client
         self.record_engines = record_engines
 

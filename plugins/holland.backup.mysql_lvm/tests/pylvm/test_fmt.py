@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import nose.tools
 from holland.backup.lvm.pylvm.fmt import *
 

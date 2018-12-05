@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import sys
 from holland.backup.mysqldump.mock.mocker import Mocker, ANY, ARGS, KWARGS
 from holland.backup.mysqldump.mysql.client import MySQLClient, flatten_list

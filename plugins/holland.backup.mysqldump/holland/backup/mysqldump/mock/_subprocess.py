@@ -1,8 +1,10 @@
+# pylint: skip-file
+
 from .storage import original_open as open
 
 class PopenMock(object):
     """subprocess.Popen mock object implementation
-    
+
     This does not support the new features in 2.6
     (kill, send_signal, terminate)
     """

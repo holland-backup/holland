@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import os
 import holland.backup.lvm.pylvm.api
 from . import lvm_helper

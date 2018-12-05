@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import unittest
 from io import StringIO
 from holland.backup.mysqldump.util import compat, ini

@@ -6,9 +6,9 @@ from textwrap import dedent
 import MySQLdb
 import MySQLdb.connections
 
-MySQLError = MySQLdb.MySQLError
-ProgrammingError = MySQLdb.ProgrammingError
-OperationalError = MySQLdb.OperationalError
+MySQLError = MySQLdb.MySQLError  # pylint: disable=C0103
+ProgrammingError = MySQLdb.ProgrammingError  # pylint: disable=C0103
+OperationalError = MySQLdb.OperationalError  # pylint: disable=C0103
 
 LOG = logging.getLogger(__name__)
 
@@ -328,6 +328,7 @@ class MySQLClient(object):
         if cursor.execute(sql % (database, table)):
             return cursor.fetchone()[1]
         cursor.close()
+        return None
 
     def show_slave_status(self):
         """Fetch MySQL slave status
@@ -431,8 +432,8 @@ class MySQLClient(object):
         match = re.match(r'^(\d+)\.(\d+)\.(\d+)', version)
         if match:
             return tuple([int(v) for v in match.groups()])
-        else:
-            raise MySQLError("Could not match server version: %r" % version)
+
+        raise MySQLError("Could not match server version: %r" % version)
 
     def __getattr__(self, key):
         """Pass through to the underlying MySQLdb.Connection object"""
@@ -444,6 +445,7 @@ class PassiveMySQLClient(MySQLClient):
     the connect method is called"""
 
     def __init__(self, *args, **kwargs):
+        super(PassiveMySQLClient, self).__init__(*args, **kwargs)
         self._connection = None
         self._args = args
         self._kwargs = kwargs

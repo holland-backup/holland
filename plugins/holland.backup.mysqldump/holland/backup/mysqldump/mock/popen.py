@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 """Mock subprocess.Popen"""
 
 from .mocker import *

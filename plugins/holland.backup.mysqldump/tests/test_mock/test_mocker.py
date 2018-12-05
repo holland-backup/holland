@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import unittest
 import tempfile
 import inspect
@@ -29,7 +31,7 @@ from holland.backup.mysqldump.mock.mocker import \
 
 class TestCase(unittest.TestCase):
     """Python 2.3 lacked a couple of useful aliases."""
-    
+
     assertTrue = unittest.TestCase.assertTrue
     assertFalse = unittest.TestCase.assertFalse
 
@@ -86,7 +88,7 @@ class IntegrationTest(TestCase):
     def test_spec_and_type(self):
         class C(object):
             def m(self, a): pass
-        
+
         obj = self.mocker.mock(C)
 
         obj.m(1)
@@ -163,7 +165,7 @@ class IntegrationTest(TestCase):
         class C(object):
             def sum(self, *args):
                 return sum(args)
-        
+
         obj = self.mocker.proxy(C())
         expect(obj.multiply(2, 3)).result(6).nospec()
         expect(obj.sum(0, 0)).result(1)
@@ -330,7 +332,7 @@ class MockerTestCaseTest(TestCase):
 
         class MyTest(MockerTestCase):
             pass
-        
+
         try:
             MyTest("unexistent_method").run()
         except Exception as e:
@@ -395,7 +397,7 @@ class MockerTestCaseTest(TestCase):
                 mock = self.mocker.mock()
                 mock.x
                 self.mocker.replay()
-        
+
         result = unittest.TestResult()
         MyTest("test_method").run(result)
 
@@ -2110,7 +2112,7 @@ class MatchParamsTest(TestCase):
 
     def false(self, *args):
         self.assertFalse(match_params(*args), repr(args))
-    
+
     def test_any_repr(self):
         self.assertEqual(repr(ANY), "ANY")
 
@@ -2388,7 +2390,7 @@ class MockTest(TestCase):
         (path,) = self.paths
         self.assertEqual(type(path), Path)
         self.assertTrue(path.parent_path is self.mock.__mocker_path__)
-        self.assertEqual(path, self.mock.__mocker_path__ + 
+        self.assertEqual(path, self.mock.__mocker_path__ +
                                 Action("getattr", ("attr",), {}))
 
     def test_setattr(self):
@@ -2396,7 +2398,7 @@ class MockTest(TestCase):
         (path,) = self.paths
         self.assertEqual(type(path), Path)
         self.assertTrue(path.parent_path is self.mock.__mocker_path__)
-        self.assertEqual(path, self.mock.__mocker_path__ + 
+        self.assertEqual(path, self.mock.__mocker_path__ +
                                 Action("setattr", ("attr", 24), {}))
 
     def test_delattr(self):
@@ -2404,7 +2406,7 @@ class MockTest(TestCase):
         (path,) = self.paths
         self.assertEqual(type(path), Path)
         self.assertTrue(path.parent_path is self.mock.__mocker_path__)
-        self.assertEqual(path, self.mock.__mocker_path__ + 
+        self.assertEqual(path, self.mock.__mocker_path__ +
                                 Action("delattr", ("attr",), {}))
 
     def test_call(self):
@@ -2412,7 +2414,7 @@ class MockTest(TestCase):
         (path,) = self.paths
         self.assertEqual(type(path), Path)
         self.assertTrue(path.parent_path is self.mock.__mocker_path__)
-        self.assertEqual(path, self.mock.__mocker_path__ + 
+        self.assertEqual(path, self.mock.__mocker_path__ +
                                 Action("call", (1,), {"a": 2}))
 
     def test_contains(self):
@@ -2420,7 +2422,7 @@ class MockTest(TestCase):
         (path,) = self.paths
         self.assertEqual(type(path), Path)
         self.assertTrue(path.parent_path is self.mock.__mocker_path__)
-        self.assertEqual(path, self.mock.__mocker_path__ + 
+        self.assertEqual(path, self.mock.__mocker_path__ +
                                 Action("contains", ("value",), {}))
 
     def test_getitem(self):
@@ -2428,7 +2430,7 @@ class MockTest(TestCase):
         (path,) = self.paths
         self.assertEqual(type(path), Path)
         self.assertTrue(path.parent_path is self.mock.__mocker_path__)
-        self.assertEqual(path, self.mock.__mocker_path__ + 
+        self.assertEqual(path, self.mock.__mocker_path__ +
                                 Action("getitem", ("key",), {}))
 
     def test_setitem(self):
@@ -2436,7 +2438,7 @@ class MockTest(TestCase):
         (path,) = self.paths
         self.assertEqual(type(path), Path)
         self.assertTrue(path.parent_path is self.mock.__mocker_path__)
-        self.assertEqual(path, self.mock.__mocker_path__ + 
+        self.assertEqual(path, self.mock.__mocker_path__ +
                                 Action("setitem", ("key", "value"), {}))
 
     def test_delitem(self):
@@ -2444,7 +2446,7 @@ class MockTest(TestCase):
         (path,) = self.paths
         self.assertEqual(type(path), Path)
         self.assertTrue(path.parent_path is self.mock.__mocker_path__)
-        self.assertEqual(path, self.mock.__mocker_path__ + 
+        self.assertEqual(path, self.mock.__mocker_path__ +
                                 Action("delitem", ("key",), {}))
 
     def test_len(self):
@@ -2452,7 +2454,7 @@ class MockTest(TestCase):
         (path,) = self.paths
         self.assertEqual(type(path), Path)
         self.assertTrue(path.parent_path is self.mock.__mocker_path__)
-        self.assertEqual(path, self.mock.__mocker_path__ + 
+        self.assertEqual(path, self.mock.__mocker_path__ +
                                 Action("len", (), {}))
 
     def test_len_with_mock_result(self):
@@ -2482,7 +2484,7 @@ class MockTest(TestCase):
         (path,) = self.paths
         self.assertEqual(type(path), Path)
         self.assertTrue(path.parent_path is self.mock.__mocker_path__)
-        self.assertEqual(path, self.mock.__mocker_path__ + 
+        self.assertEqual(path, self.mock.__mocker_path__ +
                                 Action("nonzero", (), {}))
 
     def test_nonzero_returns_true_on_match_error(self):
@@ -2505,7 +2507,7 @@ class MockTest(TestCase):
         (path,) = self.paths
         self.assertEqual(type(path), Path)
         self.assertTrue(path.parent_path is self.mock.__mocker_path__)
-        self.assertEqual(path, self.mock.__mocker_path__ + 
+        self.assertEqual(path, self.mock.__mocker_path__ +
                                 Action("iter", (), {}))
 
     def test_passthrough_on_unexpected(self):
@@ -3030,7 +3032,7 @@ class RunCounterTest(TestCase):
         event5.add_task(RunCounter(1))
         event5.add_task(ImplicitRunCounter(1))
         event5.add_task(RunCounter(1))
-        
+
         # First, when the previous event isn't a getattr.
 
         run_counter_removal_recorder(self.mocker, event5)

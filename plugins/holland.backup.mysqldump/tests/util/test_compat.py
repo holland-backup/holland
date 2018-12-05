@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 from holland.backup.mysqldump.util import compat as ConfigParser
 import io
 import unittest

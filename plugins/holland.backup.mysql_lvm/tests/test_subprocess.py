@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import unittest
 from test import test_support
 import holland.backup.lvm.py23.subprocess23 as subprocess

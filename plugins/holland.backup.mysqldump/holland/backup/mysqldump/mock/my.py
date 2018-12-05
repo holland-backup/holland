@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 """Mock various MySQL junk"""
 import os
 import logging
@@ -59,7 +61,7 @@ def mock_mysqldb_connect(mocker):
     conn = obj(KWARGS, read_default_file=CONTAINS('my.mock.cnf'))
     mocker.count(min=0,max=None)
     mocker.call(lambda *args, **kwargs: _mysqldb_connect(mocker, *args, **kwargs))
-   
+
 def _mysqldb_connect(mocker, *args, **kwargs):
     # pull in the options from mocker.mysql_options if they're available or throw an exception
     logging.info("_mysqldb_connect(*%r, **%r)", args, kwargs)

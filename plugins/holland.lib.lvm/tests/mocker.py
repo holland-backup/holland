@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 """
 Copyright (c) 2007  Gustavo Niemeyer <gustavo@niemeyer.net>
 
@@ -528,7 +530,7 @@ class MockerBase(object):
     def proxy(self, object, spec=True, type=True, name=None, count=True,
               passthrough=True):
         """Return a new mock object which proxies to the given object.
- 
+
         Proxies are useful when only part of the behavior of an object
         is to be mocked.  Unknown expressions may be passed through to
         the real implementation implicitly (if the C{passthrough} argument
@@ -744,7 +746,7 @@ class MockerBase(object):
 
     def result(self, value):
         """Make the last recorded event return the given value on replay.
-        
+
         @param value: Object to be returned when the event is replayed.
         """
         self.call(lambda *args, **kwargs: value)
@@ -802,7 +804,7 @@ class MockerBase(object):
 
     def unorder(self):
         """Disable the ordered mode.
-        
+
         See the L{order()} method for more information.
         """
         self._ordering = False
@@ -1216,7 +1218,7 @@ class Path(object):
             return None
         return self.actions[-1].path
     parent_path = property(parent_path)
- 
+
     def __add__(self, action):
         """Return a new path which includes the given action at the end."""
         return self.__class__(self.root_mock, self.root_object,
@@ -1224,7 +1226,7 @@ class Path(object):
 
     def __eq__(self, other):
         """Verify if the two paths are equal.
-        
+
         Two paths are equal if they refer to the same mock object, and
         have the actions with equal kind, args and kwargs.
         """
@@ -1239,7 +1241,7 @@ class Path(object):
 
     def matches(self, other):
         """Verify if the two paths are equivalent.
-        
+
         Two paths are equal if they refer to the same mock object, and
         have the same actions performed on them.
         """
@@ -1792,7 +1794,7 @@ class Orderer(Task):
 
     def __init__(self, path):
         self.path = path
-        self._run = False 
+        self._run = False
         self._dependencies = []
 
     def replay(self):

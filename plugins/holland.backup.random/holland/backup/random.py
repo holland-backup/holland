@@ -43,4 +43,4 @@ class RandomPlugin(object):
         filehandle = open(outfile, "w")
         filehandle.write(data)
         filehandle.close()
-        LOG.info("Wrote to " + outfile)
+        LOG.info("Wrote to %s", outfile)

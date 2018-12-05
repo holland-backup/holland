@@ -7,7 +7,7 @@ import logging
 import json
 from holland.core.backup import BackupError
 from holland.lib.safefilename import encode
-from holland.backup.mysqldump.command import ALL_DATABASES, MySQLDumpError
+from holland.backup.mysqldump.command import ALL_DATABASES
 from holland.backup.mysqldump.mock.env import MockEnvironment
 
 LOG = logging.getLogger(__name__)
@@ -20,8 +20,6 @@ def dry_run(*args, **kwargs):
         start(*args, **kwargs)
     finally:
         env.restore_environment()
-
-def run(mysqldump, config): pass
 
 def start(mysqldump,
           schema=None,
@@ -38,14 +36,14 @@ def start(mysqldump,
         target_databases = ALL_DATABASES
     else:
 
-        if len(schema.databases) == 0:
+        if not schema.databases:
             raise BackupError("No databases found to backup")
 
         if not file_per_database and not [x for x in schema.excluded_databases]:
             target_databases = ALL_DATABASES
         else:
             target_databases = [db for db in schema.databases
-                                    if not db.excluded]
+                                if not db.excluded]
             write_manifest(schema, open_stream, compression_ext)
 
     if file_per_database:
@@ -55,23 +53,24 @@ def start(mysqldump,
         if flush_logs:
             mysqldump.options.remove('--flush-logs')
         last = len(target_databases)
-        for count, db in enumerate(target_databases):
-            more_options = [mysqldump_lock_option(lock_method, [db])]
+        for count, target_db in enumerate(target_databases):
+            more_options = [mysqldump_lock_option(lock_method, [target_db])]
             # add --flush-logs only to the last mysqldump run
             if flush_logs and count == last:
                 more_options.append('--flush-logs')
-            db_name = encode(db.name)
-            if db_name != db.name:
-                LOG.warning("Encoding file-name for database %s to %s", db.name, db_name)
+            db_name = encode(target_db.name)
+            if db_name != target_db.name:
+                LOG.warning("Encoding file-name for database %s to %s",
+                            target_db.name, db_name)
             try:
                 stream = open_stream('%s.sql' % db_name, 'w')
             except (IOError, OSError) as exc:
                 raise BackupError("Failed to open output stream %s: %s" %
-                                  ( db_name + '.sql' + compression_ext, str(exc)))
+                                  (db_name + '.sql' + compression_ext, str(exc)))
             try:
                 if db_name in arg_per_database:
                     more_options.append(arg_per_database[db_name])
-                mysqldump.run([db.name], stream, more_options)
+                mysqldump.run([target_db.name], stream, more_options)
             finally:
                 try:
                     stream.close()
@@ -85,7 +84,7 @@ def start(mysqldump,
             stream = open_stream('all_databases.sql', 'w')
         except (IOError, OSError) as exc:
             raise BackupError("Failed to open output stream %s: %s" %
-                              'all_databases.sql' + compression_ext, exc)
+                              ('all_databases.sql' + compression_ext, exc))
         try:
             if target_databases is not ALL_DATABASES:
                 target_databases = [db.name for db in target_databases]
@@ -127,18 +126,18 @@ def mysqldump_lock_option(lock_method, databases):
     """
     if lock_method == 'auto-detect':
         return mysqldump_autodetect_lock(databases)
-    else:
-        valid_methods = {
-            'flush-lock'            : '--lock-all-tables',
-            'lock-tables'           : '--lock-tables',
-            'single-transaction'    : '--single-transaction',
-            'none'                  : '--skip-lock-tables',
-        }
-        try:
-            return valid_methods[lock_method]
-        except KeyError:
-            raise BackupError("Invalid mysqldump lock method %r" % \
-                              lock_method)
+
+    valid_methods = {
+        'flush-lock'            : '--lock-all-tables',
+        'lock-tables'           : '--lock-tables',
+        'single-transaction'    : '--single-transaction',
+        'none'                  : '--skip-lock-tables',
+    }
+    try:
+        return valid_methods[lock_method]
+    except KeyError:
+        raise BackupError("Invalid mysqldump lock method %r" % \
+                            lock_method)
 
 def mysqldump_autodetect_lock(databases):
     """Auto-detect if we can do a transactional or
@@ -156,5 +155,5 @@ def mysqldump_autodetect_lock(databases):
                 continue
             if not table.is_transactional:
                 return '--lock-tables'
-    else:
-        return '--single-transaction'
+
+    return '--single-transaction'

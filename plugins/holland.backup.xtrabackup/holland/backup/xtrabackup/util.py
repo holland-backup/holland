@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 """
 holland.backup.xtrabackup.util
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -106,7 +108,7 @@ def apply_xtrabackup_logfile(xb_cfg, backupdir):
     try:
         process = Popen(args, stdout=PIPE, stderr=STDOUT, close_fds=True)
     except OSError as exc:
-        raise BackupError("Failed to run %s: [%d] %s",
+        raise BackupError("Failed to run %s: [%d] %s" %
                           cmdline, exc.errno, exc.strerror)
 
     for line in process.stdout:
@@ -232,7 +234,7 @@ def xtrabackup_version():
     try:
         process = Popen(xb_version, stdout=PIPE, stderr=STDOUT, close_fds=True)
     except OSError as exc:
-        raise BackupError("Failed to run %s: [%d] %s",
+        raise BackupError("Failed to run %s: [%d] %s" %
                           cmdline, exc.errno, exc.strerror)
 
     for line in process.stdout:

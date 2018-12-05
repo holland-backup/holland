@@ -1,3 +1,4 @@
+# pylint: skip-file
 """
 holland.backup.mariabackup.util
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -65,7 +66,7 @@ def mariabackup_version():
     try:
         process = Popen(mb_version, stdout=PIPE, stderr=STDOUT, close_fds=True)
     except OSError as exc:
-        raise BackupError("Failed to run %s: [%d] %s",
+        raise BackupError("Failed to run %s: [%d] %s" %
                           cmdline, exc.errno, exc.strerror)
 
     for line in process.stdout:
@@ -125,7 +126,7 @@ def apply_mariabackup_logfile(mb_cfg, backupdir):
     try:
         process = Popen(args, stdout=PIPE, stderr=STDOUT, close_fds=True)
     except OSError as exc:
-        raise BackupError("Failed to run %s: [%d] %s",
+        raise BackupError("Failed to run %s: [%d] %s" %
                           cmdline, exc.errno, exc.strerror)
 
     for line in process.stdout:

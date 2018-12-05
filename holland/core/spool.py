@@ -98,8 +98,8 @@ class Spool(object):
             dirs = [backupset for backupset in os.listdir(self.path)
                     if os.path.isdir(os.path.join(self.path, backupset))]
 
-        backupsets = [Backupset(dir, os.path.join(self.path, dir)) \
-                      for dir in dirs]
+        backupsets = [Backupset(d, os.path.join(self.path, d)) \
+                      for d in dirs]
 
         backupsets.sort(key=lambda x: x.name)
 
@@ -176,16 +176,18 @@ class Backupset(object):
         backup_list = []
         if name:
             path = os.path.join(self.path, name)
-            return [Backup(path, self.name, name) for x in range(1)
-                    if os.path.exists(path)]
+            ret = []
+            if os.path.exists(path):
+                ret.append(Backup(path, self.name, name))
+            return ret
 
         dirs = [backup for backup in os.listdir(self.path)
                 if os.path.isdir(os.path.join(self.path, backup))
                 and backup not in ('oldest', 'newest')]
 
-        backup_list = [Backup(os.path.join(self.path, dir),
+        backup_list = [Backup(os.path.join(self.path, d),
                               self.name,
-                              dir) for dir in dirs]
+                              d) for d in dirs]
 
         backup_list.sort(key=lambda x: x.name)
         if reverse:
@@ -223,8 +225,8 @@ class Backupset(object):
         return "%s [%s]" % (self.name, self.path)
 
     def __cmp__(self, other):
-        cmp = lambda x, y: (x > y) - (x < y)
-        return cmp(self.name, other.name)
+        _cmp = lambda x, y: (x > y) - (x < y)
+        return _cmp(self.name, other.name)
 
 CONFIGSPEC = """
 [holland:backup]
@@ -360,9 +362,9 @@ class Backup(object):
         )
 
     def __cmp__(self, other):
-        cmp = lambda x, y: (x > y) - (x < y)
-        return cmp(self.config['holland:backup']['start-time'],
-                   other.config['holland:backup']['start-time'])
+        _cmp = lambda x, y: (x > y) - (x < y)
+        return _cmp(self.config['holland:backup']['start-time'],
+                    other.config['holland:backup']['start-time'])
 
     __repr__ = __str__
 

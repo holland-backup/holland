@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import time
 from holland.backup.example import ExamplePlugin
 from nose.tools import *

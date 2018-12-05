@@ -143,6 +143,8 @@ class MysqlLVMBackup(object):
         except BaseException as ex:
             LOG.debug(ex)
 
+        return None
+
     def _dry_run(self, volume, snapshot, datadir):
         """Implement dry-run for LVM snapshots.
         """

@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 """Mock IO access"""
 from .storage import replace_builtins
 

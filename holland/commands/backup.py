@@ -163,7 +163,7 @@ def call_hooks(event, entry):
                             close_fds=True)
             output, errors = process.communicate()
         except OSError as exc:
-            raise BackupError("%s", exc)
+            raise BackupError("%s" % exc)
 
         for line in errors.splitlines():
             LOG.error(" ! %s", line)

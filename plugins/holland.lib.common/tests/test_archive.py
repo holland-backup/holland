@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import os
 import shutil
 import tempfile
@@ -11,7 +13,7 @@ def setup_func():
 def teardown_func():
     global tmpdir
     shutil.rmtree(tmpdir)
-    
+
 @with_setup(setup_func, teardown_func)
 def test_dir_archive():
     global tmpdir
@@ -42,7 +44,7 @@ def test_tar_archive():
 
     for name in axv.list():
         ok_(name in name_list)
-   
+
 @with_setup(setup_func, teardown_func)
 def test_zip_archive():
     global tmpdir

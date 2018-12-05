@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import builtins
 
 __all__ = (

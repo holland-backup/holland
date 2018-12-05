@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import os
 from holland.backup.lvm.pylvm.objects import *
 from nose.tools import *
@@ -27,13 +29,13 @@ def test_find_vg():
     # find, finds a list
     vg, = VolumeGroup.find(VGNAME)
     assert vg.vg_name == VGNAME
-    assert LVNAME in [x.lv_name for x in vg.lvs] 
+    assert LVNAME in [x.lv_name for x in vg.lvs]
 
     # find_one returns first matching
     vg = VolumeGroup.find_one(VGNAME)
     assert vg.vg_name == VGNAME
     assert LVNAME in [x.lv_name for x in vg.lvs]
-    
+
     # Also check that missing groups raise appropriate errors
     assert_raises(LVMError, VolumeGroup.find_one, 'foo-bar-baz')
 

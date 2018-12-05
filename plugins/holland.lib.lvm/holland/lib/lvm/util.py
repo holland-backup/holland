@@ -67,6 +67,8 @@ def getdevice(mountpoint):
         if mount == mountpoint:
             return device
 
+    return None
+
 # Taken from posixpath in Python2.6
 def relpath(path, start=os.curdir):
     """Return a relative version of a path"""

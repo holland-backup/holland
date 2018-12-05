@@ -85,10 +85,11 @@ class MyOption(object):
         """
         if isinstance(self.arg, str):
             return re.match(self.arg, arg, re.UNICODE) is not None
-        elif callable(self.arg):
+        if callable(self.arg):
             return self.arg(version, arg)
-        elif arg:
+        if arg:
             raise MyOptionError("Invalid arg constraint %r" % self.arg)
+        return None
 
     def check_version(self, version):
         """Check the given command version against the version required by
@@ -96,12 +97,10 @@ class MyOption(object):
         if self.min_version and version < self.min_version:
             raise MyOptionError("Option %r requires minimum version %s" %
                                 (self.option,
-                                 '.'.join([str(x) for x in self.min_version])
-                                 )
-                                )
+                                 '.'.join([str(x) for x in self.min_version]))
+                               )
 
 
-# XXX: support --skip-* for all options as well
 MYSQLDUMP_OPTIONS = [
     # boolean options
     MyOption('--flush-logs'),
@@ -116,10 +115,10 @@ MYSQLDUMP_OPTIONS = [
     MyOption('--insert-ignore', min_version=(4, 1, 12)),
     MyOption('--routines', min_version=(5, 0, 13)),
     MyOption('--events', min_version=(5, 1, 8)),
-    MyOption('--max-allowed-packet', arg='\w'),
+    MyOption('--max-allowed-packet', arg=r'\w'),
 
     # options that take arguments
-    MyOption('--default-character-set', arg='\w'),
+    MyOption('--default-character-set', arg=r'\w'),
     MyOption('--master-data', arg=check_master_data),
 
     # lock modes
@@ -193,7 +192,7 @@ class MySQLDump(object):
         when mysqldump is actually run via the instances .run() method
         """
         if option in self.options:
-            LOG.warn("mysqldump option '%s' already requested.", option)
+            LOG.warning("mysqldump option '%s' already requested.", option)
         self.options.append(option)
         self.mysqldump_optcheck.check_option(option)
 

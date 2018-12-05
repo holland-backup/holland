@@ -20,7 +20,9 @@ mycnf_locations()
 mycnf_groups()
 """
 import re
-import subprocess
+from future import standard_library
+standard_library.install_aliases()
+from subprocess import getstatusoutput  # pylint: disable=C0413,C0411
 
 class CmdOption(object):
     """
@@ -77,7 +79,7 @@ class MyCmdParser(dict):
                 '--help',
                 '--verbose']
         cli_cmd = ' '.join(args)
-        status, cli_output = subprocess.getstatusoutput(cli_cmd)
+        status, cli_output = getstatusoutput(cli_cmd)
 
         if status != 0:
             raise IOError(cli_output)
