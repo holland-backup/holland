@@ -5,7 +5,7 @@ import time
 import signal
 import logging
 import pwd
-from holland.lib.mysql import connect, MySQLError, PassiveMySQLClient
+from holland.lib.mysql import connect, MySQLError, MySQLClient
 from ._mysqld import generate_server_config, MySQLServer, locate_mysqld_exe
 
 LOG = logging.getLogger(__name__)
@@ -71,7 +71,7 @@ class MySQLDumpDispatchAction(object):
 
 def wait_for_mysqld(config, mysqld):
     """Wait for new mysql instance to come online"""
-    client = connect(config, PassiveMySQLClient)
+    client = connect(config, MySQLClient)
     LOG.debug("connect via client %r", config['socket'])
     while mysqld.process.poll() is None:
         try:

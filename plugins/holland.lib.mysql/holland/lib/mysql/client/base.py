@@ -15,7 +15,6 @@ LOG = logging.getLogger(__name__)
 __all__ = [
     'connect',
     'MySQLClient',
-    'PassiveMySQLClient',
     'AutoMySQLClient',
     'MySQLError',
     'ProgrammingError',
@@ -55,6 +54,9 @@ class MySQLClient(object):
     This class also behave as a MySQLdb.Connection
     object and can be used to perform arbitrary queries
     using the Python dbapi.
+
+    If the passive kwarg is set to False, it will not defer connection until
+    the connect method is called. The default is True.
     """
 
     SCOPE = ['GLOBAL', 'SESSION']
@@ -67,7 +69,28 @@ class MySQLClient(object):
         :param args: args tuple to pass to MySQLdb.connect
         :param kwargs: kwargs dict to pass to MySQLdb.connect
         """
-        self._connection = MySQLdb.connect(*args, **kwargs)
+        passive = kwargs.pop("passive", True)
+        self._connection = None
+        self._args = args
+        self._kwargs = kwargs
+        if not passive:
+            self.connect()
+
+    def connect(self):
+        """Connect to MySQL using the connection parameters this instance
+        was created with.
+
+        :raises: `MySQLError`
+        """
+        self._connection = MySQLdb.connect(*self._args, **self._kwargs)
+
+    def disconnect(self):
+        """Disconnect this instance from MySQL"""
+        try:
+            if self._connection:
+                self._connection.close()
+        finally:
+            self._connection = None
 
     def flush_tables(self):
         """Flush MySQL server table data to disk
@@ -440,37 +463,13 @@ class MySQLClient(object):
         return getattr(self._connection, key)
 
 
-class PassiveMySQLClient(MySQLClient):
-    """A client connection that defers the connection process until
-    the connect method is called"""
-
-    def __init__(self, *args, **kwargs):
-        super(PassiveMySQLClient, self).__init__(*args, **kwargs)
-        self._connection = None
-        self._args = args
-        self._kwargs = kwargs
-
-    def connect(self):
-        """Connect to MySQL using the connection parameters this instance
-        was created with.
-
-        :raises: `MySQLError`
-        """
-        self._connection = MySQLdb.connect(*self._args, **self._kwargs)
-
-    def disconnect(self):
-        """Disconnect this instance from MySQL"""
-        try:
-            if self._connection:
-                self._connection.close()
-        finally:
-            self._connection = None
-
-
-class AutoMySQLClient(PassiveMySQLClient):
+class AutoMySQLClient(MySQLClient):
     """A client connection that deferred the connection process until
     `connect()` is called or one of the standard `MySQLClient` methods
     is requested"""
+
+    def __init__(self, *args, **kwargs):
+        super(AutoMySQLClient, self).__init__(*args, passive=True, **kwargs)
 
     def __getattr__(self, key):
         if self._connection is None:
@@ -485,7 +484,7 @@ class AutoMySQLClient(PassiveMySQLClient):
             LOG.info("Reconnecting to MySQL after failed ping")
             self.connect()
 
-        return PassiveMySQLClient.__getattr__(self, key)
+        return MySQLClient.__getattr__(self, key)
 
 def connect(config, client_class=AutoMySQLClient):
     """Create a MySQLClient object from a dict

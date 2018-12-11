@@ -3,7 +3,7 @@
 from holland.lib.mysql.client.base import MySQLClient, MySQLError, \
                                           ProgrammingError, OperationalError, \
                                           connect, \
-                                          PassiveMySQLClient, AutoMySQLClient
+                                          AutoMySQLClient
 from holland.lib.mysql.schema.filter import IncludeFilter, ExcludeFilter, \
                                             include_glob, exclude_glob, \
                                             include_glob_qualified, \
