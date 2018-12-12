@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import tempfile
 
 LOOP_DEV = '/dev/loop0'

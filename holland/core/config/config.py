@@ -37,7 +37,6 @@ class ConfigError(Exception):
     """
     Define  exceptoin for configuration errors
     """
-    pass
 
 class BaseConfig(ConfigObj):
     """
@@ -62,6 +61,9 @@ class BaseConfig(ConfigObj):
         section.rename(key, str(key.replace('_', '-')))
 
     def reload(self):
+        """ Reloads ConfigObj from filesystem, then recursively walks each
+        section.
+        """
         ConfigObj.reload(self)
         self.walk(self._canonicalize, call_on_sections=True)
 
@@ -184,6 +186,8 @@ class GlobalConfig(BaseConfig):
                 if hook_name == name:
                     return BaseConfig(self[section_name])
 
+        return None
+
 HOLLANDCFG = GlobalConfig(None)
 
 def load_backupset_config(name):
@@ -199,8 +203,8 @@ def setup_config(config_file):
     if not config_file:
         LOGGER.debug("load_config called with not configuration file")
         HOLLANDCFG.validate_config(CONFIGSPEC)
-        print(HOLLANDCFG)
-        return
+        LOGGER.debug(repr(HOLLANDCFG))
+        return None
 
     config_file = os.path.abspath(config_file)
     LOGGER.debug("Loading %r", config_file)
@@ -209,3 +213,5 @@ def setup_config(config_file):
     HOLLANDCFG.reload()
     HOLLANDCFG.validate_config(CONFIGSPEC)
     HOLLANDCFG.configdir = os.path.dirname(config_file)
+
+    return None

@@ -24,8 +24,8 @@ LOGGER = logging.getLogger(__name__)
 
 def which(cmd, search_path=None):
     """Find the canonical path for a command"""
-    if cmd == '':
-        return None
+    if not cmd:
+        ret = None
 
     if not search_path:
         search_path = os.getenv('PATH', '').split(':')
@@ -34,7 +34,10 @@ def which(cmd, search_path=None):
     for name in search_path:
         cmd_path = os.path.join(name, cmd)
         if os.access(cmd_path, os.X_OK):
-            return cmd_path
+            ret = cmd_path
+            break
+
+    return ret
 
 def _find_editor():
     candidates = [
@@ -45,11 +48,14 @@ def _find_editor():
         'vi',
         'ed'
     ]
+
     for command in candidates:
         real_cmd = which(command)
         logging.debug("%r => %r", command, real_cmd)
         if real_cmd:
             return real_cmd
+
+    return None
 
 def _report_errors(cfg, errors):
     for entry in flatten_errors(cfg, errors):
@@ -97,9 +103,9 @@ def confirm(prompt=None, resp=False):
         if ans not in ['y', 'Y', 'n', 'N']:
             print('please enter y or n.', file=sys.stderr)
             continue
-        if ans == 'y' or ans == 'Y':
+        if ans in ('y', 'Y'):
             return True
-        if ans == 'n' or ans == 'N':
+        if ans in ('n', 'N'):
             return False
 
 class MkConfig(Command):
@@ -261,8 +267,6 @@ class MkConfig(Command):
                                    "Would you like to retry?" % status):
                         print("Aborting", file=sys.stderr)
                         return 1
-                    else:
-                        continue
                 try:
                     cfg.reload()
                 except ParseError as exc:

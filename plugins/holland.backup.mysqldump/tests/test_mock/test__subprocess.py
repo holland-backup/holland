@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 from holland.backup.mysqldump.mock._subprocess import PopenMock
 from holland.backup.mysqldump.mock import MockEnvironment
 from nose.tools import assert_equals

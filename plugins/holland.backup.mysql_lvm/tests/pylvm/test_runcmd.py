@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 from nose.tools import *
 from holland.backup.lvm.pylvm.api import run_cmd, which, LVMError
 

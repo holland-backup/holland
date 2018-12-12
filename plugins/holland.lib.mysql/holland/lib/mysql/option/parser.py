@@ -88,7 +88,7 @@ def find_includes(include_directive):
     if directive == '!includedir':
         return glob.glob(os.path.join(path, '*.cnf')) + \
                glob.glob(os.path.join(path, '*.ini'))
-    elif directive == '!include':
+    if directive == '!include':
         return path
     raise ParseError("Invalid include directive %s" % include_directive)
 

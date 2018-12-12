@@ -18,34 +18,32 @@ class PluginLoadError(Exception):
     """
     Place holder for PluginLoadError
     """
-    pass
 
 def add_plugin_dir(plugin_dir):
     """
     Find available plugins
     """
-    if os.path.isdir(plugin_dir):
-        return None
-    LOGGER.debug("Adding plugin directory: %r", plugin_dir)
-    env = Environment([plugin_dir])
-    dists, errors = working_set.find_plugins(env)
-    for dist in dists:
-        LOGGER.debug("Adding distribution: %r", dist)
-        working_set.add(dist)
+    if not os.path.isdir(plugin_dir):
+        LOGGER.debug("Adding plugin directory: %r", plugin_dir)
+        env = Environment([plugin_dir])
+        dists, errors = working_set.find_plugins(env)
+        for dist in dists:
+            LOGGER.debug("Adding distribution: %r", dist)
+            working_set.add(dist)
 
-    if errors:
-        for dist, error in list(errors.items()):
-            errmsg = None
-            if isinstance(error, DistributionNotFound):
-                req, = error.args
-                errmsg = "%r not found" % req.project_name
-            elif isinstance(error, VersionConflict):
-                dist, req = error.args
-                errmsg = "Version Conflict. Requested %s Found %s" % (req, dist)
-            else:
-                errmsg = repr(error)
-            LOGGER.error("Failed to load %s: %r", dist, errmsg)
-    PLUGIN_DIRECTORIES.append(plugin_dir)
+        if errors:
+            for dist, error in list(errors.items()):
+                errmsg = None
+                if isinstance(error, DistributionNotFound):
+                    req, = error.args
+                    errmsg = "%r not found" % req.project_name
+                elif isinstance(error, VersionConflict):
+                    dist, req = error.args
+                    errmsg = "Version Conflict. Requested %s Found %s" % (req, dist)
+                else:
+                    errmsg = repr(error)
+                LOGGER.error("Failed to load %s: %r", dist, errmsg)
+        PLUGIN_DIRECTORIES.append(plugin_dir)
 
 
 def load_first_entrypoint(group, name=None):
@@ -109,8 +107,8 @@ def dist_metainfo_dict(dist):
         distmetadata = dist.get_metadata('PKG-INFO')
         ret = Parser(policy=default).parsestr(distmetadata)
     else:
-        from rfc822 import Message # pylint: disable=import-error
-        from cStringIO import StringIO # pylint: disable=import-error
+        from rfc822 import Message
+        from cStringIO import StringIO
         distmetadata = dist.get_metadata('PKG-INFO')
         msg = Message(StringIO(distmetadata))
         ret = dict(msg.items())
@@ -124,8 +122,8 @@ def iter_plugininfo():
         from email.parser import Parser
         from email.policy import default
     else:
-        from rfc822 import Message # pylint: disable=import-error
-        from cStringIO import StringIO # pylint: disable=import-error
+        from rfc822 import Message
+        from cStringIO import StringIO
     for plugin_dir in PLUGIN_DIRECTORIES:
         for dist in find_distributions(plugin_dir):
             distmetadata = dist.get_metadata('PKG-INFO')

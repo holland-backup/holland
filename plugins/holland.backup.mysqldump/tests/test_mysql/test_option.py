@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import logging
 from io import StringIO
 from textwrap import dedent
@@ -154,7 +156,7 @@ def test_merge_option_dicts():
                         'user' : 'backup',
                         'host' : '192.168.100.250',
                         'port' : '3306',
-                        'password' : 'bar' 
+                        'password' : 'bar'
                         }
                     })
 

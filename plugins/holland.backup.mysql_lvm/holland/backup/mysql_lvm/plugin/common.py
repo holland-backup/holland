@@ -9,7 +9,7 @@ import logging
 import copy
 from holland.core.backup import BackupError
 from holland.core.util.fmt import format_bytes
-from holland.lib.mysql import PassiveMySQLClient, MySQLError, \
+from holland.lib.mysql import MySQLClient, MySQLError, \
                               build_mysql_config, connect
 from holland.lib.lvm import Snapshot, parse_bytes
 
@@ -21,7 +21,7 @@ def connect_simple(config):
     """
     try:
         mysql_config = build_mysql_config(config)
-        connection = connect(mysql_config['client'], PassiveMySQLClient)
+        connection = connect(mysql_config['client'], MySQLClient)
         sanitized = copy.deepcopy(mysql_config)
         sanitized['client']['password'] = "[REDACTED]"
         LOG.debug("mysql_config => %s", sanitized)

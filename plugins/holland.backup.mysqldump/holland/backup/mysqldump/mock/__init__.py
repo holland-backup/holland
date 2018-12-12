@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 from .env import MockEnvironment
 
 __all__ = [

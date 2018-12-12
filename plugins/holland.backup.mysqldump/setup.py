@@ -32,7 +32,7 @@ setup(name='holland.backup.mysqldump',
       },
       entry_points="""
       [holland.backup]
-      mysqldump = holland.backup.mysqldump:provider [mysql, common]
+      mysqldump = holland.backup.mysqldump:Provider [mysql, common]
 
       [holland.restore]
       mysqldump = holland.restore.mysqldump:MySQLRestore

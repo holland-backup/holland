@@ -61,7 +61,7 @@ def load_plugin(name, config, path, dry_run):
     try:
         plugin_cls = load_backup_plugin(config['holland:backup']['plugin'])
     except KeyError as exc:
-        raise BackupError("No plugin defined for backupset '%s'.", name)
+        raise BackupError("No plugin defined for backupset '%s'." % name)
     except PluginLoadError as exc:
         raise BackupError(str(exc))
 
@@ -70,8 +70,9 @@ def load_plugin(name, config, path, dry_run):
                           config=config,
                           target_directory=path,
                           dry_run=dry_run)
-    except (KeyboardInterrupt, SystemExit):
-        raise
+    # commenting out the below in case we actually want to handle this one day
+    # except (KeyboardInterrupt, SystemExit):
+    #     raise
     except Exception as exc:
         LOG.debug("Error while initializing %r : %s",
                   plugin_cls, exc, exc_info=True)
@@ -276,9 +277,9 @@ class BackupRunner(object):
                         historic_size_factor, format_bytes(estimated_bytes_required),
                         format_bytes(old_estimate), historic_size_factor)
             return -1.0
-        else:
-            LOG.debug("The old and new backup estimate are roughly the same size, "
-                      "use old backup size for new size estimate")
+
+        LOG.debug("The old and new backup estimate are roughly the same size, "
+                  "use old backup size for new size estimate")
         return size_required * float(config['historic-estimated-size-factor'])
 
     def check_available_space(self, plugin, spool_entry, dry_run=False):

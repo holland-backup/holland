@@ -25,10 +25,14 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install percona-xtrabackup-24
 install:
-  - pip install -q mysqlclient
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install mysqlclient==1.3.13; else pip install mysqlclient; fi
   - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then travis_retry pip install mock; fi
   - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then travis_retry pip install mock; fi
   - python setup.py install
+  - if [[ $TRAVIS_PYTHON_VERSION != '2.6' ]]; then pip install pylint; fi
 before_script:
   - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
-script: sudo ./scripts/travis_ci.sh
+script:
+  - if [[ $TRAVIS_PYTHON_VERSION != '2.6' ]]; then pylint ./holland/; fi
+  - if [[ $TRAVIS_PYTHON_VERSION != '2.6' ]]; then for d in $(ls -d ./plugins/*/holland); do pylint $d; done; fi
+  - sudo ./scripts/travis_ci.sh

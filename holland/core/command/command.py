@@ -98,7 +98,6 @@ class Command(object):
         """
         This should be overridden by subclasses
         """
-        pass
 
     def dispatch(self, opts, args):
         """

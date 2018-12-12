@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import sys
 from nose.tools import *
 from holland.lib.lvm.base import *
@@ -43,7 +45,7 @@ class TestPhysicalVolume(object):
     def test_lookup_failure(self):
         """Test looking up an invalid pv"""
         assert_raises(LookupError, PhysicalVolume.lookup, '/dev/loop1')
-        
+
     def test_search(self):
         """Test searching for a physical volume"""
         # stupid simple test to make sure we're returning an iterable

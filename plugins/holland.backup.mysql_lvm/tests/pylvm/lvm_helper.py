@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 """Help setup lvm volumes"""
 import os
 from holland.backup.lvm.pylvm.api import lvcreate, lvremove, run_cmd

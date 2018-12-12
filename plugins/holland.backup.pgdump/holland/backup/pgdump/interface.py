@@ -6,15 +6,15 @@ and pg_dumpall
 """
 
 import os
-import sys
 import logging
-from tempfile import NamedTemporaryFile
 from holland.core.backup import BackupError
-from holland.backup.pgdump.base import backup_pgsql, dry_run, \
+from holland.backup.pgdump.base import dry_run as pg_dry_run
+from holland.backup.pgdump.base import backup_pgsql, \
                                        PgError, \
                                        dbapi, \
                                        pg_databases, \
-                                       get_connection, get_db_size
+                                       get_connection, get_db_size, \
+                                       legacy_get_db_size
 from holland.lib.compression import COMPRESSION_CONFIG_STRING
 
 LOG = logging.getLogger(__name__)
@@ -77,26 +77,26 @@ class PgDump(object):
         """
 
         totalestimate = 0
-        for db in self.databases:
+        for database in self.databases:
             try:
-                totalestimate += get_db_size(db, self.connection)
+                totalestimate += get_db_size(database, self.connection)
             except dbapi.DatabaseError as exc:
                 if exc.pgcode != '42883': # 'missing function'
                     raise BackupError("Failed to estimate database size for "
-                                      "%s: %s" % (db, exc))
-                totalestimate += self._estimate_legacy_size(db)
+                                      "%s: %s" % (database, exc))
+                totalestimate += self._estimate_legacy_size(database)
 
         return totalestimate
 
-    def _estimate_legacy_size(self, db):
+    def _estimate_legacy_size(self, database):
         try:
-            connection = get_connection(self.config, db)
-            size = legacy_get_db_size(db, connection)
+            connection = get_connection(self.config, database)
+            size = legacy_get_db_size(database, connection)
             connection.close()
             return size
         except dbapi.DatabaseError as exc:
             raise BackupError("Failed to estimate database size for %s: %s" %
-                              (db, exc))
+                              (database, exc))
 
     def backup(self):
         """
@@ -112,7 +112,7 @@ class PgDump(object):
             # enough to know that:
             # 1) We can connect to Postgres using pgpass data
             # 2) The exact databases we would dump
-            dry_run(self.databases, self.config)
+            pg_dry_run(self.databases, self.config)
             return
 
         # First run a pg_dumpall -g and save the globals
@@ -129,15 +129,15 @@ class PgDump(object):
             backup_pgsql(backup_dir, self.config, self.databases)
         except (OSError, PgError) as exc:
             LOG.debug("Failed to backup Postgres. %s",
-                          str(exc), exc_info=True)
+                      str(exc), exc_info=True)
             raise BackupError(str(exc))
 
+    @classmethod
     def configspec(cls):
         """Provide a specification for the configuration dictionary this
         plugin accepts.
         """
         return CONFIGSPEC
-    configspec = classmethod(configspec)
 
     def info(self):
         """Provide extra information about a backup
@@ -145,4 +145,4 @@ class PgDump(object):
         :returns: str. Descriptive text about the backup
         """
 
-        return ""
+        return str(self.config)

@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import logging
 #For 2.7 or newer use unittest.mock
 try:

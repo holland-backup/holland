@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 from nose.tools import *
 from holland.lib.lvm.errors import *
 

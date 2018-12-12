@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import unittest, doctest
 
 from . import test_ini

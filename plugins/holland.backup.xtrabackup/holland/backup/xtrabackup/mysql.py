@@ -1,3 +1,4 @@
+# pylint: skip-file
 """
 holland.backup.xtrabackup.mysql
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

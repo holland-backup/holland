@@ -115,43 +115,43 @@ def purge_backupset(backupset, force=False, all_backups=False):
                       "preserve.")
             LOG.error("You can still purge the backupset by using the --all "
                       "option or specifying specific backups to purge")
-            return 1
-        retention_count = config['holland:backup']['backups-to-keep']
-
-    LOG.info("Evaluating purge for backupset %s", backupset.name)
-    LOG.info("Retaining up to %d backup%s",
-             retention_count, 's'[0:bool(retention_count)])
-    backups = []
-    size = 0
-    backup_list = backupset.list_backups(reverse=True)
-    for backup in itertools.islice(backup_list, retention_count, None):
-        backups.append(backup)
-        config = backup.config['holland:backup']
-        size += int(config['on-disk-size'])
-
-    LOG.info("    %d total backups", len(backup_list))
-    for backup in backup_list:
-        LOG.info("        * %s", backup.path)
-    LOG.info("    %d backups to keep", len(backup_list) - len(backups))
-    for backup in backup_list[0:-len(backups)]:
-        LOG.info("        + %s", backup.path)
-    LOG.info("    %d backups to purge", len(backups))
-    for backup in backups:
-        LOG.info("        - %s", backup.path)
-    LOG.info("    %s total to purge", format_bytes(size))
-
-    if force:
-        count = 0
-        for backup in backupset.purge(retention_count):
-            count += 1
-            LOG.info("Purged %s", backup.name)
-        if count == 0:
-            LOG.info("No backups purged.")
         else:
-            LOG.info("Purged %d backup%s", count, 's'[0:bool(count)])
-    else:
-        LOG.info("Skipping purge in dry-run mode.")
-    backupset.update_symlinks()
+            retention_count = config['holland:backup']['backups-to-keep']
+
+            LOG.info("Evaluating purge for backupset %s", backupset.name)
+            LOG.info("Retaining up to %d backup%s",
+                     retention_count, 's'[0:bool(retention_count)])
+            backups = []
+            size = 0
+            backup_list = backupset.list_backups(reverse=True)
+            for backup in itertools.islice(backup_list, retention_count, None):
+                backups.append(backup)
+                config = backup.config['holland:backup']
+                size += int(config['on-disk-size'])
+
+            LOG.info("    %d total backups", len(backup_list))
+            for backup in backup_list:
+                LOG.info("        * %s", backup.path)
+            LOG.info("    %d backups to keep", len(backup_list) - len(backups))
+            for backup in backup_list[0:-len(backups)]:
+                LOG.info("        + %s", backup.path)
+            LOG.info("    %d backups to purge", len(backups))
+            for backup in backups:
+                LOG.info("        - %s", backup.path)
+            LOG.info("    %s total to purge", format_bytes(size))
+
+            if force:
+                count = 0
+                for backup in backupset.purge(retention_count):
+                    count += 1
+                    LOG.info("Purged %s", backup.name)
+                if count == 0:
+                    LOG.info("No backups purged.")
+                else:
+                    LOG.info("Purged %d backup%s", count, 's'[0:bool(count)])
+            else:
+                LOG.info("Skipping purge in dry-run mode.")
+            backupset.update_symlinks()
 
 def purge_backup(backup, force=False):
     """Purge a single backup

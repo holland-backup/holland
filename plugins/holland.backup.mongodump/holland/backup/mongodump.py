@@ -68,8 +68,8 @@ class MongoDump(object):
         client = MongoClient(uri)
         dbs = client.database_names()
         for database in dbs:
-            db = client[database]
-            tup = db.command("dbstats")
+            c_db = client[database]
+            tup = c_db.command("dbstats")
             ret += int(tup["storageSize"])
         # Give an upper estimate to make sure that we have enough disk space
         return ret * 2

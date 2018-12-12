@@ -34,7 +34,7 @@ class ExamplePlugin(object):
         LOG.info("Validating config")
         self.config.validate_config(CONFIGSPEC)
 
-    def estimate_backup_size(self):
+    def estimate_backup_size(self):  # pylint: disable=no-self-use
         """Estimate the size (in bytes) of the backup this plugin would
         produce, if run.
 
@@ -51,7 +51,7 @@ class ExamplePlugin(object):
         else:
             LOG.info("Example plugin - real backup run")
 
-    def info(self):
+    def info(self):  # pylint: disable=no-self-use
         """Provide extra information about the backup this plugin produced
 
         :returns: str. A textual string description the backup referenced by

@@ -136,6 +136,8 @@ class MysqlDumpLVMBackup(object):
             # Something failed in the snapshot process
             raise BackupError(str(exc))
 
+        return None
+
     def _dry_run(self, volume, snapshot, datadir):
         """Implement dry-run for LVM snapshots.
         """
