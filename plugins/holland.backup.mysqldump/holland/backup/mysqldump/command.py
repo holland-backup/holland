@@ -128,6 +128,18 @@ MYSQLDUMP_OPTIONS = [
 
     # misc
     MyOption('--skip-dump-date', min_version=(5, 1, 23)),
+    MyOption('--skip-add-drop-table'),
+    MyOption('--skip-add-locks'),
+    MyOption('--skip-comments'),
+    MyOption('--skip-compact'),
+    MyOption('--skip-disable-keys'),
+    MyOption('--skip-extended-insert'),
+    MyOption('--skip-opt'),
+    MyOption('--skip-quick'),
+    MyOption('--skip-quote-names'),
+    MyOption('--skip-set-charset'),
+    MyOption('--skip-triggers'),
+    MyOption('--skip-tz-utc'),
 ]
 
 
