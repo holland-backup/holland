@@ -91,6 +91,8 @@ class MySQLDumpPlugin(object):
         self.mysql_config = build_mysql_config(self.config['mysql:client'])
         self.client = connect(self.mysql_config['client'])
 
+        self.mock_env = None
+
     def estimate_backup_size(self):
         """Estimate the size of the backup this plugin will generate"""
 
@@ -153,23 +155,30 @@ class MySQLDumpPlugin(object):
         if self.schema.timestamp is None:
             self._fast_refresh_schema()
 
-        mock_env = None
-        if self.dry_run:
-            mock_env = MockEnvironment()
-            mock_env.replace_environment()
-            LOG.info("Running in dry-run mode.")
+        try:
+            self.client = connect(self.mysql_config['client'])
+        except Exception as Ex:
+            LOG.debug("%s" % ex)
+            raise BackupError("Failed connecting to database'")
 
+        if self.dry_run:
+            self.mock_env = MockEnvironment()
+            self.mock_env.replace_environment()
+            LOG.info("Running in dry-run mode.")
+            status = self.client.show_databases()
+            if not status:
+                raise BackupError("Failed to run 'show databases'")
         try:
             if self.config['mysqldump']['stop-slave']:
-                self.client = connect(self.mysql_config['client'])
                 slave_status = self.client.show_slave_status()
-                if slave_status is None:
+                if not slave_status:
                     raise BackupError("stop-slave enabled, but 'show slave "
                                       "status' failed")
                 elif slave_status['slave_sql_running'] != 'Yes':
                     raise BackupError("stop-slave enabled, but replication is "
                                       "not running")
-                _stop_slave(self.client, self.config)
+                if not self.dry_run:
+                    _stop_slave(self.client, self.config)
             elif self.config['mysqldump']['bin-log-position']:
                 self.config['mysql:replication'] = {}
                 repl_cfg = self.config['mysql:replication']
@@ -185,8 +194,8 @@ class MySQLDumpPlugin(object):
             if self.config['mysqldump']['stop-slave'] and \
                 'mysql:replication' in self.config:
                 _start_slave(self.client, self.config['mysql:replication'])
-            if mock_env:
-                mock_env.restore_environment()
+            if self.mock_env:
+                self.mock_env.restore_environment()
 
     def _backup(self):
         """Real backup method.  May raise BackupError exceptions"""
@@ -208,7 +217,8 @@ class MySQLDumpPlugin(object):
         try:
             mysqldump = MySQLDump(defaults_file,
                                   mysqldump_bin,
-                                  extra_defaults=extra_defaults)
+                                  extra_defaults=extra_defaults,
+                                  mock_env=self.mock_env)
         except MySQLDumpError as exc:
             raise BackupError(str(exc))
         except Exception as ex:  # pylint: disable=W0703

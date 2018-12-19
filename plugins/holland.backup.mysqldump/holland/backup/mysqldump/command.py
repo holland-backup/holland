@@ -186,7 +186,8 @@ class MySQLDump(object):
     def __init__(self,
                  defaults_file,
                  cmd_path='mysqldump',
-                 extra_defaults=False):
+                 extra_defaults=False,
+                 mock_env=None):
         if not os.path.exists(cmd_path):
             raise MySQLDumpError("'%s' does not exist" % cmd_path)
         self.cmd_path = cmd_path
@@ -198,6 +199,7 @@ class MySQLDump(object):
         for optspec in MYSQLDUMP_OPTIONS:
             self.mysqldump_optcheck.add_option(optspec)
         self.options = []
+        self.mock_env = mock_env
 
     def add_option(self, option):
         """Add an option to this mysqldump instance, to be used
@@ -210,6 +212,9 @@ class MySQLDump(object):
 
     def run(self, databases, stream, additional_options=None):
         """Run mysqldump with the options configured on this instance"""
+        if self.mock_env:
+            subprocess.Popen = self.mock_env.mocked_popen
+
         if not hasattr(stream, 'fileno'):
             raise MySQLDumpError("Invalid output stream")
 
@@ -236,7 +241,10 @@ class MySQLDump(object):
                 args.append('--databases')
             args.extend(databases)
 
-        LOG.info("Executing: %s", subprocess.list2cmdline(args))
+        if self.mock_env:
+            LOG.info("Dry Run: %s", subprocess.list2cmdline(args))
+        else:
+            LOG.info("Executing: %s", subprocess.list2cmdline(args))
         errlog = TemporaryFile()
         pid = subprocess.Popen(args,
                                stdout=stream.fileno(),
