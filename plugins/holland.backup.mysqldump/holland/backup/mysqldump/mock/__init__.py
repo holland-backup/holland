@@ -62,6 +62,7 @@ class MockEnvironment(object):
         self.mocker.restore()
         self.mocker.verify()
 
+    #pylint: disable=unused-argument
     @staticmethod
     def mocked_popen(*args, **kwargs):
         """
