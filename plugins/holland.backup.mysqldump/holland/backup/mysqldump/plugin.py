@@ -157,8 +157,8 @@ class MySQLDumpPlugin(object):
 
         try:
             self.client = connect(self.mysql_config['client'])
-        except Exception as Ex:
-            LOG.debug("%s" % ex)
+        except Exception as ex:
+            LOG.debug("%s", ex)
             raise BackupError("Failed connecting to database'")
 
         if self.dry_run:
