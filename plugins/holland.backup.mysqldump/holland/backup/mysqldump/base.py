@@ -8,18 +8,8 @@ import json
 from holland.core.backup import BackupError
 from holland.lib.safefilename import encode
 from holland.backup.mysqldump.command import ALL_DATABASES
-from holland.backup.mysqldump.mock.env import MockEnvironment
 
 LOG = logging.getLogger(__name__)
-
-def dry_run(*args, **kwargs):
-    """Run a backup in no-op mode"""
-    env = MockEnvironment()
-    try:
-        env.replace_environment()
-        start(*args, **kwargs)
-    finally:
-        env.restore_environment()
 
 def start(mysqldump,
           schema=None,
