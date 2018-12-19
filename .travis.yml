@@ -33,6 +33,4 @@ install:
 before_script:
   - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
 script:
-  - if [[ $TRAVIS_PYTHON_VERSION != '2.6' ]]; then pylint ./holland/; fi
-  - if [[ $TRAVIS_PYTHON_VERSION != '2.6' ]]; then for d in $(ls -d ./plugins/*/holland); do pylint $d; done; fi
   - sudo ./scripts/travis_ci.sh

@@ -2,6 +2,32 @@
 
 source ~/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/activate
 
+# Begin Pylint
+if [[ $TRAVIS_PYTHON_VERSION != '2.6' ]]
+then
+    pylint ./holland/
+fi
+
+if [[ $TRAVIS_PYTHON_VERSION != '2.6' ]]
+then
+    pylint_failed=0
+    for d in $(ls -d ./plugins/*/holland)
+    do
+        pylint $d
+        if [ $? -ne 0 ] && [ $pylint_failed -ne 1 ]
+        then
+            pylint_failed=1
+        fi
+    done
+fi
+
+if [ $pylint_failed -ne 0 ]
+then
+    echo "Pylint failed; please review above output."
+    exit $pylint_failed
+fi
+# End Pylint
+
 for i in `ls -d plugins/holland.*`
 do
     cd $TRAVIS_BUILD_DIR/${i}
