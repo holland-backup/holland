@@ -18,6 +18,14 @@ Instructions can be found here: https://fedoraproject.org/wiki/EPEL
 # apt-get install holland {python3-mysqldb, python3-pymongo, ext...)
   ```
 
+## SUSE
+### Install package from OBS
+```
+# . /etc/os-release
+# zypper ar -f https://download.opensuse.org/repositories/home:/holland-backup/$(echo $PRETTY_NAME|sed -e 's/ /_/g')/ holland
+# zypper install holland holland-mysqldump
+  ```
+
 ## Debian
 ### Install package from OBS
 ```
