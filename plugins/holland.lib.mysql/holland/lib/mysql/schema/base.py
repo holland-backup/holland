@@ -327,7 +327,7 @@ class SimpleTableIterator(MetadataTableIterator):
         :param client: `MySQLClient` instance to use to iterate over objects in
         the specified database
         """
-        super(SimpleTableIterator, self).__init__()
+        super(SimpleTableIterator, self).__init__(client)
         self.client = client
         self.record_engines = record_engines
 
@@ -354,9 +354,9 @@ class SimpleTableIterator(MetadataTableIterator):
         raise ValueError("Failed to lookup storage engine")
 
     def __call__(self, database):
-        if self.client.server_version >= (5, 1):
+        if self.client.server_version() >= (5, 1):
             for metadata in self._faster_mysql51_metadata(database):
-                yield Table(**metadata)
+                yield Table(*metadata)
         else:
             for table, kind in self.client.show_tables(database, full=True):
                 metadata = [
