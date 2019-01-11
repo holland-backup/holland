@@ -8,6 +8,14 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.1.10 - Dec 10, 2018
+---------------------
+
+holland
++++++++
+
+- Rework mysqldump dry-run function
+
 1.1.9 - Dec 12, 2018
 ---------------------
 
