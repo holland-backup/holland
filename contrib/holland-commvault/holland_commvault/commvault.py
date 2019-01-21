@@ -1,45 +1,56 @@
 """
 Commvault command entry point
+
+The janky arguments Commvault throws at us
+http://documentation.commvault.com/commvault/release_8_0_0/books_online_1/english_us/features/pre_post/prepost_process.htm
+http://documentation.commvault.com/commvault/release_7_0_0/books_online_1/english_us/features/pre_post/prepost_process.htm
+CV_ARGS = ("-bkplevel",
+           "-attempt",
+           "-status",
+           "-job",
+           "-vm"
+           "-cn")
 """
-import holland.core
-import sys, os
+
+from __future__ import with_statement
+
+import sys
+import os
 import logging
 import resource
+from time import sleep
+from argparse import ArgumentParser, Action
+from pid import PidFile, PidFileAlreadyLockedError
 
 from holland.core.util.bootstrap import bootstrap
-from holland.commands.backup import Backup
-from holland.core.command import run, parse_sys
+from holland.core.config.config import HOLLANDCFG
+from holland.core.command import run
 from holland.core.cmdshell import HOLLAND_VERSION
 from holland.core.util.fmt import format_loglevel
-from argparse import ArgumentParser, Action
-# The janky arguments Commvault throws at us
-# http://documentation.commvault.com/commvault/release_8_0_0/books_online_1/english_us/features/pre_post/prepost_process.htm
-# http://documentation.commvault.com/commvault/release_7_0_0/books_online_1/english_us/features/pre_post/prepost_process.htm
-#CV_ARGS = ("-bkplevel",
-#           "-attempt",
-#           "-status",
-#           "-job",
-#           "-vm"
-#           "-cn")
+
+
 
 class ArgList(Action):
+    """
+    Setup arg list
+    """
     def __call__(self, parser, namespace, value, option_string=None):
         arg_list = [x.strip() for x in value.split(',')]
         setattr(namespace, self.dest, arg_list)
 
 def main():
-    # For some reason (take a wild guess) Commvault has decided that
-    # their long options will take the form of '-option' not the standard
-    # '--option'.
+    """
+    For some reason (take a wild guess) Commvault has decided that
+    their long options will take the form of '-option' not the standard
+    '--option'.
 
 
-    # Always set HOME to '/root', as the commvault environment is bare
+    Always set HOME to '/root', as the commvault environment is bare
+    """
     os.environ['HOME'] = '/root'
     os.environ['TMPDIR'] = '/tmp'
     # ensure we do not inherit commvault's LD_LIBRARY_PATH
     os.environ.pop('LD_LIBRARY_PATH', None)
-
-    argv = sys.argv[1:]
 
     holland_conf = '/etc/holland/holland.conf'
     if sys.platform.startswith('freebsd'):
@@ -94,7 +105,35 @@ def main():
     args.dry_run = 0
     args.no_lock = 0
     largs = args.bksets
-    if run(args, largs):
+    spool = HOLLANDCFG.lookup('holland.backup-directory')
+    status_file = '%s/%s/newest/job_%s' % (spool, args.bksets[0], args.job)
+    pid_name = 'holland_commvault_%s' % args.job
+    pid_location = '/var/run/%s.pid' % pid_name
+    try:
+        with PidFile(pid_name):
+            ret = 0
+            if run(args, largs):
+                ret = 1
+            status = open(status_file, 'w')
+            status.write(str(ret))
+            status.close()
+            return ret
+    except PidFileAlreadyLockedError:
+        pid_file = open(pid_location, 'r')
+        pid = pid_file.read()
+        pid_file.close()
+
+        logging.info("Holland (commvault agent) is already running, waiting for the pid %s", pid)
+        while os.path.isfile(pid_location):
+            sleep(5)
+        try:
+            status = open(status_file, 'r')
+            ret = int(status.read())
+            status.close()
+            return ret
+        except BaseException:
+            logging.info("Holland (commvault agent) failed to read status file")
+            return 1
+    except IOError:
+        logging.info("Holland (commvault agent) must have permission to write to /var/run")
         return 1
-    else:
-        return 0
