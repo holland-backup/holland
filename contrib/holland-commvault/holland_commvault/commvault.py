@@ -119,21 +119,29 @@ def main():
             status.close()
             return ret
     except PidFileAlreadyLockedError:
+        ret =1
         pid_file = open(pid_location, 'r')
         pid = pid_file.read()
         pid_file.close()
 
         logging.info("Holland (commvault agent) is already running, waiting for the pid %s", pid)
+        count = 0
         while os.path.isfile(pid_location):
-            sleep(5)
+            sleep(10)
+            count = count + 1
+            #10 hour timeout
+            if count > 3600:
+                logging.info("Holland (commvault agent) timed out after %s seconds", count*10)
+                return 1
         try:
             status = open(status_file, 'r')
             ret = int(status.read())
-            status.close()
-            return ret
-        except BaseException:
-            logging.info("Holland (commvault agent) failed to read status file")
+        except IOError:
+            logging.info("Holland (commvault agent) failed to open/read status file")
             return 1
+        else:
+            status.close()
+        return ret
     except IOError:
         logging.info("Holland (commvault agent) must have permission to write to /var/run")
         return 1
