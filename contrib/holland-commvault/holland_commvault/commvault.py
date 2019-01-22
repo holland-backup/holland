@@ -129,8 +129,8 @@ def main():
         while os.path.isfile(pid_location):
             sleep(10)
             count = count + 1
-            #10 hour timeout
-            if count > 3600:
+            #~14 hour timeout
+            if count > 5040:
                 logging.info("Holland (commvault agent) timed out after %s seconds", count*10)
                 return 1
         try:
