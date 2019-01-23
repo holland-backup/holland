@@ -477,8 +477,8 @@ def exclude_invalid_views(schema, client, definitions_file):
                                   *exc.args)
                         raise BackupError("[%d] %s" % exc.args)
                 if invalid_view:
-                    LOG.warning("* Excluding invalid view `%s`.`%s`: [%d] %s",
-                                schema_db.name, table.name, *exc.args)
+                    LOG.warning("* Excluding invalid view `%s`.`%s`",
+                                schema_db.name, table.name)
                     table.excluded = True
                     view_definition = client.show_create_view(schema_db.name,
                                                               table.name,

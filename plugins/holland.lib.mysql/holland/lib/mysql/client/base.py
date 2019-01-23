@@ -3,6 +3,7 @@
 import re
 import logging
 from textwrap import dedent
+from warnings import filterwarnings
 import MySQLdb
 import MySQLdb.connections
 
@@ -11,6 +12,8 @@ ProgrammingError = MySQLdb.ProgrammingError  # pylint: disable=C0103
 OperationalError = MySQLdb.OperationalError  # pylint: disable=C0103
 
 LOG = logging.getLogger(__name__)
+
+filterwarnings('ignore', category=MySQLdb.Warning)
 
 __all__ = [
     'connect',
@@ -291,12 +294,11 @@ class MySQLClient(object):
                 if cursor.execute('SHOW CREATE VIEW `%s`.`%s`' %
                                   (schema, name)):
                     return cursor.fetchone()[1]
-            except MySQLError as exc:
+            except MySQLError:
                 LOG.warning("!!! SHOW CREATE VIEW failed for `%s`.`%s`. "
                             "The view likely references columns that no "
                             "longer exist in the underlying tables.",
                             schema, name)
-
             if not use_information_schema:
                 return None
 

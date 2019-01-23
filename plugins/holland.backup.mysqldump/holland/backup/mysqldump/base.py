@@ -103,8 +103,8 @@ def write_manifest(schema, open_stream, ext):
             if database.excluded:
                 continue
             name = database.name
-            encoded_name = encode(name)[0]
-            manifest.writerow([name.encode('utf-8'), encoded_name + '.sql' + ext])
+            encoded_name = encode(name)
+            manifest.writerow([name, encoded_name + '.sql' + ext])
     finally:
         manifest_fileobj.close()
         LOG.info("Wrote backup manifest %s", manifest_fileobj.name)
