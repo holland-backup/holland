@@ -17,6 +17,7 @@ Commvault support command(s)""",
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     include_package_data=True,
     zip_safe=False,
+    install_requires=['pid'],
     entry_points="""
     [console_scripts]
     holland_cvmysqlsv = holland_commvault:main

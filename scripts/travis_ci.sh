@@ -11,7 +11,7 @@ fi
 if [[ $TRAVIS_PYTHON_VERSION != '2.6' ]]
 then
     pylint_failed=0
-    for d in $(ls -d ./plugins/*/holland)
+    for d in $(ls -d ./plugins/*/holland ./contrib/holland-commvault/holland_commvault)
     do
         pylint $d
         if [ $? -ne 0 ] && [ $pylint_failed -ne 1 ]
