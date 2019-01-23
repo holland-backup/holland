@@ -8,13 +8,16 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
-1.1.11 - Jan 17, 2019
+1.1.11 - Jan 23, 2019
 ---------------------
 
 holland
 +++++++
 
 - Fixes #260
+- Rework and lint holland_commvault
+- holland_commvault now required pid module
+- Remove warning message and logging error when dumps contain an invalid view
 
 1.1.10 - Dec 10, 2018
 ---------------------
