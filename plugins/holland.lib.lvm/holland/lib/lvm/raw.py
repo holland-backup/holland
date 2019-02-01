@@ -28,9 +28,7 @@ def pvs(*physical_volumes):
         "--options=%s" % ",".join(PVS_ATTR),
     ]
     pvs_args.extend(list(physical_volumes))
-    process = Popen(
-        pvs_args, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid, close_fds=True
-    )
+    process = Popen(pvs_args, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid, close_fds=True)
     stdout, stderr = process.communicate()
 
     if process.returncode != 0:
@@ -55,9 +53,7 @@ def vgs(*volume_groups):
         "--options=%s" % ",".join(VGS_ATTR),
     ]
     vgs_args.extend(list(volume_groups))
-    process = Popen(
-        vgs_args, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid, close_fds=True
-    )
+    process = Popen(vgs_args, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid, close_fds=True)
     stdout, stderr = process.communicate()
 
     if process.returncode != 0:
@@ -85,9 +81,7 @@ def lvs(*volume_groups):
         "--options=%s" % ",".join(LVS_ATTR),
     ]
     lvs_args.extend(list(volume_groups))
-    process = Popen(
-        lvs_args, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid, close_fds=True
-    )
+    process = Popen(lvs_args, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid, close_fds=True)
     stdout, stderr = process.communicate()
     if process.returncode != 0:
         raise LVMCommandError("lvs", process.returncode, stderr.decode("utf-8"))
@@ -124,9 +118,7 @@ def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
         lvcreate_args.insert(-1, chunksize)
 
     LOG.debug("%s", list2cmdline(lvcreate_args))
-    process = Popen(
-        lvcreate_args, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid, close_fds=True
-    )
+    process = Popen(lvcreate_args, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid, close_fds=True)
 
     stdout, stderr = process.communicate()
 
@@ -137,9 +129,7 @@ def lvsnapshot(orig_lv_path, snapshot_name, snapshot_extents, chunksize=None):
 
     if process.returncode != 0:
         raise LVMCommandError(
-            list2cmdline(lvcreate_args),
-            process.returncode,
-            stderr.decode("utf-8").strip(),
+            list2cmdline(lvcreate_args), process.returncode, stderr.decode("utf-8").strip()
         )
 
 
@@ -151,9 +141,7 @@ def lvremove(lv_path):
     """
     lvremove_args = ["lvremove", "--force", lv_path]
 
-    process = Popen(
-        lvremove_args, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid, close_fds=True
-    )
+    process = Popen(lvremove_args, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid, close_fds=True)
 
     stdout, stderr = process.communicate()
 
@@ -164,9 +152,7 @@ def lvremove(lv_path):
 
     if process.returncode != 0:
         raise LVMCommandError(
-            list2cmdline(lvremove_args),
-            process.returncode,
-            stderr.decode("utf-8").strip(),
+            list2cmdline(lvremove_args), process.returncode, stderr.decode("utf-8").strip()
         )
 
 
@@ -216,9 +202,7 @@ def mount(device, path, options=None, vfstype=None):
         mount_args.extend(["-t", vfstype])
     mount_args.extend([device, path])
 
-    process = Popen(
-        mount_args, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid, close_fds=True
-    )
+    process = Popen(mount_args, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid, close_fds=True)
     stdout, stderr = process.communicate()
 
     if process.returncode != 0:
@@ -234,11 +218,7 @@ def umount(*path):
     :raises: LVMCommandError
     """
     process = Popen(
-        ["umount"] + list(path),
-        stdout=PIPE,
-        stderr=PIPE,
-        preexec_fn=os.setsid,
-        close_fds=True,
+        ["umount"] + list(path), stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid, close_fds=True
     )
 
     stdout, stderr = process.communicate()

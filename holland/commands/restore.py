@@ -33,11 +33,7 @@ class Restore(Command):
     aliases = ["re"]
 
     args = ["--dry-run", "-n"]
-    kargs = [
-        {
-            "help": "Print what restore actually would do without actually running the restore"
-        }
-    ]
+    kargs = [{"help": "Print what restore actually would do without actually running the restore"}]
 
     description = "Restore data from an existing Holland Backup"
 

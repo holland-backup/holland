@@ -24,8 +24,4 @@ from holland.lib.mysql.schema.base import (
 )
 
 
-from holland.lib.mysql.option.base import (
-    build_mysql_config,
-    load_options,
-    write_options,
-)
+from holland.lib.mysql.option.base import build_mysql_config, load_options, write_options

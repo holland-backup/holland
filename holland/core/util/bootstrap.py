@@ -9,11 +9,7 @@ import sys
 import logging
 from holland.core.plugin import add_plugin_dir
 from holland.core.config import HOLLANDCFG, setup_config as _setup_config
-from holland.core.log import (
-    setup_console_logging,
-    setup_file_logging,
-    clear_root_handlers,
-)
+from holland.core.log import setup_console_logging, setup_file_logging, clear_root_handlers
 from holland.core.spool import SPOOL
 
 LOGGER = logging.getLogger(__name__)

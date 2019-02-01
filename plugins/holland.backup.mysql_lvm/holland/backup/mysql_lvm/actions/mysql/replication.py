@@ -37,8 +37,7 @@ def record_master_status(client, config):
             )
     except MySQLError as exc:
         raise BackupError(
-            "MySQL error while acquiring master replication "
-            "status [%d] %s" % exc.args
+            "MySQL error while acquiring master replication " "status [%d] %s" % exc.args
         )
 
 
@@ -53,15 +52,13 @@ def record_slave_status(client, config):
             config["slave_master_log_file"] = binlog
             config["slave_master_log_pos"] = position
             LOG.info(
-                "Recorded slave replication status: "
-                "master_binlog = %s master_position = %s",
+                "Recorded slave replication status: " "master_binlog = %s master_position = %s",
                 binlog,
                 position,
             )
         else:
             LOG.info(
-                "This MySQL server is not a slave. "
-                "Nothing to record from SHOW SLAVE STATUS"
+                "This MySQL server is not a slave. " "Nothing to record from SHOW SLAVE STATUS"
             )
     except MySQLError as exc:
         raise BackupError(

@@ -35,10 +35,7 @@ class Backup(Command):
     args = [["--abort-immediately"], ["--dry-run", "-n"], ["--no-lock", "-f"]]
     kargs = [
         {"action": "store_true", "help": "Abort on the first backupset that fails."},
-        {
-            "action": "store_true",
-            "help": "Print backup commands without executing them.",
-        },
+        {"action": "store_true", "help": "Print backup commands without executing them."},
         {
             "action": "store_true",
             "default": False,

@@ -19,11 +19,7 @@ def merge_options(*defaults_files):
     def merge(dst_dict, src_dict):
         """Merge two dictionaries non-destructively"""
         for key, val in list(src_dict.items()):
-            if (
-                key in dst_dict
-                and isinstance(dst_dict[key], dict)
-                and isinstance(val, dict)
-            ):
+            if key in dst_dict and isinstance(dst_dict[key], dict) and isinstance(val, dict):
                 merge(dst_dict[key], val)
             else:
                 dst_dict[key] = val

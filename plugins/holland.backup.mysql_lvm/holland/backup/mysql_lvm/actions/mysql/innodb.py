@@ -24,9 +24,7 @@ class InnodbRecoveryAction(object):
         mysqld_exe = locate_mysqld_exe(self.mysqld_config)
         LOG.info("Bootstrapping with %s", mysqld_exe)
 
-        mycnf_path = os.path.join(
-            self.mysqld_config["datadir"], "my.innodb_recovery.cnf"
-        )
+        mycnf_path = os.path.join(self.mysqld_config["datadir"], "my.innodb_recovery.cnf")
         self.mysqld_config["log-error"] = "innodb_recovery.log"
         my_conf = generate_server_config(self.mysqld_config, mycnf_path)
 

@@ -11,10 +11,7 @@ from holland.backup.mysql_lvm.actions import (
     TarArchiveAction,
     DirArchiveAction,
 )
-from holland.backup.mysql_lvm.plugin.common import (
-    log_final_snapshot_size,
-    connect_simple,
-)
+from holland.backup.mysql_lvm.plugin.common import log_final_snapshot_size, connect_simple
 from holland.backup.mysql_lvm.plugin.innodb import MySQLPathInfo, check_innodb
 
 LOG = logging.getLogger(__name__)
@@ -64,9 +61,7 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
             backup_datadir = os.path.join(spooldir, "backup_data")
             os.mkdir(backup_datadir)
         except OSError as exc:
-            raise BackupError(
-                "Unable to create archive directory '%s': %s" % (backup_datadir, exc)
-            )
+            raise BackupError("Unable to create archive directory '%s': %s" % (backup_datadir, exc))
         act = DirArchiveAction(snap_datadir, backup_datadir, config["tar"])
         snapshot.register("post-mount", act, priority=50)
     else:

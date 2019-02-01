@@ -125,13 +125,7 @@ class MkConfig(Command):
     name = "mk-config"
     aliases = ["mc"]
 
-    args = [
-        ["--name"],
-        ["--edit"],
-        ["--provider"],
-        ["--file", "-f"],
-        ["--minimal", "-m"],
-    ]
+    args = [["--name"], ["--edit"], ["--provider"], ["--file", "-f"], ["--minimal", "-m"]]
     kargs = [
         {"help": "Name of the backupset"},
         {"help": "Edit the generated config", "action": "store_true", "default": False},
@@ -237,9 +231,7 @@ class MkConfig(Command):
         purge-policy            = after-backup
         estimated-size-factor   = 1.0
         """.lstrip().splitlines()
-        cfg = ConfigObj(
-            base_config, configspec=cfgspec, list_values=True, stringify=True
-        )
+        cfg = ConfigObj(base_config, configspec=cfgspec, list_values=True, stringify=True)
         cfg["holland:backup"]["plugin"] = plugin_type[0]
         self._cleanup_config(cfg, skip_comments=opts.minimal)
 

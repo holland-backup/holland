@@ -45,11 +45,7 @@ class Purge(Command):
             "default": False,
             "help": "Execute the purge (disable dry-run). Alias for --execute",
         },
-        {
-            "action": "store_true",
-            "dest": "force",
-            "help": "Execute the purge (disable dry-run)",
-        },
+        {"action": "store_true", "dest": "force", "help": "Execute the purge (disable dry-run)"},
     ]
 
     description = "Purge the requested job runs"
@@ -58,10 +54,7 @@ class Purge(Command):
         error = 0
 
         if not backups:
-            LOG.info(
-                "No backupsets specified - using backupsets from %s",
-                HOLLANDCFG.filename,
-            )
+            LOG.info("No backupsets specified - using backupsets from %s", HOLLANDCFG.filename)
             backups = HOLLANDCFG.lookup("holland.backupsets")
 
         if not backups:
@@ -108,9 +101,7 @@ def purge_backupset(backupset, force=False, all_backups=False):
             config.validate_config(CONFIGSPEC, suppress_warnings=True)
         except (IOError, ConfigError) as exc:
             LOG.error("Failed to load backupset '%s': %s", backupset.name, exc)
-            LOG.error(
-                "Aborting, because I could not tell how many backups to " "preserve."
-            )
+            LOG.error("Aborting, because I could not tell how many backups to " "preserve.")
             LOG.error(
                 "You can still purge the backupset by using the --all "
                 "option or specifying specific backups to purge"
@@ -119,11 +110,7 @@ def purge_backupset(backupset, force=False, all_backups=False):
             retention_count = config["holland:backup"]["backups-to-keep"]
 
             LOG.info("Evaluating purge for backupset %s", backupset.name)
-            LOG.info(
-                "Retaining up to %d backup%s",
-                retention_count,
-                "s"[0 : bool(retention_count)],
-            )
+            LOG.info("Retaining up to %d backup%s", retention_count, "s"[0 : bool(retention_count)])
             backups = []
             size = 0
             backup_list = backupset.list_backups(reverse=True)

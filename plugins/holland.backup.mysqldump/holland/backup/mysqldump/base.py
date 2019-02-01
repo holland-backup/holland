@@ -52,9 +52,7 @@ def start(
                 more_options.append("--flush-logs")
             db_name = encode(target_db.name)
             if db_name != target_db.name:
-                LOG.warning(
-                    "Encoding file-name for database %s to %s", target_db.name, db_name
-                )
+                LOG.warning("Encoding file-name for database %s to %s", target_db.name, db_name)
             try:
                 stream = open_stream("%s.sql" % db_name, "w")
             except (IOError, OSError) as exc:
@@ -79,8 +77,7 @@ def start(
             stream = open_stream("all_databases.sql", "w")
         except (IOError, OSError) as exc:
             raise BackupError(
-                "Failed to open output stream %s: %s"
-                % ("all_databases.sql" + compression_ext, exc)
+                "Failed to open output stream %s: %s" % ("all_databases.sql" + compression_ext, exc)
             )
         try:
             if target_databases is not ALL_DATABASES:
@@ -104,10 +101,7 @@ def write_manifest(schema, open_stream, ext):
 
     try:
         manifest = csv.writer(
-            manifest_fileobj,
-            dialect=csv.excel_tab,
-            lineterminator="\n",
-            quoting=csv.QUOTE_MINIMAL,
+            manifest_fileobj, dialect=csv.excel_tab, lineterminator="\n", quoting=csv.QUOTE_MINIMAL
         )
         for database in schema.databases:
             if database.excluded:

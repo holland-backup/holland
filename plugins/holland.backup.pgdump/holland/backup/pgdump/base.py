@@ -94,9 +94,7 @@ def pg_databases(config, connection):  # pylint: disable=W0613
     in config['pgpass']
     """
     cursor = connection.cursor()
-    cursor.execute(
-        "SELECT datname FROM pg_database WHERE not datistemplate and datallowconn"
-    )
+    cursor.execute("SELECT datname FROM pg_database WHERE not datistemplate and datallowconn")
     databases = [db for db, in cursor]
     cursor.close()
     logging.debug("pg_databases() -> %r", databases)
@@ -123,9 +121,7 @@ def run_pgdump(dbname, output_stream, connection_params, out_format="custom", en
                 args, stdout=output_stream, stderr=stderr, env=env, close_fds=True
             )
         except OSError as exc:
-            raise PgError(
-                "Failed to execute '%s': [%d] %s" % (args[0], exc.errno, exc.strerror)
-            )
+            raise PgError("Failed to execute '%s': [%d] %s" % (args[0], exc.errno, exc.strerror))
 
         stderr.flush()
         stderr.seek(0)
@@ -170,9 +166,7 @@ def backup_globals(backup_directory, config, connection_params, env=None):
                 args, stdout=output_stream, stderr=stderr, env=env, close_fds=True
             )
         except OSError as exc:
-            raise PgError(
-                "Failed to execute '%s': [%d] %s" % (args[0], exc.errno, exc.strerror)
-            )
+            raise PgError("Failed to execute '%s': [%d] %s" % (args[0], exc.errno, exc.strerror))
 
         output_stream.close()
         stderr.flush()
@@ -191,10 +185,7 @@ def generate_manifest(backups, path):
     manifest = open(os.path.join(path, "MANIFEST"), "w")
     for dbname, dumpfile in backups:
         try:
-            print(
-                "%s\t%s" % (dbname.encode("utf8"), os.path.basename(dumpfile)),
-                file=manifest,
-            )
+            print("%s\t%s" % (dbname.encode("utf8"), os.path.basename(dumpfile)), file=manifest)
         except UnicodeError as exc:
             LOG.error("Failed to encode dbname %s: %s", dbname, exc)
     manifest.close()
@@ -215,8 +206,7 @@ def pgauth2args(config):
             args.extend(["--role", config["pgdump"]["role"]])
         else:
             raise PgError(
-                "The --role option is available only in Postgres"
-                " versions 8.4 and higher."
+                "The --role option is available only in Postgres" " versions 8.4 and higher."
             )
 
     return args
@@ -263,13 +253,10 @@ def backup_pgsql(backup_directory, config, databases):
     pgenv = dict(os.environ)
 
     if config["pgauth"]["password"] is not None:
-        pgpass_file = generate_pgpassfile(
-            backup_directory, config["pgauth"]["password"]
-        )
+        pgpass_file = generate_pgpassfile(backup_directory, config["pgauth"]["password"])
         if "PGPASSFILE" in pgenv:
             LOG.warning(
-                "Overriding PGPASSFILE in environment with %s because "
-                "a password is specified.",
+                "Overriding PGPASSFILE in environment with %s because " "a password is specified.",
                 pgpass_file,
             )
         pgenv["PGPASSFILE"] = pgpass_file

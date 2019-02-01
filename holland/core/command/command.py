@@ -33,9 +33,7 @@ if sys.platform.startswith("freebsd"):
     HOLLAND_CONF = "/usr/local" + HOLLAND_CONF
 
 ## global parser
-PARSER = argparse.ArgumentParser(
-    description=HOLLAND_BANNER, formatter_class=RawTextHelpFormatter
-)
+PARSER = argparse.ArgumentParser(description=HOLLAND_BANNER, formatter_class=RawTextHelpFormatter)
 # PARSER.add_argument('-h', '--help', action='store_true',
 #                    help="Show help")
 PARSER.add_argument(
@@ -47,18 +45,10 @@ PARSER.add_argument(
     help="Log verbose output",
 )
 PARSER.add_argument(
-    "-d",
-    "--debug",
-    action="store_const",
-    const="debug",
-    dest="log_level",
-    help="Log debug output",
+    "-d", "--debug", action="store_const", const="debug", dest="log_level", help="Log debug output"
 )
 PARSER.add_argument(
-    "-c",
-    "--config-file",
-    metavar="<file>",
-    help="Read configuration from the given file",
+    "-c", "--config-file", metavar="<file>", help="Read configuration from the given file"
 )
 PARSER.add_argument("-q", "--quiet", action="store_true", help="Don't log to console")
 PARSER.add_argument(
@@ -98,9 +88,7 @@ class Command(object):
     def __init__(self):
         if LooseVersion(argparse.__version__) < LooseVersion("1.4.0"):
             self.optparser = SUBPARSER.add_parser(
-                self.name,
-                help="%s %s" % (self.name, self.description),
-                description=self.name,
+                self.name, help="%s %s" % (self.name, self.description), description=self.name
             )
             self.alias_parser = []
             for alias in self.aliases:

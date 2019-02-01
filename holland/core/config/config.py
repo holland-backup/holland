@@ -83,9 +83,7 @@ class BaseConfig(ConfigObj):
             if not error:
                 LOGGER.error("Missing parameter %s", ".".join(section_list + [key]))
             else:
-                LOGGER.error(
-                    "Configuration error %s: %s", ".".join(section_list + [key]), error
-                )
+                LOGGER.error("Configuration error %s: %s", ".".join(section_list + [key]), error)
 
         # warn about any unknown parameters before we potentially abort on
         # validation errors
@@ -94,17 +92,14 @@ class BaseConfig(ConfigObj):
             try:
                 for sections, name in get_extra_values(self):
                     LOGGER.warning(
-                        "Unknown parameter '%s' in section '%s'",
-                        name,
-                        ".".join(sections),
+                        "Unknown parameter '%s' in section '%s'", name, ".".join(sections)
                     )
             except NameError:
                 pass
 
         if errors is not True:
             raise ConfigError(
-                "Configuration errors were encountered while validating %r"
-                % self.filename
+                "Configuration errors were encountered while validating %r" % self.filename
             )
         return errors
 
@@ -151,9 +146,7 @@ class BackupConfig(BaseConfig):
                 providercfg.walk(self._canonicalize, call_on_sections=True)
                 self.merge(providercfg)
             except IOError as ex:
-                LOGGER.warning(
-                    "Failed to load config for provider %r (%s)", provider, ex
-                )
+                LOGGER.warning("Failed to load config for provider %r (%s)", provider, ex)
         self.merge(basecfg)
         self.filename = basecfg.filename
 

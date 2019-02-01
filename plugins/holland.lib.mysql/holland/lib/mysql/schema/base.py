@@ -214,8 +214,7 @@ class Database(object):
             [
                 table.size
                 for table in self.tables
-                if not table.excluded
-                and table.engine not in ("mrg_myisam", "federated")
+                if not table.excluded and table.engine not in ("mrg_myisam", "federated")
             ]
         )
 

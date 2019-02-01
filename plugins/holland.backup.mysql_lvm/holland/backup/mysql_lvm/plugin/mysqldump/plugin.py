@@ -5,13 +5,7 @@
 
 import os
 import logging
-from holland.lib.lvm import (
-    LogicalVolume,
-    CallbackFailuresError,
-    LVMCommandError,
-    relpath,
-    getmount,
-)
+from holland.lib.lvm import LogicalVolume, CallbackFailuresError, LVMCommandError, relpath, getmount
 from holland.core.util.fmt import format_bytes
 from holland.core.backup import BackupError
 from holland.backup.mysql_lvm.plugin.common import build_snapshot, connect_simple
@@ -97,13 +91,9 @@ class MysqlDumpLVMBackup(object):
         try:
             volume = LogicalVolume.lookup_from_fspath(datadir)
         except LookupError as exc:
-            raise BackupError(
-                "Failed to lookup logical volume for %s: %s" % (datadir, str(exc))
-            )
+            raise BackupError("Failed to lookup logical volume for %s: %s" % (datadir, str(exc)))
         except Exception as ex:
-            raise BackupError(
-                "Failed to lookup logical volume for %s: %s" % (datadir, str(ex))
-            )
+            raise BackupError("Failed to lookup logical volume for %s: %s" % (datadir, str(ex)))
 
         try:
             # create a snapshot manager
@@ -112,9 +102,7 @@ class MysqlDumpLVMBackup(object):
             )
             # calculate where the datadirectory on the snapshot will be located
             rpath = relpath(datadir, getmount(datadir))
-            snap_datadir = os.path.abspath(
-                os.path.join(snapshot.mountpoint or "/tmp", rpath)
-            )
+            snap_datadir = os.path.abspath(os.path.join(snapshot.mountpoint or "/tmp", rpath))
 
             LOG.debug("Snap Datadir: %s", snap_datadir)
             # setup actions to perform at each step of the snapshot process
@@ -132,8 +120,7 @@ class MysqlDumpLVMBackup(object):
         if self.config["mysqldump"]["bin-log-position"]:
             LOG.warning("bin-log-position is not supported with mysqldump-lvm.")
             LOG.warning(
-                "Replication status will be saved to the "
-                "[mysql:replication] section in %s",
+                "Replication status will be saved to the " "[mysql:replication] section in %s",
                 self.config.filename,
             )
             self.config["mysqldump"]["bin-log-position"] = False
@@ -166,15 +153,11 @@ class MysqlDumpLVMBackup(object):
             snapshot.name,
             format_bytes(snapshot.size * int(volume.vg_extent_size)),
         )
-        LOG.info(
-            "* Would mount on %s",
-            snapshot.mountpoint or "generated temporary directory",
-        )
+        LOG.info("* Would mount on %s", snapshot.mountpoint or "generated temporary directory")
 
         if getmount(self.target_directory) == getmount(datadir):
             LOG.error(
-                "Backup directory %s is on the same filesystem as "
-                "the source logical volume %s.",
+                "Backup directory %s is on the same filesystem as " "the source logical volume %s.",
                 self.target_directory,
                 volume.device_name(),
             )

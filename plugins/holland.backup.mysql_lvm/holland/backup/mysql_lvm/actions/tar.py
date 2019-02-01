@@ -36,9 +36,7 @@ class TarArchiveAction(object):
         pre_args = self.config["pre-args"]
         if pre_args:
             LOG.info("Adding tar pre-args: %s", pre_args)
-            pre_args = [
-                arg.decode("utf8") for arg in shlex.split(pre_args.encode("utf8"))
-            ]
+            pre_args = [arg.decode("utf8") for arg in shlex.split(pre_args.encode("utf8"))]
             for option in pre_args:
                 argv.insert(-3, option)
         for param in self.config["exclude"]:
@@ -47,9 +45,7 @@ class TarArchiveAction(object):
         post_args = self.config["post-args"]
         if post_args:
             LOG.info("Adding tar post-args: %s", post_args)
-            post_args = [
-                arg.decode("utf8") for arg in shlex.split(post_args.encode("utf8"))
-            ]
+            post_args = [arg.decode("utf8") for arg in shlex.split(post_args.encode("utf8"))]
             for option in post_args:
                 argv.append(option)
         LOG.info("Running: %s > %s", list2cmdline(argv), self.archive_stream.name)
@@ -58,9 +54,7 @@ class TarArchiveAction(object):
         if pre_args or post_args:
             warning_readme = os.path.join(archive_dirname, "NONSTD_TAR.txt")
             warning_log = open(warning_readme, "w")
-            print(
-                ("This tar file was generated with non-std " "args:"), file=warning_log
-            )
+            print(("This tar file was generated with non-std " "args:"), file=warning_log)
             print(list2cmdline(argv), file=warning_log)
         archive_log = os.path.join(archive_dirname, "archive.log")
         process = Popen(
@@ -86,9 +80,7 @@ class TarArchiveAction(object):
 
         if process.returncode != 0:
             LOG.error("tar exited with non-zero status: %d", process.returncode)
-            LOG.error(
-                "Tailing up to the last 10 lines of archive.log for " "troubleshooting:"
-            )
+            LOG.error("Tailing up to the last 10 lines of archive.log for " "troubleshooting:")
             for line in open(archive_log, "r").readlines()[-10:]:
                 LOG.error(" ! %s", line.rstrip())
             raise CalledProcessError(process.returncode, "tar")

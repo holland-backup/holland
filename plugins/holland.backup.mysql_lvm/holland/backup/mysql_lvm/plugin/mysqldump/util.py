@@ -49,9 +49,7 @@ def setup_actions(snapshot, config, client, datadir, spooldir, plugin):
         ibd_home_dir = pathinfo.innodb_data_home_dir
         if ibd_home_dir:
             # innodb_data_home_dir is set to something
-            ibd_home_dir = pathinfo.remap_path(
-                pathinfo.get_innodb_datadir(), snapshot.mountpoint
-            )
+            ibd_home_dir = pathinfo.remap_path(pathinfo.get_innodb_datadir(), snapshot.mountpoint)
             mysqld_config["innodb-data-home-dir"] = ibd_home_dir
             LOG.info(
                 "Remapped innodb-data-home-dir from %s to %s for snapshot",
@@ -80,9 +78,7 @@ def setup_actions(snapshot, config, client, datadir, spooldir, plugin):
 
         ib_logdir = pathinfo.innodb_log_group_home_dir
         if ib_logdir and ib_logdir != "./":
-            ib_logdir = pathinfo.remap_path(
-                pathinfo.get_innodb_logdir(), snapshot.mountpoint
-            )
+            ib_logdir = pathinfo.remap_path(pathinfo.get_innodb_logdir(), snapshot.mountpoint)
             mysqld_config["innodb-log-group-home-dir"] = ib_logdir
             LOG.info(
                 "Remapped innodb-log-group-home-dir from %s to %s for snapshot",

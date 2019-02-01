@@ -73,23 +73,18 @@ def build_snapshot(config, logical_volume, suppress_tmpdir=False):
             )
             if snapshot_size < 1:
                 raise BackupError(
-                    "Requested snapshot-size (%s) is "
-                    "less than 1 extent" % _snapshot_size
+                    "Requested snapshot-size (%s) is " "less than 1 extent" % _snapshot_size
                 )
             if snapshot_size > int(logical_volume.vg_free_count):
                 LOG.info(
                     "Snapshot size requested %s, but only %s available.",
                     config["snapshot-size"],
-                    format_bytes(
-                        int(logical_volume.vg_free_count) * extent_size, precision=4
-                    ),
+                    format_bytes(int(logical_volume.vg_free_count) * extent_size, precision=4),
                 )
                 LOG.info(
                     "Truncating snapshot-size to %d extents (%s)",
                     int(logical_volume.vg_free_count),
-                    format_bytes(
-                        int(logical_volume.vg_free_count) * extent_size, precision=4
-                    ),
+                    format_bytes(int(logical_volume.vg_free_count) * extent_size, precision=4),
                 )
                 snapshot_size = int(logical_volume.vg_free_count)
         except ValueError as exc:

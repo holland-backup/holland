@@ -6,14 +6,7 @@ import re
 import signal
 from math import log
 
-__all__ = [
-    "getmount",
-    "getdevice",
-    "relpath",
-    "format_bytes",
-    "parse_bytes",
-    "SignalManager",
-]
+__all__ = ["getmount", "getdevice", "relpath", "format_bytes", "parse_bytes", "SignalManager"]
 
 
 def getmount(getpath):

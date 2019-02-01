@@ -165,9 +165,7 @@ class Backupset(object):
         """
         if retention_count < 0:
             raise ValueError("Invalid retention count %s" % retention_count)
-        for backup in itertools.islice(
-            self.list_backups(reverse=True), retention_count, None
-        ):
+        for backup in itertools.islice(self.list_backups(reverse=True), retention_count, None):
             backup.purge()
             yield backup
 
@@ -192,8 +190,7 @@ class Backupset(object):
         dirs = [
             backup
             for backup in os.listdir(self.path)
-            if os.path.isdir(os.path.join(self.path, backup))
-            and backup not in ("oldest", "newest")
+            if os.path.isdir(os.path.join(self.path, backup)) and backup not in ("oldest", "newest")
         ]
 
         backup_list = [Backup(os.path.join(self.path, d), self.name, d) for d in dirs]

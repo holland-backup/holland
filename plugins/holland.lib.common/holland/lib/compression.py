@@ -133,10 +133,7 @@ class CompressionOutput(object):
             LOG.debug("* Executing: %s", subprocess.list2cmdline(argv))
             self.stderr = TemporaryFile()
             self.pid = subprocess.Popen(
-                argv,
-                stdin=subprocess.PIPE,
-                stdout=self.fileobj.fileno(),
-                stderr=self.stderr,
+                argv, stdin=subprocess.PIPE, stdout=self.fileobj.fileno(), stderr=self.stderr
             )
             self.filehandle = self.pid.stdin.fileno()
         self.name = path
@@ -177,9 +174,7 @@ class CompressionOutput(object):
                 cmp_f.name,
                 cmp_f.fileno(),
             )
-            pid = subprocess.Popen(
-                argv, stdin=self.fileobj.fileno(), stdout=cmp_f.fileno()
-            )
+            pid = subprocess.Popen(argv, stdin=self.fileobj.fileno(), stdout=cmp_f.fileno())
             status = pid.wait()
             os.unlink(self.fileobj.name)
         else:
@@ -196,8 +191,7 @@ class CompressionOutput(object):
                         LOG.error("%s: %s", self.argv[0], line.rstrip())
                     raise IOError(
                         errno.EPIPE,
-                        "Compression program '%s' exited with status %d"
-                        % (self.argv[0], status),
+                        "Compression program '%s' exited with status %d" % (self.argv[0], status),
                     )
                 else:
                     for line in stderr:

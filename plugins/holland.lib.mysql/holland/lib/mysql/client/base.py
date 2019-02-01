@@ -45,10 +45,7 @@ def flatten_list(a_list):
     """
     # isinstance check to ensure we're not iterating over characters
     # in a string
-    return sum(
-        [isinstance(item, (list, tuple)) and list(item) or [item] for item in a_list],
-        [],
-    )
+    return sum([isinstance(item, (list, tuple)) and list(item) or [item] for item in a_list], [])
 
 
 class MySQLClient(object):
@@ -156,9 +153,7 @@ class MySQLClient(object):
         try:
             cursor.execute(sql)
         except MySQLError as exc:
-            LOG.error(
-                "MySQL reported an error while running %s. [%d] %s", sql, *exc.args
-            )
+            LOG.error("MySQL reported an error while running %s. [%d] %s", sql, *exc.args)
             raise
         names = [info[0].lower() for info in cursor.description]
         result = []
@@ -172,10 +167,7 @@ class MySQLClient(object):
                 row["engine"] = "view"
                 if "references invalid table" in row["comment"] or "":
                     LOG.warning(
-                        "Invalid view %s.%s: %s",
-                        row["database"],
-                        row["name"],
-                        row["comment"] or "",
+                        "Invalid view %s.%s: %s", row["database"], row["name"], row["comment"] or ""
                     )
                 if "Incorrect key file" in row["comment"] or "":
                     LOG.warning(
@@ -251,10 +243,7 @@ class MySQLClient(object):
         :param full: Optional. include table type n the results
         :returns: list of table names
         """
-        sql = "SHOW %sTABLES FROM `%s`" % (
-            ["", "FULL "][int(full)],
-            database.replace("`", "``"),
-        )
+        sql = "SHOW %sTABLES FROM `%s`" % (["", "FULL "][int(full)], database.replace("`", "``"))
         cursor = self.cursor()
         cursor.execute(sql)
         try:
@@ -345,10 +334,7 @@ class MySQLClient(object):
                     return cursor.fetchone()[0]
             except MySQLError as exc:
                 LOG.debug(
-                    "INFORMATION_SCHEMA.VIEWS(%s,%s) failed: [%d] %s ",
-                    schema,
-                    name,
-                    *exc.args
+                    "INFORMATION_SCHEMA.VIEWS(%s,%s) failed: [%d] %s ", schema, name, *exc.args
                 )
             return None
         finally:

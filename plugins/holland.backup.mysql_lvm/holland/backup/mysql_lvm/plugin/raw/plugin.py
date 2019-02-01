@@ -4,13 +4,7 @@ import os
 import logging
 from holland.core.util.path import directory_size, format_bytes
 from holland.core.backup import BackupError
-from holland.lib.lvm import (
-    LogicalVolume,
-    CallbackFailuresError,
-    LVMCommandError,
-    relpath,
-    getmount,
-)
+from holland.lib.lvm import LogicalVolume, CallbackFailuresError, LVMCommandError, relpath, getmount
 from holland.lib.mysql.client import MySQLError
 from holland.lib.mysql.client.base import MYSQL_CLIENT_CONFIG_STRING
 from holland.backup.mysql_lvm.plugin.common import build_snapshot, connect_simple
@@ -118,18 +112,12 @@ class MysqlLVMBackup(object):
         try:
             volume = LogicalVolume.lookup_from_fspath(datadir)
         except LookupError as exc:
-            raise BackupError(
-                "Failed to lookup logical volume for %s: %s" % (datadir, str(exc))
-            )
+            raise BackupError("Failed to lookup logical volume for %s: %s" % (datadir, str(exc)))
         except Exception as ex:
-            raise BackupError(
-                "Failed to lookup logical volume for %s: %s" % (datadir, str(ex))
-            )
+            raise BackupError("Failed to lookup logical volume for %s: %s" % (datadir, str(ex)))
 
         # create a snapshot manager
-        snapshot = build_snapshot(
-            self.config["mysql-lvm"], volume, suppress_tmpdir=self.dry_run
-        )
+        snapshot = build_snapshot(self.config["mysql-lvm"], volume, suppress_tmpdir=self.dry_run)
         # calculate where the datadirectory on the snapshot will be located
         rpath = relpath(datadir, getmount(datadir))
         snap_datadir = os.path.abspath(os.path.join(snapshot.mountpoint, rpath))
@@ -170,15 +158,11 @@ class MysqlLVMBackup(object):
             snapshot.name,
             format_bytes(snapshot.size * int(volume.vg_extent_size)),
         )
-        LOG.info(
-            "* Would mount on %s",
-            snapshot.mountpoint or "generated temporary directory",
-        )
+        LOG.info("* Would mount on %s", snapshot.mountpoint or "generated temporary directory")
 
         if getmount(self.target_directory) == getmount(datadir):
             LOG.error(
-                "Backup directory %s is on the same filesystem as "
-                "the source logical volume %s.",
+                "Backup directory %s is on the same filesystem as " "the source logical volume %s.",
                 self.target_directory,
                 volume.device_name(),
             )

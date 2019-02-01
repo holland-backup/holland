@@ -35,9 +35,7 @@ def setup_console_logging(
     logging.getLogger().addHandler(handler)
 
 
-def setup_file_logging(
-    filename, level=DEFAULT_LOG_LEVEL, msg_format=DEFAULT_LOG_FORMAT
-):
+def setup_file_logging(filename, level=DEFAULT_LOG_LEVEL, msg_format=DEFAULT_LOG_FORMAT):
     """Setup logging to file defined in /etc/holland/holland.conf"""
     root = logging.getLogger()
     root.setLevel(level)
