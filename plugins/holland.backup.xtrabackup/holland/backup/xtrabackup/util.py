@@ -265,9 +265,12 @@ def xtrabackup_version():
         )
 
     for line in process.stdout:
+        if isinstance(line, bytes):
+            line = line.rstrip().decode("UTF-8")
         if "version" in line:
             xtrabackup_version = re.search(r"version\s*([\d.]+)", line).group(1)
-        LOG.info("%s", line.rstrip().decode("UTF-8"))
+        LOG.info("%s", line)
+
     process.wait()
     if process.returncode != 0:
         raise BackupError(
