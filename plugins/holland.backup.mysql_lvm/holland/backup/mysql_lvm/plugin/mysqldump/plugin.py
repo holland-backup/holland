@@ -6,9 +6,8 @@
 import os
 import logging
 from holland.lib.lvm import LogicalVolume, CallbackFailuresError, LVMCommandError, relpath, getmount
-from holland.core.util.fmt import format_bytes
 from holland.core.backup import BackupError
-from holland.backup.mysql_lvm.plugin.common import build_snapshot, connect_simple
+from holland.backup.mysql_lvm.plugin.common import build_snapshot, connect_simple, _dry_run
 from holland.backup.mysql_lvm.plugin.mysqldump.util import setup_actions
 from holland.backup.mysqldump import MySQLDumpPlugin
 
@@ -126,7 +125,7 @@ class MysqlDumpLVMBackup(object):
             self.config["mysqldump"]["bin-log-position"] = False
 
         if self.dry_run:
-            self._dry_run(volume, snapshot, datadir)
+            _dry_run(self.target_directory, volume, snapshot, datadir)
             # do the normal mysqldump dry-run
             return self.mysqldump_plugin.backup()
 
@@ -141,28 +140,3 @@ class MysqlDumpLVMBackup(object):
             raise BackupError(str(exc))
 
         return None
-
-    def _dry_run(self, volume, snapshot, datadir):
-        """Implement dry-run for LVM snapshots.
-        """
-        LOG.info(
-            "* Would snapshot source volume %s/%s as %s/%s (size=%s)",
-            volume.vg_name,
-            volume.lv_name,
-            volume.vg_name,
-            snapshot.name,
-            format_bytes(snapshot.size * int(volume.vg_extent_size)),
-        )
-        LOG.info("* Would mount on %s", snapshot.mountpoint or "generated temporary directory")
-
-        if getmount(self.target_directory) == getmount(datadir):
-            LOG.error(
-                "Backup directory %s is on the same filesystem as " "the source logical volume %s.",
-                self.target_directory,
-                volume.device_name(),
-            )
-            LOG.error(
-                "This will result in very poor performance and "
-                "has a high potential for failed backups."
-            )
-            raise BackupError("Improper backup configuration for LVM.")

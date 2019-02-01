@@ -2,12 +2,12 @@
 
 import os
 import logging
-from holland.core.util.path import directory_size, format_bytes
+from holland.core.util.path import directory_size
 from holland.core.backup import BackupError
 from holland.lib.lvm import LogicalVolume, CallbackFailuresError, LVMCommandError, relpath, getmount
 from holland.lib.mysql.client import MySQLError
 from holland.lib.mysql.client.base import MYSQL_CLIENT_CONFIG_STRING
-from holland.backup.mysql_lvm.plugin.common import build_snapshot, connect_simple
+from holland.backup.mysql_lvm.plugin.common import build_snapshot, connect_simple, _dry_run
 from holland.backup.mysql_lvm.plugin.raw.util import setup_actions
 from holland.lib.compression import COMPRESSION_CONFIG_STRING
 
@@ -131,7 +131,7 @@ class MysqlLVMBackup(object):
         )
 
         if self.dry_run:
-            return self._dry_run(volume, snapshot, datadir)
+            return _dry_run(self.target_directory, volume, snapshot, datadir)
 
         try:
             snapshot.start(volume)
@@ -146,28 +146,3 @@ class MysqlLVMBackup(object):
             LOG.debug(ex)
 
         return None
-
-    def _dry_run(self, volume, snapshot, datadir):
-        """Implement dry-run for LVM snapshots.
-        """
-        LOG.info(
-            "* Would snapshot source volume %s/%s as %s/%s (size=%s)",
-            volume.vg_name,
-            volume.lv_name,
-            volume.vg_name,
-            snapshot.name,
-            format_bytes(snapshot.size * int(volume.vg_extent_size)),
-        )
-        LOG.info("* Would mount on %s", snapshot.mountpoint or "generated temporary directory")
-
-        if getmount(self.target_directory) == getmount(datadir):
-            LOG.error(
-                "Backup directory %s is on the same filesystem as " "the source logical volume %s.",
-                self.target_directory,
-                volume.device_name(),
-            )
-            LOG.error(
-                "This will result in very poor performance and "
-                "has a high potential for failed backups."
-            )
-            raise BackupError("Improper backup configuration for LVM.")

@@ -16,7 +16,8 @@ from holland.lib.mysql.client.base import MYSQL_CLIENT_CONFIG_STRING
 
 LOG = logging.getLogger(__name__)
 
-CONFIGSPEC = """
+CONFIGSPEC = (
+    """
 [xtrabackup]
 global-defaults     = string(default='/etc/my.cnf')
 innobackupex        = string(default='innobackupex')
@@ -29,12 +30,17 @@ no-lock             = boolean(default=no)
 tmpdir              = string(default=None)
 additional-options  = force_list(default=list())
 pre-command         = string(default=None)
-""" + MYSQL_CLIENT_CONFIG_STRING + COMPRESSION_CONFIG_STRING
+"""
+    + MYSQL_CLIENT_CONFIG_STRING
+    + COMPRESSION_CONFIG_STRING
+)
 
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
+
 class XtrabackupPlugin(object):
     """plugin for backuping database using xtrabackup"""
+
     #: control connection to mysql server
     mysql = None
 
@@ -48,10 +54,11 @@ class XtrabackupPlugin(object):
         self.target_directory = target_directory
         self.dry_run = dry_run
 
-        defaults_path = join(self.target_directory, 'my.cnf')
-        client_opts = self.config['mysql:client']
-        includes = [self.config['xtrabackup']['global-defaults']] + \
-                   client_opts['defaults-extra-file']
+        defaults_path = join(self.target_directory, "my.cnf")
+        client_opts = self.config["mysql:client"]
+        includes = [self.config["xtrabackup"]["global-defaults"]] + client_opts[
+            "defaults-extra-file"
+        ]
         util.generate_defaults_file(defaults_path, includes, client_opts)
         self.defaults_path = defaults_path
 
@@ -60,65 +67,63 @@ class XtrabackupPlugin(object):
         try:
             client = MySQL.from_defaults(self.defaults_path)
         except MySQL.MySQLError as exc:
-            raise BackupError('Failed to connect to MySQL [%d] %s' % exc.args)
+            raise BackupError("Failed to connect to MySQL [%d] %s" % exc.args)
         try:
             try:
-                datadir = client.var('datadir')
+                datadir = client.var("datadir")
                 return directory_size(datadir)
             except MySQL.MySQLError as exc:
-                raise BackupError("Failed to find mysql datadir: [%d] %s" %
-                                  exc.args)
+                raise BackupError("Failed to find mysql datadir: [%d] %s" % exc.args)
             except OSError as exc:
-                raise BackupError('Failed to calculate directory size: [%d] %s'
-                                  % (exc.errno, exc.strerror))
+                raise BackupError(
+                    "Failed to calculate directory size: [%d] %s" % (exc.errno, exc.strerror)
+                )
         finally:
             client.close()
 
     def open_xb_logfile(self):
         """Open a file object to the log output for xtrabackup"""
-        path = join(self.target_directory, 'xtrabackup.log')
+        path = join(self.target_directory, "xtrabackup.log")
         try:
-            return open(path, 'a')
+            return open(path, "a")
         except IOError as exc:
-            raise BackupError('[%d] %s' % (exc.errno, exc.strerror))
+            raise BackupError("[%d] %s" % (exc.errno, exc.strerror))
 
     def open_xb_stdout(self):
         """Open the stdout output for a streaming xtrabackup run"""
-        config = self.config['xtrabackup']
+        config = self.config["xtrabackup"]
         backup_directory = self.target_directory
-        stream = util.determine_stream_method(config['stream'])
+        stream = util.determine_stream_method(config["stream"])
         if stream:
-            if stream == 'tar':
-                archive_path = join(backup_directory, 'backup.tar')
-            elif stream == 'xbstream':
-                archive_path = join(backup_directory, 'backup.xb')
+            if stream == "tar":
+                archive_path = join(backup_directory, "backup.tar")
+            elif stream == "xbstream":
+                archive_path = join(backup_directory, "backup.xb")
             else:
                 raise BackupError("Unknown stream method '%s'" % stream)
-            zconfig = self.config['compression']
+            zconfig = self.config["compression"]
             try:
-                return open_stream(archive_path, 'w',
-                                   method=zconfig['method'],
-                                   level=zconfig['level'],
-                                   extra_args=zconfig['options'],
-                                   inline=zconfig['inline'])
+                return open_stream(
+                    archive_path,
+                    "w",
+                    method=zconfig["method"],
+                    level=zconfig["level"],
+                    extra_args=zconfig["options"],
+                    inline=zconfig["inline"],
+                )
             except OSError as exc:
                 raise BackupError("Unable to create output file: %s" % exc)
         else:
-            return open('/dev/null', 'w')
-
+            return open("/dev/null", "w")
 
     def dryrun(self):
         """Perform test backup"""
         from subprocess import Popen, list2cmdline, PIPE, STDOUT
-        xb_cfg = self.config['xtrabackup']
-        args = util.build_xb_args(xb_cfg, self.target_directory,
-                                  self.defaults_path)
+
+        xb_cfg = self.config["xtrabackup"]
+        args = util.build_xb_args(xb_cfg, self.target_directory, self.defaults_path)
         LOG.info("* xtrabackup command: %s", list2cmdline(args))
-        args = [
-            'xtrabackup',
-            '--defaults-file=' + self.defaults_path,
-            '--help'
-        ]
+        args = ["xtrabackup", "--defaults-file=" + self.defaults_path, "--help"]
         cmdline = list2cmdline(args)
         LOG.info("* Verifying generated config '%s'", self.defaults_path)
         LOG.debug("* Verifying via command: %s", cmdline)
@@ -133,8 +138,7 @@ class XtrabackupPlugin(object):
             LOG.error("! %s failed. Output follows below.", cmdline)
             for line in stdout.splitlines():
                 LOG.error("! %s", line)
-            raise BackupError("%s exited with failure status [%d]" %
-                              (cmdline, process.returncode))
+            raise BackupError("%s exited with failure status [%d]" % (cmdline, process.returncode))
 
     def backup(self):
         """Perform Backup"""
@@ -142,14 +146,13 @@ class XtrabackupPlugin(object):
         if self.dry_run:
             self.dryrun()
             return
-        xb_cfg = self.config['xtrabackup']
+        xb_cfg = self.config["xtrabackup"]
         backup_directory = self.target_directory
-        tmpdir = util.evaluate_tmpdir(xb_cfg['tmpdir'], backup_directory)
+        tmpdir = util.evaluate_tmpdir(xb_cfg["tmpdir"], backup_directory)
         # innobackupex --tmpdir does not affect xtrabackup
         util.add_xtrabackup_defaults(self.defaults_path, tmpdir=tmpdir)
         args = util.build_xb_args(xb_cfg, backup_directory, self.defaults_path)
-        util.execute_pre_command(xb_cfg['pre-command'],
-                                 backup_directory=backup_directory)
+        util.execute_pre_command(xb_cfg["pre-command"], backup_directory=backup_directory)
         stderr = self.open_xb_logfile()
         try:
             stdout = self.open_xb_stdout()
@@ -159,7 +162,7 @@ class XtrabackupPlugin(object):
                     util.run_xtrabackup(args, stdout, stderr)
                 except Exception as exc:
                     LOG.info("!! %s", exc)
-                    for line in open(join(self.target_directory, 'xtrabackup.log'), 'r'):
+                    for line in open(join(self.target_directory, "xtrabackup.log"), "r"):
                         LOG.error("    ! %s", line.rstrip())
                     raise
             finally:
@@ -171,5 +174,5 @@ class XtrabackupPlugin(object):
                         raise
         finally:
             stderr.close()
-        if xb_cfg['apply-logs']:
+        if xb_cfg["apply-logs"]:
             util.apply_xtrabackup_logfile(xb_cfg, args[-1])

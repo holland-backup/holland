@@ -9,7 +9,7 @@ import copy
 from holland.core.backup import BackupError
 from holland.core.util.fmt import format_bytes
 from holland.lib.mysql import MySQLClient, MySQLError, build_mysql_config, connect
-from holland.lib.lvm import Snapshot, parse_bytes
+from holland.lib.lvm import Snapshot, parse_bytes, getmount
 
 LOG = logging.getLogger(__name__)
 
@@ -121,3 +121,27 @@ def log_final_snapshot_size(event, snapshot):
         format_bytes(snap_size * snap_percent),
         event,
     )
+
+
+def _dry_run(target_directory, volume, snapshot, datadir):
+    """Implement dry-run for LVM snapshots.
+    """
+    LOG.info(
+        volume.vg_name,
+        volume.lv_name,
+        volume.vg_name,
+        snapshot.name,
+        format_bytes(snapshot.size * int(volume.vg_extent_size)),
+    )
+    LOG.info("* Would mount on %s", snapshot.mountpoint or "generated temporary directory")
+    if getmount(target_directory) == getmount(datadir):
+        LOG.error(
+            "Backup directory %s is on the same filesystem as " "the source logical volume %s.",
+            target_directory,
+            volume.device_name(),
+        )
+        LOG.error(
+            "This will result in very poor performance and "
+            "has a high potential for failed backups."
+        )
+        raise BackupError("Improper backup configuration for LVM.")
