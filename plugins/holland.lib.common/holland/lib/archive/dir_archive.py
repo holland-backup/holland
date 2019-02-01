@@ -7,11 +7,14 @@ import shutil
 import logging
 
 LOGGER = logging.getLogger(__name__)
+
+
 class DirArchive(object):
     """
     Read, write, access directory archives.  Treats a directory like an
     archive.
     """
+
     def __init__(self, path, mode=None):
         """
         Initialize a DirArchive.
@@ -54,7 +57,7 @@ class DirArchive(object):
         target_dir = os.path.dirname(target_path)
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
-        fileobj = open(target_path, 'w')
+        fileobj = open(target_path, "w")
         print(string, file=fileobj)
         fileobj.close()
 
@@ -91,14 +94,17 @@ class DirArchive(object):
         Close archive.
         """
         import subprocess
-        status = subprocess.call(['gzip', '-1', '--recursive', self.path])
+
+        status = subprocess.call(["gzip", "-1", "--recursive", self.path])
         if status != 0:
             LOGGER.error("Failed to compress %r", self.path)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import time
+
     NOW = time.time()
-    XV = DirArchive('backup/')
+    XV = DirArchive("backup/")
     XV.add_string("[mysqldump]\nignore-table=mysql.user\n", "my.cnf")
     XV.add_string("blah", "test/test.MYD")
     XV.add_file("user.frm", "mysql/user.frm")

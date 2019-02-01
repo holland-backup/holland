@@ -9,8 +9,10 @@ Simple mysql client wrapper
 import MySQLdb
 from holland.core.backup import BackupError
 
+
 class MySQL(object):
     """Control MySQL Conntions"""
+
     MySQLError = MySQLdb.MySQLError
 
     def __init__(self, *args, **kwargs):
@@ -52,12 +54,12 @@ class MySQL(object):
         """Read in default config options(?)"""
         return cls(read_default_file=defaults_file)
 
-    def var(self, var, scope='SESSION'):
+    def var(self, var, scope="SESSION"):
         """Get MySQL variables"""
         scope = scope.upper()
-        if scope not in ('SESSION', 'GLOBAL'):
+        if scope not in ("SESSION", "GLOBAL"):
             raise BackupError("Invalid variable scope used")
-        var = var.replace('%', '\\%').replace('_', '\\_')
+        var = var.replace("%", "\\%").replace("_", "\\_")
         sql = "SHOW %s VARIABLES LIKE '%s'" % (scope, var)
         try:
             return self.first(sql)[1]

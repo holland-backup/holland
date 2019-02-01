@@ -10,7 +10,8 @@ LOG = logging.getLogger(__name__)
 #: engines we consider 'transactional'
 #: transactional in this context means '--single-transaction'
 #: is probably a reasonable option for mysqldump
-TRANSACTIONAL_ENGINES = 'innodb', 'federated', 'myisam_mrg', 'memory', 'view'
+TRANSACTIONAL_ENGINES = "innodb", "federated", "myisam_mrg", "memory", "view"
+
 
 class MySQLSchema(object):
     """A catalog summary of a MySQL Instance"""
@@ -28,6 +29,7 @@ class MySQLSchema(object):
             for table in database:
                 if table.excluded:
                     yield table
+
     excluded_tables = property(excluded_tables)
 
     def excluded_databases(self):
@@ -35,6 +37,7 @@ class MySQLSchema(object):
         for database in self.databases:
             if database.excluded:
                 yield database
+
     excluded_databases = property(excluded_databases)
 
     def add_database_filter(self, filterobj):
@@ -131,19 +134,26 @@ class MySQLSchema(object):
             # 1) we are matching all tables (using default pattern)
             # 2) we are matching all engines (using default pattern)
             # 3) caller does not require table iteration
-            #pylint: disable=too-many-boolean-expressions
-            if fast_iterate and (len(self._table_filters) == 2 and \
-                self._table_filters[0].patterns == ['.*\\..*$'] and \
-                    self._table_filters[1].patterns == []) and \
-                        (len(self._engine_filters) == 2 and \
-                            self._engine_filters[0].patterns == ['.*$'] and \
-                                self._engine_filters[1].patterns == []):
+            # pylint: disable=too-many-boolean-expressions
+            if (
+                fast_iterate
+                and (
+                    len(self._table_filters) == 2
+                    and self._table_filters[0].patterns == [".*\\..*$"]
+                    and self._table_filters[1].patterns == []
+                )
+                and (
+                    len(self._engine_filters) == 2
+                    and self._engine_filters[0].patterns == [".*$"]
+                    and self._engine_filters[1].patterns == []
+                )
+            ):
                 # optimize case where we have no table level filters
                 continue
 
             try:
                 for table in tbl_iter(database.name):
-                    if self.is_table_filtered(table.database + '.' + table.name):
+                    if self.is_table_filtered(table.database + "." + table.name):
                         table.excluded = True
                     if self.is_engine_filtered(table.engine):
                         table.excluded = True
@@ -163,7 +173,7 @@ class Database(object):
     Only the name an whether this database is
     excluded is recorded"""
 
-    __slots__ = ('name', 'excluded', 'tables')
+    __slots__ = ("name", "excluded", "tables")
 
     def __init__(self, name):
         self.name = name
@@ -200,35 +210,35 @@ class Database(object):
         :returns: int. sum of all data and indexes of tables that are not
                   excluded from this database
         """
-        return sum([table.size for table in self.tables
-                    if not table.excluded
-                    and table.engine not in ('mrg_myisam', 'federated')])
+        return sum(
+            [
+                table.size
+                for table in self.tables
+                if not table.excluded
+                and table.engine not in ("mrg_myisam", "federated")
+            ]
+        )
+
     size = property(size)
 
     def __str__(self):
-        return "Database(name=%r, table_count=%d, excluded=%r)" % \
-                (self.name, len(self.tables), self.excluded)
+        return "Database(name=%r, table_count=%d, excluded=%r)" % (
+            self.name,
+            len(self.tables),
+            self.excluded,
+        )
 
     __repr__ = __str__
+
 
 class Table(object):
     """Representation of a MySQL Table
 
     """
-    __slots__ = ('database',
-                 'name',
-                 'data_size',
-                 'index_size',
-                 'engine',
-                 'excluded',
-                )
 
-    def __init__(self,
-                 database,
-                 name,
-                 data_size,
-                 index_size,
-                 engine):
+    __slots__ = ("database", "name", "data_size", "index_size", "engine", "excluded")
+
+    def __init__(self, database, name, data_size, index_size, engine):
         """Init Table"""
         self.database = database
         self.name = name
@@ -240,34 +250,40 @@ class Table(object):
     def size(self):
         """Return size of table"""
         return self.data_size + self.index_size
+
     size = property(size)
 
     def is_transactional(self):
         """Return if the table is transactional"""
         return self.engine in TRANSACTIONAL_ENGINES
+
     is_transactional = property(is_transactional)
 
     def __str__(self):
-        data_size = "%.2fMB" % (self.data_size / 1024.0**2)
-        index_size = "%.2fMB" % (self.index_size / 1024.0**2)
-        return "%sTable(name=%r, data_size=%s, \
-               index_size=%s, engine=%s, txn=%s)" % \
-                (self.excluded and "[EXCL]" or "",
-                 self.name, data_size, index_size,
-                 self.engine,
-                 str(self.is_transactional)
-                )
+        data_size = "%.2fMB" % (self.data_size / 1024.0 ** 2)
+        index_size = "%.2fMB" % (self.index_size / 1024.0 ** 2)
+        return (
+            "%sTable(name=%r, data_size=%s, \
+               index_size=%s, engine=%s, txn=%s)"
+            % (
+                self.excluded and "[EXCL]" or "",
+                self.name,
+                data_size,
+                index_size,
+                self.engine,
+                str(self.is_transactional),
+            )
+        )
+
 
 class DatabaseIterator(object):
     """Iterate over databases returns by a MySQLClient instance
 
     client must have a show_databases() method
     """
-    STD_EXCLUSIONS = (
-        'information_schema',
-        'performance_schema',
-        'lost+found',
-    )
+
+    STD_EXCLUSIONS = ("information_schema", "performance_schema", "lost+found")
+
     def __init__(self, client):
         """Construct a new iterator to produce `Database` instances for the
         database requested by the __call__ method.
@@ -288,6 +304,7 @@ class TableIterator(object):
 
     client must have a show_table_metadata(database_name) method
     """
+
     def __init__(self, client):
         """Construct a new iterator to produce `Table` instances for the
         database requested by the __call__ method.
@@ -300,6 +317,7 @@ class TableIterator(object):
     def __call__(self, database):
         raise NotImplementedError()
 
+
 class MetadataTableIterator(TableIterator):
     """Iterate over SHOW TABLE STATUS in the requested database
     and yield Table instances
@@ -308,6 +326,7 @@ class MetadataTableIterator(TableIterator):
     def __call__(self, database):
         for metadata in self.client.show_table_metadata(database):
             yield Table(**metadata)
+
 
 class SimpleTableIterator(MetadataTableIterator):
     """Iterator over tables returns by the client instance
@@ -318,7 +337,7 @@ class SimpleTableIterator(MetadataTableIterator):
     SHOW CREATE TABLE is only used for engine lookup in MySQL 5.0.
     """
 
-    ENGINE_PCRE = re.compile(r'^[)].*ENGINE=(\S+)', re.M)
+    ENGINE_PCRE = re.compile(r"^[)].*ENGINE=(\S+)", re.M)
 
     def __init__(self, client, record_engines=False):
         """Construct a new iterator to produce `Table` instances for the
@@ -332,13 +351,15 @@ class SimpleTableIterator(MetadataTableIterator):
         self.record_engines = record_engines
 
     def _faster_mysql51_metadata(self, database):
-        sql = ("SELECT TABLE_SCHEMA AS `database`, "
-               "          TABLE_NAME AS `name`, "
-               "          0 AS `data_size`, "
-               "          0 AS `index_size`, "
-               "          LOWER(COALESCE(ENGINE, 'view')) AS `engine` "
-               "FROM INFORMATION_SCHEMA.TABLES "
-               "WHERE TABLE_SCHEMA = %s")
+        sql = (
+            "SELECT TABLE_SCHEMA AS `database`, "
+            "          TABLE_NAME AS `name`, "
+            "          0 AS `data_size`, "
+            "          0 AS `index_size`, "
+            "          LOWER(COALESCE(ENGINE, 'view')) AS `engine` "
+            "FROM INFORMATION_SCHEMA.TABLES "
+            "WHERE TABLE_SCHEMA = %s"
+        )
         cursor = self.client.cursor()
         try:
             cursor.execute(sql, (database,))
@@ -360,18 +381,18 @@ class SimpleTableIterator(MetadataTableIterator):
         else:
             for table, kind in self.client.show_tables(database, full=True):
                 metadata = [
-                    ('database', database),
-                    ('name', table),
-                    ('data_size', 0),
-                    ('index_size', 0),
+                    ("database", database),
+                    ("name", table),
+                    ("data_size", 0),
+                    ("index_size", 0),
                 ]
 
-                if kind == 'VIEW':
-                    metadata.append(('engine', 'view'))
+                if kind == "VIEW":
+                    metadata.append(("engine", "view"))
                 else:
                     if self.record_engines:
                         engine = self._lookup_engine(database, table).lower()
-                        metadata.append(('engine', engine))
+                        metadata.append(("engine", engine))
                     else:
-                        metadata.append(('engine', ''))
+                        metadata.append(("engine", ""))
                 yield Table(**dict(metadata))

@@ -6,6 +6,7 @@ import string
 
 SAFE_CHARACTERS = string.ascii_letters + string.digits + string.punctuation
 
+
 def encode(filename):
     """Convert database names  to safe filesystem names.
     """

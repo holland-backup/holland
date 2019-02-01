@@ -10,7 +10,7 @@ from holland.core.command import run, parse_sys, print_help
 from holland.core.config.checks import is_logging_level
 
 LOGGER = logging.getLogger(__name__)
-HOLLAND_VERSION = get_distribution('holland').version
+HOLLAND_VERSION = get_distribution("holland").version
 
 # main entrypoint for holland's cmdshell 'hl'
 def main():
@@ -24,9 +24,9 @@ def main():
     opts, args = parse_sys(sys.argv[1:])
 
     if args:
-        args = args[0].split(',')
-    logging.raiseExceptions = bool(opts.log_level == 'debug')
-    if 'log_level' in opts:
+        args = args[0].split(",")
+    logging.raiseExceptions = bool(opts.log_level == "debug")
+    if "log_level" in opts:
         opts.log_level = is_logging_level(opts.log_level)
 
     if opts.command is None:

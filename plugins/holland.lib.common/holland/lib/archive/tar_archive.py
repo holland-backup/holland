@@ -13,6 +13,7 @@ try:
 except ImportError:
     from io import StringIO
 
+
 def _make_tarinfo(name, size):
     tarinfo = tarfile.TarInfo(name=name)
     tarinfo.size = size
@@ -25,11 +26,13 @@ def _make_tarinfo(name, size):
     tarinfo.gname = grp.getgrgid(os.getegid()).gr_name
     return tarinfo
 
+
 class TarArchive(object):
     """
     Read, write, access Tar archives.
     """
-    def __init__(self, path, mode='w:gz'):
+
+    def __init__(self, path, mode="w:gz"):
         """
         Initialize a TarArchive.
 
@@ -51,7 +54,7 @@ class TarArchive(object):
         path -- Path to file for which to add to archive.
         name -- Name of file (for tarinfo)
         """
-        fileobj = open(path, 'r')
+        fileobj = open(path, "r")
         size = os.fstat(fileobj.fileno()).st_size
         tarinfo = _make_tarinfo(name, size)
         self.archive.addfile(tarinfo, fileobj)
@@ -95,9 +98,10 @@ class TarArchive(object):
         """
         self.archive.close()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     NOW = time.time()
-    XV = TarArchive('foo.tgz', 'w:gz')
+    XV = TarArchive("foo.tgz", "w:gz")
     XV.add_string("[mysqldump]\nignore-table=mysql.user\n", "my.cnf")
     XV.add_string("blah", "test/test.MYD")
     XV.add_file("user.frm", "mysql/user.frm")

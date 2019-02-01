@@ -7,13 +7,14 @@ import signal
 from math import log
 
 __all__ = [
-    'getmount',
-    'getdevice',
-    'relpath',
-    'format_bytes',
-    'parse_bytes',
-    'SignalManager',
+    "getmount",
+    "getdevice",
+    "relpath",
+    "format_bytes",
+    "parse_bytes",
+    "SignalManager",
 ]
+
 
 def getmount(getpath):
     """Return the mount point of a path
@@ -30,6 +31,7 @@ def getmount(getpath):
             return path
         path = os.path.abspath(os.path.join(path, os.pardir))
     return path
+
 
 def getdevice(mountpoint):
     """Return the device name for the given mountpoint
@@ -53,21 +55,22 @@ def getdevice(mountpoint):
 
     # For py23 support 'reversed' doesn't exist, so call list.reverse()
     # explicitly
-    proc_mounts_info = open('/etc/mtab', 'r').readlines()
+    proc_mounts_info = open("/etc/mtab", "r").readlines()
     proc_mounts_info.reverse()
 
     for path in proc_mounts_info:
         device, mount = path.split()[0:2]
         # handle path with spaces - encoded in /etc/mtab
         if sys.version_info > (3, 0):
-            mount = str(bytes(mount, 'utf-8').decode('unicode_escape'))
+            mount = str(bytes(mount, "utf-8").decode("unicode_escape"))
         else:
-            mount = mount.decode('string_escape')
+            mount = mount.decode("string_escape")
         mount = os.path.normpath(mount)
         if mount == mountpoint:
             return device
 
     return None
+
 
 # Taken from posixpath in Python2.6
 def relpath(path, start=os.curdir):
@@ -82,10 +85,11 @@ def relpath(path, start=os.curdir):
     # Work out how much of the filepath is shared by start and path.
     i = len(os.path.commonprefix([start_list, path_list]))
 
-    rel_list = [os.pardir] * (len(start_list)-i) + path_list[i:]
+    rel_list = [os.pardir] * (len(start_list) - i) + path_list[i:]
     if not rel_list:
         return os.curdir
     return os.path.join(*rel_list)
+
 
 def format_bytes(nbytes, precision=2):
     """Format an integer number of bytes to a human readable string."""
@@ -98,7 +102,7 @@ def format_bytes(nbytes, precision=2):
     return "%.*f%s" % (
         precision,
         float(nbytes) / (1024 ** exponent),
-        ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'][int(exponent)]
+        ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][int(exponent)],
     )
 
 
@@ -112,12 +116,12 @@ def parse_bytes(units_string):
 
     units = "bBkKmMgGtTpPeE"
 
-    match = re.match(r'^(\d+(?:[.]\d+)?)([%s]|)$' % units, units_string)
+    match = re.match(r"^(\d+(?:[.]\d+)?)([%s]|)$" % units, units_string)
     if not match:
         raise ValueError("Invalid LVM Unit syntax %r" % units_string)
     number, unit = match.groups()
     if not unit:
-        unit = 'M'
+        unit = "M"
     unit = unit.upper()
 
     try:
@@ -125,8 +129,8 @@ def parse_bytes(units_string):
     except ValueError:
         raise ValueError("Invalid unit %r. Must be B,K,M,G,T,P or E" % unit)
 
-
     return int(float(number) * 1024 ** (exponent))
+
 
 class SignalManager(object):
     """Manage signals around critical sections"""

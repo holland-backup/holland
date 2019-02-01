@@ -8,11 +8,13 @@ import logging
 
 LOGGER = logging.getLogger(__name__)
 
+
 class ZipArchive(object):
     """
     Read, write, access Zip archives using zipfile.
     """
-    def __init__(self, path, mode='w'):
+
+    def __init__(self, path, mode="w"):
         """
         Initialize a ZipArchive.
 
@@ -23,10 +25,7 @@ class ZipArchive(object):
         """
         self.path = path
         self.mode = mode
-        self.archive = zipfile.ZipFile(path,
-                                       mode,
-                                       zipfile.ZIP_DEFLATED,
-                                       True)
+        self.archive = zipfile.ZipFile(path, mode, zipfile.ZIP_DEFLATED, True)
 
     def add_file(self, path, name):
         """
@@ -76,9 +75,10 @@ class ZipArchive(object):
         """
         self.archive.close()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     NOW = time.time()
-    XV = ZipArchive('foo.zip', 'w')
+    XV = ZipArchive("foo.zip", "w")
     XV.add_string("[mysqldump]\nignore-table=mysql.user\n", "my.cnf")
     XV.add_string("blah", "test/test.MYD")
     XV.add_file("user.frm", "mysql/user.frm")

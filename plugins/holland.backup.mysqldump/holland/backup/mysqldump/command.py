@@ -15,19 +15,18 @@ ALL_DATABASES = object()
 def check_master_data(version, arg):
     """Validate --master-data against a mysqldump version"""
     if version < (4, 1, 8) and arg:
-        raise MyOptionError("--master-data only takes an argument in MySQL "
-                            ">= 4.1.8")
+        raise MyOptionError("--master-data only takes an argument in MySQL " ">= 4.1.8")
     else:
         if arg:
             try:
                 value = int(arg)
                 assert value in (1, 2)
             except ValueError:
-                raise MyOptionError("Invalid argument to --master-data: %r" %
-                                    arg)
+                raise MyOptionError("Invalid argument to --master-data: %r" % arg)
             except AssertionError:
-                raise MyOptionError("Argument to --master-data must be 1 or 2 "
-                                    "not %r" % arg)
+                raise MyOptionError(
+                    "Argument to --master-data must be 1 or 2 " "not %r" % arg
+                )
 
 
 class MySQLDumpError(Exception):
@@ -40,7 +39,8 @@ class MyOptionError(Exception):
 
 class MyOptionChecker(object):
     """Container for adding and validating multiple options"""
-    OPTION_ARG_CRE = re.compile(r'^(--[^=]+)(?:=(.+))?$', re.UNICODE)
+
+    OPTION_ARG_CRE = re.compile(r"^(--[^=]+)(?:=(.+))?$", re.UNICODE)
 
     def __init__(self, version):
         self.version = version
@@ -53,7 +53,7 @@ class MyOptionChecker(object):
         except AttributeError:
             raise MyOptionError("Unparseable option '%s'" % option)
 
-        option = option.replace('_', '-')
+        option = option.replace("_", "-")
 
         if option not in self._options:
             raise MyOptionError("User supplied option '%s'" % option)
@@ -95,106 +95,102 @@ class MyOption(object):
         """Check the given command version against the version required by
         this option"""
         if self.min_version and version < self.min_version:
-            raise MyOptionError("Option %r requires minimum version %s" %
-                                (self.option,
-                                 '.'.join([str(x) for x in self.min_version]))
-                               )
+            raise MyOptionError(
+                "Option %r requires minimum version %s"
+                % (self.option, ".".join([str(x) for x in self.min_version]))
+            )
 
 
 MYSQLDUMP_OPTIONS = [
     # boolean options
-    MyOption('--flush-logs'),
-    MyOption('--flush-privileges', min_version=(5, 0, 26)),
-    MyOption('--force'),
-    MyOption('--hex-blob', min_version=(4, 1, 8)),
-    MyOption('--add-drop-database'),
-    MyOption('--no-autocommit'),
-    MyOption('--delete-master-logs'),
-    MyOption('--compress'),
-    MyOption('--order-by-primary', min_version=(4, 1, 8)),
-    MyOption('--insert-ignore', min_version=(4, 1, 12)),
-    MyOption('--routines', min_version=(5, 0, 13)),
-    MyOption('--events', min_version=(5, 1, 8)),
-    MyOption('--max-allowed-packet', arg=r'\w'),
-
+    MyOption("--flush-logs"),
+    MyOption("--flush-privileges", min_version=(5, 0, 26)),
+    MyOption("--force"),
+    MyOption("--hex-blob", min_version=(4, 1, 8)),
+    MyOption("--add-drop-database"),
+    MyOption("--no-autocommit"),
+    MyOption("--delete-master-logs"),
+    MyOption("--compress"),
+    MyOption("--order-by-primary", min_version=(4, 1, 8)),
+    MyOption("--insert-ignore", min_version=(4, 1, 12)),
+    MyOption("--routines", min_version=(5, 0, 13)),
+    MyOption("--events", min_version=(5, 1, 8)),
+    MyOption("--max-allowed-packet", arg=r"\w"),
     # options that take arguments
-    MyOption('--default-character-set', arg=r'\w'),
-    MyOption('--master-data', arg=check_master_data),
-
+    MyOption("--default-character-set", arg=r"\w"),
+    MyOption("--master-data", arg=check_master_data),
     # lock modes
-    MyOption('--single-transaction', (4, 0, 2)),
-    MyOption('--lock-all-tables', min_version=(4, 1, 8)),
-    MyOption('--lock-tables'),
-
+    MyOption("--single-transaction", (4, 0, 2)),
+    MyOption("--lock-all-tables", min_version=(4, 1, 8)),
+    MyOption("--lock-tables"),
     # misc
-    MyOption('--skip-dump-date', min_version=(5, 1, 23)),
-    MyOption('--skip-add-drop-table'),
-    MyOption('--skip-add-locks'),
-    MyOption('--skip-comments'),
-    MyOption('--skip-compact'),
-    MyOption('--skip-disable-keys'),
-    MyOption('--skip-extended-insert'),
-    MyOption('--skip-opt'),
-    MyOption('--skip-quick'),
-    MyOption('--skip-quote-names'),
-    MyOption('--skip-set-charset'),
-    MyOption('--skip-triggers'),
-    MyOption('--skip-tz-utc'),
+    MyOption("--skip-dump-date", min_version=(5, 1, 23)),
+    MyOption("--skip-add-drop-table"),
+    MyOption("--skip-add-locks"),
+    MyOption("--skip-comments"),
+    MyOption("--skip-compact"),
+    MyOption("--skip-disable-keys"),
+    MyOption("--skip-extended-insert"),
+    MyOption("--skip-opt"),
+    MyOption("--skip-quick"),
+    MyOption("--skip-quote-names"),
+    MyOption("--skip-set-charset"),
+    MyOption("--skip-triggers"),
+    MyOption("--skip-tz-utc"),
 ]
 
 
 def mysqldump_version(command):
     """Return the version of the given mysqldump command"""
-    args = [
-        command,
-        '--no-defaults',
-        '--version',
-    ]
+    args = [command, "--no-defaults", "--version"]
     list2cmdline = subprocess.list2cmdline
     cmdline = list2cmdline(args)
     LOG.debug("Executing: %s", cmdline)
     try:
-        process = subprocess.Popen(args,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT,
-                                   close_fds=True)
+        process = subprocess.Popen(
+            args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True
+        )
         stdout, _ = process.communicate()
     except OSError as exc:
         if exc.errno == errno.ENOENT:
             raise MySQLDumpError("'%s' does not exist" % command)
         else:
-            raise MySQLDumpError("Error[%d:%s] when trying to run '%s'" %
-                                 (exc.errno, errno.errorcode[exc.errno], command))
+            raise MySQLDumpError(
+                "Error[%d:%s] when trying to run '%s'"
+                % (exc.errno, errno.errorcode[exc.errno], command)
+            )
 
     if process.returncode != 0:
-        LOG.error("%s exited with non-zero status[%d]",
-                  cmdline, process.returncode)
+        LOG.error("%s exited with non-zero status[%d]", cmdline, process.returncode)
         for line in stdout.splitlines():
             LOG.error("! %s", line)
     try:
-        return tuple([int(digit) for digit in
-                      re.search(r'(\d+)[.](\d+)[.](\d+)', stdout.decode('utf-8')).groups()])
+        return tuple(
+            [
+                int(digit)
+                for digit in re.search(
+                    r"(\d+)[.](\d+)[.](\d+)", stdout.decode("utf-8")
+                ).groups()
+            ]
+        )
     except AttributeError as exc:
         LOG.debug("%s provided output %r", cmdline, stdout)
-        raise MySQLDumpError("Failed to determine mysqldump version for %s" %
-                             command)
+        raise MySQLDumpError("Failed to determine mysqldump version for %s" % command)
 
 
 class MySQLDump(object):
     """mysqldump command runner"""
 
-    def __init__(self,
-                 defaults_file,
-                 cmd_path='mysqldump',
-                 extra_defaults=False,
-                 mock_env=None):
+    def __init__(
+        self, defaults_file, cmd_path="mysqldump", extra_defaults=False, mock_env=None
+    ):
         if not os.path.exists(cmd_path):
             raise MySQLDumpError("'%s' does not exist" % cmd_path)
         self.cmd_path = cmd_path
         self.defaults_file = defaults_file
         self.extra_defaults = extra_defaults
         self.version = mysqldump_version(cmd_path)
-        self.version_str = '.'.join([str(digit) for digit in self.version])
+        self.version_str = ".".join([str(digit) for digit in self.version])
         self.mysqldump_optcheck = MyOptionChecker(self.version)
         for optspec in MYSQLDUMP_OPTIONS:
             self.mysqldump_optcheck.add_option(optspec)
@@ -215,19 +211,19 @@ class MySQLDump(object):
         if self.mock_env:
             subprocess.Popen = self.mock_env.mocked_popen
 
-        if not hasattr(stream, 'fileno'):
+        if not hasattr(stream, "fileno"):
             raise MySQLDumpError("Invalid output stream")
 
         if not databases:
             raise MySQLDumpError("No databases specified to backup")
 
-        args = [self.cmd_path, ]
+        args = [self.cmd_path]
 
         if self.defaults_file:
             if self.extra_defaults:
-                args.append('--defaults-extra-file=%s' % self.defaults_file)
+                args.append("--defaults-extra-file=%s" % self.defaults_file)
             else:
-                args.append('--defaults-file=%s' % self.defaults_file)
+                args.append("--defaults-file=%s" % self.defaults_file)
 
         args.extend([str(opt) for opt in self.options])
 
@@ -235,10 +231,10 @@ class MySQLDump(object):
             args.extend(additional_options)
 
         if databases is ALL_DATABASES:
-            args.append('--all-databases')
+            args.append("--all-databases")
         else:
             if len(databases) > 1:
-                args.append('--databases')
+                args.append("--databases")
             args.extend(databases)
 
         if self.mock_env:
@@ -246,10 +242,9 @@ class MySQLDump(object):
         else:
             LOG.info("Executing: %s", subprocess.list2cmdline(args))
         errlog = TemporaryFile()
-        pid = subprocess.Popen(args,
-                               stdout=stream.fileno(),
-                               stderr=errlog.fileno(),
-                               close_fds=True)
+        pid = subprocess.Popen(
+            args, stdout=stream.fileno(), stderr=errlog.fileno(), close_fds=True
+        )
         status = pid.wait()
         try:
             errlog.flush()
@@ -259,5 +254,6 @@ class MySQLDump(object):
         finally:
             errlog.close()
         if status != 0:
-            raise MySQLDumpError("mysqldump exited with non-zero status %d" %
-                                 pid.returncode)
+            raise MySQLDumpError(
+                "mysqldump exited with non-zero status %d" % pid.returncode
+            )

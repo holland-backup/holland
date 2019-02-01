@@ -23,10 +23,12 @@ inline = boolean(default=yes)
 level  = integer(min=0, max=9, default=1)
 """.splitlines()
 
+
 class TarPlugin(object):
     """
     Define Tar Backup method
     """
+
     def __init__(self, name, config, target_directory, dry_run=False):
         """Create a new TarPlugin instance
 
@@ -50,13 +52,15 @@ class TarPlugin(object):
         Estimate how large the backup will be
         """
         total_size = 0
-        for dirpath, dirnames, filenames in os.walk(self.config['tar']['directory']):
+        for dirpath, dirnames, filenames in os.walk(self.config["tar"]["directory"]):
             for files in filenames:
                 filepointer = os.path.join(dirpath, files)
                 # verify the symlink and such exist before trying to get its size
                 if os.path.exists(filepointer):
                     total_size += os.path.getsize(filepointer)
-            LOG.debug('Debug: Checking size of %s directories in %s', len(dirnames), dirpath)
+            LOG.debug(
+                "Debug: Checking size of %s directories in %s", len(dirnames), dirpath
+            )
         return total_size
 
     def _open_stream(self, path, mode, method=None):
@@ -64,16 +68,18 @@ class TarPlugin(object):
         Open a stream through the holland compression api, relative to
         this instance's target directory
         """
-        compression_method = method or self.config['compression']['method']
-        compression_level = self.config['compression']['level']
-        compression_options = self.config['compression']['options']
-        compression_inline = self.config['compression']['inline']
-        stream = open_stream(path,
-                             mode,
-                             compression_method,
-                             compression_level,
-                             extra_args=compression_options,
-                             inline=compression_inline)
+        compression_method = method or self.config["compression"]["method"]
+        compression_level = self.config["compression"]["level"]
+        compression_options = self.config["compression"]["options"]
+        compression_inline = self.config["compression"]["inline"]
+        stream = open_stream(
+            path,
+            mode,
+            compression_method,
+            compression_level,
+            extra_args=compression_options,
+            inline=compression_inline,
+        )
         return stream
 
     def backup(self):
@@ -82,21 +88,23 @@ class TarPlugin(object):
         """
         if self.dry_run:
             return
-        if not os.path.exists(self.config['tar']['directory']) \
-         or not os.path.isdir(self.config['tar']['directory']):
-            raise BackupError('{0} is not a directory!'.format(self.config['tar']['directory']))
+        if not os.path.exists(self.config["tar"]["directory"]) or not os.path.isdir(
+            self.config["tar"]["directory"]
+        ):
+            raise BackupError(
+                "{0} is not a directory!".format(self.config["tar"]["directory"])
+            )
         out_name = "{0}.tar".format(
-            self.config['tar']['directory'].lstrip('/').replace('/', '_'))
+            self.config["tar"]["directory"].lstrip("/").replace("/", "_")
+        )
         outfile = os.path.join(self.target_directory, out_name)
-        args = ['tar', 'c', self.config['tar']['directory']]
+        args = ["tar", "c", self.config["tar"]["directory"]]
         errlog = TemporaryFile()
-        stream = self._open_stream(outfile, 'w')
+        stream = self._open_stream(outfile, "w")
         LOG.info("Executing: %s", list2cmdline(args))
         pid = Popen(
-            args,
-            stdout=stream.fileno(),
-            stderr=errlog.fileno(),
-            close_fds=True)
+            args, stdout=stream.fileno(), stderr=errlog.fileno(), close_fds=True
+        )
         status = pid.wait()
         try:
             errlog.flush()
@@ -107,4 +115,4 @@ class TarPlugin(object):
             errlog.close()
 
         if status != 0:
-            raise BackupError('tar failed (status={0})'.format(status))
+            raise BackupError("tar failed (status={0})".format(status))

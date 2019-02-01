@@ -7,6 +7,7 @@ import sys
 from holland.core.command import Command
 from holland.core.plugin import iter_plugins
 
+
 class ListPlugins(Command):
     """${cmd_usage}
 
@@ -14,11 +15,10 @@ class ListPlugins(Command):
 
     Lists installed plugins
     """
-    name = 'list-plugins'
-    aliases = [
-        'lp'
-    ]
-    description = 'List installed plugins'
+
+    name = "list-plugins"
+    aliases = ["lp"]
+    description = "List installed plugins"
 
     args = []
     kargs = []
@@ -32,7 +32,7 @@ class ListPlugins(Command):
         rest = table[1:]
         fmt = "%-12s %-15s %-9s %-16s %s"
         print(fmt % tuple(header))
-        print("-"*80)
+        print("-" * 80)
         for row in rest:
             print(fmt % tuple(row))
 
@@ -42,16 +42,16 @@ class ListPlugins(Command):
         table_header = ["Plugin-Type", "Plugin-Name", "Version", "Author", "Summary"]
         table = []
 
-        for plugin, metainfo in iter_plugins('holland.backup'):
-            row = ['backup', plugin]
-            for key in ['version', 'author', 'summary']:
-                row.append(metainfo.get(key, '-'))
+        for plugin, metainfo in iter_plugins("holland.backup"):
+            row = ["backup", plugin]
+            for key in ["version", "author", "summary"]:
+                row.append(metainfo.get(key, "-"))
             table.append(row)
 
-        for plugin, metainfo in iter_plugins('holland.commands'):
-            row = ['command', plugin]
-            for key in ['version', 'author', 'summary']:
-                row.append(metainfo.get(key, '-'))
+        for plugin, metainfo in iter_plugins("holland.commands"):
+            row = ["command", plugin]
+            for key in ["version", "author", "summary"]:
+                row.append(metainfo.get(key, "-"))
             table.append(row)
         table.sort()
         table.insert(0, table_header)

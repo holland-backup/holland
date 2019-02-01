@@ -4,7 +4,7 @@ import logging
 import os
 import os.path
 import subprocess
-from io import open # pylint: disable=redefined-builtin
+from io import open  # pylint: disable=redefined-builtin
 from six.moves import urllib
 from pymongo import MongoClient
 
@@ -16,16 +16,20 @@ LOG = logging.getLogger(__name__)
 
 # Specification for this plugin
 # See: http://www.voidspace.org.uk/python/validate.html
-CONFIGSPEC = """
+CONFIGSPEC = (
+    """
 [mongodump]
 host = string(default=None)
 username = string(default=None)
 password = string(default=None)
 authenticationDatabase = string(default=None)
 additional-options = force_list(default=list())
-""" + COMPRESSION_CONFIG_STRING
+"""
+    + COMPRESSION_CONFIG_STRING
+)
 
 CONFIGSPEC = CONFIGSPEC.splitlines()
+
 
 class MongoDump(object):
     "MongoDB backup plugin for holland"
@@ -63,7 +67,7 @@ class MongoDump(object):
             password = self.config["mongodump"].get("password")
             if password:
                 uri += ":" + urllib.parse.quote_plus(password)
-            uri += '@'
+            uri += "@"
         uri += self.config["mongodump"].get("host")
         client = MongoClient(uri)
         dbs = client.database_names()
@@ -103,24 +107,28 @@ class MongoDump(object):
             if ret != 0:
                 raise BackupError("Mongodump returned %d" % ret)
 
-            zopts = self.config['compression']
+            zopts = self.config["compression"]
             for root, _, files in os.walk(self.target_directory):
                 for file_object in files:
-                    if '.log' in file_object or '.conf' in file_object:
+                    if ".log" in file_object or ".conf" in file_object:
                         continue
-                    if '.gz' in file_object:
+                    if ".gz" in file_object:
                         continue
                     path = os.path.join(root, file_object)
                     LOG.info("Compressing file %s", path)
-                    ostream = open_stream(path, 'w',
-                                          method=zopts['method'],
-                                          level=zopts['level'],
-                                          extra_args=zopts['options'],
-                                          inline=zopts['inline'])
-                    with open(path, 'rb') as file_object:
+                    ostream = open_stream(
+                        path,
+                        "w",
+                        method=zopts["method"],
+                        level=zopts["level"],
+                        extra_args=zopts["options"],
+                        inline=zopts["inline"],
+                    )
+                    with open(path, "rb") as file_object:
                         ostream.write(file_object.read())
                     ostream.close()
                     os.remove(path)
+
     @staticmethod
     def info():
         """Provide extra information about the backup this plugin produced

@@ -2,6 +2,7 @@
 
 from fcntl import flock, LOCK_EX, LOCK_UN, LOCK_NB
 
+
 class LockError(Exception):
     """Raised when an error is encountered during a lock operation"""
 
@@ -9,6 +10,7 @@ class LockError(Exception):
         Exception.__init__(self, message, exc)
         self.message = message
         self.exc = exc
+
 
 class Lock(object):
     """A simple flock based file lock implementation"""
@@ -24,8 +26,8 @@ class Lock(object):
             return None
 
         try:
-            self.lock = open(self.path, 'r')
-            flock(self.lock, LOCK_EX|LOCK_NB)
+            self.lock = open(self.path, "r")
+            flock(self.lock, LOCK_EX | LOCK_NB)
         except IOError as exc:
             self.lock = None
             raise LockError(str(exc), exc)

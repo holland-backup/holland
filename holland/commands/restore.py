@@ -9,6 +9,7 @@ from holland.core.spool import SPOOL
 
 LOGGER = logging.getLogger(__name__)
 
+
 class Restore(Command):
     """${cmd_usage}
 
@@ -27,22 +28,19 @@ class Restore(Command):
 
     """
 
-    name = 'restore'
+    name = "restore"
 
-    aliases = [
-        're'
-    ]
+    aliases = ["re"]
 
-    args = [
-        '--dry-run', '-n'
-    ]
+    args = ["--dry-run", "-n"]
     kargs = [
         {
-            'help':"Print what restore actually would do without actually running the restore"
+            "help": "Print what restore actually would do without actually running the restore"
         }
     ]
 
-    description = 'Restore data from an existing Holland Backup'
+    description = "Restore data from an existing Holland Backup"
+
     def __init__(self):
         Command.__init__(self)
         self.optparser.disable_interspersed_args()
@@ -53,7 +51,7 @@ class Restore(Command):
             logging.error("No backup found named %s", args[0])
             return 1
         config = backup.config
-        plugin_name = config.get('holland:backup', {}).get('plugin')
-        plugin = load_first_entrypoint('holland.restore', plugin_name)(backup)
-        plugin.dispatch([plugin_name]  + list(args))
+        plugin_name = config.get("holland:backup", {}).get("plugin")
+        plugin = load_first_entrypoint("holland.restore", plugin_name)(backup)
+        plugin.dispatch([plugin_name] + list(args))
         return 1

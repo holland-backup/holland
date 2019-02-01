@@ -17,24 +17,24 @@ LOG = logging.getLogger(__name__)
 #: This is a simple table of method_name : (command, extension)
 #: mappings.
 COMPRESSION_METHODS = {
-    'gzip'  : ('gzip', '.gz'),
-    'gzip-rsyncable' : ('gzip --rsyncable', '.gz'),
-    'pigz'  : ('pigz', '.gz'),
-    'bzip2' : ('bzip2', '.bz2'),
-    'pbzip2': ('pbzip2', '.bz2'),
-    'lzop'  : ('lzop', '.lzo'),
-    'lzma'  : ('xz', '.xz'),
-    'gpg'   : ('gpg -e --batch --no-tty', '.gpg'),
-    'zstd'  : ('zstd', '.zst'),
+    "gzip": ("gzip", ".gz"),
+    "gzip-rsyncable": ("gzip --rsyncable", ".gz"),
+    "pigz": ("pigz", ".gz"),
+    "bzip2": ("bzip2", ".bz2"),
+    "pbzip2": ("pbzip2", ".bz2"),
+    "lzop": ("lzop", ".lzo"),
+    "lzma": ("xz", ".xz"),
+    "gpg": ("gpg -e --batch --no-tty", ".gpg"),
+    "zstd": ("zstd", ".zst"),
 }
 
-COMPRESSION_CONFIG_STRING = '''
+COMPRESSION_CONFIG_STRING = """
 [compression]
 method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', 'zstd', default='gzip')
 options = string(default="")
 inline = boolean(default=yes)
 level  = integer(min=0, max=9, default=1)
-'''
+"""
 
 
 def lookup_compression(method):
@@ -53,17 +53,21 @@ def lookup_compression(method):
     except KeyError:
         raise OSError("Unsupported compression method '%s'" % method)
 
+
 class CompressionInput(object):
     """
     Class to create a compressed file descriptor for reading.  Functions like
     a standard file descriptor such as from open().
     """
-    def __init__(self, path, mode, argv, bufsize=1024*1024):
-        self.fileobj = io.open(path, 'r')
-        self.pid = subprocess.Popen(argv + ['--decompress'],
-                                    stdin=self.fileobj.fileno(),
-                                    stdout=subprocess.PIPE,
-                                    bufsize=bufsize)
+
+    def __init__(self, path, mode, argv, bufsize=1024 * 1024):
+        self.fileobj = io.open(path, "r")
+        self.pid = subprocess.Popen(
+            argv + ["--decompress"],
+            stdin=self.fileobj.fileno(),
+            stdout=subprocess.PIPE,
+            bufsize=bufsize,
+        )
         self.filehandle = self.pid.stdout.fileno()
         self.name = path
         self.closed = False
@@ -98,6 +102,7 @@ class CompressionInput(object):
         close filehandle
         """
         import signal
+
         os.kill(self.pid.pid, signal.SIGTERM)
         self.fileobj.close()
         self.pid.stdout.close()
@@ -110,6 +115,7 @@ class CompressionOutput(object):
     Class to create a compressed file descriptor for writing.  Functions like
     a standard file descriptor such as from open().
     """
+
     def __init__(self, path, mode, argv, level, inline):
         self.argv = argv
         self.level = level
@@ -118,18 +124,20 @@ class CompressionOutput(object):
             self.fileobj = io.open(os.path.splitext(path)[0], mode)
             self.filehandle = self.fileobj.fileno()
         else:
-            self.fileobj = io.open(path, 'w')
+            self.fileobj = io.open(path, "w")
             if level:
                 if "gpg" in argv[0]:
-                    argv += ['-z%d' % level]
+                    argv += ["-z%d" % level]
                 else:
-                    argv += ['-%d' % level]
+                    argv += ["-%d" % level]
             LOG.debug("* Executing: %s", subprocess.list2cmdline(argv))
             self.stderr = TemporaryFile()
-            self.pid = subprocess.Popen(argv,
-                                        stdin=subprocess.PIPE,
-                                        stdout=self.fileobj.fileno(),
-                                        stderr=self.stderr)
+            self.pid = subprocess.Popen(
+                argv,
+                stdin=subprocess.PIPE,
+                stdout=self.fileobj.fileno(),
+                stderr=self.stderr,
+            )
             self.filehandle = self.pid.stdin.fileno()
         self.name = path
         self.closed = False
@@ -155,18 +163,23 @@ class CompressionOutput(object):
             argv = list(self.argv)
             if self.level:
                 if "gpg" in argv[0]:
-                    argv += ['-z%d' % self.level, '-']
+                    argv += ["-z%d" % self.level, "-"]
                 else:
-                    argv += ['-%d' % self.level, '-']
+                    argv += ["-%d" % self.level, "-"]
             self.fileobj.close()
-            self.fileobj = io.open(self.fileobj.name, 'r')
-            cmp_f = io.open(self.name, 'w')
-            LOG.debug("Running %r < %r[%d] > %r[%d]",
-                      argv, self.fileobj.name, self.fileobj.fileno(),
-                      cmp_f.name, cmp_f.fileno())
-            pid = subprocess.Popen(argv,
-                                   stdin=self.fileobj.fileno(),
-                                   stdout=cmp_f.fileno())
+            self.fileobj = io.open(self.fileobj.name, "r")
+            cmp_f = io.open(self.name, "w")
+            LOG.debug(
+                "Running %r < %r[%d] > %r[%d]",
+                argv,
+                self.fileobj.name,
+                self.fileobj.fileno(),
+                cmp_f.name,
+                cmp_f.fileno(),
+            )
+            pid = subprocess.Popen(
+                argv, stdin=self.fileobj.fileno(), stdout=cmp_f.fileno()
+            )
             status = pid.wait()
             os.unlink(self.fileobj.name)
         else:
@@ -181,9 +194,11 @@ class CompressionOutput(object):
                         if not line.strip():
                             continue
                         LOG.error("%s: %s", self.argv[0], line.rstrip())
-                    raise IOError(errno.EPIPE,
-                                  "Compression program '%s' exited with status %d" %
-                                  (self.argv[0], status))
+                    raise IOError(
+                        errno.EPIPE,
+                        "Compression program '%s' exited with status %d"
+                        % (self.argv[0], status),
+                    )
                 else:
                     for line in stderr:
                         if not line.strip():
@@ -218,18 +233,15 @@ def stream_info(path, method=None, level=None):
 
     return argv, path
 
+
 def _parse_args(value):
     """Convert a cmdline string to a list"""
     if not isinstance(value, str):
-        value = value.encode('utf8')
+        value = value.encode("utf8")
     return shlex.split(value)
 
-def open_stream(path,
-                mode,
-                method=None,
-                level=None,
-                inline=True,
-                extra_args=None):
+
+def open_stream(path, mode, method=None, level=None, inline=True, extra_args=None):
     """
     Opens a compressed data stream, and returns a file descriptor type object
     that acts much like os.open() does.  If no method is passed, or the
@@ -242,15 +254,14 @@ def open_stream(path,
     level   -- Compression level
     inline  -- Boolean whether to compress inline, or after the file is written.
     """
-    if not method or method == 'none' or level == 0:
+    if not method or method == "none" or level == 0:
         return io.open(path, mode)
 
     argv, path = stream_info(path, method)
     if extra_args:
         argv += _parse_args(extra_args)
-    if mode == 'r':
+    if mode == "r":
         return CompressionInput(path, mode, argv=argv)
-    if mode == 'w':
-        return CompressionOutput(path, mode, argv=argv, level=level,
-                                 inline=inline)
+    if mode == "w":
+        return CompressionOutput(path, mode, argv=argv, level=level, inline=inline)
     raise IOError("invalid mode: %s" % mode)

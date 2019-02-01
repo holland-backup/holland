@@ -13,18 +13,18 @@ OperationalError = MySQLdb.OperationalError  # pylint: disable=C0103
 
 LOG = logging.getLogger(__name__)
 
-filterwarnings('ignore', category=MySQLdb.Warning)
+filterwarnings("ignore", category=MySQLdb.Warning)
 
 __all__ = [
-    'connect',
-    'MySQLClient',
-    'AutoMySQLClient',
-    'MySQLError',
-    'ProgrammingError',
-    'OperationalError',
+    "connect",
+    "MySQLClient",
+    "AutoMySQLClient",
+    "MySQLError",
+    "ProgrammingError",
+    "OperationalError",
 ]
 
-MYSQL_CLIENT_CONFIG_STRING = '''
+MYSQL_CLIENT_CONFIG_STRING = """
 [mysql:client]
 defaults-extra-file = force_list(default=list('~/.my.cnf'))
 user                = string(default=None)
@@ -32,7 +32,8 @@ password            = string(default=None)
 socket              = string(default=None)
 host                = string(default=None)
 port                = integer(min=0, default=None)
-'''
+"""
+
 
 def flatten_list(a_list):
     """Given a list of sequences, return a flattened list
@@ -44,8 +45,11 @@ def flatten_list(a_list):
     """
     # isinstance check to ensure we're not iterating over characters
     # in a string
-    return sum([isinstance(item, (list, tuple)) and list(item) or [item] \
-        for item in a_list], [])
+    return sum(
+        [isinstance(item, (list, tuple)) and list(item) or [item] for item in a_list],
+        [],
+    )
+
 
 class MySQLClient(object):
     """MySQLdb Helper
@@ -62,7 +66,7 @@ class MySQLClient(object):
     the connect method is called. The default is True.
     """
 
-    SCOPE = ['GLOBAL', 'SESSION']
+    SCOPE = ["GLOBAL", "SESSION"]
 
     def __init__(self, *args, **kwargs):
         """Create a new MySQLClient instance
@@ -106,7 +110,7 @@ class MySQLClient(object):
         http://dev.mysql.com/doc/refman/5.0/en/flush.html
         """
         cursor = self.cursor()
-        cursor.execute('FLUSH /*!40101 LOCAL */ TABLES')
+        cursor.execute("FLUSH /*!40101 LOCAL */ TABLES")
         cursor.close()
 
     def flush_tables_with_read_lock(self):
@@ -115,7 +119,7 @@ class MySQLClient(object):
         Runs FLUSH TABLES WITH READ LOCK
         """
         cursor = self.cursor()
-        cursor.execute('FLUSH TABLES WITH READ LOCK')
+        cursor.execute("FLUSH TABLES WITH READ LOCK")
         cursor.close()
 
     def unlock_tables(self):
@@ -124,7 +128,7 @@ class MySQLClient(object):
         Runs UNLOCK TABLES
         """
         cursor = self.cursor()
-        cursor.execute('UNLOCK TABLES')
+        cursor.execute("UNLOCK TABLES")
         cursor.close()
 
     def show_databases(self):
@@ -147,42 +151,43 @@ class MySQLClient(object):
         :param database: database to extract metadata from
         :returns: list of dictionaries, one dictionary per table
         """
-        sql = "SHOW TABLE STATUS FROM `%s`" % database.replace('`', '``')
+        sql = "SHOW TABLE STATUS FROM `%s`" % database.replace("`", "``")
         cursor = self.cursor()
         try:
             cursor.execute(sql)
         except MySQLError as exc:
-            LOG.error("MySQL reported an error while running %s. [%d] %s",
-                      sql, *exc.args)
+            LOG.error(
+                "MySQL reported an error while running %s. [%d] %s", sql, *exc.args
+            )
             raise
         names = [info[0].lower() for info in cursor.description]
         result = []
         for row in cursor:
             row = dict(list(zip(names, row)))
-            row['database'] = database
-            row['data_size'] = (row.pop('data_length') or 0)
-            row['index_size'] = (row.pop('index_length') or 0)
+            row["database"] = database
+            row["data_size"] = row.pop("data_length") or 0
+            row["index_size"] = row.pop("index_length") or 0
             # coerce null engine to 'view' as necessary
-            if row['engine'] is None:
-                row['engine'] = 'view'
-                if 'references invalid table' in row['comment'] or '':
-                    LOG.warning("Invalid view %s.%s: %s",
-                                row['database'], row['name'],
-                                row['comment'] or '')
-                if 'Incorrect key file' in row['comment'] or '':
-                    LOG.warning("Invalid table %s.%s: %s",
-                                row['database'], row['name'],
-                                row['comment'] or '')
+            if row["engine"] is None:
+                row["engine"] = "view"
+                if "references invalid table" in row["comment"] or "":
+                    LOG.warning(
+                        "Invalid view %s.%s: %s",
+                        row["database"],
+                        row["name"],
+                        row["comment"] or "",
+                    )
+                if "Incorrect key file" in row["comment"] or "":
+                    LOG.warning(
+                        "Invalid table %s.%s: %s",
+                        row["database"],
+                        row["name"],
+                        row["comment"] or "",
+                    )
             else:
-                row['engine'] = row['engine'].lower()
+                row["engine"] = row["engine"].lower()
             for key in list(row.keys()):
-                valid_keys = [
-                    'database',
-                    'name',
-                    'data_size',
-                    'index_size',
-                    'engine',
-                ]
+                valid_keys = ["database", "name", "data_size", "index_size", "engine"]
                 if key not in valid_keys:
                     row.pop(key)
             result.append(row)
@@ -199,13 +204,15 @@ class MySQLClient(object):
         :param database: database to extract metadata from
         :returns: list of dictionaries, one dictionary per table
         """
-        sql = ("SELECT TABLE_SCHEMA AS `database`, "
-               "          TABLE_NAME AS `name`, "
-               "          COALESCE(DATA_LENGTH, 0) AS `data_size`, "
-               "          COALESCE(INDEX_LENGTH, 0) AS `index_size`, "
-               "          LOWER(COALESCE(ENGINE, 'view')) AS `engine` "
-               "FROM INFORMATION_SCHEMA.TABLES "
-               "WHERE TABLE_SCHEMA = %s")
+        sql = (
+            "SELECT TABLE_SCHEMA AS `database`, "
+            "          TABLE_NAME AS `name`, "
+            "          COALESCE(DATA_LENGTH, 0) AS `data_size`, "
+            "          COALESCE(INDEX_LENGTH, 0) AS `index_size`, "
+            "          LOWER(COALESCE(ENGINE, 'view')) AS `engine` "
+            "FROM INFORMATION_SCHEMA.TABLES "
+            "WHERE TABLE_SCHEMA = %s"
+        )
         cursor = self.cursor()
         cursor.execute(sql, (database,))
         names = [info[0] for info in cursor.description]
@@ -226,7 +233,7 @@ class MySQLClient(object):
 
             return self._show_table_metadata51(database)
         except MySQLError as exc:
-            exc.args = (exc.args[0], exc.args[1].decode('utf8'))
+            exc.args = (exc.args[0], exc.args[1].decode("utf8"))
             raise
 
     def show_tables(self, database, full=False):
@@ -244,9 +251,10 @@ class MySQLClient(object):
         :param full: Optional. include table type n the results
         :returns: list of table names
         """
-        sql = "SHOW %sTABLES FROM `%s`" % \
-            (['', 'FULL '][int(full)],
-             database.replace('`', '``'))
+        sql = "SHOW %sTABLES FROM `%s`" % (
+            ["", "FULL "][int(full)],
+            database.replace("`", "``"),
+        )
         cursor = self.cursor()
         cursor.execute(sql)
         try:
@@ -291,22 +299,29 @@ class MySQLClient(object):
         cursor = self.cursor()
         try:
             try:
-                if cursor.execute('SHOW CREATE VIEW `%s`.`%s`' %
-                                  (schema, name)):
+                if cursor.execute("SHOW CREATE VIEW `%s`.`%s`" % (schema, name)):
                     return cursor.fetchone()[1]
             except MySQLError:
-                LOG.warning("!!! SHOW CREATE VIEW failed for `%s`.`%s`. "
-                            "The view likely references columns that no "
-                            "longer exist in the underlying tables.",
-                            schema, name)
+                LOG.warning(
+                    "!!! SHOW CREATE VIEW failed for `%s`.`%s`. "
+                    "The view likely references columns that no "
+                    "longer exist in the underlying tables.",
+                    schema,
+                    name,
+                )
             if not use_information_schema:
                 return None
 
-            LOG.warning("!!! Reconstructing view definition `%s`.`%s` from "
-                        "INFORMATION_SCHEMA.VIEWS.  This definition will not "
-                        "have an explicit ALGORITHM set.", schema, name)
+            LOG.warning(
+                "!!! Reconstructing view definition `%s`.`%s` from "
+                "INFORMATION_SCHEMA.VIEWS.  This definition will not "
+                "have an explicit ALGORITHM set.",
+                schema,
+                name,
+            )
             try:
-                sql = dedent("""
+                sql = dedent(
+                    """
                              SELECT CONCAT(
                                 'CREATE DEFINER=', DEFINER,
                                 ' SQL SECURITY ', SECURITY_TYPE,
@@ -324,12 +339,17 @@ class MySQLClient(object):
                                 FROM INFORMATION_SCHEMA.VIEWS
                                 WHERE TABLE_SCHEMA = %s
                                 AND TABLE_NAME = %s
-                             """)
+                             """
+                )
                 if cursor.execute(sql, (schema, name)):
                     return cursor.fetchone()[0]
             except MySQLError as exc:
-                LOG.debug("INFORMATION_SCHEMA.VIEWS(%s,%s) failed: [%d] %s ",
-                          schema, name, *exc.args)
+                LOG.debug(
+                    "INFORMATION_SCHEMA.VIEWS(%s,%s) failed: [%d] %s ",
+                    schema,
+                    name,
+                    *exc.args
+                )
             return None
         finally:
             cursor.close()
@@ -347,8 +367,8 @@ class MySQLClient(object):
         """
 
         sql = "SHOW CREATE TABLE `%s`.`%s`"
-        database = database.replace('`', '``')
-        table = table.replace('`', '``')
+        database = database.replace("`", "``")
+        table = table.replace("`", "``")
         cursor = self.cursor()
         if cursor.execute(sql % (database, table)):
             return cursor.fetchone()[1]
@@ -412,8 +432,8 @@ class MySQLClient(object):
             scope = self.SCOPE[session]
         else:
             # 4.1 support - GLOBAL/SESSION STATUS is not implemented
-            scope = ''
-        sql = 'SHOW %s STATUS LIKE ' % scope + '%s'
+            scope = ""
+        sql = "SHOW %s STATUS LIKE " % scope + "%s"
         cursor = self.cursor()
         cursor.execute(sql, (key,))
         key, value = cursor.fetchone()
@@ -423,7 +443,7 @@ class MySQLClient(object):
     def show_variable(self, key, session=False):
         """Fetch MySQL server variable"""
         scope = self.SCOPE[session]
-        sql = 'SHOW %s VARIABLES LIKE ' % scope + '%s'
+        sql = "SHOW %s VARIABLES LIKE " % scope + "%s"
         cursor = self.cursor()
         if cursor.execute(sql, (key,)):
             value = cursor.fetchone()[1]
@@ -438,11 +458,11 @@ class MySQLClient(object):
         This method defaults to setting the variable for the session
         rather than globally.
         """
-        sql = "SET %(scope)s %(variable)s = %(value)r" % \
-            {'scope' : self.SCOPE[session],
-             'variable' : key,
-             'value' : value
-            }
+        sql = "SET %(scope)s %(variable)s = %(value)r" % {
+            "scope": self.SCOPE[session],
+            "variable": key,
+            "value": value,
+        }
         cursor = self.cursor()
         cursor.execute(sql)
         cursor.close()
@@ -454,7 +474,7 @@ class MySQLClient(object):
         returns a numeric tuple: major, minor, revision versions (respectively)
         """
         version = self.get_server_info()
-        match = re.match(r'^(\d+)\.(\d+)\.(\d+)', version)
+        match = re.match(r"^(\d+)\.(\d+)\.(\d+)", version)
         if match:
             return tuple([int(v) for v in match.groups()])
 
@@ -488,6 +508,7 @@ class AutoMySQLClient(MySQLClient):
 
         return MySQLClient.__getattr__(self, key)
 
+
 def connect(config, client_class=AutoMySQLClient):
     """Create a MySQLClient object from a dict
 
@@ -507,13 +528,13 @@ def connect(config, client_class=AutoMySQLClient):
     # what MySQLdb.connect expects
     # http://mysql-python.sourceforge.net/MySQLdb.html#mysqldb
     cnf_to_mysqldb = {
-        'user' : 'user', # same
-        'password' : 'passwd', # weird
-        'host' : 'host', # same
-        'port' : 'port',
-        'socket' : 'unix_socket',
-        'ssl' : 'ssl',
-        'compress' : 'compress'
+        "user": "user",  # same
+        "password": "passwd",  # weird
+        "host": "host",  # same
+        "port": "port",
+        "socket": "unix_socket",
+        "ssl": "ssl",
+        "compress": "compress",
     }
 
     args = {}
@@ -522,13 +543,13 @@ def connect(config, client_class=AutoMySQLClient):
         if config.get(key) is None:
             continue
         try:
-            if 'port' in key:
+            if "port" in key:
                 args[cnf_to_mysqldb[key]] = int(value)
             elif isinstance(value, bytes):
-                args[cnf_to_mysqldb[key]] = value.decode('utf-8')
+                args[cnf_to_mysqldb[key]] = value.decode("utf-8")
             else:
                 args[cnf_to_mysqldb[key]] = value
         except KeyError:
             LOG.warning("Skipping unknown parameter %s", key)
     # also, always use utf8
-    return client_class(charset='utf8', **args)
+    return client_class(charset="utf8", **args)

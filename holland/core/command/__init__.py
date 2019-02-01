@@ -9,13 +9,10 @@ import logging
 from holland.core.plugin import get_commands
 from .command import Command, PARSER
 
-__all__ = [
-    'Command',
-    'run',
-    'PARSER'
-]
+__all__ = ["Command", "run", "PARSER"]
 
 LOGGER = logging.getLogger(__name__)
+
 
 def setup_commands():
     """
@@ -26,12 +23,14 @@ def setup_commands():
         cmdobj = commands[command_name]()
     return cmdobj
 
+
 def print_help():
     """
     log command args and then display help
     """
     setup_commands()
     PARSER.print_help(sys.stderr)
+
 
 def run(opts, args=None):
     """
@@ -47,6 +46,7 @@ def run(opts, args=None):
     except BaseException:
         print_help()
         return 1
+
 
 def parse_sys(args):
     """

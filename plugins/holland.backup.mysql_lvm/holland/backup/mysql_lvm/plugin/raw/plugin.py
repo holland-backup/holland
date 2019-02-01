@@ -4,18 +4,23 @@ import os
 import logging
 from holland.core.util.path import directory_size, format_bytes
 from holland.core.backup import BackupError
-from holland.lib.lvm import LogicalVolume, CallbackFailuresError, \
-                            LVMCommandError, relpath, getmount
+from holland.lib.lvm import (
+    LogicalVolume,
+    CallbackFailuresError,
+    LVMCommandError,
+    relpath,
+    getmount,
+)
 from holland.lib.mysql.client import MySQLError
 from holland.lib.mysql.client.base import MYSQL_CLIENT_CONFIG_STRING
-from holland.backup.mysql_lvm.plugin.common import build_snapshot, \
-                                                   connect_simple
+from holland.backup.mysql_lvm.plugin.common import build_snapshot, connect_simple
 from holland.backup.mysql_lvm.plugin.raw.util import setup_actions
 from holland.lib.compression import COMPRESSION_CONFIG_STRING
 
 LOG = logging.getLogger(__name__)
 
-CONFIGSPEC = """
+CONFIGSPEC = (
+    """
 [mysql-lvm]
 # default: mysql lv + _snapshot
 snapshot-name = string(default=None)
@@ -52,7 +57,10 @@ tmpdir                  = string(default=None)
 exclude = force_list(default='mysql.sock')
 post-args = string(default=None)
 pre-args = string(default=None)
-""" + MYSQL_CLIENT_CONFIG_STRING + COMPRESSION_CONFIG_STRING
+"""
+    + MYSQL_CLIENT_CONFIG_STRING
+    + COMPRESSION_CONFIG_STRING
+)
 
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
@@ -64,6 +72,7 @@ class MysqlLVMBackup(object):
 
     This plugin produces tar archives of a MySQL data directory.
     """
+
     CONFIGSPEC = CONFIGSPEC
 
     def __init__(self, name, config, target_directory, dry_run=False):
@@ -73,7 +82,7 @@ class MysqlLVMBackup(object):
         self.name = name
         self.target_directory = target_directory
         self.dry_run = dry_run
-        self.client = connect_simple(self.config['mysql:client'])
+        self.client = connect_simple(self.config["mysql:client"])
 
     def estimate_backup_size(self):
         """Estimate the backup size this plugin will produce
@@ -82,7 +91,7 @@ class MysqlLVMBackup(object):
         """
         try:
             self.client.connect()
-            datadir = self.client.show_variable('datadir')
+            datadir = self.client.show_variable("datadir")
             self.client.disconnect()
         except MySQLError as exc:
             raise BackupError("[%d] %s" % exc.args)
@@ -99,7 +108,7 @@ class MysqlLVMBackup(object):
         # connect to mysql and lookup what we're supposed to snapshot
         try:
             self.client.connect()
-            datadir = os.path.realpath(self.client.show_variable('datadir'))
+            datadir = os.path.realpath(self.client.show_variable("datadir"))
         except MySQLError as exc:
             raise BackupError("[%d] %s" % exc.args)
 
@@ -109,24 +118,29 @@ class MysqlLVMBackup(object):
         try:
             volume = LogicalVolume.lookup_from_fspath(datadir)
         except LookupError as exc:
-            raise BackupError("Failed to lookup logical volume for %s: %s" %
-                              (datadir, str(exc)))
+            raise BackupError(
+                "Failed to lookup logical volume for %s: %s" % (datadir, str(exc))
+            )
         except Exception as ex:
-            raise BackupError("Failed to lookup logical volume for %s: %s" %
-                              (datadir, str(ex)))
+            raise BackupError(
+                "Failed to lookup logical volume for %s: %s" % (datadir, str(ex))
+            )
 
         # create a snapshot manager
-        snapshot = build_snapshot(self.config['mysql-lvm'], volume,
-                                  suppress_tmpdir=self.dry_run)
+        snapshot = build_snapshot(
+            self.config["mysql-lvm"], volume, suppress_tmpdir=self.dry_run
+        )
         # calculate where the datadirectory on the snapshot will be located
         rpath = relpath(datadir, getmount(datadir))
         snap_datadir = os.path.abspath(os.path.join(snapshot.mountpoint, rpath))
         # setup actions to perform at each step of the snapshot process
-        setup_actions(snapshot=snapshot,
-                      config=self.config,
-                      client=self.client,
-                      snap_datadir=snap_datadir,
-                      spooldir=self.target_directory)
+        setup_actions(
+            snapshot=snapshot,
+            config=self.config,
+            client=self.client,
+            snap_datadir=snap_datadir,
+            spooldir=self.target_directory,
+        )
 
         if self.dry_run:
             return self._dry_run(volume, snapshot, datadir)
@@ -148,19 +162,28 @@ class MysqlLVMBackup(object):
     def _dry_run(self, volume, snapshot, datadir):
         """Implement dry-run for LVM snapshots.
         """
-        LOG.info("* Would snapshot source volume %s/%s as %s/%s (size=%s)",
-                 volume.vg_name,
-                 volume.lv_name,
-                 volume.vg_name,
-                 snapshot.name,
-                 format_bytes(snapshot.size*int(volume.vg_extent_size)))
-        LOG.info("* Would mount on %s",
-                 snapshot.mountpoint or 'generated temporary directory')
+        LOG.info(
+            "* Would snapshot source volume %s/%s as %s/%s (size=%s)",
+            volume.vg_name,
+            volume.lv_name,
+            volume.vg_name,
+            snapshot.name,
+            format_bytes(snapshot.size * int(volume.vg_extent_size)),
+        )
+        LOG.info(
+            "* Would mount on %s",
+            snapshot.mountpoint or "generated temporary directory",
+        )
 
         if getmount(self.target_directory) == getmount(datadir):
-            LOG.error("Backup directory %s is on the same filesystem as "
-                      "the source logical volume %s.",
-                      self.target_directory, volume.device_name())
-            LOG.error("This will result in very poor performance and "
-                      "has a high potential for failed backups.")
+            LOG.error(
+                "Backup directory %s is on the same filesystem as "
+                "the source logical volume %s.",
+                self.target_directory,
+                volume.device_name(),
+            )
+            LOG.error(
+                "This will result in very poor performance and "
+                "has a high potential for failed backups."
+            )
             raise BackupError("Improper backup configuration for LVM.")

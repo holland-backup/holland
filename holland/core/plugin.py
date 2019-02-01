@@ -6,18 +6,25 @@ from __future__ import print_function
 import logging
 import os
 import sys
-from pkg_resources import working_set, Environment, iter_entry_points, \
-                            find_distributions, \
-                            DistributionNotFound, VersionConflict
+from pkg_resources import (
+    working_set,
+    Environment,
+    iter_entry_points,
+    find_distributions,
+    DistributionNotFound,
+    VersionConflict,
+)
 
 LOGGER = logging.getLogger(__name__)
 
 PLUGIN_DIRECTORIES = []
 
+
 class PluginLoadError(Exception):
     """
     Place holder for PluginLoadError
     """
+
 
 def add_plugin_dir(plugin_dir):
     """
@@ -58,26 +65,29 @@ def load_first_entrypoint(group, name=None):
             raise PluginLoadError("Could not find dependency '%s'" % ex)
         except ImportError as ex:
             raise PluginLoadError(ex)
-    raise PluginLoadError("'%s' not found" % '.'.join((group, name)))
+    raise PluginLoadError("'%s' not found" % ".".join((group, name)))
+
 
 def load_backup_plugin(name):
     """
     Pass name to load_first_entrypoint
     """
-    return load_first_entrypoint('holland.backup', name)
+    return load_first_entrypoint("holland.backup", name)
+
 
 def load_restore_plugin(name):
     """
     Pass name to load_first_entry_point
     """
-    return load_first_entrypoint('holland.restore', name)
+    return load_first_entrypoint("holland.restore", name)
+
 
 def get_commands(include_aliases=True):
     """
     Get list of avialable commands
     """
     cmds = {}
-    for entry_point in iter_entry_points('holland.commands'):
+    for entry_point in iter_entry_points("holland.commands"):
         try:
             cmdcls = entry_point.load()
         except ImportError as ex:
@@ -89,6 +99,7 @@ def get_commands(include_aliases=True):
                 cmds[alias] = cmdcls
     return cmds
 
+
 def iter_plugins(group, name=None):
     """
     Iterate over all unique distributions defining
@@ -97,6 +108,7 @@ def iter_plugins(group, name=None):
     for entry_point in working_set.iter_entry_points(group, name):
         yield entry_point.name, dist_metainfo_dict(entry_point.dist)
 
+
 def dist_metainfo_dict(dist):
     """
     Convert an Egg's PKG-INFO into a dict
@@ -104,15 +116,18 @@ def dist_metainfo_dict(dist):
     if sys.version_info > (3, 0):
         from email.parser import Parser
         from email.policy import default
-        distmetadata = dist.get_metadata('PKG-INFO')
+
+        distmetadata = dist.get_metadata("PKG-INFO")
         ret = Parser(policy=default).parsestr(distmetadata)
     else:
         from rfc822 import Message
         from cStringIO import StringIO
-        distmetadata = dist.get_metadata('PKG-INFO')
+
+        distmetadata = dist.get_metadata("PKG-INFO")
         msg = Message(StringIO(distmetadata))
         ret = dict(msg.items())
     return ret
+
 
 def iter_plugininfo():
     """
@@ -126,11 +141,11 @@ def iter_plugininfo():
         from cStringIO import StringIO
     for plugin_dir in PLUGIN_DIRECTORIES:
         for dist in find_distributions(plugin_dir):
-            distmetadata = dist.get_metadata('PKG-INFO')
+            distmetadata = dist.get_metadata("PKG-INFO")
             if sys.version_info > (3, 0):
                 msg = Parser(policy=default).parsestr(distmetadata)
             else:
                 msg = Message(StringIO(distmetadata))
-            filtered_keys = ['metadata-version', 'home-page', 'platform']
+            filtered_keys = ["metadata-version", "home-page", "platform"]
             distinfo = [x for x in list(msg.items()) if x[0] not in filtered_keys]
             yield dist, dict(distinfo)

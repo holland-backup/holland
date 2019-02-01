@@ -2,12 +2,21 @@
 
 import os
 import logging
-from holland.lib.lvm.raw import pvs, vgs, lvs, lvsnapshot, lvremove, \
-                                mount, umount, blkid
+from holland.lib.lvm.raw import (
+    pvs,
+    vgs,
+    lvs,
+    lvsnapshot,
+    lvremove,
+    mount,
+    umount,
+    blkid,
+)
 from holland.lib.lvm.util import getdevice
 from holland.lib.lvm.errors import LVMCommandError
 
 LOG = logging.getLogger(__name__)
+
 
 class Volume(object):
     """Abstract Volume object for LVM Volume implementations
@@ -16,16 +25,17 @@ class Volume(object):
     of its subclasses such as PhysicalVolume, VolumeGroup or LogicalVolume
     """
 
-    #pylint: disable=unused-argument
+    # pylint: disable=unused-argument
     def __new__(cls, attributes=()):
         if cls is Volume:
-            raise NotImplementedError('Volume is an abstract base class and '
-                                      'should not be directly instantiated')
+            raise NotImplementedError(
+                "Volume is an abstract base class and "
+                "should not be directly instantiated"
+            )
         return super(Volume, cls).__new__(cls)
 
     def __init__(self, attributes=()):
         self.attributes = dict(attributes)
-
 
     def __getattr__(self, key):
         try:
@@ -61,7 +71,8 @@ class Volume(object):
         raise NotImplementedError()
 
     def __repr__(self):
-        return '%s()' % (self.__class__.__name__,)
+        return "%s()" % (self.__class__.__name__,)
+
 
 class PhysicalVolume(Volume):
     """LVM Physical Volume representation"""
@@ -83,9 +94,10 @@ class PhysicalVolume(Volume):
             volume, = pvs(pathspec)
             return cls(volume)
         except (ValueError, LVMCommandError):
-            raise LookupError("No PhysicalVolume could be found for "
-                              "pathspec %r" %
-                              pathspec)
+            raise LookupError(
+                "No PhysicalVolume could be found for " "pathspec %r" % pathspec
+            )
+
     @classmethod
     def search(cls, pathspec=None):
         """Search for volumes matching ``pathspec``
@@ -101,6 +113,7 @@ class PhysicalVolume(Volume):
 
     def __repr__(self):
         return "%s(device=%r)" % (self.__class__.__name__, self.pv_name)
+
 
 class VolumeGroup(Volume):
     """LVM VolumeGroup representation"""
@@ -122,8 +135,9 @@ class VolumeGroup(Volume):
             volume, = vgs(pathspec)
             return cls(volume)
         except (LVMCommandError, ValueError):
-            raise LookupError("No VolumeGroup could be found for pathspec %r" %
-                              pathspec)
+            raise LookupError(
+                "No VolumeGroup could be found for pathspec %r" % pathspec
+            )
 
     @classmethod
     def search(cls, pathspec=None):
@@ -139,7 +153,8 @@ class VolumeGroup(Volume):
             yield cls(volume)
 
     def __repr__(self):
-        return '%s(vg_name=%s)' % (self.__class__.__name__, self.vg_name)
+        return "%s(vg_name=%s)" % (self.__class__.__name__, self.vg_name)
+
 
 class LogicalVolume(Volume):
     """LVM Logical Volume representation"""
@@ -157,13 +172,13 @@ class LogicalVolume(Volume):
             volume, = lvs(pathspec)
             return cls(volume)
         except (LVMCommandError, ValueError) as ex:
-            #XX: Perhaps we should be more specific :)
-            raise LookupError("No LogicalVolume could be found "
-                              "for pathspec %r, %s" %
-                              (pathspec, ex))
+            # XX: Perhaps we should be more specific :)
+            raise LookupError(
+                "No LogicalVolume could be found "
+                "for pathspec %r, %s" % (pathspec, ex)
+            )
         except Exception as ex:
             raise OSError("unable to look up path %s" % ex)
-
 
     @classmethod
     def lookup_from_fspath(cls, path):
@@ -207,7 +222,7 @@ class LogicalVolume(Volume):
             for line in exc.error.splitlines():
                 LOG.error("%s", line)
             raise
-        return LogicalVolume.lookup(self.vg_name + '/' + name)
+        return LogicalVolume.lookup(self.vg_name + "/" + name)
 
     def is_mounted(self):
         """Check if this logical volume is mounted
@@ -215,7 +230,7 @@ class LogicalVolume(Volume):
         :returns: True if mounted and false otherwise
         """
         real_device_path = os.path.realpath(self.device_name())
-        for line in open('/proc/mounts', 'r'):
+        for line in open("/proc/mounts", "r"):
             dev = line.split()[0]
             if os.path.realpath(dev) == real_device_path:
                 return True
@@ -280,7 +295,7 @@ class LogicalVolume(Volume):
 
         :returns: device name string
         """
-        return '/dev/' + self.vg_name + '/' + self.lv_name
+        return "/dev/" + self.vg_name + "/" + self.lv_name
 
     def filesystem(self):
         """Lookup the filesystem type for the underyling logical volume
@@ -290,11 +305,15 @@ class LogicalVolume(Volume):
         try:
             device_info, = blkid(self.device_name())
             LOG.debug("Looked up device_info => %r", device_info)
-            return device_info['type']
+            return device_info["type"]
         except (LVMCommandError, ValueError) as exc:
-            LOG.debug("Failed looking up filesystem for %s => %r",
-                      self.device_name(), exc, exc_info=True)
+            LOG.debug(
+                "Failed looking up filesystem for %s => %r",
+                self.device_name(),
+                exc,
+                exc_info=True,
+            )
             raise
 
     def __repr__(self):
-        return '%s(device=%r)' % (self.__class__.__name__, self.device_name())
+        return "%s(device=%r)" % (self.__class__.__name__, self.device_name())
