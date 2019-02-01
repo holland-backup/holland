@@ -7,6 +7,7 @@ Backup plugin implementation to provide support for Percona XtraBackup.
 
 import logging
 from os.path import join
+from distutils.version import LooseVersion
 from holland.core.backup import BackupError
 from holland.core.util.path import directory_size
 from holland.lib.compression import open_stream, COMPRESSION_CONFIG_STRING
@@ -138,16 +139,21 @@ class XtrabackupPlugin(object):
 
     def backup(self):
         """Perform Backup"""
-        util.xtrabackup_version()
+        xtrabackup_version = util.xtrabackup_version()
         if self.dry_run:
             self.dryrun()
             return
+        binary_xtrabackup = False
+        if LooseVersion(xtrabackup_version) > LooseVersion("8.0.0"):
+            LOG.debug("Use xtrabackup without innobackupex ")
+            binary_xtrabackup = True
+
         xb_cfg = self.config['xtrabackup']
         backup_directory = self.target_directory
         tmpdir = util.evaluate_tmpdir(xb_cfg['tmpdir'], backup_directory)
         # innobackupex --tmpdir does not affect xtrabackup
         util.add_xtrabackup_defaults(self.defaults_path, tmpdir=tmpdir)
-        args = util.build_xb_args(xb_cfg, backup_directory, self.defaults_path)
+        args = util.build_xb_args(xb_cfg, backup_directory, self.defaults_path, binary_xtrabackup)
         util.execute_pre_command(xb_cfg['pre-command'],
                                  backup_directory=backup_directory)
         stderr = self.open_xb_logfile()

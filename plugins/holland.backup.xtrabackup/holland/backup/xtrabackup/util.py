@@ -11,6 +11,7 @@ from __future__ import print_function
 import codecs
 import tempfile
 import logging
+import re
 from string import Template
 from os.path import join, isabs, expanduser
 from subprocess import Popen, PIPE, STDOUT, list2cmdline
@@ -182,11 +183,14 @@ def add_xtrabackup_defaults(defaults_path, **kwargs):
                               defaults_path)
     finally:
         fileobj.close()
-def build_xb_args(config, basedir, defaults_file=None):
+def build_xb_args(config, basedir, defaults_file=None, binary_xtrabackup=False):
     """Build the commandline for xtrabackup"""
-    innobackupex = config['innobackupex']
-    if not isabs(innobackupex):
-        innobackupex = which(innobackupex)
+    if binary_xtrabackup:
+	innobackupex = which("xtrabackup")
+    else:
+        innobackupex = config['innobackupex']
+        if not isabs(innobackupex):
+            innobackupex = which(innobackupex)
 
     ibbackup = config['ibbackup']
     stream = determine_stream_method(config['stream'])
@@ -200,27 +204,44 @@ def build_xb_args(config, basedir, defaults_file=None):
     args = [
         innobackupex,
     ]
-    if defaults_file:
-        args.append('--defaults-file=' + defaults_file)
-    if ibbackup:
-        args.append('--ibbackup=' + ibbackup)
-    if stream:
-        args.append('--stream=' + stream)
+    if not binary_xtrabackup:
+        if defaults_file:
+            args.append('--defaults-file=' + defaults_file)
+        if ibbackup:
+            args.append('--ibbackup=' + ibbackup)
+        if stream:
+            args.append('--stream=' + stream)
+        else:
+            basedir = join(basedir, 'data')
+        if tmpdir:
+            args.append('--tmpdir=' + tmpdir)
+        if slave_info:
+            args.append('--slave-info')
+        if safe_slave_backup:
+            args.append('--safe-slave-backup')
+        if no_lock:
+            args.append('--no-lock')
+        args.append('--no-timestamp')
+        if extra_opts:
+            args.extend(extra_opts)
+        if basedir:
+            args.append(basedir)
     else:
-        basedir = join(basedir, 'data')
-    if tmpdir:
-        args.append('--tmpdir=' + tmpdir)
-    if slave_info:
-        args.append('--slave-info')
-    if safe_slave_backup:
-        args.append('--safe-slave-backup')
-    if no_lock:
-        args.append('--no-lock')
-    args.append('--no-timestamp')
-    if extra_opts:
-        args.extend(extra_opts)
-    if basedir:
-        args.append(basedir)
+        if defaults_file:
+            args.append('--defaults-file=' + defaults_file)
+        args.append('--backup')
+        if ibbackup:
+            args.append('--ibbackup=' + ibbackup)
+        args.append('--stream=xbstream')
+        if slave_info:
+            args.append('--slave-info')
+        if safe_slave_backup:
+            args.append('--safe-slave-backup')
+        if no_lock:
+            args.append('--no-lock')
+        args.append('--no-timestamp')
+        if extra_opts:
+            args.extend(extra_opts)
     return args
 
 def xtrabackup_version():
@@ -238,8 +259,11 @@ def xtrabackup_version():
                           cmdline, exc.errno, exc.strerror)
 
     for line in process.stdout:
+        if 'version' in line:
+	    xtrabackup_version = re.search(r'version\s*([\d.]+)', line).group(1)
         LOG.info("%s", line.rstrip().decode('UTF-8'))
     process.wait()
     if process.returncode != 0:
         raise BackupError("%s returned failure status [%d]" %
                           (cmdline, process.returncode))
+    return  xtrabackup_version
