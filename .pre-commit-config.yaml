@@ -1,13 +1,13 @@
 ---
 repos:
 -   repo: https://github.com/ambv/black
-    rev: 18.9b0
+    rev: stable
     hooks:
     -  id: black
        args: [--line-length=100]
        language_version: python3.6
 -   repo: git://github.com/pre-commit/mirrors-pylint
-    rev: v2.3.0.dev1
+    rev: v2.2.2
     hooks:
     -  id: pylint
        language_version: python3.6
