@@ -176,7 +176,7 @@ class XtrabackupPlugin(object):
                 except Exception as exc:
                     LOG.info("!! %s", exc)
                     for line in open(
-                        join(self.target_directory, "xtrabackup.log"), "r"
+                            join(self.target_directory, "xtrabackup.log"), "r"
                     ):
                         LOG.error("    ! %s", line.rstrip())
                     raise
