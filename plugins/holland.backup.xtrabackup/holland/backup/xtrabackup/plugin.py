@@ -118,12 +118,15 @@ class XtrabackupPlugin(object):
         else:
             return open("/dev/null", "w")
 
-    def dryrun(self):
+    def dryrun(self, binary_xtrabackup):
         """Perform test backup"""
         from subprocess import Popen, list2cmdline, PIPE, STDOUT
 
         xb_cfg = self.config["xtrabackup"]
-        args = util.build_xb_args(xb_cfg, self.target_directory, self.defaults_path)
+        args = util.build_xb_args(xb_cfg,
+                                  self.target_directory,
+                                  self.defaults_path,
+                                  binary_xtrabackup)
         LOG.info("* xtrabackup command: %s", list2cmdline(args))
         args = ["xtrabackup", "--defaults-file=" + self.defaults_path, "--help"]
         cmdline = list2cmdline(args)
@@ -147,13 +150,14 @@ class XtrabackupPlugin(object):
     def backup(self):
         """Perform Backup"""
         xtrabackup_version = util.xtrabackup_version()
-        if self.dry_run:
-            self.dryrun()
-            return
         binary_xtrabackup = False
         if LooseVersion(xtrabackup_version) > LooseVersion("8.0.0"):
             LOG.debug("Use xtrabackup without innobackupex ")
             binary_xtrabackup = True
+
+        if self.dry_run:
+            self.dryrun(binary_xtrabackup)
+            return
 
         xb_cfg = self.config["xtrabackup"]
         backup_directory = self.target_directory
