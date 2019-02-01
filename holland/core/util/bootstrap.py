@@ -12,7 +12,7 @@ from holland.core.config import HOLLANDCFG, setup_config as _setup_config
 from holland.core.log import setup_console_logging, setup_file_logging, clear_root_handlers
 from holland.core.spool import SPOOL
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def setup_config(opts):
@@ -25,7 +25,7 @@ def setup_config(opts):
     try:
         _setup_config(opts.config_file)
     except IOError as ex:
-        LOGGER.error("Failed to load holland config: %s", ex)
+        LOG.error("Failed to load holland config: %s", ex)
         sys.exit(os.EX_CONFIG)
 
 
@@ -55,7 +55,7 @@ def setup_logging(opts):
                     filename=str(HOLLANDCFG.lookup("logging.filename")), level=log_level
                 )
         except IOError as exc:
-            LOGGER.warning("Skipping file logging: %s", exc)
+            LOG.warning("Skipping file logging: %s", exc)
 
 
 def setup_umask():

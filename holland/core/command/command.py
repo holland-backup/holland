@@ -11,7 +11,7 @@ import logging
 from distutils.version import LooseVersion
 from pkg_resources import get_distribution
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 HOLLAND_VERSION = get_distribution("holland").version
 HOLLAND_BANNER = (
     """
@@ -127,10 +127,10 @@ class Command(object):
         except KeyboardInterrupt:
             raise
         except TypeError as ex:
-            LOGGER.error("Failed comamnd %s': %s", self.optparser.prog, ex)
+            LOG.error("Failed comamnd %s': %s", self.optparser.prog, ex)
             return os.EX_SOFTWARE
         except BaseException as ex:
-            LOGGER.error(
+            LOG.error(
                 "Uncaught exception while running command '%s': %r",
                 self.optparser.prog,
                 ex,

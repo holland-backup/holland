@@ -19,7 +19,7 @@ try:
 except BaseException:
     from configobj import ConfigObj, flatten_errors, ParseError
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def which(cmd, search_path=None):

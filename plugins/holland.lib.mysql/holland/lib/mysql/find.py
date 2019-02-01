@@ -5,7 +5,7 @@ import fnmatch
 import string
 import logging
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class MySQLFind(object):

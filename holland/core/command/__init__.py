@@ -11,7 +11,7 @@ from .command import Command, PARSER
 
 __all__ = ["Command", "run", "PARSER"]
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def setup_commands():
@@ -41,7 +41,7 @@ def run(opts, args=None):
     try:
         return cmdobj.dispatch(opts, args)
     except KeyboardInterrupt:
-        LOGGER.info("Interrupt")
+        LOG.info("Interrupt")
         return os.EX_SOFTWARE
     except BaseException:
         print_help()

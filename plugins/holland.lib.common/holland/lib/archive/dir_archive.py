@@ -6,7 +6,7 @@ import os
 import shutil
 import logging
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class DirArchive(object):
@@ -97,7 +97,7 @@ class DirArchive(object):
 
         status = subprocess.call(["gzip", "-1", "--recursive", self.path])
         if status != 0:
-            LOGGER.error("Failed to compress %r", self.path)
+            LOG.error("Failed to compress %r", self.path)
 
 
 if __name__ == "__main__":

@@ -15,7 +15,7 @@ from pkg_resources import (
     VersionConflict,
 )
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 PLUGIN_DIRECTORIES = []
 
@@ -31,11 +31,11 @@ def add_plugin_dir(plugin_dir):
     Find available plugins
     """
     if not os.path.isdir(plugin_dir):
-        LOGGER.debug("Adding plugin directory: %r", plugin_dir)
+        LOG.debug("Adding plugin directory: %r", plugin_dir)
         env = Environment([plugin_dir])
         dists, errors = working_set.find_plugins(env)
         for dist in dists:
-            LOGGER.debug("Adding distribution: %r", dist)
+            LOG.debug("Adding distribution: %r", dist)
             working_set.add(dist)
 
         if errors:
@@ -49,7 +49,7 @@ def add_plugin_dir(plugin_dir):
                     errmsg = "Version Conflict. Requested %s Found %s" % (req, dist)
                 else:
                     errmsg = repr(error)
-                LOGGER.error("Failed to load %s: %r", dist, errmsg)
+                LOG.error("Failed to load %s: %r", dist, errmsg)
         PLUGIN_DIRECTORIES.append(plugin_dir)
 
 
@@ -91,7 +91,7 @@ def get_commands(include_aliases=True):
         try:
             cmdcls = entry_point.load()
         except ImportError as ex:
-            LOGGER.warning("Skipping command plugin %s: %s", entry_point.name, ex)
+            LOG.warning("Skipping command plugin %s: %s", entry_point.name, ex)
             continue
         cmds[cmdcls.name] = cmdcls
         if include_aliases:

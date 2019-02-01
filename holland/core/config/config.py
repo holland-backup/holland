@@ -14,7 +14,7 @@ except ImportError:
 
 from .checks import VALIDATOR
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 CONFIG_SUFFIX = ".conf"
 
@@ -81,9 +81,9 @@ class BaseConfig(ConfigObj):
         for entry in flatten_errors(self, errors):
             section_list, key, error = entry
             if not error:
-                LOGGER.error("Missing parameter %s", ".".join(section_list + [key]))
+                LOG.error("Missing parameter %s", ".".join(section_list + [key]))
             else:
-                LOGGER.error("Configuration error %s: %s", ".".join(section_list + [key]), error)
+                LOG.error("Configuration error %s: %s", ".".join(section_list + [key]), error)
 
         # warn about any unknown parameters before we potentially abort on
         # validation errors
@@ -91,9 +91,7 @@ class BaseConfig(ConfigObj):
         if not suppress_warnings:
             try:
                 for sections, name in get_extra_values(self):
-                    LOGGER.warning(
-                        "Unknown parameter '%s' in section '%s'", name, ".".join(sections)
-                    )
+                    LOG.warning("Unknown parameter '%s' in section '%s'", name, ".".join(sections))
             except NameError:
                 pass
 
@@ -146,7 +144,7 @@ class BackupConfig(BaseConfig):
                 providercfg.walk(self._canonicalize, call_on_sections=True)
                 self.merge(providercfg)
             except IOError as ex:
-                LOGGER.warning("Failed to load config for provider %r (%s)", provider, ex)
+                LOG.warning("Failed to load config for provider %r (%s)", provider, ex)
         self.merge(basecfg)
         self.filename = basecfg.filename
 
@@ -213,13 +211,13 @@ def setup_config(config_file):
     Configure the default HOLLANDCFG instance in this module
     """
     if not config_file:
-        LOGGER.debug("load_config called with not configuration file")
+        LOG.debug("load_config called with not configuration file")
         HOLLANDCFG.validate_config(CONFIGSPEC)
-        LOGGER.debug(repr(HOLLANDCFG))
+        LOG.debug(repr(HOLLANDCFG))
         return None
 
     config_file = os.path.abspath(config_file)
-    LOGGER.debug("Loading %r", config_file)
+    LOG.debug("Loading %r", config_file)
     HOLLANDCFG.clear()
     HOLLANDCFG.filename = config_file
     HOLLANDCFG.reload()

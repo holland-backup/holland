@@ -6,7 +6,7 @@ import time
 import zipfile
 import logging
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class ZipArchive(object):

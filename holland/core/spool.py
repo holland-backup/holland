@@ -10,7 +10,7 @@ import itertools
 import shutil
 from holland.core.config import BaseConfig
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def timestamp_dir(when=None):
@@ -44,7 +44,7 @@ class Spool(object):
             if backupset:
                 return backupset.find_backup(timestamp)
         except ValueError as ex:
-            LOGGER.warning("Invalid backup name: %s, Error: %s", name, ex)
+            LOG.warning("Invalid backup name: %s, Error: %s", name, ex)
         return None
 
     def add_backup(self, backupset_name):
@@ -312,14 +312,14 @@ class Backup(object):
         but does not flush any other backup metadata.
         """
         os.makedirs(self.path)
-        LOGGER.info("Creating backup path %s", self.path)
+        LOG.info("Creating backup path %s", self.path)
 
     def flush(self):
         """
         Flush this backup to disk.  Ensure the path to this backup is created
         and write the backup.conf to the backup directory.
         """
-        LOGGER.debug("Writing out config to %s", self.config.filename)
+        LOG.debug("Writing out config to %s", self.config.filename)
         self.config.write()
 
     def _formatted_config(self):

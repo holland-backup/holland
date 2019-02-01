@@ -7,7 +7,7 @@ from holland.core.command import Command
 from holland.core.plugin import load_first_entrypoint
 from holland.core.spool import SPOOL
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class Restore(Command):

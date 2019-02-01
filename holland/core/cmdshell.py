@@ -9,7 +9,7 @@ from holland.core.util.bootstrap import bootstrap
 from holland.core.command import run, parse_sys, print_help
 from holland.core.config.checks import is_logging_level
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 HOLLAND_VERSION = get_distribution("holland").version
 
 # main entrypoint for holland's cmdshell 'hl'
@@ -36,5 +36,5 @@ def main():
     # Bootstrap the environment
     bootstrap(opts)
 
-    LOGGER.info("Holland %s started with pid %d", HOLLAND_VERSION, os.getpid())
+    LOG.info("Holland %s started with pid %d", HOLLAND_VERSION, os.getpid())
     return run(opts, args)
