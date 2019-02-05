@@ -84,7 +84,9 @@ def run_xtrabackup(args, stdout, stderr):
 
 
 def apply_xtrabackup_logfile(xb_cfg, backupdir, binary_xtrabackup=False):
-    """Apply xtrabackup_logfile via innobackupex --apply-log [options]"""
+    """Apply xtrabackup_logfile via innobackupex --apply-log [options] for version < 8.0
+    With xtrabackup > 8.0 this should run xtrabackup --prepare --target-dir=backupdir/data
+    """
     # run ${innobackupex} --apply-log ${backupdir}
     # only applies when streaming is not used
     stream_method = determine_stream_method(xb_cfg["stream"])
@@ -98,12 +100,7 @@ def apply_xtrabackup_logfile(xb_cfg, backupdir, binary_xtrabackup=False):
 
     if binary_xtrabackup:
         innobackupex = which("xtrabackup")
-        args = [
-            innobackupex,
-            "--prepare",
-            "--apply-log-only",
-            "--target-dir=" + backupdir + "/data",
-        ]
+        args = [innobackupex, "--prepare", "--target-dir=" + backupdir + "/data"]
     else:
         innobackupex = xb_cfg["innobackupex"]
         if not isabs(innobackupex):
