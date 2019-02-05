@@ -87,7 +87,7 @@ def run_xtrabackup(args, stdout, stderr):
         )
 
 
-def apply_xtrabackup_logfile(xb_cfg, backupdir):
+def apply_xtrabackup_logfile(xb_cfg, backupdir, binary_xtrabackup=False):
     """Apply xtrabackup_logfile via innobackupex --apply-log [options]"""
     # run ${innobackupex} --apply-log ${backupdir}
     # only applies when streaming is not used
@@ -103,10 +103,14 @@ def apply_xtrabackup_logfile(xb_cfg, backupdir):
         )
         return
 
-    innobackupex = xb_cfg["innobackupex"]
-    if not isabs(innobackupex):
-        innobackupex = which(innobackupex)
-    args = [innobackupex, "--apply-log", backupdir]
+    if binary_xtrabackup:
+        innobackupex = which("xtrabackup")
+    	args = [innobackupex, "--prepare",  "--apply-log-only", "--target-dir=" + backupdir + "/data"]
+    else:
+        innobackupex = xb_cfg["innobackupex"]
+        if not isabs(innobackupex):
+            innobackupex = which(innobackupex)
+    	args = [innobackupex, "--apply-log", backupdir]
 
     cmdline = list2cmdline(args)
     LOG.info("Executing: %s", cmdline)
@@ -236,7 +240,10 @@ def build_xb_args(config, basedir, defaults_file=None, binary_xtrabackup=False):
         args.append("--backup")
         if ibbackup:
             args.append("--ibbackup=" + ibbackup)
-        args.append("--stream=xbstream")
+        if stream:
+            args.append("--stream=xbstream")
+	else:
+            args.append("--target-dir=%s/data" % basedir)
         if slave_info:
             args.append("--slave-info")
         if safe_slave_backup:

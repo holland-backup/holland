@@ -194,4 +194,4 @@ class XtrabackupPlugin(object):
         finally:
             stderr.close()
         if xb_cfg["apply-logs"]:
-            util.apply_xtrabackup_logfile(xb_cfg, args[-1])
+            util.apply_xtrabackup_logfile(xb_cfg, backup_directory, binary_xtrabackup)
