@@ -9,17 +9,21 @@ from holland.core.backup import BackupError
 
 LOG = logging.getLogger(__name__)
 
-CONFIGSPEC = """
+CONFIGSPEC = (
+    """
 [sqlite]
 databases = force_list(default=list())
 binary = string(default=/usr/bin/sqlite3)
-""" + COMPRESSION_CONFIG_STRING
+"""
+    + COMPRESSION_CONFIG_STRING
+)
 
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
 
 class SQLitePlugin(object):
     """Define Plugin to backup SQLite"""
+
     def __init__(self, name, config, target_directory, dry_run=False):
         self.name = name
         self.config = config
@@ -32,7 +36,7 @@ class SQLitePlugin(object):
         self.config.validate_config(CONFIGSPEC)
         LOG.debug("Validated config: %r", self.config)
 
-        self.sqlite_bin = self.config['sqlite']['binary']
+        self.sqlite_bin = self.config["sqlite"]["binary"]
         self.check()
 
     @staticmethod
@@ -46,7 +50,7 @@ class SQLitePlugin(object):
         if not os.path.exists(self.sqlite_bin):
             raise BackupError("SQLite binary [%s] doesn't exist!" % self.sqlite_bin)
 
-        for database in self.config['sqlite']['databases']:
+        for database in self.config["sqlite"]["databases"]:
             # sometimes picks up empty string ('')
             if not database:
                 continue
@@ -57,10 +61,12 @@ class SQLitePlugin(object):
                 self.invalid_databases.append(database)
                 continue
 
-            process = Popen([self.sqlite_bin, path, '.schema'],
-                            stdin=open('/dev/null', 'r'),
-                            stdout=open('/dev/null', 'w'),
-                            stderr=PIPE)
+            process = Popen(
+                [self.sqlite_bin, path, ".schema"],
+                stdin=open("/dev/null", "r"),
+                stdout=open("/dev/null", "w"),
+                stderr=PIPE,
+            )
             _, stderroutput = process.communicate()
 
             if process.returncode != 0:
@@ -91,10 +97,12 @@ class SQLitePlugin(object):
         pure ASCII SQL Text and write that to disk.
         """
 
-        zopts = (self.config['compression']['method'],
-                 int(self.config['compression']['level']),
-                 self.config['compression']['options'],
-                 self.config['compression']['inline'])
+        zopts = (
+            self.config["compression"]["method"],
+            int(self.config["compression"]["level"]),
+            self.config["compression"]["options"],
+            self.config["compression"]["inline"],
+        )
         LOG.info("SQLite binary is [%s]", self.sqlite_bin)
         for database in self.databases:
             path = os.path.abspath(os.path.expanduser(database))
@@ -105,16 +113,18 @@ class SQLitePlugin(object):
 
             if self.dry_run:
                 LOG.info("Backing up SQLite database at [%s] (dry run)", path)
-                dest = open('/dev/null', 'w')
+                dest = open("/dev/null", "w")
             else:
                 LOG.info("Backing up SQLite database at [%s]", path)
-                dest = os.path.join(self.target_directory, '%s.sql' % \
-                                    os.path.basename(path))
-                dest = open_stream(dest, 'w', *zopts)
+                dest = os.path.join(self.target_directory, "%s.sql" % os.path.basename(path))
+                dest = open_stream(dest, "w", *zopts)
 
-            process = Popen([self.sqlite_bin, path, '.dump'],
-                            stdin=open('/dev/null', 'r'), stdout=dest,
-                            stderr=PIPE)
+            process = Popen(
+                [self.sqlite_bin, path, ".dump"],
+                stdin=open("/dev/null", "r"),
+                stdout=dest,
+                stderr=PIPE,
+            )
             _, stderroutput = process.communicate()
             dest.close()
 

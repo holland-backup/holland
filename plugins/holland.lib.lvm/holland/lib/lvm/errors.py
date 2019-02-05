@@ -1,7 +1,9 @@
 """Standard errors raised by holland.lib.lvm"""
 
+
 class SnapshotError(Exception):
     """Error occurred during snapshotting process"""
+
 
 class LVMCommandError(Exception):
     """Error occurred while running a lvm command
@@ -12,7 +14,7 @@ class LVMCommandError(Exception):
     """
 
     def __init__(self, cmd, status, error):
-        error = (error.strip() if error else '')
+        error = error.strip() if error else ""
         Exception.__init__(self, cmd, status, error)
         self.cmd = cmd
         self.status = status
