@@ -8,6 +8,7 @@ from holland.core.command import Command
 from holland.core.spool import SPOOL
 from holland.core.plugin import load_backup_plugin
 
+
 class ListBackups(Command):
     """${cmd_usage}
 
@@ -15,20 +16,12 @@ class ListBackups(Command):
 
     Lists available backups
     """
-    name = 'list-backups'
-    aliases = [
-        'lb'
-    ]
-    description = 'List available backups'
-    args = [
-        ['-v', '--verbose']
-    ]
-    kargs = [
-        {
-            'action':'store_true',
-            'help':"Verbose output"
-        }
-    ]
+
+    name = "list-backups"
+    aliases = ["lb"]
+    description = "List available backups"
+    args = [["-v", "--verbose"]]
+    kargs = [{"action": "store_true", "help": "Verbose output"}]
 
     @staticmethod
     def print_table(table):
@@ -58,7 +51,7 @@ class ListBackups(Command):
                 print("Backupset[%s]:" % (backup.backupset))
             # Read the backup.conf
             backup.load_config()
-            plugin_name = backup.config.get('holland:backup', {})['plugin']
+            plugin_name = backup.config.get("holland:backup", {})["plugin"]
             if not plugin_name:
                 print("Skipping broken backup: %s" % backup.name)
                 continue
@@ -67,10 +60,11 @@ class ListBackups(Command):
                 print("\t", backup.info())
                 plugin = load_backup_plugin(plugin_name)
                 plugin = plugin(backup.backupset, backup.config, backup.path)
-                if hasattr(plugin, 'info'):
+                if hasattr(plugin, "info"):
                     plugin_info = plugin.info()
                     import re
-                    rec = re.compile(r'^', re.M)
-                    print(rec.sub('\t\t', plugin_info))
+
+                    rec = re.compile(r"^", re.M)
+                    print(rec.sub("\t\t", plugin_info))
 
         return 0

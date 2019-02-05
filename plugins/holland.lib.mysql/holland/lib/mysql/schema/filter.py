@@ -3,20 +3,22 @@
 import re
 import fnmatch
 
+
 class BaseFilter(object):
     """Filter a string based on a list of regular expression or glob patterns.
 
     This should be inherited and the __call__ overriden with a real
     implementation
     """
-    __slots__ = ('patterns', '_re_options')
+
+    __slots__ = ("patterns", "_re_options")
 
     def __init__(self, patterns, case_insensitive=True):
         self.patterns = list(patterns)
         if case_insensitive:
-            self._re_options = re.M|re.U|re.I
+            self._re_options = re.M | re.U | re.I
         else:
-            self._re_options = re.M|re.U
+            self._re_options = re.M | re.U
 
     def add_glob(self, glob):
         """Add a glob pattern to this filter
@@ -46,7 +48,8 @@ class BaseFilter(object):
         raise NotImplementedError()
 
     def __repr__(self):
-        return self.__class__.__name__ + '(patterns=%r)' % self.patterns
+        return self.__class__.__name__ + "(patterns=%r)" % self.patterns
+
 
 class IncludeFilter(BaseFilter):
     """Include only objects that match *all* assigned filters"""
@@ -57,6 +60,7 @@ class IncludeFilter(BaseFilter):
                 return False
         return True
 
+
 class ExcludeFilter(BaseFilter):
     """Exclude objects that match any filter"""
 
@@ -66,6 +70,7 @@ class ExcludeFilter(BaseFilter):
                 return True
         return False
 
+
 def exclude_glob(*pattern):
     """Create an exclusion filter from a glob pattern"""
     result = []
@@ -73,12 +78,14 @@ def exclude_glob(*pattern):
         result.append(fnmatch.translate(pat))
     return ExcludeFilter(result)
 
+
 def include_glob(*pattern):
     """Create an inclusion filter from glob patterns"""
     result = []
     for pat in pattern:
         result.append(fnmatch.translate(pat))
     return IncludeFilter(result)
+
 
 def include_glob_qualified(*pattern):
     """Create an inclusion filter from glob patterns
@@ -89,10 +96,11 @@ def include_glob_qualified(*pattern):
     """
     result = []
     for pat in pattern:
-        if '.' not in pat:
-            pat = '*.' + pat
+        if "." not in pat:
+            pat = "*." + pat
         result.append(pat)
     return include_glob(*result)
+
 
 def exclude_glob_qualified(*pattern):
     """Create an exclusion filter from glob patterns
@@ -103,7 +111,7 @@ def exclude_glob_qualified(*pattern):
     """
     result = []
     for pat in pattern:
-        if '.' not in pat:
-            pat = '*.' + pat
+        if "." not in pat:
+            pat = "*." + pat
         result.append(pat)
     return exclude_glob(*result)

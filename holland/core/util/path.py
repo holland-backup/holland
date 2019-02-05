@@ -11,6 +11,7 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
+
 def ensure_dir(dir_path):
     """
     Ensure a directory path exists (by creating it if it doesn't).
@@ -27,6 +28,7 @@ def ensure_dir(dir_path):
             LOG.error("os.makedirs(%s): %s", dir_path, ex)
             raise
     return False
+
 
 def protected_path(path):
     """
@@ -54,6 +56,7 @@ def protected_path(path):
         safety = safety + 1
     return safe_path
 
+
 def format_bytes(input_bytes, precision=2):
     """
     Format an integer number of input_bytes to a human
@@ -74,7 +77,7 @@ def format_bytes(input_bytes, precision=2):
     return "%.*f%s" % (
         precision,
         input_bytes / (1024 ** exponent),
-        ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'][int(exponent)]
+        ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][int(exponent)],
     )
 
 
@@ -83,6 +86,7 @@ def normpath(path):
     Normalize Path
     """
     return os.path.abspath(os.path.normpath(path))
+
 
 def relpath(path, start=os.curdir):
     """Return a relative version of a path"""
@@ -96,10 +100,11 @@ def relpath(path, start=os.curdir):
     # Work out how much of the filepath is shared by start and path.
     i = len(os.path.commonprefix([start_list, path_list]))
 
-    rel_list = [os.pardir] * (len(start_list)-i) + path_list[i:]
+    rel_list = [os.pardir] * (len(start_list) - i) + path_list[i:]
     if not rel_list:
         return os.curdir
     return os.path.join(*rel_list)
+
 
 def getmount(path):
     """Return the mount point of a path
@@ -117,6 +122,7 @@ def getmount(path):
         path = os.path.abspath(os.path.join(path, os.pardir))
     return path
 
+
 def disk_capacity(target_path):
     """Find the total capacity of the filesystem that target_path is on
 
@@ -124,7 +130,8 @@ def disk_capacity(target_path):
     """
     path = getmount(target_path)
     info = os.statvfs(path)
-    return info.f_frsize*info.f_blocks
+    return info.f_frsize * info.f_blocks
+
 
 def disk_free(target_path):
     """
@@ -137,7 +144,8 @@ def disk_free(target_path):
     """
     path = getmount(target_path)
     info = os.statvfs(path)
-    return info.f_frsize*info.f_bavail
+    return info.f_frsize * info.f_bavail
+
 
 def directory_size(path):
     """
@@ -146,6 +154,7 @@ def directory_size(path):
     Returns the size in input_bytes on success
     """
     from os.path import join, getsize
+
     result = 0
     for root, dirs, files in os.walk(path):
         for name in files:
@@ -155,5 +164,5 @@ def directory_size(path):
             except OSError:
                 pass
         for name in dirs:
-            LOG.debug('Debug: Database backups writen to %s/%s', root, name)
+            LOG.debug("Debug: Database backups writen to %s/%s", root, name)
     return result

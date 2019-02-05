@@ -6,12 +6,14 @@ a validate.py Validator instance
 import shlex
 from builtins import str  # pylint: disable=redefined-builtin,import-error
 from holland.core.util.fmt import format_loglevel
+
 # Required for EL6
 try:
     from configobj.validate import Validator
 except ImportError:
     import validate
     from validate import Validator
+
 
 def is_coerced_list(value, min_val=None, max_val=None):
     """
@@ -21,6 +23,7 @@ def is_coerced_list(value, min_val=None, max_val=None):
     if isinstance(value, str):
         value = [value]
     return validate.is_list(value, min_val, max_val)
+
 
 def is_octal(value, min_val=None, max_val=None):
     """
@@ -35,6 +38,7 @@ def is_octal(value, min_val=None, max_val=None):
         raise validate.VdtTypeError(value)
     return validate.is_integer(value, min_val, max_val)
 
+
 def is_logging_level(value):
     """
     Coerces a string to an integer logging level which
@@ -47,6 +51,7 @@ def is_logging_level(value):
 
     return level
 
+
 def is_cmdline(value):
     """
     Parse command line input
@@ -56,9 +61,12 @@ def is_cmdline(value):
     except:
         raise validate.VdtTypeError(value)
 
-VALIDATOR = Validator({
-    'octal' : is_octal,
-    'logging_level' : is_logging_level,
-    'coerced_list' : is_coerced_list,
-    'cmd_args' : is_cmdline
-})
+
+VALIDATOR = Validator(
+    {
+        "octal": is_octal,
+        "logging_level": is_logging_level,
+        "coerced_list": is_coerced_list,
+        "cmd_args": is_cmdline,
+    }
+)

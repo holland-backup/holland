@@ -6,6 +6,7 @@ import os
 import shutil
 from holland.core.backup import BackupError
 
+
 def which(cmd):
     """ Returns full path to command or else raises an error """
     try:
@@ -13,8 +14,8 @@ def which(cmd):
         if full_path:
             return full_path
     except AttributeError:
-        #shutil.which was added in python 3.3
-        for path in os.environ['PATH'].split(':'):
+        # shutil.which was added in python 3.3
+        for path in os.environ["PATH"].split(":"):
             try:
                 for path_cmd in os.listdir(path):
                     if cmd == path_cmd:

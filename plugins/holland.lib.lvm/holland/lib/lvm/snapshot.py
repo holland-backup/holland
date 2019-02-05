@@ -8,13 +8,12 @@ from holland.lib.lvm.util import SignalManager, format_bytes
 
 LOG = logging.getLogger(__name__)
 
-__all__ = [
-    'Snapshot',
-    'CallbackFailuresError',
-]
+__all__ = ["Snapshot", "CallbackFailuresError"]
+
 
 class Snapshot(object):
     """Snapshot state machine"""
+
     def __init__(self, name, size, mountpoint):
         self.name = name
         self.size = size
@@ -29,7 +28,7 @@ class Snapshot(object):
         """
         self.sigmgr.trap(signal.SIGINT, signal.SIGTERM, signal.SIGHUP)
         try:
-            self._apply_callbacks('initialize', self)
+            self._apply_callbacks("initialize", self)
         except CallbackFailuresError as exc:
             return self.error(None, exc)
         return self.create_snapshot(volume)
@@ -40,14 +39,14 @@ class Snapshot(object):
         """
 
         try:
-            self._apply_callbacks('pre-snapshot', self, None)
+            self._apply_callbacks("pre-snapshot", self, None)
             snapshot = logical_volume.snapshot(self.name, self.size)
             LOG.info("Created snapshot volume %s", snapshot.device_name())
         except (LVMCommandError, CallbackFailuresError) as exc:
             return self.error(None, exc)
 
         try:
-            self._apply_callbacks('post-snapshot', self, snapshot)
+            self._apply_callbacks("post-snapshot", self, snapshot)
         except CallbackFailuresError as exc:
             return self.error(snapshot, exc)
 
@@ -57,22 +56,22 @@ class Snapshot(object):
         """Mount the snapshot"""
 
         try:
-            self._apply_callbacks('pre-mount', self, snapshot)
+            self._apply_callbacks("pre-mount", self, snapshot)
             options = None
             try:
                 filesystem = snapshot.filesystem()
             except BaseException:
-                return self.error(snapshot, 'Failed looking up filesystem')
+                return self.error(snapshot, "Failed looking up filesystem")
 
-            if filesystem == 'xfs':
-                LOG.info("xfs filesystem detected on %s. "
-                         "Using mount -o nouuid",
-                         snapshot.device_name())
-                options = 'nouuid'
+            if filesystem == "xfs":
+                LOG.info(
+                    "xfs filesystem detected on %s. " "Using mount -o nouuid",
+                    snapshot.device_name(),
+                )
+                options = "nouuid"
             snapshot.mount(self.mountpoint, options)
-            LOG.info("Mounted %s on %s",
-                     snapshot.device_name(), self.mountpoint)
-            self._apply_callbacks('post-mount', self, snapshot)
+            LOG.info("Mounted %s on %s", snapshot.device_name(), self.mountpoint)
+            self._apply_callbacks("post-mount", self, snapshot)
         except (CallbackFailuresError, LVMCommandError) as exc:
             return self.error(snapshot, exc)
 
@@ -81,14 +80,14 @@ class Snapshot(object):
     def unmount_snapshot(self, snapshot):
         """Unmount the snapshot"""
         try:
-            self._apply_callbacks('pre-unmount', snapshot)
+            self._apply_callbacks("pre-unmount", snapshot)
             snapshot.unmount()
             LOG.info("Unmounted %s", snapshot.device_name())
         except (CallbackFailuresError, LVMCommandError) as exc:
             return self.error(snapshot, exc)
 
         try:
-            self._apply_callbacks('post-unmount', snapshot)
+            self._apply_callbacks("post-unmount", snapshot)
         except CallbackFailuresError as exc:
             return self.error(snapshot, exc)
 
@@ -97,14 +96,14 @@ class Snapshot(object):
     def remove_snapshot(self, snapshot):
         """Remove the snapshot"""
         try:
-            self._apply_callbacks('pre-remove', snapshot)
+            self._apply_callbacks("pre-remove", snapshot)
             snapshot.remove()
             LOG.info("Removed snapshot %s", snapshot.device_name())
         except (CallbackFailuresError, LVMCommandError) as exc:
             return self.error(snapshot, exc)
 
         try:
-            self._apply_callbacks('post-remove', snapshot)
+            self._apply_callbacks("post-remove", snapshot)
         except (CallbackFailuresError) as exc:
             return self.error(snapshot, exc)
 
@@ -117,9 +116,9 @@ class Snapshot(object):
         if signal.SIGINT in pending:
             raise KeyboardInterrupt()
 
-        self._apply_callbacks('finish', self)
+        self._apply_callbacks("finish", self)
         if sys.exc_info()[1]:
-            raise #pylint: disable= misplaced-bare-raise
+            raise  # pylint: disable= misplaced-bare-raise
 
     def error(self, snapshot, exc):
         """Handle an error during the snapshot process"""
@@ -127,24 +126,23 @@ class Snapshot(object):
 
         if snapshot and snapshot.exists():
             snapshot.reload()
-            if 'S' in snapshot.lv_attr:
-                LOG.error("Snapshot space (%s) exceeded. "
-                          "Snapshot %s is no longer valid",
-                          snapshot.device_name(),
-                          format_bytes(int(snapshot.lv_size)))
+            if "S" in snapshot.lv_attr:
+                LOG.error(
+                    "Snapshot space (%s) exceeded. " "Snapshot %s is no longer valid",
+                    snapshot.device_name(),
+                    format_bytes(int(snapshot.lv_size)),
+                )
             try:
                 if snapshot.is_mounted():
                     snapshot.unmount()
-                    LOG.info("Unmounting snapshot %s on cleanup",
-                             snapshot.device_name())
+                    LOG.info("Unmounting snapshot %s on cleanup", snapshot.device_name())
             except LVMCommandError as ex:
                 LOG.error("Failed to unmount snapshot %s", ex)
 
             try:
                 if snapshot.exists():
                     snapshot.remove()
-                    LOG.info("Removed snapshot %s on cleanup",
-                             snapshot.device_name())
+                    LOG.info("Removed snapshot %s on cleanup", snapshot.device_name())
             except LVMCommandError as ex:
                 LOG.error("Failed to remove snapshot %s", ex)
 
@@ -177,8 +175,7 @@ class Snapshot(object):
                 LOG.debug("Calling %s", event)
                 callback(event, *args, **kwargs)
             except:
-                LOG.debug("Callback %r failed for event %s",
-                          callback, event, exc_info=True)
+                LOG.debug("Callback %r failed for event %s", callback, event, exc_info=True)
                 exc = sys.exc_info()[1]
                 raise CallbackFailuresError([(callback, exc)])
 
