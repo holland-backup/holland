@@ -116,7 +116,7 @@ def apply_mariabackup_logfile(mb_cfg, backupdir):
     innobackupex = mb_cfg["innobackupex"]
     if not isabs(innobackupex):
         innobackupex = which(innobackupex)
-    args = [innobackupex, "--prepare", backupdir]
+    args = [innobackupex, "--prepare", backupdir + "/data"]
 
     cmdline = list2cmdline(args)
     LOG.info("Executing: %s", cmdline)

@@ -108,7 +108,7 @@ def apply_xtrabackup_logfile(xb_cfg, backupdir, binary_xtrabackup=False):
         innobackupex = xb_cfg["innobackupex"]
         if not isabs(innobackupex):
             innobackupex = which(innobackupex)
-        args = [innobackupex, "--apply-log", backupdir]
+        args = [innobackupex, "--apply-log", backupdir + "/data"]
 
     cmdline = list2cmdline(args)
     LOG.info("Executing: %s", cmdline)
