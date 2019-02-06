@@ -100,12 +100,12 @@ def apply_xtrabackup_logfile(xb_cfg, backupdir, binary_xtrabackup=False):
 
     if binary_xtrabackup:
         innobackupex = which("xtrabackup")
-        args = [innobackupex, "--prepare", "--target-dir=" + backupdir + "/data"]
+        args = [innobackupex, "--prepare", "--target-dir=" + join(backupdir, "data")]
     else:
         innobackupex = xb_cfg["innobackupex"]
         if not isabs(innobackupex):
             innobackupex = which(innobackupex)
-        args = [innobackupex, "--apply-log", backupdir + "/data"]
+        args = [innobackupex, "--apply-log", join(backupdir, "data")]
 
     cmdline = list2cmdline(args)
     LOG.info("Executing: %s", cmdline)
@@ -232,7 +232,7 @@ def build_xb_args(config, basedir, defaults_file=None, binary_xtrabackup=False):
         if stream:
             args.append("--stream=xbstream")
         else:
-            args.append("--target-dir=%s/data" % basedir)
+            args.append("--target-dir=%s" % join(backupdir, "data"))
         if slave_info:
             args.append("--slave-info")
         if safe_slave_backup:
