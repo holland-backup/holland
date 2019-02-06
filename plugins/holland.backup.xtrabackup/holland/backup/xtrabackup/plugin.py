@@ -7,6 +7,7 @@ Backup plugin implementation to provide support for Percona XtraBackup.
 
 import logging
 from os.path import join
+from distutils.version import LooseVersion
 from holland.core.backup import BackupError
 from holland.core.util.path import directory_size
 from holland.lib.compression import open_stream, COMPRESSION_CONFIG_STRING
@@ -116,12 +117,14 @@ class XtrabackupPlugin(object):
         else:
             return open("/dev/null", "w")
 
-    def dryrun(self):
+    def dryrun(self, binary_xtrabackup):
         """Perform test backup"""
         from subprocess import Popen, list2cmdline, PIPE, STDOUT
 
         xb_cfg = self.config["xtrabackup"]
-        args = util.build_xb_args(xb_cfg, self.target_directory, self.defaults_path)
+        args = util.build_xb_args(
+            xb_cfg, self.target_directory, self.defaults_path, binary_xtrabackup
+        )
         LOG.info("* xtrabackup command: %s", list2cmdline(args))
         args = ["xtrabackup", "--defaults-file=" + self.defaults_path, "--help"]
         cmdline = list2cmdline(args)
@@ -142,16 +145,22 @@ class XtrabackupPlugin(object):
 
     def backup(self):
         """Perform Backup"""
-        util.xtrabackup_version()
+        xtrabackup_version = util.xtrabackup_version()
+        binary_xtrabackup = False
+        if LooseVersion(xtrabackup_version) > LooseVersion("8.0.0"):
+            LOG.debug("Use xtrabackup without innobackupex ")
+            binary_xtrabackup = True
+
         if self.dry_run:
-            self.dryrun()
+            self.dryrun(binary_xtrabackup)
             return
+
         xb_cfg = self.config["xtrabackup"]
         backup_directory = self.target_directory
         tmpdir = util.evaluate_tmpdir(xb_cfg["tmpdir"], backup_directory)
         # innobackupex --tmpdir does not affect xtrabackup
         util.add_xtrabackup_defaults(self.defaults_path, tmpdir=tmpdir)
-        args = util.build_xb_args(xb_cfg, backup_directory, self.defaults_path)
+        args = util.build_xb_args(xb_cfg, backup_directory, self.defaults_path, binary_xtrabackup)
         util.execute_pre_command(xb_cfg["pre-command"], backup_directory=backup_directory)
         stderr = self.open_xb_logfile()
         try:
@@ -175,4 +184,4 @@ class XtrabackupPlugin(object):
         finally:
             stderr.close()
         if xb_cfg["apply-logs"]:
-            util.apply_xtrabackup_logfile(xb_cfg, args[-1])
+            util.apply_xtrabackup_logfile(xb_cfg, backup_directory, binary_xtrabackup)

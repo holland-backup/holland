@@ -174,4 +174,4 @@ class MariabackupPlugin(object):
         finally:
             stderr.close()
         if mb_cfg["apply-logs"]:
-            util.apply_mariabackup_logfile(mb_cfg, args[-1])
+            util.apply_mariabackup_logfile(mb_cfg, backup_directory)
