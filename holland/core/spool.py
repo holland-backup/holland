@@ -187,11 +187,15 @@ class Backupset(object):
                 ret.append(Backup(path, self.name, name))
             return ret
 
-        dirs = [
-            backup
-            for backup in os.listdir(self.path)
-            if os.path.isdir(os.path.join(self.path, backup)) and backup not in ("oldest", "newest")
-        ]
+        dirs = []
+        for backup in os.listdir(self.path):
+            path = os.path.join(self.path, backup)
+            if os.path.isdir(path) and not os.path.islink(path):
+                try:
+                    time.strptime(backup, "%Y%m%d_%H%M%S")
+                except ValueError:
+                    continue
+                dirs.append(backup)
 
         backup_list = [Backup(os.path.join(self.path, d), self.name, d) for d in dirs]
 
