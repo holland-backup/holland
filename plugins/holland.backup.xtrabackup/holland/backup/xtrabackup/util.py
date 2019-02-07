@@ -232,7 +232,7 @@ def build_xb_args(config, basedir, defaults_file=None, binary_xtrabackup=False):
         if stream:
             args.append("--stream=xbstream")
         else:
-            args.append("--target-dir=%s" % join(backupdir, "data"))
+            args.append("--target-dir=%s" % join(basedir, "data"))
         if slave_info:
             args.append("--slave-info")
         if safe_slave_backup:
