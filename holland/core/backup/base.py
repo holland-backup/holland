@@ -184,7 +184,7 @@ class BackupRunner(object):
         if dry_run:
             spool_entry.purge()
 
-        if sys.exc_info() != (None, None, None):
+        if sys.exc_info() != (None, None, None) or spool_entry.config["holland:backup"]["failed"]:
             self.apply_cb("failed-backup", spool_entry)
             raise BackupError("Failed backup: %s" % name)
         else:
