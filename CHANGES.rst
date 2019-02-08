@@ -16,6 +16,7 @@ holland
 
 - Bug fixes #269, 267
 - Add support for xtrabackup 8.0
+- Add --maint/--skip-purge to the backup command
 
 1.1.11 - Jan 23, 2019
 ---------------------
