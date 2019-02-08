@@ -29,14 +29,15 @@ from holland.core.cmdshell import HOLLAND_VERSION
 from holland.core.util.fmt import format_loglevel
 
 
-
 class ArgList(Action):
     """
     Setup arg list
     """
+
     def __call__(self, parser, namespace, value, option_string=None):
-        arg_list = [x.strip() for x in value.split(',')]
+        arg_list = [x.strip() for x in value.split(",")]
         setattr(namespace, self.dest, arg_list)
+
 
 def main():
     """
@@ -47,31 +48,38 @@ def main():
 
     Always set HOME to '/root', as the commvault environment is bare
     """
-    os.environ['HOME'] = '/root'
-    os.environ['TMPDIR'] = '/tmp'
+    os.environ["HOME"] = "/root"
+    os.environ["TMPDIR"] = "/tmp"
     # ensure we do not inherit commvault's LD_LIBRARY_PATH
-    os.environ.pop('LD_LIBRARY_PATH', None)
+    os.environ.pop("LD_LIBRARY_PATH", None)
 
-    holland_conf = '/etc/holland/holland.conf'
-    if sys.platform.startswith('freebsd'):
-        holland_conf = '/usr/local' + holland_conf
+    holland_conf = "/etc/holland/holland.conf"
+    if sys.platform.startswith("freebsd"):
+        holland_conf = "/usr/local" + holland_conf
 
     parser = ArgumentParser()
-    parser.add_argument("--config-file", "-c", metavar="<file>",
-                        help="Read configuration from the given file")
+    parser.add_argument(
+        "--config-file", "-c", metavar="<file>", help="Read configuration from the given file"
+    )
 
-    parser.add_argument('-l', '--log-level', metavar='<log-level>',
-                        choices=['critical', 'error', 'warning', 'info', 'debug'],
-                        help="Specify the log level. "
-                        "One of: critical,error,warning,info,debug")
-    parser.add_argument("--quiet", "-q", action="store_true",
-                        help="Don't log to console")
-    parser.add_argument("--verbose", "-v", action="store_true",
-                        help="Verbose output")
+    parser.add_argument(
+        "-l",
+        "--log-level",
+        metavar="<log-level>",
+        choices=["critical", "error", "warning", "info", "debug"],
+        help="Specify the log level. " "One of: critical,error,warning,info,debug",
+    )
+    parser.add_argument("--quiet", "-q", action="store_true", help="Don't log to console")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
 
-    parser.add_argument("--bksets", "-b", metavar="<bkset>,<bkset>...",
-                        help="only run the specified backupset",
-                        default=[], action=ArgList)
+    parser.add_argument(
+        "--bksets",
+        "-b",
+        metavar="<bkset>,<bkset>...",
+        help="only run the specified backupset",
+        default=[],
+        action=ArgList,
+    )
 
     parser.add_argument("-bkplevel", type=int)
     parser.add_argument("-attempt", type=int)
@@ -79,10 +87,7 @@ def main():
     parser.add_argument("-job", type=int)
     parser.add_argument("-vm")
     parser.add_argument("-cn")
-    parser.set_defaults(
-        config_file=os.getenv('HOLLAND_CONFIG') or holland_conf,
-        verbose=False,
-    )
+    parser.set_defaults(config_file=os.getenv("HOLLAND_CONFIG") or holland_conf, verbose=False)
 
     args, largs = parser.parse_known_args(sys.argv[1:])
     if args.log_level:
@@ -90,8 +95,7 @@ def main():
 
     bootstrap(args)
 
-    logging.info("Holland (commvault agent) %s started with pid %d",
-                 HOLLAND_VERSION, os.getpid())
+    logging.info("Holland (commvault agent) %s started with pid %d", HOLLAND_VERSION, os.getpid())
     # Commvault usually runs with a very low default limit for nofile
     # so a best effort is taken to raise that here.
     try:
@@ -100,27 +104,27 @@ def main():
     except (ValueError, resource.error) as exc:
         logging.debug("Failed to raise RLIMIT_NOFILE: %s", exc)
 
-
-    args.command = 'backup'
+    args.command = "backup"
     args.dry_run = 0
     args.no_lock = 0
+    args.maint = 0
     largs = args.bksets
-    spool = HOLLANDCFG.lookup('holland.backup-directory')
-    status_file = '%s/%s/newest/job_%s' % (spool, args.bksets[0], args.job)
-    pid_name = 'holland_commvault_%s' % args.job
-    pid_location = '/var/run/%s.pid' % pid_name
+    spool = HOLLANDCFG.lookup("holland.backup-directory")
+    status_file = "%s/%s/newest/job_%s" % (spool, args.bksets[0], args.job)
+    pid_name = "holland_commvault_%s" % args.job
+    pid_location = "/var/run/%s.pid" % pid_name
     try:
         with PidFile(pid_name):
             ret = 0
             if run(args, largs):
                 ret = 1
-            status = open(status_file, 'w')
+            status = open(status_file, "w")
             status.write(str(ret))
             status.close()
             return ret
     except PidFileAlreadyLockedError:
         ret = 1
-        pid_file = open(pid_location, 'r')
+        pid_file = open(pid_location, "r")
         pid = pid_file.read()
         pid_file.close()
 
@@ -129,12 +133,12 @@ def main():
         while os.path.isfile(pid_location):
             sleep(10)
             count = count + 1
-            #~14 hour timeout
+            # ~14 hour timeout
             if count > 5040:
-                logging.info("Holland (commvault agent) timed out after %s seconds", count*10)
+                logging.info("Holland (commvault agent) timed out after %s seconds", count * 10)
                 return 1
         try:
-            status = open(status_file, 'r')
+            status = open(status_file, "r")
             ret = int(status.read())
         except IOError:
             logging.info("Holland (commvault agent) failed to open/read status file")
