@@ -108,6 +108,7 @@ def main():
     args.dry_run = 0
     args.no_lock = 0
     args.maint = 0
+    args.skip_purge = 0
     largs = args.bksets
     spool = HOLLANDCFG.lookup("holland.backup-directory")
     status_file = "%s/%s/newest/job_%s" % (spool, args.bksets[0], args.job)

@@ -32,7 +32,13 @@ class Backup(Command):
 
     aliases = ["bk"]
 
-    args = [["--abort-immediately"], ["--dry-run", "-n"], ["--no-lock", "-f"], ["--maint"]]
+    args = [
+        ["--abort-immediately"],
+        ["--dry-run", "-n"],
+        ["--no-lock", "-f"],
+        ["--maint"],
+        ["--skip-purge", "-s"],
+    ]
     kargs = [
         {"action": "store_true", "help": "Abort on the first backupset that fails."},
         {"action": "store_true", "help": "Print backup commands without executing them."},
@@ -45,6 +51,7 @@ class Backup(Command):
             "action": "store_true",
             "help": "Create a maintenance backup. Ignore 'backups-to-keep' setting, and create a single file backup if the plugin supports it",
         },
+        {"action": "store_true", "help": "Don't purge backups"},
     ]
     description = "Run backups for active backupsets"
 
@@ -71,7 +78,10 @@ class Backup(Command):
         # don't purge if doing a dry-run,
         # when simultaneous backups may be running,
         # or when creating a mintenace backup
-        if not opts.no_lock and not opts.maint:
+        if opts.maint:
+            opts.skip_purge = True
+
+        if not opts.no_lock and not opts.skip_purge:
             purge_mgr = PurgeManager()
 
             runner.register_cb("before-backup", purge_mgr)
