@@ -175,6 +175,9 @@ class MySQLDumpPlugin(object):
             status = self.client.show_databases()
             if not status:
                 raise BackupError("Failed to run 'show databases'")
+        if self.config["holland:backup"]["maintenance"]:
+            LOG.info("Requested maintenace backup, set 'file-per-database' to False")
+            self.config["mysqldump"]["file-per-database"] = False
         try:
             if self.config["mysqldump"]["stop-slave"]:
                 slave_status = self.client.show_slave_status()

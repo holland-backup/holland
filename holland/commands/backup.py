@@ -32,7 +32,7 @@ class Backup(Command):
 
     aliases = ["bk"]
 
-    args = [["--abort-immediately"], ["--dry-run", "-n"], ["--no-lock", "-f"]]
+    args = [["--abort-immediately"], ["--dry-run", "-n"], ["--no-lock", "-f"], ["--maint"]]
     kargs = [
         {"action": "store_true", "help": "Abort on the first backupset that fails."},
         {"action": "store_true", "help": "Print backup commands without executing them."},
@@ -40,6 +40,10 @@ class Backup(Command):
             "action": "store_true",
             "default": False,
             "help": "Run even if another copy of Holland is running.",
+        },
+        {
+            "action": "store_true",
+            "help": "Create a maintenance backup. Ignore 'backups-to-keep' setting, and create a single file backup if the plugin supports it",
         },
     ]
     description = "Run backups for active backupsets"
@@ -64,8 +68,10 @@ class Backup(Command):
         if opts.dry_run:
             opts.no_lock = True
 
-        # don't purge if doing a dry-run, or when simultaneous backups may be running
-        if not opts.no_lock:
+        # don't purge if doing a dry-run,
+        # when simultaneous backups may be running,
+        # or when creating a mintenace backup
+        if not opts.no_lock and not opts.maint:
             purge_mgr = PurgeManager()
 
             runner.register_cb("before-backup", purge_mgr)
@@ -104,6 +110,7 @@ class Backup(Command):
                     )
                     break
 
+            config["holland:backup"]["maintenance"] = opts.maint
             try:
                 try:
                     runner.backup(name, config, opts.dry_run)
