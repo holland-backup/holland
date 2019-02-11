@@ -8,6 +8,15 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.1.12 - Feb 7, 2019
+---------------------
+
+holland
++++++++
+
+- Bug fixes #269, 267
+- Add support for xtrabackup 8.0
+
 1.1.11 - Jan 23, 2019
 ---------------------
 

@@ -1,21 +1,21 @@
 """Use Mock to preform dry run"""
 
 import os
-#For 2.7 or newer use unittest.mock
+
+# For 2.7 or newer use unittest.mock
 try:
     from unittest.mock import MagicMock, ANY
 except ImportError:
     from mock import MagicMock, ANY
 
-__all__ = [
-    'MockEnvironment'
-]
+__all__ = ["MockEnvironment"]
 
 
 class MockPopen(object):
     """
     mock object to return to subclass.Popen
     """
+
     def __init__(self):
         self.pid = -1
         self.returncode = 0
@@ -43,6 +43,7 @@ class MockEnvironment(object):
     """
     Setup environement for dry-run
     """
+
     def __init__(self):
         """
         Create Mock object
@@ -62,7 +63,7 @@ class MockEnvironment(object):
         self.mocker.restore()
         self.mocker.verify()
 
-    #pylint: disable=unused-argument
+    # pylint: disable=unused-argument
     @staticmethod
     def mocked_popen(*args, **kwargs):
         """

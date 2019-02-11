@@ -13,6 +13,7 @@ CONFIGSPEC = """
 foo_param = boolean(default=no)
 """.splitlines()
 
+
 class ExamplePlugin(object):
     """An example backup plugin for holland"""
 

@@ -10,7 +10,8 @@ import itertools
 import shutil
 from holland.core.config import BaseConfig
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
+
 
 def timestamp_dir(when=None):
     """
@@ -21,12 +22,14 @@ def timestamp_dir(when=None):
         when = time.time()
     return time.strftime("%Y%m%d_%H%M%S", time.localtime(when))
 
+
 class Spool(object):
     """
     A directory spool where backups are saved
     """
+
     def __init__(self, path=None):
-        self.path = path or '/var/spool/holland'
+        self.path = path or "/var/spool/holland"
 
     def find_backup(self, name):
         """
@@ -36,12 +39,12 @@ class Spool(object):
         The backup name must be in <backupset>/<timestamp> format
         """
         try:
-            backupset_name, timestamp = name.split('/')
+            backupset_name, timestamp = name.split("/")
             backupset = self.find_backupset(backupset_name)
             if backupset:
                 return backupset.find_backup(timestamp)
         except ValueError as ex:
-            LOGGER.warning("Invalid backup name: %s, Error: %s", name, ex)
+            LOG.warning("Invalid backup name: %s, Error: %s", name, ex)
         return None
 
     def add_backup(self, backupset_name):
@@ -95,11 +98,13 @@ class Spool(object):
                 return []
             dirs = [name]
         else:
-            dirs = [backupset for backupset in os.listdir(self.path)
-                    if os.path.isdir(os.path.join(self.path, backupset))]
+            dirs = [
+                backupset
+                for backupset in os.listdir(self.path)
+                if os.path.isdir(os.path.join(self.path, backupset))
+            ]
 
-        backupsets = [Backupset(d, os.path.join(self.path, d)) \
-                      for d in dirs]
+        backupsets = [Backupset(d, os.path.join(self.path, d)) for d in dirs]
 
         backupsets.sort(key=lambda x: x.name)
 
@@ -127,6 +132,7 @@ class Backupset(object):
     """
     Define backupset
     """
+
     def __init__(self, name, path):
         """
         A backupset should have a name and a path
@@ -181,13 +187,17 @@ class Backupset(object):
                 ret.append(Backup(path, self.name, name))
             return ret
 
-        dirs = [backup for backup in os.listdir(self.path)
-                if os.path.isdir(os.path.join(self.path, backup))
-                and backup not in ('oldest', 'newest')]
+        dirs = []
+        for backup in os.listdir(self.path):
+            path = os.path.join(self.path, backup)
+            if os.path.isdir(path) and not os.path.islink(path):
+                try:
+                    time.strptime(backup, "%Y%m%d_%H%M%S")
+                except ValueError:
+                    continue
+                dirs.append(backup)
 
-        backup_list = [Backup(os.path.join(self.path, d),
-                              self.name,
-                              d) for d in dirs]
+        backup_list = [Backup(os.path.join(self.path, d), self.name, d) for d in dirs]
 
         backup_list.sort(key=lambda x: x.name)
         if reverse:
@@ -199,8 +209,8 @@ class Backupset(object):
         "Update symlinks for newest and oldest backup in the set"
         backups = self.list_backups()
 
-        oldest_link = os.path.join(self.path, 'oldest')
-        newest_link = os.path.join(self.path, 'newest')
+        oldest_link = os.path.join(self.path, "oldest")
+        newest_link = os.path.join(self.path, "newest")
         try:
             os.remove(oldest_link)
         except OSError as exc:
@@ -228,6 +238,7 @@ class Backupset(object):
         _cmp = lambda x, y: (x > y) - (x < y)
         return _cmp(self.name, other.name)
 
+
 CONFIGSPEC = """
 [holland:backup]
 plugin                  = string(default="")
@@ -249,17 +260,19 @@ historic-size-factor    = float(default=1.5)
 historic-estimated-size-factor = float(default=1.1)
 """.splitlines()
 
+
 class Backup(object):
     """
     Representation of a backup instance.
     """
+
     def __init__(self, path, backupset, name):
         self.path = path
         self.backupset = backupset
-        self.name = '/'.join((backupset, name))
+        self.name = "/".join((backupset, name))
         # Initialize an empty config
         # This will not be loaded until load_config is called
-        config_path = os.path.join(self.path, 'backup.conf')
+        config_path = os.path.join(self.path, "backup.conf")
         self.config = BaseConfig({}, file_error=False)
         self.config.filename = config_path
         if os.path.exists(config_path):
@@ -284,7 +297,7 @@ class Backup(object):
         """
         Purge the entire backup directory
         """
-        assert os.path.realpath(self.path) != '/'
+        assert os.path.realpath(self.path) != "/"
         try:
             shutil.rmtree(self.path)
         except OSError as exc:
@@ -303,23 +316,24 @@ class Backup(object):
         but does not flush any other backup metadata.
         """
         os.makedirs(self.path)
-        LOGGER.info("Creating backup path %s", self.path)
+        LOG.info("Creating backup path %s", self.path)
 
     def flush(self):
         """
         Flush this backup to disk.  Ensure the path to this backup is created
         and write the backup.conf to the backup directory.
         """
-        LOGGER.debug("Writing out config to %s", self.config.filename)
+        LOG.debug("Writing out config to %s", self.config.filename)
         self.config.write()
 
     def _formatted_config(self):
         from holland.core.util.fmt import format_bytes, format_datetime
-        cfg = dict(self.config['holland:backup'])
-        cfg['stop-time'] = format_datetime(cfg['stop-time'])
-        cfg['start-time'] = format_datetime(cfg['start-time'])
-        cfg['estimated-size'] = format_bytes(cfg['estimated-size'])
-        cfg['on-disk-size'] = format_bytes(cfg['on-disk-size'])
+
+        cfg = dict(self.config["holland:backup"])
+        cfg["stop-time"] = format_datetime(cfg["stop-time"])
+        cfg["start-time"] = format_datetime(cfg["start-time"])
+        cfg["estimated-size"] = format_bytes(cfg["estimated-size"])
+        cfg["on-disk-size"] = format_bytes(cfg["on-disk-size"])
         return cfg
 
     def info(self):
@@ -328,13 +342,16 @@ class Backup(object):
         """
         from string import Template
         from textwrap import dedent
-        tmpl = Template("""
+
+        tmpl = Template(
+            """
         backup-plugin   = ${plugin}
         backup-started  = ${start-time}
         backup-finished = ${stop-time}
         estimated size  = ${estimated-size}
         on-disk size    = ${on-disk-size}
-        """)
+        """
+        )
         info_str = tmpl.safe_substitute(self._formatted_config())
         info_str = "\t" + dedent(str).lstrip()
         info_str = "\n\t\t".join(str.splitlines())
@@ -347,25 +364,33 @@ class Backup(object):
         from textwrap import dedent
         from holland.core.util.fmt import format_bytes, format_datetime
 
-        return dedent("""
+        return (
+            dedent(
+                """
         Backup: %s
         start-time:     %s
         stop-time:      %s
         estimated-size: %s
         on-disk-size:   %s
-        """).strip() % (
-            self.name,
-            format_datetime(self.config.lookup('holland:backup.start-time')),
-            format_datetime(self.config.lookup('holland:backup.stop-time')),
-            format_bytes(self.config.lookup('holland:backup.estimated-size')),
-            format_bytes(self.config.lookup('holland:backup.on-disk-size'))
+        """
+            ).strip()
+            % (
+                self.name,
+                format_datetime(self.config.lookup("holland:backup.start-time")),
+                format_datetime(self.config.lookup("holland:backup.stop-time")),
+                format_bytes(self.config.lookup("holland:backup.estimated-size")),
+                format_bytes(self.config.lookup("holland:backup.on-disk-size")),
+            )
         )
 
     def __cmp__(self, other):
         _cmp = lambda x, y: (x > y) - (x < y)
-        return _cmp(self.config['holland:backup']['start-time'],
-                    other.config['holland:backup']['start-time'])
+        return _cmp(
+            self.config["holland:backup"]["start-time"],
+            other.config["holland:backup"]["start-time"],
+        )
 
     __repr__ = __str__
+
 
 SPOOL = Spool()

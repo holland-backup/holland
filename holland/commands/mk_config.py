@@ -19,7 +19,7 @@ try:
 except BaseException:
     from configobj import ConfigObj, flatten_errors, ParseError
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def which(cmd, search_path=None):
@@ -28,7 +28,7 @@ def which(cmd, search_path=None):
         ret = None
 
     if not search_path:
-        search_path = os.getenv('PATH', '').split(':')
+        search_path = os.getenv("PATH", "").split(":")
 
     logging.debug("Using search_path: %r", search_path)
     for name in search_path:
@@ -39,14 +39,15 @@ def which(cmd, search_path=None):
 
     return ret
 
+
 def _find_editor():
     candidates = [
-        os.getenv('VISUAL', ''),
-        os.getenv('EDITOR', ''),
-        '/usr/bin/editor',
-        'vim',
-        'vi',
-        'ed'
+        os.getenv("VISUAL", ""),
+        os.getenv("EDITOR", ""),
+        "/usr/bin/editor",
+        "vim",
+        "vi",
+        "ed",
     ]
 
     for command in candidates:
@@ -57,17 +58,19 @@ def _find_editor():
 
     return None
 
+
 def _report_errors(cfg, errors):
     for entry in flatten_errors(cfg, errors):
         (section,), key, error = entry
-        param = '.'.join((section, key))
+        param = ".".join((section, key))
         if key is not None:
             pass
         else:
-            param = ' '.join((section, '[missing section]'))
+            param = " ".join((section, "[missing section]"))
         if not error:
-            error = 'Missing value or section'
-        print(param, ' = ', error, file=sys.stderr)
+            error = "Missing value or section"
+        print(param, " = ", error, file=sys.stderr)
+
 
 def confirm(prompt=None, resp=False):
     """prompts for yes or no response from the user. Returns True for yes and
@@ -89,24 +92,25 @@ def confirm(prompt=None, resp=False):
     """
 
     if prompt is None:
-        prompt = 'Confirm'
+        prompt = "Confirm"
 
     if resp:
-        prompt = '%s ([%s] or %s): ' % (prompt, 'y', 'n')
+        prompt = "%s ([%s] or %s): " % (prompt, "y", "n")
     else:
-        prompt = '%s ([%s] or %s): ' % (prompt, 'n', 'y')
+        prompt = "%s ([%s] or %s): " % (prompt, "n", "y")
 
     while True:
         ans = input(prompt)
         if not ans:
             return resp
-        if ans not in ['y', 'Y', 'n', 'N']:
-            print('please enter y or n.', file=sys.stderr)
+        if ans not in ["y", "Y", "n", "N"]:
+            print("please enter y or n.", file=sys.stderr)
             continue
-        if ans in ('y', 'Y'):
+        if ans in ("y", "Y"):
             return True
-        if ans in ('n', 'N'):
+        if ans in ("n", "N"):
             return False
+
 
 class MkConfig(Command):
     """${cmd_usage}
@@ -118,42 +122,23 @@ class MkConfig(Command):
 
     """
 
-    name = 'mk-config'
-    aliases = [
-        'mc'
-    ]
+    name = "mk-config"
+    aliases = ["mc"]
 
-    args = [
-        ['--name'],
-        ['--edit'],
-        ['--provider'],
-        ['--file', '-f'],
-        ['--minimal', '-m']
-    ]
+    args = [["--name"], ["--edit"], ["--provider"], ["--file", "-f"], ["--minimal", "-m"]]
     kargs = [
+        {"help": "Name of the backupset"},
+        {"help": "Edit the generated config", "action": "store_true", "default": False},
+        {"help": "Generate a provider config"},
+        {"help": "Save the final config to the specified file"},
         {
-            'help':'Name of the backupset',
+            "help": "Do not include comment from a backupplugin's configspec",
+            "action": "store_true",
+            "default": False,
         },
-        {
-            'help':'Edit the generated config',
-            'action':'store_true',
-            'default': False
-        },
-        {
-            'help':'Generate a provider config'
-        },
-        {
-            'help':'Save the final config to the specified file'
-        },
-        {
-            'help':'Do not include comment from a backupplugin\'s configspec',
-            'action':'store_true',
-            'default': False
-        }
     ]
 
-    description = 'Generate a config file for a backup plugin'
-
+    description = "Generate a config file for a backup plugin"
 
     # After initial validation:
     #   run through and flag required parameters with a 'REQUIRED' comment
@@ -166,8 +151,8 @@ class MkConfig(Command):
             section_list, key, error = entry
             section_name, = section_list
             if error is False:
-                config[section_name][key] = ''
-                config[section_name].comments[key].append('REQUIRED')
+                config[section_name][key] = ""
+                config[section_name].comments[key].append("REQUIRED")
             elif error:
                 print("Bad configspec generated error", error, file=sys.stderr)
 
@@ -199,7 +184,7 @@ class MkConfig(Command):
                         config[section].comments[key] = comments
                         del pending_comments[:]
                     if value is True or value is False:
-                        config[section][key] = 'yes' if value else 'no'
+                        config[section][key] = "yes" if value else "no"
 
         if pending_comments:
             if skip_comments:
@@ -211,7 +196,7 @@ class MkConfig(Command):
         config.initial_comment = []
         # insert a blank between [holland:backup] and first section
         try:
-            config.comments[config.sections[1]].insert(0, '')
+            config.comments[config.sections[1]].insert(0, "")
         except IndexError:
             pass
 
@@ -224,17 +209,18 @@ class MkConfig(Command):
             return 1
 
         try:
-            plugin_cls = load_first_entrypoint('holland.backup', plugin_type[0])
+            plugin_cls = load_first_entrypoint("holland.backup", plugin_type[0])
         except PluginLoadError as exc:
-            logging.info("Failed to load backup plugin %r: %s",
-                         plugin_type[0], exc)
+            logging.info("Failed to load backup plugin %r: %s", plugin_type[0], exc)
             return 1
 
         try:
             cfgspec = sys.modules[plugin_cls.__module__].CONFIGSPEC
         except BaseException as ex:
-            print("Could not load config-spec from plugin %r, %s"
-                  % (plugin_type[0], ex), file=sys.stderr)
+            print(
+                "Could not load config-spec from plugin %r, %s" % (plugin_type[0], ex),
+                file=sys.stderr,
+            )
             return 1
 
         base_config = """
@@ -245,9 +231,8 @@ class MkConfig(Command):
         purge-policy            = after-backup
         estimated-size-factor   = 1.0
         """.lstrip().splitlines()
-        cfg = ConfigObj(base_config, configspec=cfgspec, list_values=True,
-                        stringify=True)
-        cfg['holland:backup']['plugin'] = plugin_type[0]
+        cfg = ConfigObj(base_config, configspec=cfgspec, list_values=True, stringify=True)
+        cfg["holland:backup"]["plugin"] = plugin_type[0]
         self._cleanup_config(cfg, skip_comments=opts.minimal)
 
         if opts.edit:
@@ -263,15 +248,16 @@ class MkConfig(Command):
             while not done:
                 status = subprocess.call([editor, cfg.filename])
                 if status != 0:
-                    if not confirm("Editor exited with non-zero status[%d]. "
-                                   "Would you like to retry?" % status):
+                    if not confirm(
+                        "Editor exited with non-zero status[%d]. "
+                        "Would you like to retry?" % status
+                    ):
                         print("Aborting", file=sys.stderr)
                         return 1
                 try:
                     cfg.reload()
                 except ParseError as exc:
-                    print("%s : %s" % \
-                    (exc.msg, exc.line), file=sys.stderr)
+                    print("%s : %s" % (exc.msg, exc.line), file=sys.stderr)
                 else:
                     errors = cfg.validate(VALIDATOR, preserve_errors=True)
                     if errors is True:
@@ -280,28 +266,28 @@ class MkConfig(Command):
                     else:
                         _report_errors(cfg, errors)
 
-                if not confirm('There were configuration errors. Continue?'):
+                if not confirm("There were configuration errors. Continue?"):
                     print("Aborting", file=sys.stderr)
                     return 1
             tmpfileobj.close()
 
         if not opts.name and not opts.file:
-            buf = getattr(sys.stdout, 'buffer', sys.stdout)
+            buf = getattr(sys.stdout, "buffer", sys.stdout)
             cfg.write(buf)
             buf.flush()
 
         if opts.file:
             print("Saving config to %r" % opts.file, file=sys.stderr)
-            filehandle = open(opts.file, 'w')
-            buf = getattr(filehandle, 'buffer', filehandle)
+            filehandle = open(opts.file, "w")
+            buf = getattr(filehandle, "buffer", filehandle)
             cfg.write(buf)
             buf.flush()
         elif opts.name:
             base_dir = os.path.dirname(HOLLANDCFG.filename)
-            path = os.path.join(base_dir, 'backupsets', opts.name + '.conf')
+            path = os.path.join(base_dir, "backupsets", opts.name + ".conf")
             print("Saving config to %r" % path, file=sys.stderr)
-            filehandle = open(path, 'w')
-            buf = getattr(filehandle, 'buffer', filehandle)
+            filehandle = open(path, "w")
+            buf = getattr(filehandle, "buffer", filehandle)
             cfg.write(buf)
             buf.flush()
         return 0

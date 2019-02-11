@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.1.11'
+version = '1.1.12'
 
 setup(name='holland.lib.common',
       version=version,

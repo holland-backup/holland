@@ -8,8 +8,10 @@ Simple mysql client wrapper
 import MySQLdb
 from holland.core.backup import BackupError
 
+
 class MySQL(object):
     """Class for connecting to MySQl"""
+
     MySQLError = MySQLdb.MySQLError
 
     def __init__(self, *args, **kwargs):
@@ -46,18 +48,17 @@ class MySQL(object):
         """return cursor object"""
         return self._connection.cursor()
 
-
     @classmethod
     def from_defaults(cls, defaults_file):
         """return defaults"""
         return cls(read_default_file=defaults_file)
 
-    def var(self, var, scope='SESSION'):
+    def var(self, var, scope="SESSION"):
         """return database variables"""
         scope = scope.upper()
-        if scope not in ('SESSION', 'GLOBAL'):
+        if scope not in ("SESSION", "GLOBAL"):
             raise BackupError("Invalid variable scope used")
-        var = var.replace('%', '\\%').replace('_', '\\_')
+        var = var.replace("%", "\\%").replace("_", "\\_")
         sql = "SHOW %s VARIABLES LIKE '%s'" % (scope, var)
         try:
             return self.first(sql)[1]

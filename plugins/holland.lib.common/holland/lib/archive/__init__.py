@@ -6,17 +6,14 @@ from .dir_archive import DirArchive
 from .tar_archive import TarArchive
 from .zip_archive import ZipArchive
 
-__all__ = [
-    'DirArchive',
-    'TarArchive',
-    'ZipArchive'
-]
+__all__ = ["DirArchive", "TarArchive", "ZipArchive"]
 
 ARCHIVE_METHODS = {
-    'dir' : (DirArchive, ''),
-    'tar' : (TarArchive, '.tgz'),
-    'zip' : (ZipArchive, '.zip')
+    "dir": (DirArchive, ""),
+    "tar": (TarArchive, ".tgz"),
+    "zip": (ZipArchive, ".zip"),
 }
+
 
 def create_archive(method, base_path):
     """
