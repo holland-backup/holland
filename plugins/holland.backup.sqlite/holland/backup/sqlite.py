@@ -102,6 +102,7 @@ class SQLitePlugin(object):
             int(self.config["compression"]["level"]),
             self.config["compression"]["options"],
             self.config["compression"]["inline"],
+            self.config["compression"]["split"],
         )
         LOG.info("SQLite binary is [%s]", self.sqlite_bin)
         for database in self.databases:

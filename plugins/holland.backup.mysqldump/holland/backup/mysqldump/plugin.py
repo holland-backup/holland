@@ -275,6 +275,7 @@ class MySQLDumpPlugin(object):
         compression_level = self.config["compression"]["level"]
         compression_options = self.config["compression"]["options"]
         compression_inline = self.config["compression"]["inline"]
+        compression_split = self.config["compression"]["split"]
         stream = open_stream(
             path,
             mode,
@@ -282,6 +283,7 @@ class MySQLDumpPlugin(object):
             compression_level,
             extra_args=compression_options,
             inline=compression_inline,
+            split=compression_split,
         )
         return stream
 

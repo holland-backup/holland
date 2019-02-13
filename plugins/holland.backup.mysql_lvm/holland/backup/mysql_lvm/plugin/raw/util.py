@@ -73,6 +73,7 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
                 level=config["compression"]["level"],
                 extra_args=config["compression"]["options"],
                 inline=config["compression"]["inline"],
+                split=config["compression"]["split"],
             )
         except OSError as exc:
             raise BackupError(

@@ -123,6 +123,7 @@ class MongoDump(object):
                         level=zopts["level"],
                         extra_args=zopts["options"],
                         inline=zopts["inline"],
+                        split=zopts["split"],
                     )
                     with open(path, "rb") as file_object:
                         ostream.write(file_object.read())
