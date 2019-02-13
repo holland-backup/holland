@@ -122,6 +122,8 @@ class CompressionOutput(object):
         self.level = level
         self.inline = inline
         if not inline:
+            if split:
+                LOG.warning("The split option only works if inline is enabled")
             self.fileobj = io.open(os.path.splitext(path)[0], mode)
             self.filehandle = self.fileobj.fileno()
         else:
@@ -130,17 +132,14 @@ class CompressionOutput(object):
                     argv += ["-z%d" % level]
                 else:
                     argv += ["-%d" % level]
-            if not inline and split:
-                LOG.warning("The split option only works if inline is enabled")
             self.stderr = TemporaryFile()
             LOG.debug("* Executing: %s", subprocess.list2cmdline(argv))
-            if inline and split:
-                LOG.debug("Splitting dump file")
+            if split:
+                split_args = [which("split"), "-a5", "--bytes=1G", "-", path + "."]
+                LOG.debug("* Splitting dump file with: %s", subprocess.list2cmdline(split_args))
                 self.pid = subprocess.Popen(
                     argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self.stderr
                 )
-                split_args = [which("split"), "-a5", "--bytes=1G", "-", path + "."]
-                LOG.debug("* Executing: %s", subprocess.list2cmdline(split_args))
                 self.split = subprocess.Popen(split_args, stdin=self.pid.stdout, stderr=self.stderr)
 
             else:
