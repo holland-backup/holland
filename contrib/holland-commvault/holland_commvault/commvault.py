@@ -109,7 +109,7 @@ def main():
     args.no_lock = 0
     spool = HOLLANDCFG.lookup("holland.backup-directory")
     if not args.bksets:
-        largs = HOLLANDCFG.lookup("holland.largs")
+        largs = HOLLANDCFG.lookup("holland.backupsets")
     else:
         largs = args.bksets
 
