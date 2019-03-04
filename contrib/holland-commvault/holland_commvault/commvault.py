@@ -109,18 +109,18 @@ def main():
     args.no_lock = 0
     spool = HOLLANDCFG.lookup("holland.backup-directory")
     if not args.bksets:
-	backupsets = HOLLANDCFG.lookup("holland.backupsets")
+        largs = HOLLANDCFG.lookup("holland.largs")
     else:
-	backupsets = args.bksets
- 
-    status_file = "%s/%s/newest/job_%s" % (spool, backupsets[0], args.job)
+        largs = args.bksets
+
+    status_file = "%s/%s/newest/job_%s" % (spool, largs[0], args.job)
     logging.info("status_file: %s", status_file)
     pid_name = "holland_commvault_%s" % args.job
     pid_location = "/var/run/%s.pid" % pid_name
     try:
         with PidFile(pid_name):
             ret = 0
-            if run(args, backupsets):
+            if run(args, largs):
                 ret = 1
             status = open(status_file, "w")
             status.write(str(ret))
