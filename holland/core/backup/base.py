@@ -140,6 +140,7 @@ class BackupRunner(object):
         spool_entry.config["holland:backup"]["start-time"] = time.time()
         spool_entry.flush()
         self.apply_cb("before-backup", spool_entry)
+	spool_entry.config["holland:backup"]["failed"] = False
 
         try:
             estimated_size = self.check_available_space(plugin, spool_entry, dry_run)
@@ -156,8 +157,6 @@ class BackupRunner(object):
         except BaseException as ex:
             LOG.warning(ex)
             spool_entry.config["holland:backup"]["failed"] = True
-        else:
-            spool_entry.config["holland:backup"]["failed"] = False
 
         spool_entry.config["holland:backup"]["stop-time"] = time.time()
         if not dry_run and not spool_entry.config["holland:backup"]["failed"]:
@@ -185,6 +184,7 @@ class BackupRunner(object):
             spool_entry.purge()
 
         if sys.exc_info() != (None, None, None) or spool_entry.config["holland:backup"]["failed"]:
+            LOG.debug("sys.exc_info(): %r", sys.exc_info())
             self.apply_cb("failed-backup", spool_entry)
             raise BackupError("Failed backup: %s" % name)
         else:
