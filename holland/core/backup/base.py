@@ -140,7 +140,7 @@ class BackupRunner(object):
         spool_entry.config["holland:backup"]["start-time"] = time.time()
         spool_entry.flush()
         self.apply_cb("before-backup", spool_entry)
-	spool_entry.config["holland:backup"]["failed"] = False
+        spool_entry.config["holland:backup"]["failed"] = False
 
         try:
             estimated_size = self.check_available_space(plugin, spool_entry, dry_run)
