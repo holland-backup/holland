@@ -75,6 +75,7 @@ CMDS=(
 "holland bk pgdump"
 "holland bk mysqldump xtrabackup"
 "holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001 --bkset mysqldump"
+"holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001"
 )
 
 for command in "${CMDS[@]}"
