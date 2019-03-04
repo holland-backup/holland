@@ -109,6 +109,7 @@ class MariabackupPlugin(object):
                     level=zconfig["level"],
                     extra_args=zconfig["options"],
                     inline=zconfig["inline"],
+                    split=zconfig["split"],
                 )
             except OSError as exc:
                 raise BackupError("Unable to create output file: %s" % exc)

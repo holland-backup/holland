@@ -7,21 +7,21 @@ import os
 from subprocess import Popen, list2cmdline
 from tempfile import TemporaryFile
 from holland.core.backup import BackupError
-from holland.lib.compression import open_stream
+from holland.lib.compression import open_stream, COMPRESSION_CONFIG_STRING
 
 LOG = logging.getLogger(__name__)
 
 # Specification for this plugin
 # See: http://www.voidspace.org.uk/python/validate.html
-CONFIGSPEC = """
+CONFIGSPEC = (
+    """
 [tar]
 directory = string(default='/home')
-[compression]
-method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', default='gzip')
-options = string(default="")
-inline = boolean(default=yes)
-level  = integer(min=0, max=9, default=1)
-""".splitlines()
+"""
+    + COMPRESSION_CONFIG_STRING
+)
+
+CONFIGSPEC = CONFIGSPEC.splitlines()
 
 
 class TarPlugin(object):
@@ -66,17 +66,14 @@ class TarPlugin(object):
         Open a stream through the holland compression api, relative to
         this instance's target directory
         """
-        compression_method = method or self.config["compression"]["method"]
-        compression_level = self.config["compression"]["level"]
-        compression_options = self.config["compression"]["options"]
-        compression_inline = self.config["compression"]["inline"]
         stream = open_stream(
             path,
             mode,
-            compression_method,
-            compression_level,
-            extra_args=compression_options,
-            inline=compression_inline,
+            method or self.config["compression"]["method"],
+            self.config["compression"]["level"],
+            extra_args=self.config["compression"]["options"],
+            inline=self.config["compression"]["inline"],
+            split=self.config["compression"]["split"],
         )
         return stream
 

@@ -33,6 +33,7 @@ COMPRESSION_CONFIG_STRING = """
 method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lzma', 'lzop', 'gpg', 'zstd', default='gzip')
 options = string(default="")
 inline = boolean(default=yes)
+split = boolean(default=no)
 level  = integer(min=0, max=9, default=1)
 """
 
@@ -116,25 +117,37 @@ class CompressionOutput(object):
     a standard file descriptor such as from open().
     """
 
-    def __init__(self, path, mode, argv, level, inline):
+    def __init__(self, path, mode, argv, level, inline, split=False):
         self.argv = argv
         self.level = level
         self.inline = inline
         if not inline:
+            if split:
+                LOG.warning("The split option only works if inline is enabled")
             self.fileobj = io.open(os.path.splitext(path)[0], mode)
             self.filehandle = self.fileobj.fileno()
         else:
-            self.fileobj = io.open(path, "w")
             if level:
                 if "gpg" in argv[0]:
                     argv += ["-z%d" % level]
                 else:
                     argv += ["-%d" % level]
-            LOG.debug("* Executing: %s", subprocess.list2cmdline(argv))
             self.stderr = TemporaryFile()
-            self.pid = subprocess.Popen(
-                argv, stdin=subprocess.PIPE, stdout=self.fileobj.fileno(), stderr=self.stderr
-            )
+            LOG.debug("* Executing: %s", subprocess.list2cmdline(argv))
+            if split:
+                split_args = [which("split"), "-a5", "--bytes=1G", "-", path + "."]
+                LOG.debug("* Splitting dump file with: %s", subprocess.list2cmdline(split_args))
+                self.pid = subprocess.Popen(
+                    argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self.stderr
+                )
+                self.split = subprocess.Popen(split_args, stdin=self.pid.stdout, stderr=self.stderr)
+
+            else:
+                self.fileobj = io.open(path, "w")
+                self.stderr = TemporaryFile()
+                self.pid = subprocess.Popen(
+                    argv, stdin=subprocess.PIPE, stdout=self.fileobj.fileno(), stderr=self.stderr
+                )
             self.filehandle = self.pid.stdin.fileno()
         self.name = path
         self.closed = False
@@ -193,11 +206,10 @@ class CompressionOutput(object):
                         errno.EPIPE,
                         "Compression program '%s' exited with status %d" % (self.argv[0], status),
                     )
-                else:
-                    for line in stderr:
-                        if not line.strip():
-                            continue
-                        LOG.info("%s: %s", self.argv[0], line.rstrip())
+                for line in stderr:
+                    if not line.strip():
+                        continue
+                    LOG.info("%s: %s", self.argv[0], line.rstrip())
             finally:
                 stderr.close()
 
@@ -235,7 +247,7 @@ def _parse_args(value):
     return shlex.split(value)
 
 
-def open_stream(path, mode, method=None, level=None, inline=True, extra_args=None):
+def open_stream(path, mode, method=None, level=None, inline=True, extra_args=None, split=False):
     """
     Opens a compressed data stream, and returns a file descriptor type object
     that acts much like os.open() does.  If no method is passed, or the
@@ -257,5 +269,5 @@ def open_stream(path, mode, method=None, level=None, inline=True, extra_args=Non
     if mode == "r":
         return CompressionInput(path, mode, argv=argv)
     if mode == "w":
-        return CompressionOutput(path, mode, argv=argv, level=level, inline=inline)
+        return CompressionOutput(path, mode, argv=argv, level=level, inline=inline, split=split)
     raise IOError("invalid mode: %s" % mode)

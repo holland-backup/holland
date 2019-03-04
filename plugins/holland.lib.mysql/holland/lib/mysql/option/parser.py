@@ -65,7 +65,7 @@ def resolve_option(item):
     if len(candidates) > 1:
         # mimic MySQL's error message
         raise ParseError("ambiguous option '%s' (%s)" % (item, ",".join(candidates)))
-    elif not candidates:
+    if not candidates:
         return item
 
     return candidates[0]

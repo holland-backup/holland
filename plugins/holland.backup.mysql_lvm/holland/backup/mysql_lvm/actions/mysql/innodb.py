@@ -45,5 +45,4 @@ class InnodbRecoveryAction(object):
                 "%s exited with non-zero status (%s) during "
                 "InnoDB recovery" % (mysqld_exe, mysqld.returncode)
             )
-        else:
-            LOG.info("%s ran successfully", mysqld_exe)
+        LOG.info("%s ran successfully", mysqld_exe)

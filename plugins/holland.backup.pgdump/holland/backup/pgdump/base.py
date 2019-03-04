@@ -154,6 +154,7 @@ def backup_globals(backup_directory, config, connection_params, env=None):
         level=zopts["level"],
         extra_args=zopts["options"],
         inline=zopts["inline"],
+        split=zopts["split"],
     )
 
     args = ["pg_dumpall", "-g"] + connection_params

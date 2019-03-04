@@ -8,6 +8,14 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.1.13 - Feb 13, 2019
+---------------------
+
+holland
++++++++
+
+- Add support for splitting compressed backup files
+
 1.1.12 - Feb 7, 2019
 ---------------------
 

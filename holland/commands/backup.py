@@ -50,6 +50,7 @@ class Backup(Command):
     def run(self, cmd, opts, *backupsets):
         if not backupsets:
             backupsets = HOLLANDCFG.lookup("holland.backupsets")
+            LOG.debug("No backupsets given. Using %r", backupsets)
 
         # strip empty items from backupsets list
         backupsets = [name for name in backupsets if name]

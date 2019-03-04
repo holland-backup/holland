@@ -180,7 +180,7 @@ class MySQLDumpPlugin(object):
                 slave_status = self.client.show_slave_status()
                 if not slave_status:
                     raise BackupError("stop-slave enabled, but 'show slave " "status' failed")
-                elif slave_status["slave_sql_running"] != "Yes":
+                if slave_status and slave_status["slave_sql_running"] != "Yes":
                     raise BackupError("stop-slave enabled, but replication is " "not running")
                 if not self.dry_run:
                     _stop_slave(self.client, self.config)
@@ -275,6 +275,7 @@ class MySQLDumpPlugin(object):
         compression_level = self.config["compression"]["level"]
         compression_options = self.config["compression"]["options"]
         compression_inline = self.config["compression"]["inline"]
+        compression_split = self.config["compression"]["split"]
         stream = open_stream(
             path,
             mode,
@@ -282,6 +283,7 @@ class MySQLDumpPlugin(object):
             compression_level,
             extra_args=compression_options,
             inline=compression_inline,
+            split=compression_split,
         )
         return stream
 

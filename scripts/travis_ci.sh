@@ -75,10 +75,13 @@ CMDS=(
 "holland bk pgdump"
 "holland bk mysqldump xtrabackup"
 "holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001 --bkset mysqldump"
+"holland mc --name default mysqldump"
+"holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001"
 )
 
 for command in "${CMDS[@]}"
 do
+    echo $command
     sleep 1
     $command
     exit_code=$?
@@ -91,6 +94,7 @@ done
 
 # Stopgap measure to check for issue 213
 sed -i 's|^estimate-method = plugin$|estimate-method = const:1K|' /etc/holland/backupsets/mysqldump.conf
+echo "holland bk mysqldump"
 sleep 1
 holland bk mysqldump
 exit_code=$?

@@ -102,7 +102,7 @@ def build_snapshot(config, logical_volume, suppress_tmpdir=False):
             LOG.info("Created mountpoint %s", mountpoint)
         except OSError as exc:
             # silently ignore if the mountpoint already exists
-            if exc.errno != errno.EEXIST:
+            if exc.errno != errno.EEXIST:  # pylint: disable=no-member
                 raise BackupError("Failure creating snapshot mountpoint: %s" % str(exc))
     snapshot = Snapshot(snapshot_name, int(snapshot_size), mountpoint)
     if tempdir:
