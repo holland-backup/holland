@@ -81,6 +81,7 @@ CMDS=(
 
 for command in "${CMDS[@]}"
 do
+    echo $command
     sleep 1
     $command
     exit_code=$?
