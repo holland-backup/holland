@@ -180,7 +180,7 @@ class MySQLDumpPlugin(object):
                 slave_status = self.client.show_slave_status()
                 if not slave_status:
                     raise BackupError("stop-slave enabled, but 'show slave " "status' failed")
-                elif slave_status["slave_sql_running"] != "Yes":
+                if slave_status and slave_status["slave_sql_running"] != "Yes":
                     raise BackupError("stop-slave enabled, but replication is " "not running")
                 if not self.dry_run:
                     _stop_slave(self.client, self.config)

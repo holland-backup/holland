@@ -16,15 +16,14 @@ def check_master_data(version, arg):
     """Validate --master-data against a mysqldump version"""
     if version < (4, 1, 8) and arg:
         raise MyOptionError("--master-data only takes an argument in MySQL " ">= 4.1.8")
-    else:
-        if arg:
-            try:
-                value = int(arg)
-                assert value in (1, 2)
-            except ValueError:
-                raise MyOptionError("Invalid argument to --master-data: %r" % arg)
-            except AssertionError:
-                raise MyOptionError("Argument to --master-data must be 1 or 2 " "not %r" % arg)
+    if arg:
+        try:
+            value = int(arg)
+            assert value in (1, 2)
+        except ValueError:
+            raise MyOptionError("Invalid argument to --master-data: %r" % arg)
+        except AssertionError:
+            raise MyOptionError("Argument to --master-data must be 1 or 2 " "not %r" % arg)
 
 
 class MySQLDumpError(Exception):
@@ -152,11 +151,10 @@ def mysqldump_version(command):
     except OSError as exc:
         if exc.errno == errno.ENOENT:
             raise MySQLDumpError("'%s' does not exist" % command)
-        else:
-            raise MySQLDumpError(
-                "Error[%d:%s] when trying to run '%s'"
-                % (exc.errno, errno.errorcode[exc.errno], command)
-            )
+        raise MySQLDumpError(
+            "Error[%d:%s] when trying to run '%s'"
+            % (exc.errno, errno.errorcode[exc.errno], command)
+        )
 
     if process.returncode != 0:
         LOG.error("%s exited with non-zero status[%d]", cmdline, process.returncode)

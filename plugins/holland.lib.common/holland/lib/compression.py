@@ -206,11 +206,10 @@ class CompressionOutput(object):
                         errno.EPIPE,
                         "Compression program '%s' exited with status %d" % (self.argv[0], status),
                     )
-                else:
-                    for line in stderr:
-                        if not line.strip():
-                            continue
-                        LOG.info("%s: %s", self.argv[0], line.rstrip())
+                for line in stderr:
+                    if not line.strip():
+                        continue
+                    LOG.info("%s: %s", self.argv[0], line.rstrip())
             finally:
                 stderr.close()
 
