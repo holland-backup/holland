@@ -27,6 +27,7 @@ from holland.core.config.config import HOLLANDCFG
 from holland.core.command import run
 from holland.core.cmdshell import HOLLAND_VERSION
 from holland.core.util.fmt import format_loglevel
+from holland.core.backup.base import BackupError
 
 
 class ArgList(Action):
@@ -119,11 +120,14 @@ def main():
     try:
         with PidFile(pid_name):
             ret = 0
-            if run(args, largs):
-                ret = 1
-            status = open(status_file, "w")
-            status.write(str(ret))
-            status.close()
+            try:
+                if run(args, largs):
+                    ret = 1
+                status = open(status_file, "w")
+                status.write(str(ret))
+                status.close()
+            except BackupError:
+                logging.debug("Caught BackupError")
             return ret
     except PidFileAlreadyLockedError:
         ret = 1
