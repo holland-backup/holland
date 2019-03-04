@@ -78,7 +78,7 @@ def main():
         "-b",
         metavar="<bkset>,<bkset>...",
         help="only run the specified backupset",
-        default=["default"],
+        default=[],
         action=ArgList,
     )
 
