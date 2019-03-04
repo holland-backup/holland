@@ -94,6 +94,7 @@ done
 
 # Stopgap measure to check for issue 213
 sed -i 's|^estimate-method = plugin$|estimate-method = const:1K|' /etc/holland/backupsets/mysqldump.conf
+echo "holland bk mysqldump"
 sleep 1
 holland bk mysqldump
 exit_code=$?
