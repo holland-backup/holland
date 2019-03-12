@@ -106,8 +106,6 @@ class MongoDump(object):
 
             if ret != 0:
                 raise BackupError("Mongodump returned %d" % ret)
-
-            zopts = self.config["compression"]
             for root, _, files in os.walk(self.target_directory):
                 for file_object in files:
                     if ".log" in file_object or ".conf" in file_object:
@@ -116,15 +114,7 @@ class MongoDump(object):
                         continue
                     path = os.path.join(root, file_object)
                     LOG.info("Compressing file %s", path)
-                    ostream = open_stream(
-                        path,
-                        "w",
-                        method=zopts["method"],
-                        level=zopts["level"],
-                        extra_args=zopts["options"],
-                        inline=zopts["inline"],
-                        split=zopts["split"],
-                    )
+                    ostream = open_stream(path, "w", **self.config["compression"])
                     with open(path, "rb") as file_object:
                         ostream.write(file_object.read())
                     ostream.close()

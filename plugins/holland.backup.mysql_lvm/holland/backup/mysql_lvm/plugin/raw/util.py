@@ -67,13 +67,7 @@ def setup_actions(snapshot, config, client, snap_datadir, spooldir):
     else:
         try:
             archive_stream = open_stream(
-                os.path.join(spooldir, "backup.tar"),
-                "w",
-                method=config["compression"]["method"],
-                level=config["compression"]["level"],
-                extra_args=config["compression"]["options"],
-                inline=config["compression"]["inline"],
-                split=config["compression"]["split"],
+                os.path.join(spooldir, "backup.tar"), "w", **config["compression"]
             )
         except OSError as exc:
             raise BackupError(

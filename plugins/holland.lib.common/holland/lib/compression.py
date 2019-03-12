@@ -247,7 +247,9 @@ def _parse_args(value):
     return shlex.split(value)
 
 
-def open_stream(path, mode, method=None, level=None, inline=True, extra_args=None, split=False):
+def open_stream(
+    path, mode, method=None, level=None, inline=True, extra_args=None, split=False, **kwargs
+):  # pylint: disable=unused-argument
     """
     Opens a compressed data stream, and returns a file descriptor type object
     that acts much like os.open() does.  If no method is passed, or the

@@ -146,16 +146,7 @@ def backup_globals(backup_directory, config, connection_params, env=None):
     """
 
     path = os.path.join(backup_directory, "global.sql")
-    zopts = config["compression"]
-    output_stream = open_stream(
-        path,
-        "w",
-        method=zopts["method"],
-        level=zopts["level"],
-        extra_args=zopts["options"],
-        inline=zopts["inline"],
-        split=zopts["split"],
-    )
+    output_stream = open_stream(path, "w", **config["compression"])
 
     args = ["pg_dumpall", "-g"] + connection_params
 
@@ -276,16 +267,7 @@ def backup_pgsql(backup_directory, config, databases):
 
         filename = os.path.join(backup_directory, dump_name + ext_map[out_format])
 
-        zopts = config["compression"]
-        stream = open_stream(
-            filename,
-            "w",
-            method=zopts["method"],
-            level=zopts["level"],
-            extra_args=zopts["options"],
-            inline=zopts["inline"],
-        )
-
+        stream = open_stream(filename, "w", **config["compression"])
         backups.append((dbname, stream.name))
 
         run_pgdump(

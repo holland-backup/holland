@@ -164,5 +164,5 @@ def directory_size(path):
             except OSError:
                 pass
         for name in dirs:
-            LOG.debug("Debug: Database backups writen to %s/%s", root, name)
+            LOG.debug("Debug: Determining size of directory %s", os.path.join(root, name))
     return result

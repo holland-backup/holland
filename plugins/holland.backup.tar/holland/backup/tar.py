@@ -61,22 +61,6 @@ class TarPlugin(object):
             LOG.debug("Debug: Checking size of %s directories in %s", len(dirnames), dirpath)
         return total_size
 
-    def _open_stream(self, path, mode, method=None):
-        """
-        Open a stream through the holland compression api, relative to
-        this instance's target directory
-        """
-        stream = open_stream(
-            path,
-            mode,
-            method or self.config["compression"]["method"],
-            self.config["compression"]["level"],
-            extra_args=self.config["compression"]["options"],
-            inline=self.config["compression"]["inline"],
-            split=self.config["compression"]["split"],
-        )
-        return stream
-
     def backup(self):
         """
         Create backup
@@ -91,7 +75,7 @@ class TarPlugin(object):
         outfile = os.path.join(self.target_directory, out_name)
         args = ["tar", "c", self.config["tar"]["directory"]]
         errlog = TemporaryFile()
-        stream = self._open_stream(outfile, "w")
+        stream = open_stream(outfile, "w", **self.config["compression"])
         LOG.info("Executing: %s", list2cmdline(args))
         pid = Popen(args, stdout=stream.fileno(), stderr=errlog.fileno(), close_fds=True)
         status = pid.wait()
