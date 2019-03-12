@@ -15,6 +15,7 @@ holland
 +++++++
 
 - Bug fix release
+- Add URI config option to Mongodb plugin
 
 1.1.13 - Feb 13, 2019
 ---------------------
