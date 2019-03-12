@@ -3,11 +3,6 @@ import sys, os
 
 version = "1.1.14"
 
-requires = []
-if sys.version_info[:2] > (3, 0):
-    requires.append("psycopg2-binary")
-else:
-    requires.append("psycopg2")
 setup(
     name="holland.backup.pgdump",
     version=version,
@@ -21,7 +16,7 @@ setup(
     packages=find_packages(exclude=["ez_setup", "examples", "tests", "tests.*"]),
     namespace_packages=["holland", "holland.backup"],
     zip_safe=True,
-    install_requires=requires,
+    install_requires=["psycopg2"],
     # holland looks for plugins in holland.backup
     entry_points="""
       [holland.backup]
