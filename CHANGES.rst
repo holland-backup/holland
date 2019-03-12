@@ -8,6 +8,14 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.1.14 - Mar 12, 2019
+---------------------
+
+holland
++++++++
+
+- Bug fix release
+
 1.1.13 - Feb 13, 2019
 ---------------------
 
