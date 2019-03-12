@@ -23,6 +23,7 @@ host = string(default=None)
 username = string(default=None)
 password = string(default=None)
 authenticationDatabase = string(default=None)
+uri = force_list(default=list())
 additional-options = force_list(default=list())
 """
     + COMPRESSION_CONFIG_STRING
@@ -60,15 +61,19 @@ class MongoDump(object):
         """
         ret = 0
 
-        uri = "mongodb://"
-        username = self.config["mongodump"].get("username")
-        if username:
-            uri += urllib.parse.quote_plus(username)
-            password = self.config["mongodump"].get("password")
-            if password:
-                uri += ":" + urllib.parse.quote_plus(password)
-            uri += "@"
-        uri += self.config["mongodump"].get("host")
+        uri = self.config["mongodump"].get("uri")
+        if uri and uri != ['']:
+            uri = ','.join(uri)
+        else:
+            uri = "mongodb://"
+            username = self.config["mongodump"].get("username")
+            if username:
+                uri += urllib.parse.quote_plus(username)
+                password = self.config["mongodump"].get("password")
+                if password:
+                    uri += ":" + urllib.parse.quote_plus(password)
+                uri += "@"
+            uri += self.config["mongodump"].get("host")
         client = MongoClient(uri)
         dbs = client.database_names()
         for database in dbs:
@@ -83,13 +88,17 @@ class MongoDump(object):
         Do what is necessary to perform and validate a successful backup.
         """
         command = ["mongodump"]
-        username = self.config["mongodump"].get("username")
-        if username:
-            command += ["-u", username]
-            password = self.config["mongodump"].get("password")
-            if password:
-                command += ["-p", password]
-        command += ["--host", self.config["mongodump"].get("host")]
+        uri = self.config["mongodump"].get("uri")
+        if uri and uri != ['']:
+            command.extend(['--uri', ','.join(uri)])
+        else:
+            username = self.config["mongodump"].get("username")
+            if username:
+                command += ["-u", username]
+                password = self.config["mongodump"].get("password")
+                if password:
+                    command += ["-p", password]
+            command += ["--host", self.config["mongodump"].get("host")]
         command += ["--out", self.target_directory]
         add_options = self.config["mongodump"].get("additional-options")
         if add_options:
