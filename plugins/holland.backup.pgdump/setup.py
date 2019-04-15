@@ -16,7 +16,7 @@ setup(
     packages=find_packages(exclude=["ez_setup", "examples", "tests", "tests.*"]),
     namespace_packages=["holland", "holland.backup"],
     zip_safe=True,
-    install_requires=["psycopg2"],
+    install_requires=["psycopg2==2.7.7"],
     # holland looks for plugins in holland.backup
     entry_points="""
       [holland.backup]
