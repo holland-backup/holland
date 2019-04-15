@@ -124,13 +124,13 @@ class MySQLDumpPlugin(object):
                 self.client.connect()
             except Exception as ex:
                 LOG.error("Failed to connect to database")
-                LOG.error("%s", ex)
+                LOG.debug("%s", ex)
                 raise BackupError("MySQL Error %s" % ex)
             try:
                 self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
             except MySQLError as exc:
                 LOG.error("Failed to estimate backup size")
-                LOG.error("[%d] %s", *exc.args)
+                LOG.debug("[%d] %s", *exc.args)
                 raise BackupError("MySQL Error [%d] %s" % exc.args)
             return float(sum([db.size for db in self.schema.databases]))
         finally:
