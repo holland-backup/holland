@@ -23,6 +23,7 @@ host = string(default=None)
 username = string(default=None)
 password = string(default=None)
 authenticationDatabase = string(default=None)
+uri = force_list(default=list())
 additional-options = force_list(default=list())
 """
     + COMPRESSION_CONFIG_STRING
@@ -60,15 +61,19 @@ class MongoDump(object):
         """
         ret = 0
 
-        uri = "mongodb://"
-        username = self.config["mongodump"].get("username")
-        if username:
-            uri += urllib.parse.quote_plus(username)
-            password = self.config["mongodump"].get("password")
-            if password:
-                uri += ":" + urllib.parse.quote_plus(password)
-            uri += "@"
-        uri += self.config["mongodump"].get("host")
+        uri = self.config["mongodump"].get("uri")
+        if uri and uri != ['']:
+            uri = ','.join(uri)
+        else:
+            uri = "mongodb://"
+            username = self.config["mongodump"].get("username")
+            if username:
+                uri += urllib.parse.quote_plus(username)
+                password = self.config["mongodump"].get("password")
+                if password:
+                    uri += ":" + urllib.parse.quote_plus(password)
+                uri += "@"
+            uri += self.config["mongodump"].get("host")
         client = MongoClient(uri)
         dbs = client.database_names()
         for database in dbs:
@@ -83,13 +88,17 @@ class MongoDump(object):
         Do what is necessary to perform and validate a successful backup.
         """
         command = ["mongodump"]
-        username = self.config["mongodump"].get("username")
-        if username:
-            command += ["-u", username]
-            password = self.config["mongodump"].get("password")
-            if password:
-                command += ["-p", password]
-        command += ["--host", self.config["mongodump"].get("host")]
+        uri = self.config["mongodump"].get("uri")
+        if uri and uri != ['']:
+            command.extend(['--uri', ','.join(uri)])
+        else:
+            username = self.config["mongodump"].get("username")
+            if username:
+                command += ["-u", username]
+                password = self.config["mongodump"].get("password")
+                if password:
+                    command += ["-p", password]
+            command += ["--host", self.config["mongodump"].get("host")]
         command += ["--out", self.target_directory]
         add_options = self.config["mongodump"].get("additional-options")
         if add_options:
@@ -106,8 +115,6 @@ class MongoDump(object):
 
             if ret != 0:
                 raise BackupError("Mongodump returned %d" % ret)
-
-            zopts = self.config["compression"]
             for root, _, files in os.walk(self.target_directory):
                 for file_object in files:
                     if ".log" in file_object or ".conf" in file_object:
@@ -116,15 +123,7 @@ class MongoDump(object):
                         continue
                     path = os.path.join(root, file_object)
                     LOG.info("Compressing file %s", path)
-                    ostream = open_stream(
-                        path,
-                        "w",
-                        method=zopts["method"],
-                        level=zopts["level"],
-                        extra_args=zopts["options"],
-                        inline=zopts["inline"],
-                        split=zopts["split"],
-                    )
+                    ostream = open_stream(path, "w", **self.config["compression"])
                     with open(path, "rb") as file_object:
                         ostream.write(file_object.read())
                     ostream.close()

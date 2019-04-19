@@ -5,6 +5,7 @@ import os
 import re
 import codecs
 import logging
+from copy import deepcopy
 from holland.core.backup import BackupError
 from holland.lib.compression import open_stream, lookup_compression, COMPRESSION_CONFIG_STRING
 from holland.lib.mysql import (
@@ -123,13 +124,13 @@ class MySQLDumpPlugin(object):
                 self.client.connect()
             except Exception as ex:
                 LOG.error("Failed to connect to database")
-                LOG.error("%s", ex)
+                LOG.debug("%s", ex)
                 raise BackupError("MySQL Error %s" % ex)
             try:
                 self.schema.refresh(db_iter=db_iter, tbl_iter=tbl_iter)
             except MySQLError as exc:
                 LOG.error("Failed to estimate backup size")
-                LOG.error("[%d] %s", *exc.args)
+                LOG.debug("[%d] %s", *exc.args)
                 raise BackupError("MySQL Error [%d] %s" % exc.args)
             return float(sum([db.size for db in self.schema.databases]))
         finally:
@@ -271,20 +272,10 @@ class MySQLDumpPlugin(object):
         this instance's target directory
         """
         path = str(os.path.join(self.target_directory, "backup_data", path))
-        compression_method = method or self.config["compression"]["method"]
-        compression_level = self.config["compression"]["level"]
-        compression_options = self.config["compression"]["options"]
-        compression_inline = self.config["compression"]["inline"]
-        compression_split = self.config["compression"]["split"]
-        stream = open_stream(
-            path,
-            mode,
-            compression_method,
-            compression_level,
-            extra_args=compression_options,
-            inline=compression_inline,
-            split=compression_split,
-        )
+        config = deepcopy(self.config["compression"])
+        if method:
+            config["method"] = method
+        stream = open_stream(path, mode, **config)
         return stream
 
     def info(self):

@@ -283,7 +283,7 @@ class BackupRunner(object):
         if estimated_bytes_required > (old_estimate * historic_size_factor):
             LOG.warning(
                 "The new backup estimate is at least %s times the size of "
-                "the currnet estimate: %s > (%s * %s). Default back"
+                "the current estimate: %s > (%s * %s). Default back"
                 " to 'estimated-size-factor'",
                 historic_size_factor,
                 format_bytes(estimated_bytes_required),

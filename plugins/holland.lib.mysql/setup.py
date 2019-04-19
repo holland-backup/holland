@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = "1.1.13"
+version = "1.1.14"
 
 setup(
     name="holland.lib.mysql",

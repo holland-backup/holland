@@ -97,13 +97,6 @@ class SQLitePlugin(object):
         pure ASCII SQL Text and write that to disk.
         """
 
-        zopts = (
-            self.config["compression"]["method"],
-            int(self.config["compression"]["level"]),
-            self.config["compression"]["options"],
-            self.config["compression"]["inline"],
-            self.config["compression"]["split"],
-        )
         LOG.info("SQLite binary is [%s]", self.sqlite_bin)
         for database in self.databases:
             path = os.path.abspath(os.path.expanduser(database))
@@ -118,7 +111,7 @@ class SQLitePlugin(object):
             else:
                 LOG.info("Backing up SQLite database at [%s]", path)
                 dest = os.path.join(self.target_directory, "%s.sql" % os.path.basename(path))
-                dest = open_stream(dest, "w", *zopts)
+                dest = open_stream(dest, "w", **self.config["compression"])
 
             process = Popen(
                 [self.sqlite_bin, path, ".dump"],

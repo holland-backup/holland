@@ -8,6 +8,15 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.1.14 - Apr 19, 2019
+---------------------
+
+holland
++++++++
+
+- Bug fix release
+- Add URI config option to Mongodb plugin
+
 1.1.13 - Feb 13, 2019
 ---------------------
 

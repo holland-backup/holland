@@ -200,9 +200,6 @@ class MySQLDump(object):
 
     def run(self, databases, stream, additional_options=None):
         """Run mysqldump with the options configured on this instance"""
-        if self.mock_env:
-            subprocess.Popen = self.mock_env.mocked_popen
-
         if not hasattr(stream, "fileno"):
             raise MySQLDumpError("Invalid output stream")
 
@@ -231,10 +228,12 @@ class MySQLDump(object):
 
         if self.mock_env:
             LOG.info("Dry Run: %s", subprocess.list2cmdline(args))
+            popen = self.mock_env.mocked_popen
         else:
             LOG.info("Executing: %s", subprocess.list2cmdline(args))
+            popen = subprocess.Popen
         errlog = TemporaryFile()
-        pid = subprocess.Popen(args, stdout=stream.fileno(), stderr=errlog.fileno(), close_fds=True)
+        pid = popen(args, stdout=stream.fileno(), stderr=errlog.fileno(), close_fds=True)
         status = pid.wait()
         try:
             errlog.flush()

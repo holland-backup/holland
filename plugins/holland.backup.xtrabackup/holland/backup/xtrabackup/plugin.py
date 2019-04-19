@@ -102,17 +102,8 @@ class XtrabackupPlugin(object):
                 archive_path = join(backup_directory, "backup.xb")
             else:
                 raise BackupError("Unknown stream method '%s'" % stream)
-            zconfig = self.config["compression"]
             try:
-                return open_stream(
-                    archive_path,
-                    "w",
-                    method=zconfig["method"],
-                    level=zconfig["level"],
-                    extra_args=zconfig["options"],
-                    inline=zconfig["inline"],
-                    split=zconfig["split"],
-                )
+                return open_stream(archive_path, "w", **self.config["compression"])
             except OSError as exc:
                 raise BackupError("Unable to create output file: %s" % exc)
         else:

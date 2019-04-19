@@ -1,7 +1,5 @@
 """Main driver"""
 
-import sys
-import csv
 import errno
 import logging
 import json
@@ -94,21 +92,16 @@ def start(
 
 def write_manifest(schema, open_stream, ext):
     """Write real database names => encoded names to MANIFEST.txt"""
-    if sys.version_info > (3, 0):
-        manifest_fileobj = open_stream("MANIFEST.txt", "w", method="none")
-    else:
-        manifest_fileobj = open_stream("MANIFEST.txt", "wb", method="none")
+    manifest_fileobj = open_stream("MANIFEST.txt", "w", method="none")
 
     try:
-        manifest = csv.writer(
-            manifest_fileobj, dialect=csv.excel_tab, lineterminator="\n", quoting=csv.QUOTE_MINIMAL
-        )
         for database in schema.databases:
             if database.excluded:
                 continue
             name = database.name
             encoded_name = encode(name)
-            manifest.writerow([name, encoded_name + ".sql" + ext])
+            line = "%s %s\n" % (name, encoded_name + ".sql" + ext)
+            manifest_fileobj.write(line)
     finally:
         manifest_fileobj.close()
         LOG.info("Wrote backup manifest %s", manifest_fileobj.name)
