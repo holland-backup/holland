@@ -5,11 +5,15 @@ Common Compression utils
 import os
 import logging
 import errno
-import subprocess
 import shlex
 import io
 from tempfile import TemporaryFile
 from holland.lib.which import which
+
+try:
+    import subprocess32 as subprocess
+except ImportError:
+    import subprocess
 
 
 LOG = logging.getLogger(__name__)
