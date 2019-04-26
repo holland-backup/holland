@@ -103,4 +103,16 @@ then
     echo "Failed running holland bk mysqldump with constant estimate size"
     exit $exit_code
 fi
+
+# test that split command is working as expected
+sed -i 's|^split = no|split = yes|' /etc/holland/backupsets/mysqldump.conf
+echo "holland bk mysqldump"
+sleep 1
+holland bk mysqldump
+exit_code=$?
+if [ $exit_code -ne  0 ]
+then
+    echo "Failed running holland bk mysqldump with constant estimate size"
+    exit $exit_code
+fi
 exit 0
