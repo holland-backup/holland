@@ -8,6 +8,14 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.1.15 - Apr 26, 2019
+---------------------
+
+holland
++++++++
+
+- Fix bug preventing split option from work in python2.6
+
 1.1.14 - Apr 19, 2019
 ---------------------
 
