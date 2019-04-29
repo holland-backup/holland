@@ -150,6 +150,6 @@ def main():
         else:
             status.close()
         return ret
-    except IOError:
-        logging.info("Holland (commvault agent) must have permission to write to /var/run")
+    except IOError as ex:
+        logging.warning("Holland (commvault agent) IOError: %r", ex)
         return 1

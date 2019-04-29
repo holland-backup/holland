@@ -1,7 +1,12 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = "1.1.14"
+version = "1.1.15"
+if sys.version_info[0] == 2 and sys.version_info[1] < 7:
+    install_requires = (["pymongo<3.8.0"],)
+else:
+    install_requires = (["pymongo"],)
+
 
 setup(
     name="holland.backup.mongodump",
@@ -16,7 +21,7 @@ setup(
     packages=find_packages(exclude=["ez_setup", "examples", "tests", "tests.*"]),
     namespace_packages=["holland", "holland.backup"],
     zip_safe=True,
-    install_requires=["pymongo"],
+    install_requires=install_requires,
     # holland looks for plugins in holland.backup
     entry_points="""
       [holland.backup]
