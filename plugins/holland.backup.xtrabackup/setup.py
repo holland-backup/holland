@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = "1.1.15"
+version = "1.1.16"
 
 setup(
     name="holland.backup.xtrabackup",
