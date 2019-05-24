@@ -49,6 +49,4 @@ jobs:
       services:
         - docker
       script: skip
-      script: sudo ./scripts/run_docker.sh
-      python: 
-       - "3.6"
+      script: sudo docker run --env FORK="https://github.com/holland-backup/holland.git" --env BRANCH=$TRAVIS_BRANCH --env DEBUG="False" soulen3/holland:centos6_mysql_5.1
