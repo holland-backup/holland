@@ -16,8 +16,6 @@ install:
   - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then travis_retry pip install mock; fi
   - python setup.py install
   - if [[ $TRAVIS_PYTHON_VERSION != '2.6' ]]; then pip install pylint; fi
-before_script:
-  - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
 script:
   - sudo ./scripts/travis_ci.sh
 jobs:
@@ -27,22 +25,30 @@ jobs:
       name: "Python 3.7"
       python:
         - "3.7"
+      before_script:
+        - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
     - stage: Test
       name: "Python 3.6"
       python:
         - "3.6"
+      before_script:
+        - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
     - stage: Test
       name: "Python 2.7"
       python:
         - "2.7"
+      before_script:
+        - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
     - stage: Test
       name: "Python 2.6"
       python:
         - "2.6"
+      before_script:
+        - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
     - stage: Docker
       services:
         - docker
       script: skip
-      script: ./scripts/run_docker.sh
+      script: sudo ./scripts/run_docker.sh
       python: 
        - "3.6"
