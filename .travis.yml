@@ -1,12 +1,6 @@
 ---
 language: python
 sudo: required
-dist: xenial
-python:
-  - "3.7"
-  - "3.6"
-  - "2.7"
-  - "2.6"
 services:
   - mysql
   - mongodb
@@ -28,6 +22,15 @@ script:
   - sudo ./scripts/travis_ci.sh
 jobs:
   include:
+    - stage: Test
+      dist: xenial
+      python:
+        - "3.7"
+        - "3.6"
+        - "2.7"
+    - stage: Test
+      python:
+        - "2.6"
     - stage: Docker
       services:
         - docker
