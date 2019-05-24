@@ -34,3 +34,10 @@ before_script:
   - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
 script:
   - sudo ./scripts/travis_ci.sh
+jobs:
+  include:
+    - stage: Docker
+      language: python
+      services:
+        - docker
+      script: ./scripts/run_docker.sh
