@@ -1,20 +1,12 @@
 ---
 language: python
-matrix:
-  include:
-    - os: linux
-      dist: xenial
-      sudo: required
-      python: 3.7
-    - os: linux
-      sudo: required
-      python: 3.6
-    - os: linux
-      sudo: required
-      python: 2.7
-    - os: linux
-      sudo: required
-      python: 2.6
+sudo: required
+dist: xenial
+python:
+  - "3.7"
+  - "3.6"
+  - "2.7"
+  - "2.6"
 services:
   - mysql
   - mongodb
@@ -40,4 +32,5 @@ jobs:
       services:
         - docker
       script: ./scripts/run_docker.sh
-      python: 3.6
+      python: 
+       - "3.6"
