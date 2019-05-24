@@ -19,12 +19,11 @@ then
             pylint_failed=1
         fi
     done
-fi
-
-if [ $pylint_failed -ne 0 ]
-then
-    echo "Pylint failed; please review above output."
-    exit $pylint_failed
+    if [ $pylint_failed -ne 0 ]
+    then
+        echo "Pylint failed; please review above output."
+        exit $pylint_failed
+    fi
 fi
 # End Pylint
 
@@ -33,7 +32,7 @@ do
     cd $TRAVIS_BUILD_DIR/${i}
     python setup.py install
     exit_code=$?
-	if [ $exit_code -ne  0 ]
+	if [ $exit_code -ne 0 ]
     then
         echo "Failed installing $i"
         exit $exit_code
@@ -43,7 +42,7 @@ done
 cd $TRAVIS_BUILD_DIR/contrib/holland-commvault/
 python setup.py install
 exit_code=$?
-if [ $exit_code -ne  0 ]
+if [ $exit_code -ne 0 ]
 then
     echo "Failed installing holland_commvault"
     exit $exit_code
