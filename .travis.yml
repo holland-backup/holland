@@ -46,7 +46,62 @@ jobs:
       before_script:
         - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
     - stage: Docker
+      name: "centos6_mysql_5.1"
       services:
         - docker
       script: skip
-      script: sudo docker run --env FORK="https://github.com/holland-backup/holland.git" --env BRANCH=$TRAVIS_BRANCH --env DEBUG="False" soulen3/holland:centos6_mysql_5.1
+      script: sudo docker run --env FORK="https://github.com/holland-backup/holland.git" --env BRANCH=$TRAVIS_BRANCH --env DEBUG="True" soulen3/holland:centos6_mysql_5.1
+    - stage: Docker
+      name: "centos6_mysql_8"
+      services:
+        - docker
+      script: skip
+      script: sudo docker run --env FORK="https://github.com/holland-backup/holland.git" --env BRANCH=$TRAVIS_BRANCH --env DEBUG="True" soulen3/holland:centos6_mysql_8
+    - stage: Docker
+      name: "centos6_pgsql_8.4"
+      services:
+        - docker
+      script: skip
+      script: sudo docker run --env FORK="https://github.com/holland-backup/holland.git" --env BRANCH=$TRAVIS_BRANCH --env DEBUG="True" soulen3/holland:centos6_pgsql_8.4
+    - stage: Docker
+      name: "centos7_mariadb_10.0"
+      services:
+        - docker
+      script: skip
+      script: sudo docker run --env FORK="https://github.com/holland-backup/holland.git" --env BRANCH=$TRAVIS_BRANCH --env DEBUG="True" soulen3/holland:centos7_mariadb_10.0
+    - stage: Docker
+      name: "centos7_mariadb_10.1"
+      services:
+        - docker
+      script: skip
+      script: sudo docker run --env FORK="https://github.com/holland-backup/holland.git" --env BRANCH=$TRAVIS_BRANCH --env DEBUG="True" soulen3/holland:centos7_mariadb_10.1
+    - stage: Docker
+      name: "centos7_mariadb_5.5"
+      services:
+        - docker
+      script: skip
+      script: sudo docker run --env FORK="https://github.com/holland-backup/holland.git" --env BRANCH=$TRAVIS_BRANCH --env DEBUG="True" soulen3/holland:centos7_mariadb_5.5
+    - stage: Docker
+      name: "centos7_mysql_5.6"
+      services:
+        - docker
+      script: skip
+      script: sudo docker run --env FORK="https://github.com/holland-backup/holland.git" --env BRANCH=$TRAVIS_BRANCH --env DEBUG="True" soulen3/holland:centos7_mysql_5.6
+    - stage: Docker
+      name: "centos7_mysql_5.7"
+      services:
+        - docker
+      script: skip
+      script: sudo docker run --env FORK="https://github.com/holland-backup/holland.git" --env BRANCH=$TRAVIS_BRANCH --env DEBUG="True" soulen3/holland:centos7_mysql_5.7
+    - stage: Docker
+      name: "centos7_mysql_8"
+      services:
+        - docker
+      script: skip
+      script: sudo docker run --env FORK="https://github.com/holland-backup/holland.git" --env BRANCH=$TRAVIS_BRANCH --env DEBUG="True" soulen3/holland:centos7_mysql_8
+    - stage: Docker
+      name: "centos7_pgsql_9.2"
+      services:
+        - docker
+      script: skip
+      script: sudo docker run --env FORK="https://github.com/holland-backup/holland.git" --env BRANCH=$TRAVIS_BRANCH --env DEBUG="True" soulen3/holland:centos7_pgsql_9.2
