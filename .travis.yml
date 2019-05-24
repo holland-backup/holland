@@ -24,16 +24,25 @@ jobs:
   include:
     - stage: Test
       dist: xenial
+      name: "Python 3.7"
       python:
         - "3.7"
+    - stage: Test
+      name: "Python 3.6"
+      python:
         - "3.6"
+    - stage: Test
+      name: "Python 2.7"
+      python:
         - "2.7"
     - stage: Test
+      name: "Python 2.6"
       python:
         - "2.6"
     - stage: Docker
       services:
         - docker
+      script: skip
       script: ./scripts/run_docker.sh
       python: 
        - "3.6"
