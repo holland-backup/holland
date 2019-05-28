@@ -14,7 +14,7 @@ https://github.com/holland-backup/holland/issues
 holland
 +++++++
 
-- WIP
+- Fix encoding issue in python 2.6 with MySQL 8
 
 1.1.15 - Apr 26, 2019
 ---------------------
