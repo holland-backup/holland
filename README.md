@@ -7,7 +7,7 @@ Holland is an Open Source backup framework originally developed by Rackspace and
 
 [Install Instructions](INSTALL.md)
 
-[Documentation](http://docs.hollandbackup.org)
+[Documentation](https://docs.hollandbackup.org)
 
 LICENSE
 =======

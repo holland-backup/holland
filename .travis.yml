@@ -40,6 +40,7 @@ jobs:
       before_script:
         - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
     - stage: Test
+      dist: trusty
       name: "Python 2.6"
       python:
         - "2.6"
