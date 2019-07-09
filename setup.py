@@ -22,7 +22,6 @@ setup(
     test_suite="tests",
     install_requires=[
         "configobj>=4.6.0",
-        "future",
         "setuptools",
         "six"
         #'argparse'   #Not built into python2.6

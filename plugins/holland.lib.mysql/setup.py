@@ -1,12 +1,18 @@
+import sys
 from setuptools import setup, find_packages
 
 version = "1.1.17"
+
+if sys.version_info[0] < 3:
+    install_requires = ["future"]
+else:
+    install_requires = []
 
 setup(
     name="holland.lib.mysql",
     version=version,
     description="Holland MySQL Support",
-    install_requires=[],
+    install_requires=install_requires,
     long_description="""
         Provides convenience methods for MySQL
       """,

@@ -20,7 +20,10 @@ mycnf_locations()
 mycnf_groups()
 """
 import re
-from future import standard_library
+import sys
+
+if sys.version_info[0] < 3:
+    from future import standard_library
 
 standard_library.install_aliases()
 from subprocess import getstatusoutput  # pylint: disable=C0413,C0411
