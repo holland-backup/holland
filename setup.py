@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = "1.1.16"
+version = "1.1.17"
 
 setup(
     name="holland",
@@ -22,7 +22,6 @@ setup(
     test_suite="tests",
     install_requires=[
         "configobj>=4.6.0",
-        "future",
         "setuptools",
         "six"
         #'argparse'   #Not built into python2.6

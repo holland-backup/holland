@@ -8,7 +8,16 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
-1.1.16 - TBD
+1.1.17 - TBD
+---------------------
+
+holland
++++++++
+
+- Cosmetic change to the mariabackup plugin
+- Move 'future' requirement from holland to holland.lib.mysql in python2
+
+1.1.16 - May 28, 2019
 ---------------------
 
 holland

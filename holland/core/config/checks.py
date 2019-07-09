@@ -3,9 +3,12 @@ Extra check methods to work with
 a validate.py Validator instance
 """
 
+import sys
 import shlex
-from builtins import str  # pylint: disable=redefined-builtin,import-error
 from holland.core.util.fmt import format_loglevel
+
+if sys.version_info[0] < 3:
+    from types import StringTypes
 
 # Required for EL6
 try:
@@ -20,7 +23,7 @@ def is_coerced_list(value, min_val=None, max_val=None):
     Checks if a value is a list, if not coerces
     it to a list
     """
-    if isinstance(value, str):
+    if not isinstance(value, list):
         value = [value]
     return validate.is_list(value, min_val, max_val)
 
@@ -29,8 +32,12 @@ def is_octal(value, min_val=None, max_val=None):
     """
     Coerces a value to octal
     """
-    if not isinstance(value, str):
-        return validate.is_integer(value, min_val, max_val)
+    if sys.version_info[0] < 3:
+        if not isinstance(value, StringTypes):
+            return validate.is_integer(value, min_val, max_val)
+    else:
+        if not isinstance(value, str):
+            return validate.is_integer(value, min_val, max_val)
 
     try:
         value = int(value, 8)

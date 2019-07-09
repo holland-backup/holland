@@ -1,7 +1,7 @@
 import sys
 from setuptools import setup, find_packages
 
-version = "1.1.16"
+version = "1.1.17"
 if sys.version_info[0] == 2:
     install_requires = (["subprocess32"],)
 else:
