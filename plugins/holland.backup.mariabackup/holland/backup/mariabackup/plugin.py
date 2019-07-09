@@ -96,7 +96,7 @@ class MariabackupPlugin(object):
         if stream:
             if stream == "tar":
                 archive_path = join(backup_directory, "backup.tar")
-            elif stream == "xbstream":
+            elif stream == "mbstream":
                 archive_path = join(backup_directory, "backup.mb")
             else:
                 raise BackupError("Unknown stream method '%s'" % stream)
