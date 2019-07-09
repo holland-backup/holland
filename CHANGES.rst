@@ -8,7 +8,15 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
-1.1.17 - TBD
+1.1.18 - TBD
+---------------------
+
+holland
++++++++
+
+- Fix bug preventing the `options` arg from working in compression lib
+
+1.1.17 - July 9, 2019
 ---------------------
 
 holland

@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = "1.1.17"
+version = "1.1.18"
 
 setup(
     name="holland.backup.mysqldump",

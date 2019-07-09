@@ -259,7 +259,7 @@ def _parse_args(value):
 
 
 def open_stream(
-    path, mode, method=None, level=None, inline=True, extra_args=None, split=False, **kwargs
+    path, mode, method=None, level=None, inline=True, options=None, split=False, **kwargs
 ):  # pylint: disable=unused-argument
     """
     Opens a compressed data stream, and returns a file descriptor type object
@@ -277,8 +277,8 @@ def open_stream(
         return io.open(path, mode)
 
     argv, path = stream_info(path, method)
-    if extra_args:
-        argv += _parse_args(extra_args)
+    if options:
+        argv += _parse_args(options)
     if mode == "r":
         return CompressionInput(path, mode, argv=argv)
     if mode == "w":
