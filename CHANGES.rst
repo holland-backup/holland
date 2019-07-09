@@ -14,7 +14,8 @@ https://github.com/holland-backup/holland/issues
 holland
 +++++++
 
-- WIP
+- Cosmetic change to the mariabackup plugin
+- Move 'future' requirement from holland to holland.lib.mysql in python2
 
 1.1.16 - May 28, 2019
 ---------------------
