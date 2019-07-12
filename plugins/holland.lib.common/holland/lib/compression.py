@@ -3,22 +3,13 @@ Common Compression utils
 """
 
 import os
-import sys
 import logging
 import errno
 import shlex
 import io
 from tempfile import TemporaryFile
+import subprocess
 from holland.lib.which import which
-
-
-DISABLE_SPLIT = False
-try:
-    import subprocess32 as subprocess
-except ImportError:
-    if sys.version_info[0] == 2 and sys.version_info[1] < 7:
-        DISABLE_SPLIT = True
-    import subprocess
 
 
 LOG = logging.getLogger(__name__)
@@ -143,7 +134,7 @@ class CompressionOutput(object):
                     argv += ["-%d" % level]
             self.stderr = TemporaryFile()
             LOG.debug("* Executing: %s", subprocess.list2cmdline(argv))
-            if split and not DISABLE_SPLIT:
+            if split:
                 split_args = [which("split"), "-a5", "--bytes=1G", "-", path + "."]
                 LOG.debug("* Splitting dump file with: %s", subprocess.list2cmdline(split_args))
                 self.pid = subprocess.Popen(
@@ -152,8 +143,6 @@ class CompressionOutput(object):
                 self.split = subprocess.Popen(split_args, stdin=self.pid.stdout, stderr=self.stderr)
 
             else:
-                if DISABLE_SPLIT:
-                    LOG.info("Split option is not supported with this version of subprocess module")
                 self.fileobj = io.open(path, "w")
                 self.stderr = TemporaryFile()
                 self.pid = subprocess.Popen(
