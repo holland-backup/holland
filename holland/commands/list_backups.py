@@ -2,7 +2,6 @@
 Define List Backup Command
 """
 
-from __future__ import print_function
 import sys
 from holland.core.command import Command
 from holland.core.spool import SPOOL

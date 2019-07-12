@@ -12,6 +12,7 @@ before_install:
   - sudo apt-get install percona-xtrabackup-24
 install:
   - python setup.py install
+  - pip install pylint
 script:
   - sudo ./scripts/travis_ci.sh
 jobs:

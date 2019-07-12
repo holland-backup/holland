@@ -2,7 +2,6 @@
 
 http://dev.mysql.com/doc/refman/5.1/en/option-files.html
 """
-from __future__ import print_function
 import os
 import codecs
 import logging
