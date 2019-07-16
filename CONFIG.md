@@ -5,7 +5,7 @@ This document provides a brief look at the configuration files commonly used whi
 Thanks to [THE-Alan-Hicks](https://github.com/THE-Alan-Hicks) for writting this document. 
 
 # Holland Configuration Files
-Let's being by taking a quick look at what files and directories we can expect to see in /etc/holland.
+Let's begin by taking a quick look at what files and directories we can expect to see in /etc/holland.
 ```
 # find /etc/holland/ 
 /etc/holland/ 
@@ -33,7 +33,7 @@ path                         = /usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bi
 filename                     = /var/log/holland/holland.log
 level                        = info  
 ```
-This file is split up in a manner similar to /etc/my.cnf, but doesn't have nearly as many options. Most of the configuration is offloaded to other files. Since the [logging] section should be fairly self-explanatory, let's take a look at the [holland] section first. Here we where to look for installed plugins (plugin_dirs), the directory where backups will be placed (backup_directory), the backupsets which will be used (more than one can be specified), and the umask and path variables.
+This file is split up in a manner similar to /etc/my.cnf, but doesn't have nearly as many options. Most of the configuration is offloaded to other files. Since the [logging] section should be fairly self-explanatory, let's take a look at the [holland] section first. Here we see where to look for installed plugins (plugin_dirs), the directory where backups will be placed (backup_directory), the backupsets which will be used (more than one can be specified), and the umask and path variables.
 /etc/holland/providers/*.conf
 The /etc/holland/providers directory contains configuration files for each different type of holland backup supported (mysqldump, lvm, xtrabackup, etc.). These files contain configuration information such as how to login to the database server along with default configuration options for each type.
 ```
@@ -62,7 +62,7 @@ level                        = 1
 [mysql:client]
 defaults-extra-file          = /root/.my.cnf,~/.my.cnf,
 ```
-##mysql-lvm.conf  
+## mysql-lvm.conf  
 ```
 # egrep -v '^\s*#|^\s*$' /etc/holland/providers/mysql-lvm.conf 
 [mysql-lvm]
@@ -251,6 +251,6 @@ These plugins using the mariabackup and xtrabackup command to perform dumps
 ## mongodump
 Holland performs a mongodump on the database
 
-References
+# References
 
 •	[Holland Configuration Files](http://docs.hollandbackup.org/config.html)
