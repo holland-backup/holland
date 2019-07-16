@@ -2,7 +2,7 @@
 ## Overview
 This document provides a brief look at the configuration files commonly used while configuration Holland backups. To start, there are several different providers in holland and each one brings different strengths and weaknesses to the table. Understanding the different providers is fundamental to working with holland.   
 
-Thanks to Alan H. for writting this document. 
+Thanks to @THE-Alan-Hicks. for writting this document. 
 
 # Holland Configuration Files
 Let's being by taking a quick look at what files and directories we can expect to see in /etc/holland.
