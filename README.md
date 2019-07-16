@@ -6,6 +6,7 @@ Holland README
 Holland is an Open Source backup framework originally developed by Rackspace and written in Python. Its goal is to help facilitate backing up databases with greater configurability, consistency, and ease. Holland currently focuses on MySQL, however future development will include other database platforms and even non-database related applications. Because of its plugin structure, Holland can be used to backup anything you want by whatever means you want.
 
 [Install Instructions](INSTALL.md)
+[Holland Configuration](CONFIG.md)
 
 [Documentation](https://docs.hollandbackup.org)
 
