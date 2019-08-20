@@ -20,6 +20,7 @@ setup(
     install_requires=[
         # -*- Emaria requirements: -*-
     ],
+    extras_require={"mysql": "holland.lib.mysql", "common": "holland.lib.common"},
     entry_points="""
       [holland.backup]
       mariabackup = holland.backup.mariabackup:MariabackupPlugin

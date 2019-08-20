@@ -20,6 +20,7 @@ setup(
     install_requires=[
         # -*- Extra requirements: -*-
     ],
+    extras_require={"mysql": "holland.lib.mysql", "common": "holland.lib.common"},
     entry_points="""
       [holland.backup]
       xtrabackup = holland.backup.xtrabackup:XtrabackupPlugin

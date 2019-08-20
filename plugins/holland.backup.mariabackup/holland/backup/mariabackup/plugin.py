@@ -10,8 +10,9 @@ from os.path import join
 from holland.core.backup import BackupError
 from holland.core.util.path import directory_size
 from holland.lib.compression import open_stream, COMPRESSION_CONFIG_STRING
-from holland.backup.mariabackup.mysql import MySQL
 from holland.backup.mariabackup import util
+from holland.lib.mysql import connect
+from holland.lib.mysql.option import build_mysql_config
 from holland.lib.mysql.client.base import MYSQL_CLIENT_CONFIG_STRING
 
 LOG = logging.getLogger(__name__)
@@ -62,21 +63,16 @@ class MariabackupPlugin(object):
         self.defaults_path = defaults_path
 
     def estimate_backup_size(self):
-        """Estimate the size of the next backup"""
+        """Return estimated backup size"""
+        mysql_config = build_mysql_config(self.config["mysql:client"])
+        client = connect(mysql_config["client"])
         try:
-            client = MySQL.from_defaults(self.defaults_path)
-        except MySQL.MySQLError as exc:
-            raise BackupError("Failed to connect to MySQL [%d] %s" % exc.args)
-        try:
-            try:
-                datadir = client.var("datadir")
-                return directory_size(datadir)
-            except MySQL.MySQLError as exc:
-                raise BackupError("Failed to find mysql datadir: [%d] %s" % exc.args)
-            except OSError as exc:
-                raise BackupError(
-                    "Failed to calculate directory size: [%d] %s" % (exc.errno, exc.strerror)
-                )
+            datadir = client.show_variable("datadir")
+            return directory_size(datadir)
+        except OSError as exc:
+            raise BackupError(
+                "Failed to calculate directory size: [%d] %s" % (exc.errno, exc.strerror)
+            )
         finally:
             client.close()
 
