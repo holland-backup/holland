@@ -7,7 +7,9 @@ Utility functions
 # and generally useful.
 
 import os
+from os.path import join, getsize
 import logging
+import math
 
 LOG = logging.getLogger(__name__)
 
@@ -64,8 +66,6 @@ def format_bytes(input_bytes, precision=2):
 
     If input_bytes is negative, this method raises ArithmeticError
     """
-    import math
-
     if input_bytes < 0:
         raise ArithmeticError("Only Positive Integers Allowed")
 
@@ -153,8 +153,6 @@ def directory_size(path):
 
     Returns the size in input_bytes on success
     """
-    from os.path import join, getsize
-
     result = 0
     for root, dirs, files in os.walk(path):
         for name in files:

@@ -8,7 +8,11 @@ import errno
 import logging
 import itertools
 import shutil
+from string import Template
+from textwrap import dedent
+
 from holland.core.config import BaseConfig
+from holland.core.util.fmt import format_bytes, format_datetime
 
 LOG = logging.getLogger(__name__)
 
@@ -327,8 +331,6 @@ class Backup(object):
         self.config.write()
 
     def _formatted_config(self):
-        from holland.core.util.fmt import format_bytes, format_datetime
-
         cfg = dict(self.config["holland:backup"])
         cfg["stop-time"] = format_datetime(cfg["stop-time"])
         cfg["start-time"] = format_datetime(cfg["start-time"])
@@ -340,9 +342,6 @@ class Backup(object):
         """
         get plugin info
         """
-        from string import Template
-        from textwrap import dedent
-
         tmpl = Template(
             """
         backup-plugin   = ${plugin}
@@ -361,9 +360,6 @@ class Backup(object):
         """
         format plugin info
         """
-        from textwrap import dedent
-        from holland.core.util.fmt import format_bytes, format_datetime
-
         return (
             dedent(
                 """

@@ -8,6 +8,7 @@ Backup plugin implementation to provide support for Percona XtraBackup.
 import logging
 from os.path import join
 from distutils.version import LooseVersion
+from subprocess import Popen, list2cmdline, PIPE, STDOUT
 from holland.core.backup import BackupError
 from holland.core.util.path import directory_size
 from holland.lib.compression import open_stream, COMPRESSION_CONFIG_STRING
@@ -107,8 +108,6 @@ class XtrabackupPlugin(object):
 
     def dryrun(self, binary_xtrabackup):
         """Perform test backup"""
-        from subprocess import Popen, list2cmdline, PIPE, STDOUT
-
         xb_cfg = self.config["xtrabackup"]
         args = util.build_xb_args(
             xb_cfg, self.target_directory, self.defaults_path, binary_xtrabackup

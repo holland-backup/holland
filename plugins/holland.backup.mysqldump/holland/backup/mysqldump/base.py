@@ -30,7 +30,7 @@ def start(
         if not schema.databases:
             raise BackupError("No databases found to backup")
 
-        if not file_per_database and not [x for x in schema.excluded_databases]:
+        if not file_per_database and not list(schema.excluded_databases):
             target_databases = ALL_DATABASES
         else:
             target_databases = [db for db in schema.databases if not db.excluded]

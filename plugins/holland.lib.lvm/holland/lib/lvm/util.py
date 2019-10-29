@@ -134,9 +134,8 @@ class SignalManager(object):
             prev = signal.signal(sig, self._trap_signal)
             self._handlers[sig] = prev
 
-    def _trap_signal(self, signum, *args):
+    def _trap_signal(self, signum):
         """Trap a signal and note it in this instance's pending list"""
-        args = args
         self.pending.append(signum)
 
     def restore(self):

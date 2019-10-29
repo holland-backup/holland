@@ -4,6 +4,7 @@ import os
 import re
 import codecs
 import logging
+import textwrap
 from copy import deepcopy
 from holland.core.backup import BackupError
 from holland.lib.compression import open_stream, lookup_compression, COMPRESSION_CONFIG_STRING
@@ -279,7 +280,6 @@ class MySQLDumpPlugin(object):
 
     def info(self):
         """Summarize information about this backup"""
-        import textwrap
 
         return (
             textwrap.dedent(

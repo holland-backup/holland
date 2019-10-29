@@ -379,6 +379,7 @@ class SimpleTableIterator(MetadataTableIterator):
                 yield Table(*metadata)
         else:
             for table, kind in self.client.show_tables(database, full=True):
+                LOG.debug("Table: %s, Kind: %s", table, kind)
                 metadata = [
                     ("database", database),
                     ("name", table),

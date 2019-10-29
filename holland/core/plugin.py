@@ -4,6 +4,8 @@ Core plugin support
 
 import logging
 import os
+from email.parser import Parser
+from email.policy import default
 from pkg_resources import (
     working_set,
     Environment,
@@ -111,8 +113,6 @@ def dist_metainfo_dict(dist):
     """
     Convert an Egg's PKG-INFO into a dict
     """
-    from email.parser import Parser
-    from email.policy import default
 
     distmetadata = dist.get_metadata("PKG-INFO")
     ret = Parser(policy=default).parsestr(distmetadata)
@@ -123,9 +123,6 @@ def iter_plugininfo():
     """
     Iterate over the plugins loaded so far
     """
-    from email.parser import Parser
-    from email.policy import default
-
     for plugin_dir in PLUGIN_DIRECTORIES:
         for dist in find_distributions(plugin_dir):
             distmetadata = dist.get_metadata("PKG-INFO")

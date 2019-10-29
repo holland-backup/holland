@@ -9,6 +9,7 @@ import shlex
 import io
 from tempfile import TemporaryFile
 import subprocess
+import signal
 from holland.lib.which import which
 
 
@@ -102,7 +103,6 @@ class CompressionInput(object):
         """
         close filehandle
         """
-        import signal
 
         os.kill(self.pid.pid, signal.SIGTERM)
         self.fileobj.close()

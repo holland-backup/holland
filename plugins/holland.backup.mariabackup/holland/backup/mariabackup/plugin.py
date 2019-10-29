@@ -7,6 +7,7 @@ Backup plugin implementation to provide support for MariaDB-backup.
 
 import logging
 from os.path import join
+from subprocess import Popen, list2cmdline, PIPE, STDOUT
 from holland.core.backup import BackupError
 from holland.core.util.path import directory_size
 from holland.lib.compression import open_stream, COMPRESSION_CONFIG_STRING
@@ -105,7 +106,6 @@ class MariabackupPlugin(object):
 
     def dryrun(self):
         """Test backup without preformaning backup"""
-        from subprocess import Popen, list2cmdline, PIPE, STDOUT
 
         mb_cfg = self.config["mariabackup"]
         args = util.build_mb_args(mb_cfg, self.target_directory, self.defaults_path)
