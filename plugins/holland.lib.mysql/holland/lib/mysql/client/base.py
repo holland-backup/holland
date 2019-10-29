@@ -264,7 +264,7 @@ class MySQLClient(object):
         cursor = self.cursor()
         cursor.execute(sql)
         try:
-            return [row for row in cursor]
+            return list(cursor)
         finally:
             cursor.close()
 
