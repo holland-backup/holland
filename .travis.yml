@@ -32,11 +32,11 @@ jobs:
       before_script:
         - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
     - stage: Docker
-      name: "centos7_mariadb_10.0"
+      name: "centos7_mariadb_10.3"
       services:
         - docker
       script: skip
-      script: sudo ./scripts/travis_run_docker.sh centos7_mariadb_10.0
+      script: sudo ./scripts/travis_run_docker.sh centos7_mariadb_10.3
     - stage: Docker
       name: "centos7_mariadb_10"
       services:
