@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = "1.1.18"
+version = "1.1.19"
 if sys.version_info[0] == 2 and sys.version_info[1] < 7:
     install_requires = (["pymongo<3.8.0"],)
 else:
