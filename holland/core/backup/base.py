@@ -187,8 +187,7 @@ class BackupRunner(object):
             LOG.debug("sys.exc_info(): %r", sys.exc_info())
             self.apply_cb("failed-backup", spool_entry)
             raise BackupError("Failed backup: %s" % name)
-        else:
-            self.apply_cb("after-backup", spool_entry)
+        self.apply_cb("after-backup", spool_entry)
 
     def free_required_space(self, name, required_bytes, dry_run=False):
         """Attempt to free at least ``required_bytes`` of old backups from a backupset

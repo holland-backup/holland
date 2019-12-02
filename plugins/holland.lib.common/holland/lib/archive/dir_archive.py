@@ -1,10 +1,10 @@
 """
 Dir Archive
 """
-from __future__ import print_function
 import os
 import shutil
 import logging
+import subprocess
 
 LOG = logging.getLogger(__name__)
 
@@ -93,7 +93,6 @@ class DirArchive(object):
         """
         Close archive.
         """
-        import subprocess
 
         status = subprocess.call(["gzip", "-1", "--recursive", self.path])
         if status != 0:

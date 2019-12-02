@@ -2,7 +2,6 @@
 Setup functions to import commnad plugins
 """
 
-from __future__ import print_function
 import os
 import sys
 import logging

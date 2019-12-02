@@ -247,9 +247,7 @@ class MySQLClient(object):
         cursor = self.cursor()
         cursor.execute(sql)
         try:
-            if full:
-                return [(table, kind) for table, kind in cursor]
-            return [table for table in cursor]
+            return list(cursor)
         finally:
             cursor.close()
 
@@ -266,7 +264,7 @@ class MySQLClient(object):
         cursor = self.cursor()
         cursor.execute(sql)
         try:
-            return [row for row in cursor]
+            return list(cursor)
         finally:
             cursor.close()
 

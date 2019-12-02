@@ -3,19 +3,10 @@ Extra check methods to work with
 a validate.py Validator instance
 """
 
-import sys
 import shlex
+import validate
+from validate import Validator
 from holland.core.util.fmt import format_loglevel
-
-if sys.version_info[0] < 3:
-    from types import StringTypes
-
-# Required for EL6
-try:
-    from configobj.validate import Validator
-except ImportError:
-    import validate
-    from validate import Validator
 
 
 def is_coerced_list(value, min_val=None, max_val=None):
@@ -32,12 +23,8 @@ def is_octal(value, min_val=None, max_val=None):
     """
     Coerces a value to octal
     """
-    if sys.version_info[0] < 3:
-        if not isinstance(value, StringTypes):
-            return validate.is_integer(value, min_val, max_val)
-    else:
-        if not isinstance(value, str):
-            return validate.is_integer(value, min_val, max_val)
+    if not isinstance(value, str):
+        return validate.is_integer(value, min_val, max_val)
 
     try:
         value = int(value, 8)

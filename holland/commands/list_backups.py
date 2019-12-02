@@ -2,8 +2,8 @@
 Define List Backup Command
 """
 
-from __future__ import print_function
 import sys
+import re
 from holland.core.command import Command
 from holland.core.spool import SPOOL
 from holland.core.plugin import load_backup_plugin
@@ -39,7 +39,7 @@ class ListBackups(Command):
         """
         if args:
             print("The list-backup command takes no arguments", file=sys.stderr)
-        backup_list = [x for x in SPOOL.list_backups()]
+        backup_list = list(SPOOL.list_backups())
         if not backup_list:
             print("No backups")
             return 0
@@ -62,8 +62,6 @@ class ListBackups(Command):
                 plugin = plugin(backup.backupset, backup.config, backup.path)
                 if hasattr(plugin, "info"):
                     plugin_info = plugin.info()
-                    import re
-
                     rec = re.compile(r"^", re.M)
                     print(rec.sub("\t\t", plugin_info))
 

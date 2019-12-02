@@ -1,14 +1,12 @@
 """
 Pluggable command support
 """
-from __future__ import print_function
 
 import os
 import sys
 import argparse
 from argparse import RawTextHelpFormatter
 import logging
-from distutils.version import LooseVersion
 from pkg_resources import get_distribution
 
 LOG = logging.getLogger(__name__)
@@ -86,27 +84,12 @@ class Command(object):
     description = " "
 
     def __init__(self):
-        if LooseVersion(argparse.__version__) < LooseVersion("1.4.0"):
-            self.optparser = SUBPARSER.add_parser(
-                self.name, help="%s %s" % (self.name, self.description), description=self.name
-            )
-            self.alias_parser = []
-            for alias in self.aliases:
-                self.alias_parser.append(
-                    SUBPARSER.add_parser(
-                        alias, help="Alias to %s" % self.name, description=self.name
-                    )
-                )
-            for parser in self.alias_parser:
-                for counter, arg in enumerate(self.args):
-                    parser.add_argument(*arg, **self.kargs[counter])
-        else:
-            self.optparser = SUBPARSER.add_parser(
-                self.name,
-                help="%s %s" % (self.name, self.description),
-                aliases=self.aliases,
-                description=self.name,
-            )
+        self.optparser = SUBPARSER.add_parser(
+            self.name,
+            help="%s %s" % (self.name, self.description),
+            aliases=self.aliases,
+            description=self.name,
+        )
 
         for counter, arg in enumerate(self.args):
             self.optparser.add_argument(*arg, **self.kargs[counter])

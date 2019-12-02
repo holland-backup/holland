@@ -5,7 +5,7 @@ import os
 import os.path
 import subprocess
 from io import open  # pylint: disable=redefined-builtin
-from six.moves import urllib
+import urllib
 from pymongo import MongoClient
 
 from holland.core.backup import BackupError
@@ -62,8 +62,8 @@ class MongoDump(object):
         ret = 0
 
         uri = self.config["mongodump"].get("uri")
-        if uri and uri != ['']:
-            uri = ','.join(uri)
+        if uri and uri != [""]:
+            uri = ",".join(uri)
         else:
             uri = "mongodb://"
             username = self.config["mongodump"].get("username")
@@ -89,8 +89,8 @@ class MongoDump(object):
         """
         command = ["mongodump"]
         uri = self.config["mongodump"].get("uri")
-        if uri and uri != ['']:
-            command.extend(['--uri', ','.join(uri)])
+        if uri and uri != [""]:
+            command.extend(["--uri", ",".join(uri)])
         else:
             username = self.config["mongodump"].get("username")
             if username:

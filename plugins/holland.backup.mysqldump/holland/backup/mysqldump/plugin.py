@@ -1,10 +1,10 @@
 """Command Line Interface"""
 
-from __future__ import print_function
 import os
 import re
 import codecs
 import logging
+import textwrap
 from copy import deepcopy
 from holland.core.backup import BackupError
 from holland.lib.compression import open_stream, lookup_compression, COMPRESSION_CONFIG_STRING
@@ -280,7 +280,6 @@ class MySQLDumpPlugin(object):
 
     def info(self):
         """Summarize information about this backup"""
-        import textwrap
 
         return (
             textwrap.dedent(
@@ -458,70 +457,65 @@ def exclude_invalid_views(schema, client, definitions_file):
     """
     LOG.info("* Invalid and excluded views will be saved to %s", definitions_file)
     cursor = client.cursor()
-    with open(definitions_file, "w") as sqlf:
-        print("--", file=sqlf)
-        print("-- DDL of Invalid Views", file=sqlf)
-        print("-- Created automatically by Holland", file=sqlf)
-        print("--", file=sqlf)
-        print(file=sqlf)
-        for schema_db in schema.databases:
-            if schema_db.excluded:
-                continue
-            for table in schema_db.tables:
-                if table.excluded:
-                    continue
-                if table.engine != "view":
-                    continue
-                LOG.debug("Testing view %s.%s", schema_db.name, table.name)
-                invalid_view = False
-                try:
-                    cursor.execute("SHOW FIELDS FROM `%s`.`%s`" % (schema_db.name, table.name))
-                    # check for missing definers that would bork
-                    # lock-tables
-                    for _, error_code, msg in client.show_warnings():
-                        if error_code == 1449:  # ER_NO_SUCH_USER
-                            raise MySQLError(error_code, msg)
-                except MySQLError as exc:
-                    # 1356 = View references invalid table(s)...
-                    if exc.args[0] in (1356, 1142, 1143, 1449, 1267, 1271):
-                        invalid_view = True
-                    else:
-                        LOG.error(
-                            "Unexpected error when checking invalid " "view %s.%s: [%d] %s",
-                            schema_db.name,
-                            table.name,
-                            *exc.args
-                        )
-                        raise BackupError("[%d] %s" % exc.args)
-                if invalid_view:
-                    LOG.warning("* Excluding invalid view `%s`.`%s`", schema_db.name, table.name)
-                    table.excluded = True
-                    view_definition = client.show_create_view(
-                        schema_db.name, table.name, use_information_schema=True
-                    )
-                    if view_definition is None:
-                        LOG.error(
-                            "!!! Failed to retrieve view definition for " "`%s`.`%s`",
-                            schema_db.name,
-                            table.name,
-                        )
-                        LOG.warning(
-                            "!!! View definition for `%s`.`%s` will "
-                            "not be included in this backup",
-                            schema_db.name,
-                            table.name,
-                        )
-                        continue
 
-                    LOG.info(
-                        "* Saving view definition for " "`%s`.`%s`", schema_db.name, table.name
+    invalid_views = "--\n-- DDL of Invalid Views\n-- Created automatically by Holland\n--\n"
+
+    for schema_db in schema.databases:
+        if schema_db.excluded:
+            continue
+        for table in schema_db.tables:
+            if table.excluded:
+                continue
+            if table.engine != "view":
+                continue
+            LOG.debug("Testing view %s.%s", schema_db.name, table.name)
+            invalid_view = False
+            try:
+                cursor.execute("SHOW FIELDS FROM `%s`.`%s`" % (schema_db.name, table.name))
+                # check for missing definers that would bork
+                # lock-tables
+                for _, error_code, msg in client.show_warnings():
+                    if error_code == 1449:  # ER_NO_SUCH_USER
+                        raise MySQLError(error_code, msg)
+            except MySQLError as exc:
+                # 1356 = View references invalid table(s)...
+                if exc.args[0] in (1356, 1142, 1143, 1449, 1267, 1271):
+                    invalid_view = True
+                else:
+                    LOG.error(
+                        "Unexpected error when checking invalid " "view %s.%s: [%d] %s",
+                        schema_db.name,
+                        table.name,
+                        *exc.args
                     )
-                    print("--", file=sqlf)
-                    print("-- Current View: `%s`.`%s`" % (schema_db.name, table.name), file=sqlf)
-                    print("--", file=sqlf)
-                    print(file=sqlf)
-                    print(view_definition + ";", file=sqlf)
-                    print(file=sqlf)
+                    raise BackupError("[%d] %s" % exc.args)
+            if invalid_view:
+                LOG.warning("* Excluding invalid view `%s`.`%s`", schema_db.name, table.name)
+                table.excluded = True
+                view_definition = client.show_create_view(
+                    schema_db.name, table.name, use_information_schema=True
+                )
+                if view_definition is None:
+                    LOG.error(
+                        "!!! Failed to retrieve view definition for " "`%s`.`%s`",
+                        schema_db.name,
+                        table.name,
+                    )
+                    LOG.warning(
+                        "!!! View definition for `%s`.`%s` will " "not be included in this backup",
+                        schema_db.name,
+                        table.name,
+                    )
+                    continue
+
+                LOG.info("* Saving view definition for " "`%s`.`%s`", schema_db.name, table.name)
+                invalid_views = invalid_views + "--\n-- Current View: `%s`.`%s`\n--\n%s;\n" % (
+                    schema_db.name,
+                    table.name,
+                    view_definition,
+                )
+    with open(definitions_file, "w") as sqlf:
+        sqlf.write(invalid_views)
 
 
 def add_exclusions(schema, config):

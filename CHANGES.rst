@@ -8,6 +8,17 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.2.0 - TBA
+---------------------
+
+holland
++++++++
+
+- Remove support for python2
+- Remove mysql lib from xtrabackup and mariadb plugins
+- Use common mysql lib in backup plugins
+- Fixes #297
+
 1.1.18 - July 10, 2019
 ---------------------
 

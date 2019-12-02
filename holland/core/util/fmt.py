@@ -2,6 +2,10 @@
 Format day, byt, number, and log objects
 """
 
+import math
+import logging
+from time import strftime, localtime
+
 
 def format_interval(seconds):
     """
@@ -28,8 +32,6 @@ def format_datetime(epoch):
     """
     Define standard datetime string
     """
-    from time import strftime, localtime
-
     return strftime("%a %b %d %Y %I:%M:%S%p", localtime(epoch))
 
 
@@ -37,8 +39,6 @@ def format_bytes(input_bytes, precision=2):
     """
     Format an integer number of input_bytes to a human readable string.
     """
-    import math
-
     if input_bytes < 0:
         raise ArithmeticError("Only Positive Integers Allowed")
 
@@ -59,8 +59,6 @@ def format_loglevel(str_level):
     Coerces a string to an integer logging level which
     maps to a standard python logging level
     """
-    import logging
-
     std_levels = {
         "debug": logging.DEBUG,
         "info": logging.INFO,

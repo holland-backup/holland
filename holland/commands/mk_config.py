@@ -2,7 +2,6 @@
 Command support for generating backupset configs
 """
 
-from __future__ import print_function
 import os
 import sys
 import tempfile
@@ -262,11 +261,10 @@ class MkConfig(Command):
                     errors = cfg.validate(VALIDATOR, preserve_errors=True)
                     if errors is True:
                         done = True
-                        continue
                     else:
                         _report_errors(cfg, errors)
 
-                if not confirm("There were configuration errors. Continue?"):
+                if not done and not confirm("There were configuration errors. Continue?"):
                     print("Aborting", file=sys.stderr)
                     return 1
             tmpfileobj.close()

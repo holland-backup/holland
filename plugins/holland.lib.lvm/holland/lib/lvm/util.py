@@ -1,7 +1,6 @@
 """LVM formatting and validation methods"""
 
 import os
-import sys
 import re
 import signal
 from math import log
@@ -54,10 +53,7 @@ def getdevice(mountpoint):
     for path in proc_mounts_info:
         device, mount = path.split()[0:2]
         # handle path with spaces - encoded in /etc/mtab
-        if sys.version_info > (3, 0):
-            mount = str(bytes(mount, "utf-8").decode("unicode_escape"))
-        else:
-            mount = mount.decode("string_escape")
+        mount = str(bytes(mount, "utf-8").decode("unicode_escape"))
         mount = os.path.normpath(mount)
         if mount == mountpoint:
             return device
@@ -138,9 +134,8 @@ class SignalManager(object):
             prev = signal.signal(sig, self._trap_signal)
             self._handlers[sig] = prev
 
-    def _trap_signal(self, signum, *args):
+    def _trap_signal(self, signum):
         """Trap a signal and note it in this instance's pending list"""
-        args = args
         self.pending.append(signum)
 
     def restore(self):

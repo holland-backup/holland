@@ -2,10 +2,10 @@
 Core plugin support
 """
 
-from __future__ import print_function
 import logging
 import os
-import sys
+from email.parser import Parser
+from email.policy import default
 from pkg_resources import (
     working_set,
     Environment,
@@ -113,19 +113,9 @@ def dist_metainfo_dict(dist):
     """
     Convert an Egg's PKG-INFO into a dict
     """
-    if sys.version_info > (3, 0):
-        from email.parser import Parser
-        from email.policy import default
 
-        distmetadata = dist.get_metadata("PKG-INFO")
-        ret = Parser(policy=default).parsestr(distmetadata)
-    else:
-        from rfc822 import Message
-        from cStringIO import StringIO
-
-        distmetadata = dist.get_metadata("PKG-INFO")
-        msg = Message(StringIO(distmetadata))
-        ret = dict(msg.items())
+    distmetadata = dist.get_metadata("PKG-INFO")
+    ret = Parser(policy=default).parsestr(distmetadata)
     return ret
 
 
@@ -133,19 +123,10 @@ def iter_plugininfo():
     """
     Iterate over the plugins loaded so far
     """
-    if sys.version_info > (3, 0):
-        from email.parser import Parser
-        from email.policy import default
-    else:
-        from rfc822 import Message
-        from cStringIO import StringIO
     for plugin_dir in PLUGIN_DIRECTORIES:
         for dist in find_distributions(plugin_dir):
             distmetadata = dist.get_metadata("PKG-INFO")
-            if sys.version_info > (3, 0):
-                msg = Parser(policy=default).parsestr(distmetadata)
-            else:
-                msg = Message(StringIO(distmetadata))
+            msg = Parser(policy=default).parsestr(distmetadata)
             filtered_keys = ["metadata-version", "home-page", "platform"]
             distinfo = [x for x in list(msg.items()) if x[0] not in filtered_keys]
             yield dist, dict(distinfo)

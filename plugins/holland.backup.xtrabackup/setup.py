@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = "1.1.18"
+version = "1.2.0"
 
 setup(
     name="holland.backup.xtrabackup",
@@ -20,6 +20,7 @@ setup(
     install_requires=[
         # -*- Extra requirements: -*-
     ],
+    extras_require={"mysql": "holland.lib.mysql", "common": "holland.lib.common"},
     entry_points="""
       [holland.backup]
       xtrabackup = holland.backup.xtrabackup:XtrabackupPlugin

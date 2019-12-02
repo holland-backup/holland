@@ -6,7 +6,6 @@ holland.backup.mariabackup.util
 Utility methods used by the mariabackup plugin
 """
 
-from __future__ import print_function
 import codecs
 import tempfile
 import logging
