@@ -458,7 +458,7 @@ def exclude_invalid_views(schema, client, definitions_file):
     """
     LOG.info("* Invalid and excluded views will be saved to %s", definitions_file)
     cursor = client.cursor()
-    with open(definitions_file, "w") as sqlf:
+    with open(definitions_file, "w", encoding="utf-16") as sqlf:
         print("--", file=sqlf)
         print("-- DDL of Invalid Views", file=sqlf)
         print("-- Created automatically by Holland", file=sqlf)
