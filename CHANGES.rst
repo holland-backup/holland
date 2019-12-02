@@ -16,6 +16,8 @@ holland
 
 - Remove support for python2
 - Remove mysql lib from xtrabackup and mariadb plugins
+- Use common mysql lib in backup plugins
+- Fixes #297
 
 1.1.18 - July 10, 2019
 ---------------------
