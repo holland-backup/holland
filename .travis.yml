@@ -21,19 +21,6 @@ script:
 jobs:
   include:
     - stage: Test
-      dist: xenial
-      name: "Python 3.7"
-      python:
-        - "3.7"
-      before_script:
-        - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
-    - stage: Test
-      name: "Python 3.6"
-      python:
-        - "3.6"
-      before_script:
-        - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
-    - stage: Test
       name: "Python 2.7"
       python:
         - "2.7"
