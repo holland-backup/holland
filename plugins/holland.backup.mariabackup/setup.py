@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = "1.1.19"
+version = "1.1.20"
 
 setup(
     name="holland.backup.mariabackup",
