@@ -253,4 +253,4 @@ Holland performs a mongodump on the database
 
 # References
 
-•	[Holland Configuration Files](http://docs.hollandbackup.org/config.html)
+•	[Holland Configuration Files](https://docs.hollandbackup.org/docs/config.html)
