@@ -1,7 +1,7 @@
 import sys
 from setuptools import setup, find_packages
 
-version = "1.1.20"
+version = "1.1.21"
 
 if sys.version_info[0] < 3:
     install_requires = ["future"]

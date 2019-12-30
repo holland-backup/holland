@@ -8,6 +8,14 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
+1.1.21 - Dec 2, 2019
+---------------------
+
+holland
++++++++
+
+- Fix(?) python2 encoding issues #302
+
 1.1.20 - Dec 2, 2019
 ---------------------
 

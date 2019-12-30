@@ -5,7 +5,6 @@ import os
 import re
 import codecs
 import logging
-import io
 import textwrap
 from copy import deepcopy
 from holland.core.backup import BackupError
@@ -516,7 +515,7 @@ def exclude_invalid_views(schema, client, definitions_file):
                     table.name,
                     view_definition,
                 )
-    with io.open(definitions_file, "w", encoding="utf-8") as sqlf:
+    with codecs.open(definitions_file, "w", encoding="utf-8") as sqlf:
         sqlf.write(invalid_views)
 
 
