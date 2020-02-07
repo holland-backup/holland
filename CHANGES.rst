@@ -8,7 +8,16 @@ http://bugs.launchpad.net/holland-backup
 GH# referes to the deprecated github bug tracker here:
 https://github.com/holland-backup/holland/issues
 
-1.2.0 - TBA
+1.2.1 - Feb 7, 2020
+---------------------
+
+holland
++++++++
+
+- Use pymsql instaed of MySQLdb
+- Fixes #304
+
+1.2.0 - Jan 28, 2020
 ---------------------
 
 holland
