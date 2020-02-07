@@ -1,19 +1,19 @@
-"""MySQLdb.Connection wrappers"""
+"""pymysql.Connection wrappers"""
 
 import re
 import logging
 from textwrap import dedent
 from warnings import filterwarnings
-import MySQLdb
-import MySQLdb.connections
+import pymysql
+import pymysql.connections
 
-MySQLError = MySQLdb.MySQLError  # pylint: disable=C0103
-ProgrammingError = MySQLdb.ProgrammingError  # pylint: disable=C0103
-OperationalError = MySQLdb.OperationalError  # pylint: disable=C0103
+MySQLError = pymysql.MySQLError  # pylint: disable=C0103
+ProgrammingError = pymysql.ProgrammingError  # pylint: disable=C0103
+OperationalError = pymysql.OperationalError  # pylint: disable=C0103
 
 LOG = logging.getLogger(__name__)
 
-filterwarnings("ignore", category=MySQLdb.Warning)
+filterwarnings("ignore", category=pymysql.Warning)
 
 __all__ = [
     "connect",
@@ -49,13 +49,13 @@ def flatten_list(a_list):
 
 
 class MySQLClient(object):
-    """MySQLdb Helper
+    """pymysql Helper
 
     Provides common functions for reading meta-data
     from and performing administrative functions on
     a MySQL server.
 
-    This class also behave as a MySQLdb.Connection
+    This class also behave as a pymysql.Connection
     object and can be used to perform arbitrary queries
     using the Python dbapi.
 
@@ -68,10 +68,10 @@ class MySQLClient(object):
     def __init__(self, *args, **kwargs):
         """Create a new MySQLClient instance
 
-        This is a simple wrapper for MySQLdb.connect(*args, **kwargs)
+        This is a simple wrapper for pymysql.connect(*args, **kwargs)
 
-        :param args: args tuple to pass to MySQLdb.connect
-        :param kwargs: kwargs dict to pass to MySQLdb.connect
+        :param args: args tuple to pass to pymysql.connect
+        :param kwargs: kwargs dict to pass to pymysql.connect
         """
         passive = kwargs.pop("passive", True)
         self._connection = None
@@ -86,7 +86,7 @@ class MySQLClient(object):
 
         :raises: `MySQLError`
         """
-        self._connection = MySQLdb.connect(*self._args, **self._kwargs)
+        self._connection = pymysql.connect(*self._args, **self._kwargs)
 
     def disconnect(self):
         """Disconnect this instance from MySQL"""
@@ -465,7 +465,7 @@ class MySQLClient(object):
         raise MySQLError("Could not match server version: %r" % version)
 
     def __getattr__(self, key):
-        """Pass through to the underlying MySQLdb.Connection object"""
+        """Pass through to the underlying pymysql.Connection object"""
         return getattr(self._connection, key)
 
 
@@ -479,7 +479,7 @@ class AutoMySQLClient(MySQLClient):
 
     def __getattr__(self, key):
         if self._connection is None:
-            getattr(MySQLdb.connections.Connection, key)
+            getattr(pymysql.connections.Connection, key)
             LOG.debug("Connected to MySQL")
             self.connect()
 
@@ -509,8 +509,8 @@ def connect(config, client_class=AutoMySQLClient):
     """
 
     # map standard my.cnf parameters to
-    # what MySQLdb.connect expects
-    # http://mysql-python.sourceforge.net/MySQLdb.html#mysqldb
+    # what pymysql.connect expects
+    # http://mysql-python.sourceforge.net/pymysql.html#mysqldb
     cnf_to_mysqldb = {
         "user": "user",  # same
         "password": "passwd",  # weird

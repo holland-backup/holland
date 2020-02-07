@@ -1,13 +1,13 @@
 from setuptools import setup, find_packages
 
-version = "1.2.0"
+version = "1.2.1"
 
 
 setup(
     name="holland.lib.mysql",
     version=version,
     description="Holland MySQL Support",
-    install_requires=[],
+    install_requires=["pymysql"],
     long_description="""
         Provides convenience methods for MySQL
       """,
