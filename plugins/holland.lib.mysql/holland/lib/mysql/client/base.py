@@ -510,7 +510,7 @@ def connect(config, client_class=AutoMySQLClient):
 
     # map standard my.cnf parameters to
     # what pymysql.connect expects
-    # http://mysql-python.sourceforge.net/pymysql.html#mysqldb
+    # http://mysql-python.sourceforge.net/MySQLdb.html#mysqldb
     cnf_to_mysqldb = {
         "user": "user",  # same
         "password": "passwd",  # weird
