@@ -26,12 +26,22 @@ Instructions can be found here: https://fedoraproject.org/wiki/EPEL
 # zypper install holland holland-mysqldump
   ```
 
-## Debian
+## Debian 9 and older
 ### Install package from OBS
 ```
 # . /etc/os-release
 # echo "deb http://download.opensuse.org/repositories/home:/holland-backup/Debian_${VERSION_ID}.0/ ./" >> /etc/apt/sources.list
 # wget -qO -  https://download.opensuse.org/repositories/home:/holland-backup/Debian_${VERSION_ID}.0/Release.key |apt-key add -
+# apt-get update
+# apt-get install holland {python3-mysqldb, python3-pymongo, ext...)
+```
+
+## Debian 10
+### Install package from OBS
+```
+# . /etc/os-release
+# echo "deb https://download.opensuse.org/repositories/home:/holland-backup/Debian_${VERSION_ID}/ ./" >> /etc/apt/sources.list
+# wget -qO -  https://download.opensuse.org/repositories/home:/holland-backup/Debian_${VERSION_ID}/Release.key |apt-key add -
 # apt-get update
 # apt-get install holland {python3-mysqldb, python3-pymongo, ext...)
 ```
