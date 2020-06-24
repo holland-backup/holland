@@ -1,64 +1,70 @@
-# pylint: skip-file
-
+"""Test for sqlite plugin"""
 import os
-import time
 import shutil
+import time
+import unittest
 from tempfile import mkdtemp
+
 from configobj import ConfigObj
-from nose.tools import ok_, assert_equals, with_setup
 
 from holland.backup.sqlite import SQLitePlugin
 from holland.lib.which import which
 
 
 class MockConfig(ConfigObj):
+    """Mock Config Class"""
+
     def validate_config(self, *args, **kw):
-        pass
-
-config = MockConfig()
-config['sqlite'] = {
-    'databases' : [os.path.join(os.path.dirname(__file__), 'sqlite.db')]
-    }
-config['compression'] = {
-    'method': 'gzip',
-    'inline': 'yes',
-    'level': 1
-    }
-
-try:
-    config['sqlite']['binary'] = which('sqlite')
-except Exception:
-    config['sqlite']['binary'] = which('sqlite3')
+        """Pass"""
 
 
-def setup_func():
-    "set up test fixtures"
-    config['tmpdir'] = mkdtemp()
+class BackupError(Exception):
+    """Mock BackupError"""
 
-def teardown_func():
-    "tear down test fixtures"
-    if os.path.exists(config['tmpdir']):
-        shutil.rmtree(config['tmpdir'])
 
-@with_setup(setup_func, teardown_func)
-def test_sqlite_dry_run():
-    name = 'sqlite/' + time.strftime('%Y%m%d_%H%M%S')
-    dry_run = True
-    plugin = SQLitePlugin(name, config, config['tmpdir'], dry_run)
-    plugin.backup()
+class TestSQLite(unittest.TestCase):
+    """Test SQLite Plugin"""
 
-@with_setup(setup_func, teardown_func)
-def test_sqlite_plugin():
-    name = 'sqlite/' + time.strftime('%Y%m%d_%H%M%S')
-    dry_run = False
-    plugin = SQLitePlugin(name, config, config['tmpdir'], dry_run)
-    assert_equals(plugin.estimate_backup_size(), 2048)
-    plugin.backup()
+    config = {}
 
-@with_setup(setup_func, teardown_func)
-def test_sqlite_info():
-    name = 'sqlite/' + time.strftime('%Y%m%d_%H%M%S')
-    dry_run = False
-    plugin = SQLitePlugin(name, config, config['tmpdir'], dry_run)
-    ok_(isinstance(plugin.info(), str))
+    @classmethod
+    def setUpClass(cls):
+        "set up test fixtures"
+        cls.config = MockConfig()
+        cls.config["sqlite"] = {"databases": [os.path.join(os.path.dirname(__file__), "sqlite.db")]}
+        cls.config["compression"] = {"method": "gzip", "inline": "yes", "level": 1}
 
+        # Disabling lint as unittest was failing on the BackupError exception
+        try:
+            cls.config["sqlite"]["binary"] = which("sqlite")
+        except:  # pylint: disable-msg=W0702
+            cls.config["sqlite"]["binary"] = which("sqlite3")
+
+        cls.config["tmpdir"] = mkdtemp()
+
+    @classmethod
+    def tearDownClass(cls):
+        if os.path.exists(cls.config["tmpdir"]):
+            shutil.rmtree(cls.config["tmpdir"])
+
+    def test_sqlite_dry_run(self):
+        """Test Dry run"""
+        name = "sqlite/" + time.strftime("%Y%m%d_%H%M%S")
+        dry_run = True
+        plugin = SQLitePlugin(name, self.__class__.config, self.__class__.config["tmpdir"], dry_run)
+        plugin.backup()
+
+    def test_sqlite_plugin(self):
+        """Test backup"""
+        name = "sqlite/" + time.strftime("%Y%m%d_%H%M%S")
+        dry_run = False
+        plugin = SQLitePlugin(name, self.__class__.config, self.__class__.config["tmpdir"], dry_run)
+        self.assertEqual(plugin.estimate_backup_size(), 2048)
+        plugin.backup()
+
+    def test_sqlite_info(self):
+        """Test info"""
+        name = "sqlite/" + time.strftime("%Y%m%d_%H%M%S")
+        dry_run = False
+        plugin = SQLitePlugin(name, self.__class__.config, self.__class__.config["tmpdir"], dry_run)
+        self.assertTrue(isinstance(plugin.info(), str))
