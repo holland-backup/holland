@@ -475,7 +475,7 @@ class AutoMySQLClient(MySQLClient):
     is requested"""
 
     def __init__(self, *args, **kwargs):
-        super(AutoMySQLClient, self).__init__(*args, passive=True, **kwargs)
+        super().__init__(*args, passive=True, **kwargs)
 
     def __getattr__(self, key):
         if self._connection is None:

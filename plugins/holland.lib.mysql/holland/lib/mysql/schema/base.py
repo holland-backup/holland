@@ -345,7 +345,7 @@ class SimpleTableIterator(MetadataTableIterator):
         :param client: `MySQLClient` instance to use to iterate over objects in
         the specified database
         """
-        super(SimpleTableIterator, self).__init__(client)
+        super().__init__(client)
         self.client = client
         self.record_engines = record_engines
 
