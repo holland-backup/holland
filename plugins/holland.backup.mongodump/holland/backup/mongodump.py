@@ -10,6 +10,7 @@ from pymongo import MongoClient
 
 from holland.core.backup import BackupError
 from holland.lib.compression import open_stream, COMPRESSION_CONFIG_STRING
+from holland.lib.which import which
 
 
 LOG = logging.getLogger(__name__)
@@ -87,7 +88,7 @@ class MongoDump(object):
         """
         Do what is necessary to perform and validate a successful backup.
         """
-        command = ["mongodump"]
+        command = which("mongodump")
         uri = self.config["mongodump"].get("uri")
         if uri and uri != [""]:
             command.extend(["--uri", ",".join(uri)])
