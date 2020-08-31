@@ -88,7 +88,7 @@ class MongoDump(object):
         """
         Do what is necessary to perform and validate a successful backup.
         """
-        command = which("mongodump")
+        command = [which("mongodump")]
         uri = self.config["mongodump"].get("uri")
         if uri and uri != [""]:
             command.extend(["--uri", ",".join(uri)])
