@@ -10,7 +10,6 @@ before_install:
   - sudo dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb
   - sudo apt-get update
   - sudo apt-get install percona-xtrabackup-80
-  - sudo apt-get install mongo-tools
 install:
   - pip install mysqlclient
   - python setup.py install
@@ -27,6 +26,7 @@ jobs:
       before_script:
         - sleep 15
         - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
+        - sudo apt-get install mongo-tools
     - stage: Test
       dist: focal
       name: "Python 3.7"
@@ -35,6 +35,7 @@ jobs:
       before_script:
         - sleep 15
         - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
+        - sudo apt-get install mongo-tools
     - stage: Test
       dist: focal
       name: "Python 3.6"
@@ -43,6 +44,7 @@ jobs:
       before_script:
         - sleep 15
         - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
+        - sudo apt-get install mongo-tools
     - stage: Docker
       name: "centos7_mariadb_10.3"
       services:
