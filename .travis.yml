@@ -24,6 +24,7 @@ jobs:
       python:
         - "3.8"
       before_script:
+        - sleep 15
         - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
     - stage: Test
       dist: focal
@@ -31,6 +32,7 @@ jobs:
       python:
         - "3.7"
       before_script:
+        - sleep 15
         - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
     - stage: Test
       dist: focal
@@ -38,6 +40,7 @@ jobs:
       python:
         - "3.6"
       before_script:
+        - sleep 15
         - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
     - stage: Docker
       name: "centos7_mariadb_10.3"
