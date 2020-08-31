@@ -10,7 +10,7 @@ before_install:
   - sudo dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb
   - sudo apt-get update
   - sudo apt-get install percona-xtrabackup-80
-  - sudo apt-get install mongodb-server
+  - sudo apt-get install mongo-tools
 install:
   - pip install mysqlclient
   - python setup.py install
