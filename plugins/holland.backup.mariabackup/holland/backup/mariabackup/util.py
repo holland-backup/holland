@@ -223,7 +223,6 @@ def build_mb_args(config, basedir, defaults_file=None):
         args.append("--safe-slave-backup")
     if no_lock:
         args.append("--no-lock")
-    args.append("--no-timestamp")
     if extra_opts:
         args.extend(extra_opts)
     if basedir:

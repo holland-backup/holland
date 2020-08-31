@@ -34,7 +34,7 @@ def pvs(*physical_volumes):
     if process.returncode != 0:
         raise LVMCommandError("pvs", process.returncode, stderr.decode("utf-8"))
 
-    return parse_lvm_format(PVS_ATTR, stdout)
+    return parse_lvm_format(PVS_ATTR, stdout.decode("utf-8"))
 
 
 def vgs(*volume_groups):
@@ -59,7 +59,7 @@ def vgs(*volume_groups):
     if process.returncode != 0:
         raise LVMCommandError("vgs", process.returncode, stderr.decode("utf-8"))
 
-    return parse_lvm_format(VGS_ATTR, stdout)
+    return parse_lvm_format(VGS_ATTR, stdout.decode("utf-8"))
 
 
 def lvs(*volume_groups):

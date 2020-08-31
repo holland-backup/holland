@@ -1,3 +1,0 @@
-The providers directory contains global configs for each backup provider. 
-These settings are merged with those set in individual backupsets.  The 
-settings in backupsets take precedence.
