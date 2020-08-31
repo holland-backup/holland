@@ -18,8 +18,5 @@ Commvault support command(s)""",
     include_package_data=True,
     zip_safe=False,
     install_requires=["pid"],
-    entry_points="""
-    [console_scripts]
-    holland_cvmysqlsv = holland_commvault.__init__:main
-    """,
+    entry_points={"console_scripts": ["holland_cvmysqlsv=holland_commvault:main"]},
 )
