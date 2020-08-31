@@ -20,6 +20,6 @@ Commvault support command(s)""",
     install_requires=["pid"],
     entry_points="""
     [console_scripts]
-    holland_cvmysqlsv = holland_commvault:main
+    holland_cvmysqlsv = holland_commvault.__init__:main
     """,
 )

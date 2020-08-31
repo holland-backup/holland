@@ -46,6 +46,8 @@ mkdir -p /etc/holland/providers /etc/holland/backupsets /var/log/holland /var/sp
 cp $TRAVIS_BUILD_DIR/config/holland.conf /etc/holland/
 cp $TRAVIS_BUILD_DIR/config/providers/* /etc/holland/providers/
 
+
+mkdir -p /var/lib/pgsql/data/
 echo 'host all root 127.0.0.1/32 trust' >> /var/lib/pgsql/data/pg_hba.conf
 su -c 'psql -c "CREATE USER root WITH SUPERUSER"' postgres
 
