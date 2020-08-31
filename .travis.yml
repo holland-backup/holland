@@ -19,7 +19,14 @@ script:
 jobs:
   include:
     - stage: Test
-      dist: xenial
+      dist: focal
+      name: "Python 3.8"
+      python:
+        - "3.8"
+      before_script:
+        - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
+    - stage: Test
+      dist: focal
       name: "Python 3.7"
       python:
         - "3.7"
