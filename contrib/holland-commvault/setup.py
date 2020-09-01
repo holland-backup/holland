@@ -1,7 +1,9 @@
-from setuptools import setup, find_packages
-import sys, os
+import os
+import sys
 
-version = "1.2.1"
+from setuptools import find_packages, setup
+
+version = "1.2.2"
 
 setup(
     name="holland_commvault",
@@ -18,8 +20,5 @@ Commvault support command(s)""",
     include_package_data=True,
     zip_safe=False,
     install_requires=["pid"],
-    entry_points="""
-    [console_scripts]
-    holland_cvmysqlsv = holland_commvault:main
-    """,
+    entry_points={"console_scripts": ["holland_cvmysqlsv=holland_commvault:main"]},
 )

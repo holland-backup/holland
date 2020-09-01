@@ -31,7 +31,7 @@ class Volume(object):
         try:
             return self.attributes[key]
         except KeyError:
-            return super(Volume, self).__getattribute__(key)
+            return super().__getattribute__(key)
 
     def reload(self):
         """Reload a Volume with underlying data, which may have changed"""

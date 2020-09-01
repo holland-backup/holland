@@ -121,7 +121,8 @@ class MariabackupPlugin(object):
         stdout = process.stdout.read()
         process.wait()
         # Note: mariabackup --help will exit with 1 usually
-        if process.returncode != 1:
+        # New versions are return zero
+        if process.returncode > 1:
             LOG.error("! %s failed. Output follows below.", cmdline)
             for line in stdout.splitlines():
                 LOG.error("! %s", line)

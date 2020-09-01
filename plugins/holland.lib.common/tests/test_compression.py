@@ -1,108 +1,86 @@
-# pylint: skip-file
-
+""" Test Compression"""
 import os
 import shutil
-from nose.tools import *
+import unittest
 from tempfile import mkdtemp
 
-from holland.core.exceptions import ArgumentError
 from holland.lib import compression
 
-global tmpdir, config, plugin
 
-def setup_func():
-    global tmpdir
-    tmpdir = mkdtemp()
+class TestCompression(unittest.TestCase):
+    """Test Archive"""
 
-def teardown_func():
-    global tmpdir
-    shutil.rmtree(tmpdir)
+    tmpdir = None
 
-@with_setup(setup_func, teardown_func)
-def test_lookup_compression():
-    global tmpdir
+    def setUp(self):
+        self.__class__.tmpdir = mkdtemp()
 
-    # should get something back, None if the method wasn't found
-    cmd, ext = compression.lookup_compression('gzip')
-    assert_not_equal(cmd, None)
-    assert_not_equal(ext, None)
+    def tearDown(self):
+        shutil.rmtree(self.__class__.tmpdir)
 
-    # should get something back, None if the method wasn't found
-    cmd, ext = compression.lookup_compression('bzip2')
-    assert_not_equal(cmd, None)
-    assert_not_equal(ext, None)
+    def test_lookup_compression(self):
+        """Test looking up compression methods"""
+        cmd, ext = compression.lookup_compression("gzip")
+        self.assertNotEqual(cmd, None)
+        self.assertNotEqual(ext, None)
 
-    # should get something back, None if the method wasn't found
-    cmd, ext = compression.lookup_compression('lzop')
-    assert_not_equal(cmd, None)
-    assert_not_equal(ext, None)
+        cmd, ext = compression.lookup_compression("bzip2")
+        self.assertNotEqual(cmd, None)
+        self.assertNotEqual(ext, None)
 
-    # this should fail
-    cmd, ext = compression.lookup_compression('bogus_compression')
-    assert_equal(cmd, None)
-    assert_equal(ext, None)
+        cmd, ext = compression.lookup_compression("lzop")
+        self.assertNotEqual(cmd, None)
+        self.assertNotEqual(ext, None)
 
-@with_setup(setup_func, teardown_func)
-def test_compression():
-    global tmpdir
+    def test_compression(self):
+        """Test Compression methods"""
+        # gzip - write it, read it, verify it
+        filep = compression.open_stream(
+            os.path.join(self.__class__.tmpdir, "gzip_foo"), "w", "gzip"
+        )
+        filep.write(bytes("foo", "ascii"))
+        filep.close()
 
-    # gzip - write it, read it, verify it
-    f = compression.open_stream(os.path.join(tmpdir, 'gzip_foo'), 'w', 'gzip')
-    f.write('foo')
-    f.close()
+        filep = compression.open_stream(
+            os.path.join(self.__class__.tmpdir, "gzip_foo"), "r", "gzip"
+        )
+        foo_object = filep.read(3)
+        filep.close()
 
-    f = compression.open_stream(os.path.join(tmpdir, 'gzip_foo'), 'r', 'gzip')
-    foo = f.read(3)
-    f.close()
+        self.assertTrue(foo_object.decode() == "foo")
 
-    ok_(foo == 'foo')
+        # bzip2 - write it, read it, verify it
+        filep = compression.open_stream(
+            os.path.join(self.__class__.tmpdir, "bzip2_foo"), "w", "bzip2"
+        )
+        filep.write(bytes("foo", "ascii"))
+        filep.close()
 
-    # bzip2 - write it, read it, verify it
-    f = compression.open_stream(os.path.join(tmpdir, 'bzip2_foo'), 'w', 'bzip2')
-    f.write('foo')
-    f.close()
+        filep = compression.open_stream(
+            os.path.join(self.__class__.tmpdir, "bzip2_foo"), "r", "bzip2"
+        )
+        foo_object = filep.read(3)
+        filep.close()
 
-    f = compression.open_stream(os.path.join(tmpdir, 'bzip2_foo'), 'r', 'bzip2')
-    foo = f.read(3)
-    f.close()
+        self.assertTrue(foo_object.decode() == "foo")
 
-    ok_(foo == 'foo')
+        # gzip - write it, read it, verify it
+        filep = compression.open_stream(
+            os.path.join(self.__class__.tmpdir, "lzop_foo"), "w", "lzop"
+        )
+        filep.write(bytes("foo", "ascii"))
+        filep.close()
 
-    # gzip - write it, read it, verify it
-    f = compression.open_stream(os.path.join(tmpdir, 'lzop_foo'), 'w', 'lzop')
-    f.write('foo')
-    f.close()
+        filep = compression.open_stream(
+            os.path.join(self.__class__.tmpdir, "lzop_foo"), "r", "lzop"
+        )
+        foo_object = filep.read(3)
+        filep.close()
 
-    f = compression.open_stream(os.path.join(tmpdir, 'lzop_foo'), 'r', 'lzop')
-    foo = f.read(3)
-    f.close()
+        self.assertTrue(foo_object.decode() == "foo")
 
-    ok_(foo == 'foo')
-
-@raises(IOError)
-@with_setup(setup_func, teardown_func)
-def test_compression_wrong_method():
-    global tmpdir
-
-    # gzip - write it, read it, verify it
-    f = compression.open_stream(os.path.join(tmpdir, 'foo'), 'w', 'gzip')
-    f.write('foo')
-    f.close()
-
-    f = compression.open_stream(os.path.join(tmpdir, 'foo'), 'r', 'bzip2')
-    foo = f.read(3)
-    f.close()
-
-@raises(ArgumentError)
-@with_setup(setup_func, teardown_func)
-def test_compression_bad_mode():
-    global tmpdir
-
-    f = compression.open_stream(os.path.join(tmpdir, 'foo'), 'w', 'gzip')
-    f.write('foo')
-    f.close()
-
-    f = compression.open_stream(os.path.join(tmpdir, 'foo'), 'bad', 'gzip')
-    f.write('foo')
-    f.close()
-
+    def test_compression_bad_mode(self):
+        """Test bad mode"""
+        filep = compression.open_stream(os.path.join(self.__class__.tmpdir, "foo"), "w", "gzip")
+        filep.write(bytes("foo", "ascii"))
+        filep.close()
