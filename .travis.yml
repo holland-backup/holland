@@ -16,6 +16,8 @@ install:
   - pip install pylint
 script:
   - sudo ./scripts/travis_ci.sh
+before_script:
+    - psql -c 'create database travis_ci_test;' -U postgres
 jobs:
   include:
     - stage: Test
