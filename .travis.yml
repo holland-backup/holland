@@ -4,7 +4,6 @@ sudo: required
 services:
   - mysql
   - mongodb
-  - postgresql
 before_install:
   - wget https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb
   - sudo dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb
@@ -105,3 +104,15 @@ jobs:
         - docker
       script: skip
       script: sudo ./scripts/travis_run_docker.sh centos7_pgsql_11
+    - stage: Docker
+      name: "centos7_pgsql_12"
+      services:
+        - docker
+      script: skip
+      script: sudo ./scripts/travis_run_docker.sh centos7_pgsql_12
+    - stage: Docker
+      name: "centos8_pgsql_13"
+      services:
+        - docker
+      script: skip
+      script: sudo ./scripts/travis_run_docker.sh centos8_pgsql_13

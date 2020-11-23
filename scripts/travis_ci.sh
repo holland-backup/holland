@@ -47,10 +47,6 @@ cp $TRAVIS_BUILD_DIR/config/holland.conf /etc/holland/
 cp $TRAVIS_BUILD_DIR/config/providers/* /etc/holland/providers/
 
 
-mkdir -p /var/lib/pgsql/data/
-echo 'host all root 127.0.0.1/32 trust' >> /var/lib/pgsql/data/pg_hba.conf
-su -c 'psql -c "CREATE USER root WITH SUPERUSER"' postgres
-
 CMDS=(
 "holland mc --name mysqldump mysqldump"
 "holland mc -f /tmp/mysqldump.conf mysqldump"
@@ -64,10 +60,6 @@ CMDS=(
 "holland mc --file /tmp/mongodump.conf mongodump"
 "holland bk mongodump --dry-run"
 "holland bk mongodump"
-"holland mc --name pgdump pgdump"
-"holland mc --file /tmp/pgdump.conf pgdump"
-"holland bk pgdump --dry-run"
-"holland bk pgdump"
 "holland bk mysqldump xtrabackup"
 "holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001 --bkset mysqldump"
 "holland mc --name default mysqldump"
