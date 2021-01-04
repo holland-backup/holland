@@ -124,8 +124,8 @@ class MariabackupPlugin(object):
             raise BackupError("Failed to find mariabackup binary")
         stdout = process.stdout.read()
         process.wait()
-        # Note: mariabackup --help will exit with 1 usually
-        if process.returncode != 1:
+        # New versions are return zero, old version are still returning 1
+        if process.returncode > 1:
             LOG.error("! %s failed. Output follows below.", cmdline)
             for line in stdout.splitlines():
                 LOG.error("! %s", line)
