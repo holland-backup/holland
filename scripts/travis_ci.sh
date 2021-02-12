@@ -47,13 +47,24 @@ cp $TRAVIS_BUILD_DIR/config/holland.conf /etc/holland/
 cp $TRAVIS_BUILD_DIR/config/providers/* /etc/holland/providers/
 
 
+# Work around if xtrabackup hasn't released a new version
+echo "holland mc --name xtrabackup xtrabackup"
+sleep 1
+holland mc --name xtrabackup xtrabackup
+exit_code=$?
+sed -i 's/additional-options = ,/additional-options = "--no-server-version-check",/g' /etc/holland/backupsets/xtrabackup.conf
+if [ $exit_code -ne  0 ]
+then
+    echo "Failed running holland mc xtrabackup"
+    exit $exit_code
+fi
+
 CMDS=(
 "holland mc --name mysqldump mysqldump"
 "holland mc -f /tmp/mysqldump.conf mysqldump"
 "holland bk mysqldump --dry-run"
 "holland bk mysqldump"
 "holland mc --name xtrabackup xtrabackup"
-"holland mc --file /tmp/xtrabackup.conf xtrabackup"
 "holland bk xtrabackup --dry-run"
 "holland bk xtrabackup"
 "holland mc --name mongodump mongodump"
