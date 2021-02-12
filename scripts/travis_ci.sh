@@ -64,7 +64,7 @@ CMDS=(
 "holland mc -f /tmp/mysqldump.conf mysqldump"
 "holland bk mysqldump --dry-run"
 "holland bk mysqldump"
-"holland mc --name xtrabackup xtrabackup"
+"holland mc --file /tmp/xtrabackup.conf xtrabackup"
 "holland bk xtrabackup --dry-run"
 "holland bk xtrabackup"
 "holland mc --name mongodump mongodump"
