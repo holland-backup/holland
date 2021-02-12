@@ -3,7 +3,7 @@ import sys
 
 from setuptools import find_packages, setup
 
-version = "1.2.2"
+version = "1.2.3"
 
 setup(
     name="holland_commvault",
@@ -19,6 +19,6 @@ Commvault support command(s)""",
     packages=find_packages(exclude=["ez_setup", "examples", "tests"]),
     include_package_data=True,
     zip_safe=False,
-    install_requires=["pid"],
+    extras_require={"status_file": ["pid"]},
     entry_points={"console_scripts": ["holland_cvmysqlsv=holland_commvault:main"]},
 )
