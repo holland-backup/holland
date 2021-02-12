@@ -12,19 +12,25 @@ CV_ARGS = ("-bkplevel",
            "-cn")
 """
 
-import sys
-import os
 import logging
+import os
 import resource
+import sys
+from argparse import Action, ArgumentParser
 from time import sleep
-from argparse import ArgumentParser, Action
-from pid import PidFile, PidFileAlreadyLockedError
 
-from holland.core.util.bootstrap import bootstrap
-from holland.core.config.config import HOLLANDCFG
-from holland.core.command import run
 from holland.core.cmdshell import HOLLAND_VERSION
+from holland.core.command import run
+from holland.core.config.config import HOLLANDCFG
+from holland.core.util.bootstrap import bootstrap
 from holland.core.util.fmt import format_loglevel
+
+try:
+    from pid import PidFile, PidFileAlreadyLockedError
+
+    ENABLE_PID = True
+except ImportError:
+    ENABLE_PID = False
 
 
 class ArgList(Action):
@@ -111,6 +117,12 @@ def main():
     else:
         largs = args.bksets
 
+    if not ENABLE_PID:
+        if run(args, largs):
+            return 1
+        return 0
+
+    # Use PID module to drop a status file
     status_file = "%s/%s/newest/job_%s" % (spool, largs[0], args.job)
     logging.info("status_file: %s", status_file)
     pid_name = "holland_commvault_%s" % args.job

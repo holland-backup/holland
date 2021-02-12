@@ -6,6 +6,6 @@ repos:
     -  id: black
        args: [--line-length=100]
 -   repo: git://github.com/pre-commit/mirrors-pylint
-    rev: v2.2.2
+    rev: v2.6.0
     hooks:
     -  id: pylint
