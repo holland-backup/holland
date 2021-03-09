@@ -35,6 +35,7 @@ method = option('none', 'gzip', 'gzip-rsyncable', 'pigz', 'bzip2', 'pbzip2', 'lz
 options = string(default="")
 inline = boolean(default=yes)
 split = boolean(default=no)
+splitsize = integer(min=1, default=1)
 level  = integer(min=0, max=9, default=1)
 """
 
@@ -117,7 +118,7 @@ class CompressionOutput(object):
     a standard file descriptor such as from open().
     """
 
-    def __init__(self, path, mode, argv, level, inline, split=False):
+    def __init__(self, path, mode, argv, level, inline, split=False, splitsize=1):
         self.argv = argv
         self.level = level
         self.inline = inline
@@ -135,10 +136,22 @@ class CompressionOutput(object):
             self.stderr = TemporaryFile()
             LOG.debug("* Executing: %s", subprocess.list2cmdline(argv))
             if split:
-                split_args = [which("split"), "-a5", "--bytes=1G", "-", path + "."]
-                LOG.debug("* Splitting dump file with: %s", subprocess.list2cmdline(split_args))
+                split_args = [
+                    which("split"),
+                    "-a5",
+                    f"--bytes={splitsize}G",
+                    "-",
+                    path + ".",
+                ]
+                LOG.debug(
+                    "* Splitting dump file with: %s",
+                    subprocess.list2cmdline(split_args),
+                )
                 self.pid = subprocess.Popen(
-                    argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self.stderr
+                    argv,
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=self.stderr,
                 )
                 self.split = subprocess.Popen(split_args, stdin=self.pid.stdout, stderr=self.stderr)
 
@@ -146,7 +159,10 @@ class CompressionOutput(object):
                 self.fileobj = io.open(path, "w")
                 self.stderr = TemporaryFile()
                 self.pid = subprocess.Popen(
-                    argv, stdin=subprocess.PIPE, stdout=self.fileobj.fileno(), stderr=self.stderr
+                    argv,
+                    stdin=subprocess.PIPE,
+                    stdout=self.fileobj.fileno(),
+                    stderr=self.stderr,
                 )
             self.filehandle = self.pid.stdin.fileno()
         self.name = path
@@ -248,7 +264,15 @@ def _parse_args(value):
 
 
 def open_stream(
-    path, mode, method=None, level=None, inline=True, options=None, split=False, **kwargs
+    path,
+    mode,
+    method=None,
+    level=None,
+    inline=True,
+    options=None,
+    split=False,
+    splitsize=1,
+    **kwargs,
 ):  # pylint: disable=unused-argument
     """
     Opens a compressed data stream, and returns a file descriptor type object
@@ -271,5 +295,13 @@ def open_stream(
     if mode == "r":
         return CompressionInput(path, mode, argv=argv)
     if mode == "w":
-        return CompressionOutput(path, mode, argv=argv, level=level, inline=inline, split=split)
+        return CompressionOutput(
+            path,
+            mode,
+            argv=argv,
+            level=level,
+            inline=inline,
+            split=split,
+            splitsize=splitsize,
+        )
     raise IOError("invalid mode: %s" % mode)
