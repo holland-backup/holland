@@ -1,15 +1,13 @@
 """pymysql.Connection wrappers"""
 
-import re
 import logging
+import re
 from textwrap import dedent
 from warnings import filterwarnings
+
 import pymysql
 import pymysql.connections
-
-MySQLError = pymysql.MySQLError  # pylint: disable=C0103
-ProgrammingError = pymysql.ProgrammingError  # pylint: disable=C0103
-OperationalError = pymysql.OperationalError  # pylint: disable=C0103
+from pymysql import MySQLError, OperationalError, ProgrammingError
 
 LOG = logging.getLogger(__name__)
 
@@ -165,17 +163,11 @@ class MySQLClient(object):
             # coerce null engine to 'view' as necessary
             if row["engine"] is None:
                 row["engine"] = "view"
-                if "references invalid table" in row["comment"] or "":
-                    LOG.warning(
-                        "Invalid view %s.%s: %s", row["database"], row["name"], row["comment"] or ""
-                    )
-                if "Incorrect key file" in row["comment"] or "":
-                    LOG.warning(
-                        "Invalid table %s.%s: %s",
-                        row["database"],
-                        row["name"],
-                        row["comment"] or "",
-                    )
+                comment = row.get("comment", "")
+                if "references invalid table" in comment:
+                    LOG.warning("Invalid view %s.%s: %s", row["database"], row["name"], comment)
+                if "Incorrect key file" in comment:
+                    LOG.warning("Invalid table %s.%s: %s", row["database"], row["name"], comment)
             else:
                 row["engine"] = row["engine"].lower()
             for key in list(row.keys()):
@@ -460,7 +452,7 @@ class MySQLClient(object):
         version = self.get_server_info()
         match = re.match(r"^(\d+)\.(\d+)\.(\d+)", version)
         if match:
-            return tuple([int(v) for v in match.groups()])
+            return tuple((int(v) for v in match.groups()))
 
         raise MySQLError("Could not match server version: %r" % version)
 

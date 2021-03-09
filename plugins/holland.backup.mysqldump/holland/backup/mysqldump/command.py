@@ -78,8 +78,7 @@ class MyOption(object):
         self.check_arg(version, arg)
 
     def check_arg(self, version, arg):
-        """Check the given argument against this option.
-        """
+        """Check the given argument against this option."""
         if isinstance(self.arg, str):
             return re.match(self.arg, arg, re.UNICODE) is not None
         if callable(self.arg):
@@ -162,10 +161,10 @@ def mysqldump_version(command):
             LOG.error("! %s", line)
     try:
         return tuple(
-            [
+            (
                 int(digit)
                 for digit in re.search(r"(\d+)[.](\d+)[.](\d+)", stdout.decode("utf-8")).groups()
-            ]
+            )
         )
     except AttributeError as exc:
         LOG.debug("%s provided output %r", cmdline, stdout)
