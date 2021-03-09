@@ -2,9 +2,9 @@
 Format day, byt, number, and log objects
 """
 
-import math
 import logging
-from time import strftime, localtime
+import math
+from time import localtime, strftime
 
 
 def format_interval(seconds):

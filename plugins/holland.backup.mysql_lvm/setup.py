@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-from setuptools import setup, find_packages
 
-version = "1.2.3"
+from setuptools import find_packages, setup
+
+version = "1.2.4"
 
 setup(
     name="holland.backup.mysql_lvm",

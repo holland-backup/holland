@@ -1,6 +1,6 @@
 """A simple fcntl/flock implementation"""
 
-from fcntl import flock, LOCK_EX, LOCK_UN, LOCK_NB
+from fcntl import LOCK_EX, LOCK_NB, LOCK_UN, flock
 
 
 class LockError(Exception):

@@ -2,15 +2,16 @@
 Define how backup plugins will be called
 """
 
+import errno
+import logging
 import os
 import sys
 import time
-import errno
-import logging
+
 from holland.core.plugin import PluginLoadError, load_backup_plugin
-from holland.core.util.path import directory_size, disk_free
-from holland.core.util.fmt import format_bytes, format_interval
 from holland.core.spool import Backup
+from holland.core.util.fmt import format_bytes, format_interval
+from holland.core.util.path import directory_size, disk_free
 
 MAX_SPOOL_RETRIES = 5
 

@@ -2,11 +2,12 @@
 Command to delete old backups
 """
 
-import logging
 import itertools
+import logging
+
 from holland.core.command import Command
 from holland.core.config import HOLLANDCFG, ConfigError
-from holland.core.spool import SPOOL, CONFIGSPEC
+from holland.core.spool import CONFIGSPEC, SPOOL
 from holland.core.util.fmt import format_bytes
 
 LOG = logging.getLogger(__name__)

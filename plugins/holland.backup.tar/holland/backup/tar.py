@@ -6,8 +6,9 @@ import logging
 import os
 from subprocess import Popen, list2cmdline
 from tempfile import TemporaryFile
+
 from holland.core.backup import BackupError
-from holland.lib.compression import open_stream, COMPRESSION_CONFIG_STRING
+from holland.lib.compression import COMPRESSION_CONFIG_STRING, open_stream
 
 LOG = logging.getLogger(__name__)
 

@@ -2,8 +2,10 @@
 Configuration API support
 """
 
-import os
 import logging
+import os
+
+from .checks import VALIDATOR
 
 # get_extra_values was added in configobj 4.7. EL6 ships with 4.6
 # Try to import this and remove get_extra_values if it doesn't work
@@ -12,7 +14,6 @@ try:
 except ImportError:
     from configobj import ConfigObj, Section, flatten_errors
 
-from .checks import VALIDATOR
 
 LOG = logging.getLogger(__name__)
 
@@ -66,7 +67,7 @@ class BaseConfig(ConfigObj):
         section.rename(key, str(key.replace("_", "-")))
 
     def reload(self):
-        """ Reloads ConfigObj from filesystem, then recursively walks each
+        """Reloads ConfigObj from filesystem, then recursively walks each
         section.
         """
         ConfigObj.reload(self)

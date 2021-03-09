@@ -2,11 +2,11 @@
 Tar Archive
 """
 
+import grp
 import os
 import pwd
-import grp
-import time
 import tarfile
+import time
 
 try:
     from io import StringIO

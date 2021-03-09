@@ -1,10 +1,10 @@
 """Copy datadir from snapshot without creating a tar file """
 
-import os
-import time
-import signal
 import logging
-from subprocess import list2cmdline, Popen, CalledProcessError
+import os
+import signal
+import time
+from subprocess import CalledProcessError, Popen, list2cmdline
 
 LOG = logging.getLogger(__name__)
 

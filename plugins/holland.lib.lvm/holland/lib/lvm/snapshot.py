@@ -1,8 +1,9 @@
 """LVM Snapshot state machine"""
 
-import sys
-import signal
 import logging
+import signal
+import sys
+
 from holland.lib.lvm.errors import LVMCommandError
 from holland.lib.lvm.util import SignalManager, format_bytes
 
@@ -34,9 +35,7 @@ class Snapshot(object):
         return self.create_snapshot(volume)
 
     def create_snapshot(self, logical_volume):
-        """Create a snapshot for the given logical volume
-
-        """
+        """Create a snapshot for the given logical volume"""
 
         try:
             self._apply_callbacks("pre-snapshot", self, None)
@@ -149,9 +148,7 @@ class Snapshot(object):
         return self.finish()
 
     def register(self, event, callback, priority=100):
-        """Register a callback for ``event`` with ``priority``
-
-        """
+        """Register a callback for ``event`` with ``priority``"""
         self.callbacks.setdefault(event, []).append((priority, callback))
 
     def unregister(self, event, callback):

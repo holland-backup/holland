@@ -1,6 +1,7 @@
 """Handle replication during backups"""
 
 import logging
+
 from holland.core.backup import BackupError
 from holland.lib.mysql import MySQLError
 

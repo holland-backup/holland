@@ -8,12 +8,13 @@ Utility methods used by the xtrabackup plugin
 """
 
 import codecs
-import tempfile
 import logging
 import re
+import tempfile
+from os.path import expanduser, isabs, join
 from string import Template
-from os.path import join, isabs, expanduser
-from subprocess import Popen, PIPE, STDOUT, list2cmdline
+from subprocess import PIPE, STDOUT, Popen, list2cmdline
+
 from holland.core.backup import BackupError
 from holland.lib.which import which
 

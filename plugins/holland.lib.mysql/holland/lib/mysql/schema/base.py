@@ -1,8 +1,9 @@
 """Summarize a MySQL Schema"""
 
-import time
 import logging
 import re
+import time
+
 from holland.lib.mysql.client import MySQLError
 
 LOG = logging.getLogger(__name__)
@@ -231,9 +232,7 @@ class Database(object):
 
 
 class Table(object):
-    """Representation of a MySQL Table
-
-    """
+    """Representation of a MySQL Table"""
 
     __slots__ = ("database", "name", "data_size", "index_size", "engine", "excluded")
 
@@ -261,17 +260,14 @@ class Table(object):
     def __str__(self):
         data_size = "%.2fMB" % (self.data_size / 1024.0 ** 2)
         index_size = "%.2fMB" % (self.index_size / 1024.0 ** 2)
-        return (
-            "%sTable(name=%r, data_size=%s, \
-               index_size=%s, engine=%s, txn=%s)"
-            % (
-                self.excluded and "[EXCL]" or "",
-                self.name,
-                data_size,
-                index_size,
-                self.engine,
-                str(self.is_transactional),
-            )
+        return "%sTable(name=%r, data_size=%s, \
+               index_size=%s, engine=%s, txn=%s)" % (
+            self.excluded and "[EXCL]" or "",
+            self.name,
+            data_size,
+            index_size,
+            self.engine,
+            str(self.is_transactional),
         )
 
 

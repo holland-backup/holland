@@ -4,8 +4,10 @@ a validate.py Validator instance
 """
 
 import shlex
+
 import validate
 from validate import Validator
+
 from holland.core.util.fmt import format_loglevel
 
 

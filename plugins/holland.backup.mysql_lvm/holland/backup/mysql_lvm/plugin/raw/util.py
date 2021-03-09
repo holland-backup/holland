@@ -1,18 +1,22 @@
 """Utility functions to help out the mysql-lvm plugin"""
+import logging
 import os
 import tempfile
-import logging
+
+from holland.backup.mysql_lvm.actions import (
+    DirArchiveAction,
+    FlushAndLockMySQLAction,
+    InnodbRecoveryAction,
+    RecordMySQLReplicationAction,
+    TarArchiveAction,
+)
+from holland.backup.mysql_lvm.plugin.common import (
+    connect_simple,
+    log_final_snapshot_size,
+)
+from holland.backup.mysql_lvm.plugin.innodb import MySQLPathInfo, check_innodb
 from holland.core.backup import BackupError
 from holland.lib.compression import open_stream
-from holland.backup.mysql_lvm.actions import (
-    FlushAndLockMySQLAction,
-    RecordMySQLReplicationAction,
-    InnodbRecoveryAction,
-    TarArchiveAction,
-    DirArchiveAction,
-)
-from holland.backup.mysql_lvm.plugin.common import log_final_snapshot_size, connect_simple
-from holland.backup.mysql_lvm.plugin.innodb import MySQLPathInfo, check_innodb
 
 LOG = logging.getLogger(__name__)
 

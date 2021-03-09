@@ -4,14 +4,14 @@ import logging
 import os
 import os.path
 import subprocess
-from io import open  # pylint: disable=redefined-builtin
 import urllib
+from io import open  # pylint: disable=redefined-builtin
+
 from pymongo import MongoClient
 
 from holland.core.backup import BackupError
-from holland.lib.compression import open_stream, COMPRESSION_CONFIG_STRING
+from holland.lib.compression import COMPRESSION_CONFIG_STRING, open_stream
 from holland.lib.which import which
-
 
 LOG = logging.getLogger(__name__)
 

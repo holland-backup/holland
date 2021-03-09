@@ -6,13 +6,14 @@ import logging
 import os
 from email.parser import Parser
 from email.policy import default
+
 from pkg_resources import (
-    working_set,
-    Environment,
-    iter_entry_points,
-    find_distributions,
     DistributionNotFound,
+    Environment,
     VersionConflict,
+    find_distributions,
+    iter_entry_points,
+    working_set,
 )
 
 LOG = logging.getLogger(__name__)
@@ -42,7 +43,7 @@ def add_plugin_dir(plugin_dir):
             for dist, error in list(errors.items()):
                 errmsg = None
                 if isinstance(error, DistributionNotFound):
-                    req, = error.args
+                    (req,) = error.args
                     errmsg = "%r not found" % req.project_name
                 elif isinstance(error, VersionConflict):
                     dist, req = error.args

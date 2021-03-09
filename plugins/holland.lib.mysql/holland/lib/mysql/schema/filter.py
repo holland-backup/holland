@@ -1,7 +1,7 @@
 """Simple Filter support"""
 
-import re
 import fnmatch
+import re
 
 
 class BaseFilter(object):

@@ -3,6 +3,7 @@ Print list of installed plugins
 """
 
 import sys
+
 from holland.core.command import Command
 from holland.core.plugin import iter_plugins
 

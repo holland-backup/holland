@@ -1,12 +1,14 @@
 """Dispatch to the holland mysqldump plugin"""
 
-import os
-import time
-import signal
 import logging
+import os
 import pwd
-from holland.lib.mysql import connect, MySQLError, MySQLClient
-from ._mysqld import generate_server_config, MySQLServer, locate_mysqld_exe
+import signal
+import time
+
+from holland.lib.mysql import MySQLClient, MySQLError, connect
+
+from ._mysqld import MySQLServer, generate_server_config, locate_mysqld_exe
 
 LOG = logging.getLogger(__name__)
 
