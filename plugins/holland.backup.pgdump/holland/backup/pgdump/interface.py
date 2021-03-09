@@ -5,19 +5,18 @@ to backup Postgres databases using pg_dump
 and pg_dumpall
 """
 
-import os
 import logging
-from holland.core.backup import BackupError
+import os
+
+from holland.backup.pgdump.base import PgError, backup_pgsql, dbapi
 from holland.backup.pgdump.base import dry_run as pg_dry_run
 from holland.backup.pgdump.base import (
-    backup_pgsql,
-    PgError,
-    dbapi,
-    pg_databases,
     get_connection,
     get_db_size,
     legacy_get_db_size,
+    pg_databases,
 )
+from holland.core.backup import BackupError
 from holland.lib.compression import COMPRESSION_CONFIG_STRING
 
 LOG = logging.getLogger(__name__)

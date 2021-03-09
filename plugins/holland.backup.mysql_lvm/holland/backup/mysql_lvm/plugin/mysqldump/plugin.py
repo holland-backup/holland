@@ -3,13 +3,24 @@
 # pylint: disable=no-name-in-module
 # pylint: disable=import-error
 
-import os
 import logging
-from holland.lib.lvm import LogicalVolume, CallbackFailuresError, LVMCommandError, relpath, getmount
-from holland.core.backup import BackupError
-from holland.backup.mysql_lvm.plugin.common import build_snapshot, connect_simple, _dry_run
+import os
+
+from holland.backup.mysql_lvm.plugin.common import (
+    _dry_run,
+    build_snapshot,
+    connect_simple,
+)
 from holland.backup.mysql_lvm.plugin.mysqldump.util import setup_actions
 from holland.backup.mysqldump import MySQLDumpPlugin
+from holland.core.backup import BackupError
+from holland.lib.lvm import (
+    CallbackFailuresError,
+    LogicalVolume,
+    LVMCommandError,
+    getmount,
+    relpath,
+)
 
 LOG = logging.getLogger(__name__)
 

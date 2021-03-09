@@ -1,12 +1,12 @@
 """Define mysql_lvm.actions"""
+from holland.backup.mysql_lvm.actions.dir import DirArchiveAction
 from holland.backup.mysql_lvm.actions.mysql import (
     FlushAndLockMySQLAction,
     InnodbRecoveryAction,
-    RecordMySQLReplicationAction,
-    record_slave_status,
-    record_master_status,
-    wait_for_mysqld,
     MySQLDumpDispatchAction,
+    RecordMySQLReplicationAction,
+    record_master_status,
+    record_slave_status,
+    wait_for_mysqld,
 )
 from holland.backup.mysql_lvm.actions.tar import TarArchiveAction
-from holland.backup.mysql_lvm.actions.dir import DirArchiveAction

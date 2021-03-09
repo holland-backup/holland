@@ -2,12 +2,13 @@
 """Backup functions for pg_dump"""
 
 
+import logging
+
 # Python stdlib
 import os
 import shlex
-import tempfile
-import logging
 import subprocess
+import tempfile
 
 # 3rd party Postgres db connector
 import psycopg2 as dbapi

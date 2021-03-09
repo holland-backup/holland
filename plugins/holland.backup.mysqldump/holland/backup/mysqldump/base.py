@@ -1,11 +1,12 @@
 """Main driver"""
 
 import errno
-import logging
 import json
+import logging
+
+from holland.backup.mysqldump.command import ALL_DATABASES
 from holland.core.backup import BackupError
 from holland.lib.safefilename import encode
-from holland.backup.mysqldump.command import ALL_DATABASES
 
 LOG = logging.getLogger(__name__)
 

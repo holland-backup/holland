@@ -2,11 +2,12 @@
 Pluggable command support
 """
 
+import argparse
+import logging
 import os
 import sys
-import argparse
 from argparse import RawTextHelpFormatter
-import logging
+
 from pkg_resources import get_distribution
 
 LOG = logging.getLogger(__name__)

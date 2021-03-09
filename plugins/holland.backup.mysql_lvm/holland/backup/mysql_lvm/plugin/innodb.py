@@ -1,13 +1,13 @@
 """
 Path utility functions to inspect MySQL files
 """
-import os
-from os.path import isabs, join, realpath, abspath
 import logging
+import os
 from operator import itemgetter
-from holland.core.util.path import relpath
-from holland.core.util.path import getmount
+from os.path import abspath, isabs, join, realpath
+
 from holland.core.backup import BackupError
+from holland.core.util.path import getmount, relpath
 
 LOG = logging.getLogger(__name__)
 

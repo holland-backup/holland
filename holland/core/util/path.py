@@ -6,10 +6,10 @@ Utility functions
 # Functions added here should really be as portable as possible
 # and generally useful.
 
-import os
-from os.path import join, getsize
 import logging
 import math
+import os
+from os.path import getsize, join
 
 LOG = logging.getLogger(__name__)
 

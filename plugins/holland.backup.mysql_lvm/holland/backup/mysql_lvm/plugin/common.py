@@ -1,14 +1,15 @@
 """Utility functions to help out the mysql-lvm plugin"""
-import os
+import copy
 import errno
+import logging
+import os
 import shutil
 import tempfile
-import logging
-import copy
+
 from holland.core.backup import BackupError
 from holland.core.util.fmt import format_bytes
+from holland.lib.lvm import Snapshot, getmount, parse_bytes
 from holland.lib.mysql import MySQLClient, MySQLError, build_mysql_config, connect
-from holland.lib.lvm import Snapshot, parse_bytes, getmount
 
 LOG = logging.getLogger(__name__)
 
@@ -123,8 +124,7 @@ def log_final_snapshot_size(event, snapshot):
 
 
 def _dry_run(target_directory, volume, snapshot, datadir):
-    """Implement dry-run for LVM snapshots.
-    """
+    """Implement dry-run for LVM snapshots."""
     LOG.info(
         volume.vg_name,
         volume.lv_name,

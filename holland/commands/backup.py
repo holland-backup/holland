@@ -3,17 +3,17 @@ Define backup command
 """
 
 import logging
-from subprocess import Popen, PIPE
 from string import Template
-from holland.core.command import Command
+from subprocess import PIPE, Popen
 
 # Commvault command entry point
-from holland.core.backup import BackupRunner, BackupError
+from holland.core.backup import BackupError, BackupRunner
+from holland.core.command import Command
 from holland.core.config import HOLLANDCFG, ConfigError
 from holland.core.spool import SPOOL
 from holland.core.util.fmt import format_bytes
-from holland.core.util.path import disk_free, disk_capacity, getmount
 from holland.core.util.lock import Lock, LockError
+from holland.core.util.path import disk_capacity, disk_free, getmount
 
 LOG = logging.getLogger(__name__)
 

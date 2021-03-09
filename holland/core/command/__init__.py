@@ -2,11 +2,13 @@
 Setup functions to import commnad plugins
 """
 
+import logging
 import os
 import sys
-import logging
+
 from holland.core.plugin import get_commands
-from .command import Command, PARSER
+
+from .command import PARSER, Command
 
 __all__ = ["Command", "run", "PARSER"]
 

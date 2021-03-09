@@ -1,9 +1,10 @@
 """Common mysqld bootstrapping functionality"""
 
-import os
 import logging
+import os
 from io import StringIO
-from subprocess import Popen, STDOUT, list2cmdline
+from subprocess import STDOUT, Popen, list2cmdline
+
 from holland.core.backup import BackupError
 from holland.lib.which import which
 

@@ -1,15 +1,26 @@
 """MySQL LVM snapshot backups"""
 
-import os
 import logging
-from holland.core.util.path import directory_size
+import os
+
+from holland.backup.mysql_lvm.plugin.common import (
+    _dry_run,
+    build_snapshot,
+    connect_simple,
+)
+from holland.backup.mysql_lvm.plugin.raw.util import setup_actions
 from holland.core.backup import BackupError
-from holland.lib.lvm import LogicalVolume, CallbackFailuresError, LVMCommandError, relpath, getmount
+from holland.core.util.path import directory_size
+from holland.lib.compression import COMPRESSION_CONFIG_STRING
+from holland.lib.lvm import (
+    CallbackFailuresError,
+    LogicalVolume,
+    LVMCommandError,
+    getmount,
+    relpath,
+)
 from holland.lib.mysql.client import MySQLError
 from holland.lib.mysql.client.base import MYSQL_CLIENT_CONFIG_STRING
-from holland.backup.mysql_lvm.plugin.common import build_snapshot, connect_simple, _dry_run
-from holland.backup.mysql_lvm.plugin.raw.util import setup_actions
-from holland.lib.compression import COMPRESSION_CONFIG_STRING
 
 LOG = logging.getLogger(__name__)
 

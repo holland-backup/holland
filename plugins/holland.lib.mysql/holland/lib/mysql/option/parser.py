@@ -1,9 +1,9 @@
 """MySQL option file support"""
 
+import codecs
+import glob
 import os
 import re
-import glob
-import codecs
 
 
 def expandpath(path):
@@ -91,8 +91,7 @@ class OptionFile(dict):
     KV_CRE = re.compile(r"(?P<key>[^=\s]+?)\s*(?:=\s*(?P<value>.*))?$")
 
     def read_options(self, iterable):
-        """Parse lines from the data source specified by ``iterable``
-        """
+        """Parse lines from the data source specified by ``iterable``"""
         section = None
 
         path = getattr(iterable, "name", "<unknown>")

@@ -1,10 +1,20 @@
 """High-level Object Oriented LVM API"""
 
-import os
 import logging
-from holland.lib.lvm.raw import pvs, vgs, lvs, lvsnapshot, lvremove, mount, umount, blkid
-from holland.lib.lvm.util import getdevice
+import os
+
 from holland.lib.lvm.errors import LVMCommandError
+from holland.lib.lvm.raw import (
+    blkid,
+    lvremove,
+    lvs,
+    lvsnapshot,
+    mount,
+    pvs,
+    umount,
+    vgs,
+)
+from holland.lib.lvm.util import getdevice
 
 LOG = logging.getLogger(__name__)
 
@@ -69,7 +79,7 @@ class PhysicalVolume(Volume):
 
     def reload(self):
         """Reload this PhysicalVolume"""
-        self.attributes, = pvs(self.pv_name)
+        (self.attributes,) = pvs(self.pv_name)
 
     @classmethod
     def lookup(cls, pathspec):
@@ -81,7 +91,7 @@ class PhysicalVolume(Volume):
         :returns: PhysicalVolume instance
         """
         try:
-            volume, = pvs(pathspec)
+            (volume,) = pvs(pathspec)
             return cls(volume)
         except (ValueError, LVMCommandError):
             raise LookupError("No PhysicalVolume could be found for " "pathspec %r" % pathspec)
@@ -108,7 +118,7 @@ class VolumeGroup(Volume):
 
     def reload(self):
         """Reload this VolumeGroup"""
-        self.attributes, = vgs(self.vg_name)
+        (self.attributes,) = vgs(self.vg_name)
 
     @classmethod
     def lookup(cls, pathspec):
@@ -120,7 +130,7 @@ class VolumeGroup(Volume):
         :returns: VolumeGroup instance
         """
         try:
-            volume, = vgs(pathspec)
+            (volume,) = vgs(pathspec)
             return cls(volume)
         except (LVMCommandError, ValueError):
             raise LookupError("No VolumeGroup could be found for pathspec %r" % pathspec)
@@ -155,7 +165,7 @@ class LogicalVolume(Volume):
         :returns: LogicalVolume instance
         """
         try:
-            volume, = lvs(pathspec)
+            (volume,) = lvs(pathspec)
             return cls(volume)
         except (LVMCommandError, ValueError) as ex:
             # XX: Perhaps we should be more specific :)
@@ -189,7 +199,7 @@ class LogicalVolume(Volume):
 
     def reload(self):
         """Reload the data for this LogicalVolume"""
-        self.attributes, = lvs(self.device_name())
+        (self.attributes,) = lvs(self.device_name())
 
     def snapshot(self, name, size):
         """Snapshot the current LogicalVolume instance and create a snapshot
@@ -288,7 +298,7 @@ class LogicalVolume(Volume):
         :returns: filesystem type name string
         """
         try:
-            device_info, = blkid(self.device_name())
+            (device_info,) = blkid(self.device_name())
             LOG.debug("Looked up device_info => %r", device_info)
             return device_info["type"]
         except (LVMCommandError, ValueError) as exc:

@@ -3,6 +3,7 @@ Unused restore command
 """
 
 import logging
+
 from holland.core.command import Command
 from holland.core.plugin import load_first_entrypoint
 from holland.core.spool import SPOOL

@@ -2,11 +2,12 @@
 Define List Backup Command
 """
 
-import sys
 import re
+import sys
+
 from holland.core.command import Command
-from holland.core.spool import SPOOL
 from holland.core.plugin import load_backup_plugin
+from holland.core.spool import SPOOL
 
 
 class ListBackups(Command):

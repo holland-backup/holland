@@ -2,12 +2,12 @@
 Utilities to manage spool directory
 """
 
-import os
-import time
 import errno
-import logging
 import itertools
+import logging
+import os
 import shutil
+import time
 from string import Template
 from textwrap import dedent
 
@@ -360,23 +360,20 @@ class Backup(object):
         """
         format plugin info
         """
-        return (
-            dedent(
-                """
+        return dedent(
+            """
         Backup: %s
         start-time:     %s
         stop-time:      %s
         estimated-size: %s
         on-disk-size:   %s
         """
-            ).strip()
-            % (
-                self.name,
-                format_datetime(self.config.lookup("holland:backup.start-time")),
-                format_datetime(self.config.lookup("holland:backup.stop-time")),
-                format_bytes(self.config.lookup("holland:backup.estimated-size")),
-                format_bytes(self.config.lookup("holland:backup.on-disk-size")),
-            )
+        ).strip() % (
+            self.name,
+            format_datetime(self.config.lookup("holland:backup.start-time")),
+            format_datetime(self.config.lookup("holland:backup.stop-time")),
+            format_bytes(self.config.lookup("holland:backup.estimated-size")),
+            format_bytes(self.config.lookup("holland:backup.on-disk-size")),
         )
 
     def __cmp__(self, other):

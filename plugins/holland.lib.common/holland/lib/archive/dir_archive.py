@@ -1,9 +1,9 @@
 """
 Dir Archive
 """
+import logging
 import os
 import shutil
-import logging
 import subprocess
 
 LOG = logging.getLogger(__name__)

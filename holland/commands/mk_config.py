@@ -2,21 +2,21 @@
 Command support for generating backupset configs
 """
 
+import logging
 import os
+import subprocess
 import sys
 import tempfile
-import logging
-import subprocess
 
 from holland.core.command import Command
-from holland.core.plugin import load_first_entrypoint, PluginLoadError
 from holland.core.config import HOLLANDCFG
 from holland.core.config.checks import VALIDATOR
+from holland.core.plugin import PluginLoadError, load_first_entrypoint
 
 try:
-    from holland.core.config.configobj import ConfigObj, flatten_errors, ParseError
+    from holland.core.config.configobj import ConfigObj, ParseError, flatten_errors
 except BaseException:
-    from configobj import ConfigObj, flatten_errors, ParseError
+    from configobj import ConfigObj, ParseError, flatten_errors
 
 LOG = logging.getLogger(__name__)
 
@@ -148,7 +148,7 @@ class MkConfig(Command):
         # First flag any required parameters
         for entry in flatten_errors(config, errors):
             section_list, key, error = entry
-            section_name, = section_list
+            (section_name,) = section_list
             if error is False:
                 config[section_name][key] = ""
                 config[section_name].comments[key].append("REQUIRED")

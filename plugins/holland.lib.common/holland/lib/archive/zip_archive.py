@@ -2,9 +2,9 @@
 Zip Archive
 """
 
+import logging
 import time
 import zipfile
-import logging
 
 LOG = logging.getLogger(__name__)
 

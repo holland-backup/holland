@@ -1,9 +1,9 @@
 """mysqldump support"""
 
-import os
-import re
 import errno
 import logging
+import os
+import re
 import subprocess
 from tempfile import TemporaryFile
 

@@ -1,11 +1,13 @@
 """Perform InnoDB recovery against a MySQL data directory"""
 
-import os
-import time
-import signal
 import logging
+import os
+import signal
+import time
+
 from holland.core.backup import BackupError
-from ._mysqld import locate_mysqld_exe, generate_server_config, MySQLServer
+
+from ._mysqld import MySQLServer, generate_server_config, locate_mysqld_exe
 
 LOG = logging.getLogger(__name__)
 

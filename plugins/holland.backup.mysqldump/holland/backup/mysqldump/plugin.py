@@ -1,30 +1,35 @@
 """Command Line Interface"""
 
-import os
-import re
 import codecs
 import logging
+import os
+import re
 import textwrap
 from copy import deepcopy
+
+from holland.backup.mysqldump.base import start
+from holland.backup.mysqldump.command import MyOptionError, MySQLDump, MySQLDumpError
+from holland.backup.mysqldump.mock import MockEnvironment
 from holland.core.backup import BackupError
-from holland.lib.compression import open_stream, lookup_compression, COMPRESSION_CONFIG_STRING
+from holland.lib.compression import (
+    COMPRESSION_CONFIG_STRING,
+    lookup_compression,
+    open_stream,
+)
 from holland.lib.mysql import (
-    MySQLSchema,
-    connect,
-    MySQLError,
-    include_glob,
-    exclude_glob,
-    include_glob_qualified,
-    exclude_glob_qualified,
     DatabaseIterator,
     MetadataTableIterator,
+    MySQLError,
+    MySQLSchema,
     SimpleTableIterator,
+    connect,
+    exclude_glob,
+    exclude_glob_qualified,
+    include_glob,
+    include_glob_qualified,
 )
 from holland.lib.mysql.client.base import MYSQL_CLIENT_CONFIG_STRING
-from holland.backup.mysqldump.base import start
-from holland.lib.mysql.option import write_options, build_mysql_config
-from holland.backup.mysqldump.command import MySQLDump, MySQLDumpError, MyOptionError
-from holland.backup.mysqldump.mock import MockEnvironment
+from holland.lib.mysql.option import build_mysql_config, write_options
 
 LOG = logging.getLogger(__name__)
 
@@ -281,9 +286,8 @@ class MySQLDumpPlugin(object):
     def info(self):
         """Summarize information about this backup"""
 
-        return (
-            textwrap.dedent(
-                """
+        return textwrap.dedent(
+            """
         lock-method         = %s
         file-per-database   = %s
 
@@ -299,19 +303,17 @@ class MySQLDumpPlugin(object):
         tables              = %s
         exclude-tables      = %s
         """
-            ).strip()
-            % (
-                self.config["mysqldump"]["lock-method"],
-                self.config["mysqldump"]["file-per-database"] and "yes" or "no",
-                self.config["mysqldump"]["flush-logs"],
-                self.config["mysqldump"]["flush-privileges"],
-                self.config["mysqldump"]["dump-routines"],
-                self.config["mysqldump"]["dump-events"],
-                ",".join(self.config["mysqldump"]["databases"]),
-                ",".join(self.config["mysqldump"]["exclude-databases"]),
-                ",".join(self.config["mysqldump"]["tables"]),
-                ",".join(self.config["mysqldump"]["exclude-tables"]),
-            )
+        ).strip() % (
+            self.config["mysqldump"]["lock-method"],
+            self.config["mysqldump"]["file-per-database"] and "yes" or "no",
+            self.config["mysqldump"]["flush-logs"],
+            self.config["mysqldump"]["flush-privileges"],
+            self.config["mysqldump"]["dump-routines"],
+            self.config["mysqldump"]["dump-events"],
+            ",".join(self.config["mysqldump"]["databases"]),
+            ",".join(self.config["mysqldump"]["exclude-databases"]),
+            ",".join(self.config["mysqldump"]["tables"]),
+            ",".join(self.config["mysqldump"]["exclude-tables"]),
         )
 
 
@@ -453,8 +455,7 @@ def _start_slave(client, config=None):
 
 
 def exclude_invalid_views(schema, client, definitions_file):
-    """Flag invalid MySQL views as excluded to skip them during a mysqldump
-    """
+    """Flag invalid MySQL views as excluded to skip them during a mysqldump"""
     LOG.info("* Invalid and excluded views will be saved to %s", definitions_file)
     cursor = client.cursor()
 

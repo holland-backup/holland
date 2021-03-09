@@ -2,8 +2,8 @@
 Find schema names that adhere to particular patterns
 """
 import fnmatch
-import string
 import logging
+import string
 
 LOG = logging.getLogger(__name__)
 

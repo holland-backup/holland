@@ -1,12 +1,13 @@
 """Utility functions to help out the mysql-lvm plugin"""
+import logging
 import os
 import shutil
 import tempfile
-import logging
+
 from holland.backup.mysql_lvm.actions import (
     FlushAndLockMySQLAction,
-    RecordMySQLReplicationAction,
     MySQLDumpDispatchAction,
+    RecordMySQLReplicationAction,
 )
 from holland.backup.mysql_lvm.plugin.common import log_final_snapshot_size
 from holland.backup.mysql_lvm.plugin.innodb import MySQLPathInfo, check_innodb

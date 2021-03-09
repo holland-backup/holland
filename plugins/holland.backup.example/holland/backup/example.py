@@ -3,7 +3,6 @@ Example Backup Plugin
 """
 import logging
 
-
 LOG = logging.getLogger(__name__)
 
 # Specification for this plugin

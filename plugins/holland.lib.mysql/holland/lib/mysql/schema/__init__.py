@@ -1,18 +1,18 @@
 """MySQL Schema introspection support"""
 
-from holland.lib.mysql.schema.filter import (
-    IncludeFilter,
-    ExcludeFilter,
-    include_glob,
-    exclude_glob,
-    include_glob_qualified,
-    exclude_glob_qualified,
-)
 from holland.lib.mysql.schema.base import (
-    MySQLSchema,
     DatabaseIterator,
     MetadataTableIterator,
+    MySQLSchema,
     SimpleTableIterator,
+)
+from holland.lib.mysql.schema.filter import (
+    ExcludeFilter,
+    IncludeFilter,
+    exclude_glob,
+    exclude_glob_qualified,
+    include_glob,
+    include_glob_qualified,
 )
 
 __all__ = [

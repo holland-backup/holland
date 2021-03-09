@@ -1,12 +1,12 @@
 """Raw LVM command API"""
 
+import logging
 import os
 import re
-import logging
 from io import StringIO  # pylint: disable=unused-import
-from subprocess import Popen, PIPE, list2cmdline
+from subprocess import PIPE, Popen, list2cmdline
 
-from holland.lib.lvm.constants import PVS_ATTR, VGS_ATTR, LVS_ATTR
+from holland.lib.lvm.constants import LVS_ATTR, PVS_ATTR, VGS_ATTR
 from holland.lib.lvm.errors import LVMCommandError
 
 LOG = logging.getLogger(__name__)

@@ -3,12 +3,12 @@ Handle connections to MySQL
 """
 
 from holland.lib.mysql.client.base import (
+    AutoMySQLClient,
     MySQLClient,
     MySQLError,
-    ProgrammingError,
     OperationalError,
+    ProgrammingError,
     connect,
-    AutoMySQLClient,
 )
 
 __all__ = [

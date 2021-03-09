@@ -1,11 +1,12 @@
 """Create tar of datadir on the LVM snapshot"""
 
+import logging
 import os
-import time
 import shlex
 import signal
-import logging
-from subprocess import list2cmdline, Popen, CalledProcessError
+import time
+from subprocess import CalledProcessError, Popen, list2cmdline
+
 from holland.core.backup import BackupError
 
 LOG = logging.getLogger(__name__)

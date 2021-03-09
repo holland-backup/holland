@@ -2,16 +2,16 @@
 Common Compression utils
 """
 
-import os
-import logging
 import errno
-import shlex
 import io
-from tempfile import TemporaryFile
-import subprocess
+import logging
+import os
+import shlex
 import signal
-from holland.lib.which import which
+import subprocess
+from tempfile import TemporaryFile
 
+from holland.lib.which import which
 
 LOG = logging.getLogger(__name__)
 

@@ -2,9 +2,10 @@
 
 http://dev.mysql.com/doc/refman/5.1/en/option-files.html
 """
-import os
 import codecs
 import logging
+import os
+
 from holland.lib.mysql.option.parser import OptionFile
 
 LOG = logging.getLogger(__name__)
