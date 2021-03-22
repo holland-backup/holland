@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-version = "1.2.4"
+version = "1.2.5"
 
 setup(
     name="holland.backup.pgdump",
