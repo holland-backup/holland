@@ -2,6 +2,9 @@ Holland README
 ==============
 
 [![Build Status](https://travis-ci.com/holland-backup/holland.svg?branch=master)](https://travis-ci.com/holland-backup/holland)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/holland-backup/holland.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/holland-backup/holland/alerts/)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/holland-backup/holland.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/holland-backup/holland/context:python)
+
 
 Holland is an Open Source backup framework originally developed by Rackspace and written in Python. Its goal is to help facilitate backing up databases with greater configurability, consistency, and ease. Holland currently focuses on MySQL, however future development will include other database platforms and even non-database related applications. Because of its plugin structure, Holland can be used to backup anything you want by whatever means you want.
 
