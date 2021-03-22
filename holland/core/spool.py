@@ -352,8 +352,8 @@ class Backup(object):
         """
         )
         info_str = tmpl.safe_substitute(self._formatted_config())
-        info_str = "\t" + dedent(str).lstrip()
-        info_str = "\n\t\t".join(str.splitlines())
+        info_str = "\t" + dedent(info_str).lstrip()
+        info_str = "\n\t\t".join(info_str.splitlines())
         return info_str
 
     def __str__(self):

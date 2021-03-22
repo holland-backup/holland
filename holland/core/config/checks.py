@@ -6,7 +6,6 @@ a validate.py Validator instance
 import shlex
 
 import validate
-from validate import Validator
 
 from holland.core.util.fmt import format_loglevel
 
@@ -58,7 +57,7 @@ def is_cmdline(value):
         raise validate.VdtTypeError(value)
 
 
-VALIDATOR = Validator(
+VALIDATOR = validate.Validator(
     {
         "octal": is_octal,
         "logging_level": is_logging_level,
