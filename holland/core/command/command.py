@@ -6,7 +6,6 @@ import argparse
 import logging
 import os
 import sys
-from argparse import RawTextHelpFormatter
 
 from pkg_resources import get_distribution
 
@@ -32,7 +31,9 @@ if sys.platform.startswith("freebsd"):
     HOLLAND_CONF = "/usr/local" + HOLLAND_CONF
 
 ## global parser
-PARSER = argparse.ArgumentParser(description=HOLLAND_BANNER, formatter_class=RawTextHelpFormatter)
+PARSER = argparse.ArgumentParser(
+    description=HOLLAND_BANNER, formatter_class=argparse.RawTextHelpFormatter
+)
 # PARSER.add_argument('-h', '--help', action='store_true',
 #                    help="Show help")
 PARSER.add_argument(
