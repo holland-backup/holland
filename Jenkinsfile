@@ -8,7 +8,8 @@ pipeline {
   stages {
     stage('Install pylint') {
       steps {
-        sh '''pip install pylint
+        sh '''apt-get install -y python3-pip
+pip3 install pylint
 '''
       }
     }
