@@ -2,7 +2,7 @@ pipeline {
   agent {
     docker {
       args '-u root:root'
-      image 'mysql'
+      image 'ubuntu'
     }
 
   }
@@ -85,11 +85,34 @@ python3 setup.py install'''
     }
 
     stage('Setup holland') {
-      steps {
-        sh '''mkdir -p /etc/holland/providers /etc/holland/backupsets /var/log/holland /var/spool/holland
+      parallel {
+        stage('Setup holland') {
+          steps {
+            sh '''mkdir -p /etc/holland/providers /etc/holland/backupsets /var/log/holland /var/spool/holland
 cp ${WORKSPACE}/config/holland.conf /etc/holland/
 cp ${WORKSPACE}/config/providers/* /etc/holland/providers/
 '''
+          }
+        }
+
+        stage('MySQL') {
+          steps {
+            sh '''apt-get --yes install mysql-server python3-mysqldb
+
+mkdir -p /var/log/mysql/
+touch /var/log/mysql/error.log
+chown -R mysql:mysql /var/log/mysql
+
+rm -rf /var/lib/mysql/*
+mysqld --initialize-insecure --user=mysql 2>>/dev/null >>/dev/null
+mkdir -p /var/run/mysqld
+chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
+mysqld_safe --user=mysql 2>>/dev/null >>/dev/null &
+sleep 20
+'''
+          }
+        }
+
       }
     }
 
