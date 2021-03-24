@@ -8,7 +8,8 @@ pipeline {
   stages {
     stage('build') {
       steps {
-        sh '''pylint holland
+        sh '''pip install pylint
+pylint holland
 
 pylint_failed=0
 for d in $(ls -d ./plugins/*/holland ./contrib/holland-commvault/holland_commvault)
