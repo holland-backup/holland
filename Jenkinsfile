@@ -9,7 +9,8 @@ pipeline {
   stages {
     stage('Install pylint') {
       steps {
-        sh '''apt-get install -y python3-pip
+        sh '''apt-get update
+apt-get install -y python3-pip
 pip3 install pylint
 '''
       }
