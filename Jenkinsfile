@@ -10,7 +10,7 @@ pipeline {
     stage('Setup Env') {
       steps {
         sh '''apt-get update
-apt-get install -y python3-pip psycopg2-binary
+apt-get install -y python3-pip
 pip3 install pylint
 python3 --version'''
       }
