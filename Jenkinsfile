@@ -51,16 +51,13 @@ fi'''
     }
 
     stage('Install holland') {
-      parallel {
-        stage('Install holland') {
-          steps {
-            sh 'python3 setup.py install'
-          }
-        }
+      steps {
+        sh '''python3 setup.py install
 
-        stage('Install Plugins') {
-          steps {
-            sh '''for i in `ls -d plugins/holland.*`
+cd ${WORKSPACE}/contrib/holland-commvault/
+python3 setup.py install
+
+for i in `ls -d plugins/holland.*`
 do
     cd ${WORKSPACE}/${i}
     python3 setup.py install
@@ -72,16 +69,6 @@ do
     fi
 done
 '''
-          }
-        }
-
-        stage('Install Commvault Script') {
-          steps {
-            sh '''cd ${WORKSPACE}/contrib/holland-commvault/
-python3 setup.py install'''
-          }
-        }
-
       }
     }
 
