@@ -54,9 +54,6 @@ fi'''
       steps {
         sh '''python3 setup.py install
 
-cd ${WORKSPACE}/contrib/holland-commvault/
-python3 setup.py install
-
 for i in `ls -d plugins/holland.*`
 do
     cd ${WORKSPACE}/${i}
@@ -68,7 +65,9 @@ do
         exit $exit_code
     fi
 done
-'''
+
+cd ${WORKSPACE}/contrib/holland-commvault/
+python3 setup.py install'''
       }
     }
 
