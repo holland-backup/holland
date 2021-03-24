@@ -1,17 +1,31 @@
 pipeline {
   agent {
     docker {
-      image 'python'
+      image 'ubuntu'
     }
 
   }
   stages {
-    stage('build') {
+    stage('Install pylint') {
       steps {
         sh '''pip install pylint
-pylint holland
+'''
+      }
+    }
 
-pylint_failed=0
+    stage('pylint holland') {
+      parallel {
+        stage('pylint holland') {
+          steps {
+            sh '''pylint holland
+
+'''
+          }
+        }
+
+        stage('pylint plugins') {
+          steps {
+            sh '''pylint_failed=0
 for d in $(ls -d ./plugins/*/holland ./contrib/holland-commvault/holland_commvault)
 do
     pylint $d
@@ -25,6 +39,9 @@ then
     echo "Pylint failed; please review above output."
     exit $pylint_failed
 fi'''
+          }
+        }
+
       }
     }
 
