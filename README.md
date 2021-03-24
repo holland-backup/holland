@@ -1,7 +1,6 @@
 Holland README
 ==============
 
-[![Build Status](https://travis-ci.com/holland-backup/holland.svg?branch=master)](https://travis-ci.com/holland-backup/holland)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/holland-backup/holland.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/holland-backup/holland/alerts/)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/holland-backup/holland.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/holland-backup/holland/context:python)
 
