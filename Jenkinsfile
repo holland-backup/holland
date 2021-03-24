@@ -118,30 +118,16 @@ sleep 20
 
     stage('Test holland') {
       steps {
-        sh '''CMDS=(
-"holland mc --name mysqldump mysqldump"
-"holland mc -f /tmp/mysqldump.conf mysqldump"
-"holland bk mysqldump --dry-run"
-"holland bk mysqldump"
-"holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001 --bkset mysqldump"
-"holland mc --name default mysqldump"
-"holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001"
-)
-
-for command in "${CMDS[@]}"
-do
-    echo $command
-    sleep 1
-    $command
-    exit_code=$?
-    if [ $exit_code -ne  0 ]
-    then
-        echo "Failed running $command"
-        exit $exit_code
-    fi
-done'''
-        }
+        sh '''holland mc --name mysqldump mysqldump
+holland mc -f /tmp/mysqldump.conf mysqldump
+holland bk mysqldump --dry-run
+holland bk mysqldump
+holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001 --bkset mysqldump
+holland mc --name default mysqldump
+holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001
+'''
       }
-
     }
+
   }
+}
