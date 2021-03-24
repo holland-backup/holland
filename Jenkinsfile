@@ -12,6 +12,7 @@ pipeline {
         sh '''apt-get update
 apt-get install -y python3-pip python3-psycopg2
 pip3 install pylint
+pip3 install six
 python3 --version'''
       }
     }
