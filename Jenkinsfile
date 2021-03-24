@@ -95,7 +95,7 @@ cp ${WORKSPACE}/config/providers/* /etc/holland/providers/
           }
         }
 
-        stage('MySQL') {
+        stage('Setup Database') {
           steps {
             sh '''apt-get --yes install mysql-server python3-mysqldb
 
