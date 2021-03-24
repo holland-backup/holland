@@ -8,7 +8,7 @@ pipeline {
   stages {
     stage('build') {
       steps {
-        sh '/entrypoint.sh'
+        sh 'sudo /entrypoint.sh'
       }
     }
 
