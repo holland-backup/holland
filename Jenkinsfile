@@ -54,7 +54,7 @@ fi'''
       steps {
         sh '''# Move over to tmp to prevent file permissions issues
 mkdir -p /tmp/holland
-cp $WORKSPACE/* /tmp/holland
+rsync -art $WORKSPACE/ /tmp/holland/
 cd /tmp/holland
 
 # Install Holland
