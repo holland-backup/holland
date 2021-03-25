@@ -10,7 +10,7 @@ pipeline {
     stage('Setup Env') {
       steps {
         sh '''apt-get update
-apt-get install -y python3-pip python3-psycopg2
+apt-get install -y python3-pip python3-psycopg2 rsync
 pip3 install pylint
 pip3 install six
 python3 --version'''
