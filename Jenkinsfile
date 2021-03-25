@@ -52,11 +52,18 @@ fi'''
 
     stage('Install holland') {
       steps {
-        sh '''python3 setup.py install
+        sh '''# Move over to tmp to prevent file permissions issues
+mkdir -p /tmp/holland
+cp $WORKSPACE/* /tmp/holland
+cd /tmp/holland
 
+# Install Holland
+python3 setup.py install
+
+# Install Plugins
 for i in `ls -d plugins/holland.*`
 do
-    cd ${WORKSPACE}/${i}
+    cd /tmp/holland/${i}
     python3 setup.py install
     exit_code=$?
     if [ $exit_code -ne 0 ]
@@ -66,7 +73,8 @@ do
     fi
 done
 
-cd ${WORKSPACE}/contrib/holland-commvault/
+# Install Commvault script
+cd /tmp/holland/contrib/holland-commvault/
 python3 setup.py install'''
       }
     }
