@@ -1,8 +1,8 @@
 pipeline {
   agent {
     docker {
-      args '-u root:root'
       image 'ubuntu'
+      args '-u root:root'
     }
 
   }
@@ -10,7 +10,7 @@ pipeline {
     stage('Setup Env') {
       steps {
         sh '''apt-get update
-apt-get install -y python3-pip python3-psycopg2
+apt-get install -y python3-pip python3-psycopg2 rsync
 pip3 install pylint
 pip3 install six
 python3 --version'''
@@ -51,18 +51,19 @@ fi'''
     }
 
     stage('Install holland') {
-      parallel {
-        stage('Install holland') {
-          steps {
-            sh 'python3 setup.py install'
-          }
-        }
+      steps {
+        sh '''# Move over to tmp to prevent file permissions issues
+mkdir -p /tmp/holland
+rsync -art $WORKSPACE/ /tmp/holland/
+cd /tmp/holland
 
-        stage('Install Plugins') {
-          steps {
-            sh '''for i in `ls -d plugins/holland.*`
+# Install Holland
+python3 setup.py install
+
+# Install Plugins
+for i in `ls -d plugins/holland.*`
 do
-    cd ${WORKSPACE}/${i}
+    cd /tmp/holland/${i}
     python3 setup.py install
     exit_code=$?
     if [ $exit_code -ne 0 ]
@@ -71,17 +72,10 @@ do
         exit $exit_code
     fi
 done
-'''
-          }
-        }
 
-        stage('Install Commvault Script') {
-          steps {
-            sh '''cd ${WORKSPACE}/contrib/holland-commvault/
+# Install Commvault script
+cd /tmp/holland/contrib/holland-commvault/
 python3 setup.py install'''
-          }
-        }
-
       }
     }
 
@@ -126,6 +120,14 @@ holland bk mysqldump
 holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001 --bkset mysqldump
 holland mc --name default mysqldump
 holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001
+
+# Stopgap measure to check for issue 213
+sed -i \'s|^estimate-method = plugin$|estimate-method = const:1K|\' /etc/holland/backupsets/mysqldump.conf
+holland bk mysqldump
+
+# test that split command is working as expected
+sed -i \'s|^split = no|split = yes|\' /etc/holland/backupsets/mysqldump.conf
+holland bk mysqldump
 '''
       }
     }
