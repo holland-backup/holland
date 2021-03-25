@@ -120,6 +120,14 @@ holland bk mysqldump
 holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001 --bkset mysqldump
 holland mc --name default mysqldump
 holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001
+
+# Stopgap measure to check for issue 213
+sed -i \'s|^estimate-method = plugin$|estimate-method = const:1K|\' /etc/holland/backupsets/mysqldump.conf
+holland bk mysqldump
+
+# test that split command is working as expected
+sed -i \'s|^split = no|split = yes|\' /etc/holland/backupsets/mysqldump.conf
+holland bk mysqldump
 '''
       }
     }
