@@ -124,8 +124,8 @@ class MysqlDumpLVMBackup(object):
                 spooldir=self.target_directory,
                 plugin=self.mysqldump_plugin,
             )
-        except BaseException as ex:
-            LOG.debug(ex)
+        except Exception as ex:
+            raise BackupError(str(ex))
 
         if self.config["mysqldump"]["bin-log-position"]:
             LOG.warning("bin-log-position is not supported with mysqldump-lvm.")

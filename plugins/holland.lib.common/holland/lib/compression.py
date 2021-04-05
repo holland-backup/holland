@@ -98,7 +98,7 @@ class CompressionInput(object):
         """
         iter stdout
         """
-        return iter(self.pid.stdout)
+        return self.pid.stdout
 
     def close(self):
         """
@@ -205,6 +205,7 @@ class CompressionOutput(object):
             )
             pid = subprocess.Popen(argv, stdin=self.fileobj.fileno(), stdout=cmp_f.fileno())
             status = pid.wait()
+            LOG.debug("Return status: %s", status)
             os.unlink(self.fileobj.name)
         else:
             self.pid.stdin.close()

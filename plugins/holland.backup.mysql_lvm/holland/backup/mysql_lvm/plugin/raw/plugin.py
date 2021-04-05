@@ -153,7 +153,8 @@ class MysqlLVMBackup(object):
         except LVMCommandError as exc:
             # Something failed in the snapshot process
             raise BackupError(str(exc))
-        except BaseException as ex:
+        except Exception as ex:
             LOG.debug(ex)
+            raise
 
         return None

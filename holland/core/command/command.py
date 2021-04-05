@@ -110,15 +110,16 @@ class Command(object):
         try:
             return self.run(self.optparser.prog, opts, *args)
         except KeyboardInterrupt:
+            LOG.debug("Interrupted by user")
             raise
         except TypeError as ex:
             LOG.error("Failed comamnd %s': %s", self.optparser.prog, ex)
             return os.EX_SOFTWARE
-        except BaseException as ex:
+        except Exception as ex:
             LOG.error(
                 "Uncaught exception while running command '%s': %r",
                 self.optparser.prog,
                 ex,
                 exc_info=True,
             )
-            return os.EX_SOFTWARE
+            raise

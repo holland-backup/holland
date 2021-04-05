@@ -15,7 +15,7 @@ from holland.core.plugin import PluginLoadError, load_first_entrypoint
 
 try:
     from holland.core.config.configobj import ConfigObj, ParseError, flatten_errors
-except BaseException:
+except ImportError:
     from configobj import ConfigObj, ParseError, flatten_errors
 
 LOG = logging.getLogger(__name__)
@@ -215,12 +215,12 @@ class MkConfig(Command):
 
         try:
             cfgspec = sys.modules[plugin_cls.__module__].CONFIGSPEC
-        except BaseException as ex:
+        except Exception as ex:
             print(
                 "Could not load config-spec from plugin %r, %s" % (plugin_type[0], ex),
                 file=sys.stderr,
             )
-            return 1
+            raise
 
         base_config = """
         [holland:backup]
