@@ -98,7 +98,7 @@ class CompressionInput(object):
         """
         iter stdout
         """
-        return iter(self.pid.stdout)
+        return self.pid.stdout
 
     def close(self):
         """
@@ -139,7 +139,7 @@ class CompressionOutput(object):
                 split_args = [
                     which("split"),
                     "-a5",
-                    f"--bytes={splitsize}G",
+                    "--bytes=%sG" % splitsize,
                     "-",
                     path + ".",
                 ]
@@ -205,6 +205,7 @@ class CompressionOutput(object):
             )
             pid = subprocess.Popen(argv, stdin=self.fileobj.fileno(), stdout=cmp_f.fileno())
             status = pid.wait()
+            LOG.debug("Return status: %s", status)
             os.unlink(self.fileobj.name)
         else:
             self.pid.stdin.close()
@@ -272,7 +273,7 @@ def open_stream(
     options=None,
     split=False,
     splitsize=1,
-    **kwargs,
+    **kwargs
 ):  # pylint: disable=unused-argument
     """
     Opens a compressed data stream, and returns a file descriptor type object

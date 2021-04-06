@@ -137,7 +137,6 @@ def main():
             status.close()
             return ret
     except PidFileAlreadyLockedError:
-        ret = 1
         pid_file = open(pid_location, "r")
         pid = pid_file.read()
         pid_file.close()
