@@ -139,7 +139,7 @@ class CompressionOutput(object):
                 split_args = [
                     which("split"),
                     "-a5",
-                    f"--bytes={splitsize}G",
+                    "--bytes=%sG" % splitsize,
                     "-",
                     path + ".",
                 ]
@@ -273,7 +273,7 @@ def open_stream(
     options=None,
     split=False,
     splitsize=1,
-    **kwargs,
+    **kwargs
 ):  # pylint: disable=unused-argument
     """
     Opens a compressed data stream, and returns a file descriptor type object
