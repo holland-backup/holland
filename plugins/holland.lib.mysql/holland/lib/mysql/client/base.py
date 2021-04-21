@@ -43,7 +43,10 @@ def flatten_list(a_list):
     """
     # isinstance check to ensure we're not iterating over characters
     # in a string
-    return sum([isinstance(item, (list, tuple)) and list(item) or [item] for item in a_list], [])
+    return sum(
+        [isinstance(item, (list, tuple)) and list(item) or [item] for item in a_list],
+        [],
+    )
 
 
 class MySQLClient(object):
@@ -235,7 +238,10 @@ class MySQLClient(object):
         :param full: Optional. include table type n the results
         :returns: list of table names
         """
-        sql = "SHOW %sTABLES FROM `%s`" % (["", "FULL "][int(full)], database.replace("`", "``"))
+        sql = "SHOW %sTABLES FROM `%s`" % (
+            ["", "FULL "][int(full)],
+            database.replace("`", "``"),
+        )
         cursor = self.cursor()
         cursor.execute(sql)
         try:
@@ -502,30 +508,26 @@ def connect(config, client_class=AutoMySQLClient):
 
     # map standard my.cnf parameters to
     # what pymysql.connect expects
-    # http://mysql-python.sourceforge.net/MySQLdb.html#mysqldb
-    cnf_to_mysqldb = {
-        "user": "user",  # same
-        "password": "passwd",  # weird
-        "host": "host",  # same
-        "port": "port",
-        "socket": "unix_socket",
-        "ssl": "ssl",
-        "compress": "compress",
-    }
+    # https://pymysql.readthedocs.io/en/latest/modules/connections.html
+    #    "socket": "unix_socket",
 
     args = {}
     for key, value in config.items():
         # skip undefined values
         if config.get(key) is None:
             continue
-        try:
-            if "port" in key:
-                args[cnf_to_mysqldb[key]] = int(value)
-            elif isinstance(value, bytes):
-                args[cnf_to_mysqldb[key]] = value.decode("utf-8")
-            else:
-                args[cnf_to_mysqldb[key]] = value
-        except KeyError:
-            LOG.warning("Skipping unknown parameter %s", key)
-    # also, always use utf8
+
+        if "socket" in key:
+            key = "unix_socket"
+
+        if "port" in key:
+            args[key] = int(value)
+        elif "password" in key:
+            # Pass password to pymysql as bytes to
+            # prevent encoding issues
+            args[key] = value.encode()
+        elif isinstance(value, bytes):
+            args[key] = value.decode("utf-8")
+        else:
+            args[key] = value
     return client_class(charset="utf8", **args)
