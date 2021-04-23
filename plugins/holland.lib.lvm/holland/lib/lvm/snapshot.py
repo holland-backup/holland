@@ -59,7 +59,7 @@ class Snapshot(object):
             options = None
             try:
                 filesystem = snapshot.filesystem()
-            except BaseException:
+            except (LVMCommandError, ValueError):
                 return self.error(snapshot, "Failed looking up filesystem")
 
             if filesystem == "xfs":
