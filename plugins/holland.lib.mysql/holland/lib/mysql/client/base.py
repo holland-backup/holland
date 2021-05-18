@@ -5,6 +5,7 @@ import re
 from textwrap import dedent
 from warnings import filterwarnings
 
+import pkg_resources
 import pymysql
 import pymysql.connections
 from pymysql import MySQLError, OperationalError, ProgrammingError
@@ -525,7 +526,12 @@ def connect(config, client_class=AutoMySQLClient):
         elif "password" in key:
             # Pass password to pymysql as bytes to
             # prevent encoding issues
-            args[key] = value.encode()
+            pymysql_version = pkg_resources.get_distribution("pymysql").version
+            if int(pymysql_version.split(".")[0]) > 1:
+                args[key] = value.decode("utf-8")
+            else:
+                LOG.debug("Using legacy password encoding, only ASCII characters are supported")
+                args["passwd"] = value
         elif isinstance(value, bytes):
             args[key] = value.decode("utf-8")
         else:
