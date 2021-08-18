@@ -111,7 +111,7 @@ class Backup(Command):
                 except BackupError as exc:
                     LOG.error("Backup failed: %s", exc.args[0])
                     break
-                except ConfigError as exc:
+                except ConfigError:
                     break
             finally:
                 if not opts.no_lock:
