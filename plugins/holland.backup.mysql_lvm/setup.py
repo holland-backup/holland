@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from setuptools import find_packages, setup
 
-version = "1.2.6"
+version = "1.2.7"
 
 setup(
     name="holland.backup.mysql_lvm",
