@@ -141,7 +141,9 @@ class MariabackupPlugin(object):
         # innobackupex --tmpdir does not affect mariabackup
         util.add_mariabackup_defaults(self.defaults_path, tmpdir=tmpdir)
         args = util.build_mb_args(mb_cfg, backup_directory, self.defaults_path)
-        util.execute_pre_command(mb_cfg["pre-command"], backup_directory=backup_directory)
+        util.execute_pre_command(
+            mb_cfg["pre-command"], backup_directory=backup_directory, backupdir=backup_directory
+        )
         stderr = self.open_mb_logfile()
         try:
             stdout = self.open_mb_stdout()

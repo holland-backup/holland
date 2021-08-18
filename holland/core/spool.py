@@ -209,8 +209,11 @@ class Backupset(object):
 
         return backup_list
 
-    def update_symlinks(self):
+    def update_symlinks(self, enable=True):
         "Update symlinks for newest and oldest backup in the set"
+        if not enable:
+            return
+
         backups = self.list_backups()
 
         oldest_link = os.path.join(self.path, "oldest")
@@ -262,6 +265,7 @@ failed-backup-command   = string(default=None)
 historic-size           = boolean(default=yes)
 historic-size-factor    = float(default=1.5)
 historic-estimated-size-factor = float(default=1.1)
+create-symlinks     = boolean(default=yes)
 """.splitlines()
 
 
