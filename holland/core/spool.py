@@ -209,7 +209,7 @@ class Backupset(object):
 
         return backup_list
 
-    def update_symlinks(self, enable=True):
+    def update_symlinks(self, enable=True, relative=False):
         "Update symlinks for newest and oldest backup in the set"
         if not enable:
             return
@@ -230,8 +230,12 @@ class Backupset(object):
                 raise
         if not backups:
             return
-        oldest_path = backups[0].path
-        newest_path = backups[-1].path
+        if relative:
+            oldest_path = backups[0].name.split("/")[-1]
+            newest_path = backups[-1].name.split("/")[-1]
+        else:
+            oldest_path = backups[0].path
+            newest_path = backups[-1].path
         os.symlink(oldest_path, oldest_link)
         os.symlink(newest_path, newest_link)
 
@@ -266,6 +270,7 @@ historic-size           = boolean(default=yes)
 historic-size-factor    = float(default=1.5)
 historic-estimated-size-factor = float(default=1.1)
 create-symlinks     = boolean(default=yes)
+relative-symlinks     = boolean(default=no)
 """.splitlines()
 
 

@@ -201,7 +201,10 @@ class PurgeManager(object):
         if event == "before-backup":
             retention_count += 1
         self.purge_backupset(backupset, retention_count)
-        backupset.update_symlinks(enable=entry.config["holland:backup"]["create-symlinks"])
+        config = entry.config["holland:backup"]
+        backupset.update_symlinks(
+            enable=config["create-symlinks"], relative=config["relative-symlinks"]
+        )
 
     @staticmethod
     def purge_backupset(backupset, retention_count):
