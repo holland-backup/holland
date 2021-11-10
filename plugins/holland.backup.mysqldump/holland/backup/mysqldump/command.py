@@ -166,7 +166,7 @@ def mysqldump_version(command):
                 for digit in re.search(r"(\d+)[.](\d+)[.](\d+)", stdout.decode("utf-8")).groups()
             )
         )
-    except AttributeError:
+    except AttributeError as exc:
         LOG.debug("%s provided output %r", cmdline, stdout)
         raise MySQLDumpError("Failed to determine mysqldump version for %s" % command)
 

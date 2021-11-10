@@ -82,7 +82,7 @@ class Spool(object):
         """
         path = os.path.join(self.path, backupset_name)
         if os.path.exists(path):
-            raise IOError(f"Backupset {backupset_name} already exists")
+            raise IOError("Backupset %s already exists" % backupset_name)
         return Backupset(backupset_name, path)
 
     def list_backupsets(self, name=None, reverse=False):
@@ -168,7 +168,7 @@ class Backupset(object):
         Delete old backup
         """
         if retention_count < 0:
-            raise ValueError(f"Invalid retention count {retention_count}")
+            raise ValueError("Invalid retention count %s" % retention_count)
         for backup in itertools.islice(self.list_backups(reverse=True), retention_count, None):
             backup.purge()
             yield backup
@@ -243,7 +243,7 @@ class Backupset(object):
         return iter(self.list_backups())
 
     def __str__(self):
-        return f"{self.name} [{self.path}]"
+        return "%s [%s]" % (self.name, self.path)
 
     def __cmp__(self, other):
         _cmp = lambda x, y: (x > y) - (x < y)

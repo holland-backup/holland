@@ -22,10 +22,9 @@ def format_interval(seconds):
     for names, value in units:
         num, seconds = divmod(seconds, value)
         if num > 0:
-            result.append(f"{num} {names[num > 1]}")
+            result.append("%d %s" % (num, names[num > 1]))
     if seconds:
-        ret = ["second", "seconds"][seconds != 1.0]
-        result.append(f"{seconds:.2f} {ret}")
+        result.append("%.2f %s" % (seconds, ["second", "seconds"][seconds != 1.0]))
     return ", ".join(result)
 
 
@@ -36,7 +35,7 @@ def format_datetime(epoch):
     return strftime("%a %b %d %Y %I:%M:%S%p", localtime(epoch))
 
 
-def format_bytes(input_bytes):
+def format_bytes(input_bytes, precision=2):
     """
     Format an integer number of input_bytes to a human readable string.
     """
@@ -48,9 +47,11 @@ def format_bytes(input_bytes):
     else:
         exponent = float(0)
 
-    ret = input_bytes / (1024 ** exponent)
-    postfix = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][int(exponent)]
-    return f"{ret:.2f}{postfix}"
+    return "%.*f%s" % (
+        precision,
+        float(input_bytes) / (1024 ** exponent),
+        ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][int(exponent)],
+    )
 
 
 def format_loglevel(str_level):

@@ -127,7 +127,7 @@ class PgDump(object):
         # put everything in data/
         try:
             os.mkdir(backup_dir)
-        except OSError:
+        except OSError as exc:
             raise BackupError("Failed to create backup directory %s" % backup_dir)
 
         try:

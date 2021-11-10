@@ -94,9 +94,9 @@ def confirm(prompt=None, resp=False):
         prompt = "Confirm"
 
     if resp:
-        prompt = f"{prompt} ([y] or n): "
+        prompt = "%s ([%s] or %s): " % (prompt, "y", "n")
     else:
-        prompt = f"{prompt} ([n] or y): "
+        prompt = "%s ([%s] or %s): " % (prompt, "n", "y")
 
     while True:
         ans = input(prompt)
@@ -169,7 +169,7 @@ class MkConfig(Command):
                 if value is None:
                     if not skip_comments:
                         pending_comments.extend(config[section].comments.get(key, []))
-                    pending_comments.append(f'{key} = "" # no default')
+                    pending_comments.append('%s = "" # no default' % key)
                     del config[section][key]
                 else:
                     if skip_comments:
@@ -217,7 +217,7 @@ class MkConfig(Command):
             cfgspec = sys.modules[plugin_cls.__module__].CONFIGSPEC
         except Exception as ex:
             print(
-                f"Could not load config-spec from plugin {plugin_type[0]}, {ex}",
+                "Could not load config-spec from plugin %r, %s" % (plugin_type[0], ex),
                 file=sys.stderr,
             )
             raise
@@ -248,14 +248,15 @@ class MkConfig(Command):
                 status = subprocess.call([editor, cfg.filename])
                 if status != 0:
                     if not confirm(
-                        f"Editor exited with non-zero status[{status}]. " "Would you like to retry?"
+                        "Editor exited with non-zero status[%d]. "
+                        "Would you like to retry?" % status
                     ):
                         print("Aborting", file=sys.stderr)
                         return 1
                 try:
                     cfg.reload()
                 except ParseError as exc:
-                    print(f"{exc.msg} : {exc.line}", file=sys.stderr)
+                    print("%s : %s" % (exc.msg, exc.line), file=sys.stderr)
                 else:
                     errors = cfg.validate(VALIDATOR, preserve_errors=True)
                     if errors is True:
@@ -274,7 +275,7 @@ class MkConfig(Command):
             buf.flush()
 
         if opts.file:
-            print(f"Saving config to {opts.file}", file=sys.stderr)
+            print("Saving config to %r" % opts.file, file=sys.stderr)
             filehandle = open(opts.file, "w")
             buf = getattr(filehandle, "buffer", filehandle)
             cfg.write(buf)
@@ -282,7 +283,7 @@ class MkConfig(Command):
         elif opts.name:
             base_dir = os.path.dirname(HOLLANDCFG.filename)
             path = os.path.join(base_dir, "backupsets", opts.name + ".conf")
-            print(f"Saving config to {path}", file=sys.stderr)
+            print("Saving config to %r" % path, file=sys.stderr)
             filehandle = open(path, "w")
             buf = getattr(filehandle, "buffer", filehandle)
             cfg.write(buf)

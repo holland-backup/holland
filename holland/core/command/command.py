@@ -11,8 +11,9 @@ from pkg_resources import get_distribution
 
 LOG = logging.getLogger(__name__)
 HOLLAND_VERSION = get_distribution("holland").version
-HOLLAND_BANNER = f"""
-Holland Backup v{HOLLAND_VERSION}
+HOLLAND_BANNER = (
+    """
+Holland Backup v%s
 Copyright (c) 2008-2018 Rackspace US, Inc.
 More info available at http://hollandbackup.org
 
@@ -22,12 +23,14 @@ More info available at http://hollandbackup.org
 [[[[[[[]]]]]]] [[[[[[[]]]]]]]
 
 """
+    % HOLLAND_VERSION
+)
 
 HOLLAND_CONF = "/etc/holland/holland.conf"
 if sys.platform.startswith("freebsd"):
     HOLLAND_CONF = "/usr/local" + HOLLAND_CONF
 
-# global parser
+## global parser
 PARSER = argparse.ArgumentParser(
     description=HOLLAND_BANNER, formatter_class=argparse.RawTextHelpFormatter
 )
@@ -85,7 +88,7 @@ class Command(object):
     def __init__(self):
         self.optparser = SUBPARSER.add_parser(
             self.name,
-            help=f"{self.name} {self.description}",
+            help="%s %s" % (self.name, self.description),
             aliases=self.aliases,
             description=self.name,
         )

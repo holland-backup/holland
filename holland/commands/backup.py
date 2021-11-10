@@ -158,14 +158,14 @@ def call_hooks(event, entry):
             )
             output, errors = process.communicate()
         except OSError as exc:
-            raise BackupError(str(exc))
+            raise BackupError("%s" % exc)
 
         for line in errors.splitlines():
             LOG.error(" ! %s", line)
         for line in output.splitlines():
             LOG.info(" + %s", line)
         if process.returncode != 0:
-            raise BackupError(f"{hook} command failed")
+            raise BackupError("%s command failed" % hook)
     return 0
 
 

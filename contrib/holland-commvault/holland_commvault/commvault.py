@@ -123,10 +123,10 @@ def main():
         return 0
 
     # Use PID module to drop a status file
-    status_file = f"{spool}/{largs[0]}/newest/job_{args.job}"
+    status_file = "%s/%s/newest/job_%s" % (spool, largs[0], args.job)
     logging.info("status_file: %s", status_file)
-    pid_name = f"holland_commvault_{args.job}"
-    pid_location = f"/var/run/{pid_name}.pid"
+    pid_name = "holland_commvault_%s" % args.job
+    pid_location = "/var/run/%s.pid" % pid_name
     try:
         with PidFile(pid_name):
             ret = 0
