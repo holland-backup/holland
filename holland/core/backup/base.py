@@ -65,7 +65,7 @@ def load_plugin(name, config, path, dry_run):
     try:
         plugin_cls = load_backup_plugin(config["holland:backup"]["plugin"])
     except KeyError:
-        raise BackupError(f"No plugin defined for backupset '{name}'.")
+        raise BackupError("No plugin defined for backupset '%s'." % name)
     except PluginLoadError as exc:
         raise BackupError(str(exc))
 
