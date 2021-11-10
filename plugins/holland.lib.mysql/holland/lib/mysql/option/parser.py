@@ -109,7 +109,7 @@ class OptionFile(dict):
                 section = remove_inline_comment(line).strip()
                 if section.startswith("[") and section.endswith("]"):
                     section = section[1:-1].lower()
-                    self.setdefault(section, dict())
+                    self.setdefault(section, {})
                 else:
                     raise ParseError(
                         "Wrong group definition in config file: "

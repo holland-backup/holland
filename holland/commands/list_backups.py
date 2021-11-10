@@ -49,14 +49,14 @@ class ListBackups(Command):
         for backup in backup_list:
             if backup.backupset not in backupsets_seen:
                 backupsets_seen.append(backup.backupset)
-                print("Backupset[%s]:" % (backup.backupset))
+                print(f"Backupset[{backup.backupset}]:")
             # Read the backup.conf
             backup.load_config()
             plugin_name = backup.config.get("holland:backup", {})["plugin"]
             if not plugin_name:
-                print("Skipping broken backup: %s" % backup.name)
+                print(f"Skipping broken backup: {backup.name}")
                 continue
-            print("\t%s" % backup.name)
+            print(f"\t{backup.name}")
             if opts.verbose:
                 print("\t", backup.info())
                 plugin = load_backup_plugin(plugin_name)

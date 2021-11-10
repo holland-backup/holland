@@ -98,7 +98,7 @@ class BaseConfig(ConfigObj):
 
         if errors is not True:
             raise ConfigError(
-                "Configuration errors were encountered while validating %r" % self.filename
+                f"Configuration errors were encountered while validating {self.filename}"
             )
         return errors
 
@@ -119,7 +119,7 @@ class BaseConfig(ConfigObj):
             result = section.get(name)
             section = result
         if not result and not safe:
-            raise KeyError("%r not found (%r)" % (key, parts[count]))
+            raise KeyError(f"{key} not found ({parts[count]})")
         if isinstance(result, bytes):
             return result.decode("utf-8")
         return result

@@ -44,10 +44,10 @@ def add_plugin_dir(plugin_dir):
                 errmsg = None
                 if isinstance(error, DistributionNotFound):
                     (req,) = error.args
-                    errmsg = "%r not found" % req.project_name
+                    errmsg = f"{req.project_name} not found"
                 elif isinstance(error, VersionConflict):
                     dist, req = error.args
-                    errmsg = "Version Conflict. Requested %s Found %s" % (req, dist)
+                    errmsg = f"Version Conflict. Requested {req} Found {dist}"
                 else:
                     errmsg = repr(error)
                 LOG.error("Failed to load %s: %r", dist, errmsg)
@@ -63,10 +63,11 @@ def load_first_entrypoint(group, name=None):
         try:
             return entry_points.load()
         except DistributionNotFound as ex:
-            raise PluginLoadError("Could not find dependency '%s'" % ex)
+            raise PluginLoadError(f"Could not find dependency '{ex}'")
         except ImportError as ex:
             raise PluginLoadError(ex)
-    raise PluginLoadError("'%s' not found" % ".".join((group, name)))
+    ret = ".".join((group, name))
+    raise PluginLoadError(f"'{ret}' not found")
 
 
 def load_backup_plugin(name):

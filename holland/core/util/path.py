@@ -52,14 +52,14 @@ def protected_path(path):
     safe_path = path
     while True:
         if os.path.exists(safe_path):
-            safe_path = "%s.%s" % (path, safety)
+            safe_path = f"{path}.{safety}"
         else:
             break
         safety = safety + 1
     return safe_path
 
 
-def format_bytes(input_bytes, precision=2):
+def format_bytes(input_bytes):
     """
     Format an integer number of input_bytes to a human
     readable string.
@@ -74,11 +74,9 @@ def format_bytes(input_bytes, precision=2):
     else:
         exponent = 0
 
-    return "%.*f%s" % (
-        precision,
-        input_bytes / (1024 ** exponent),
-        ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][int(exponent)],
-    )
+    ret = input_bytes / (1024 ** exponent)
+    postfix = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][int(exponent)]
+    return f"{ret:.2f}{postfix}"
 
 
 def normpath(path):

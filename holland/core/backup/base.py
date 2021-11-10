@@ -65,7 +65,7 @@ def load_plugin(name, config, path, dry_run):
     try:
         plugin_cls = load_backup_plugin(config["holland:backup"]["plugin"])
     except KeyError:
-        raise BackupError("No plugin defined for backupset '%s'." % name)
+        raise BackupError(f"No plugin defined for backupset '{name}'.")
     except PluginLoadError as exc:
         raise BackupError(str(exc))
 
@@ -77,7 +77,7 @@ def load_plugin(name, config, path, dry_run):
     except Exception as exc:
         LOG.debug("Error while initializing %r : %s", plugin_cls, exc, exc_info=True)
         raise BackupError(
-            "Error initializing %s plugin: %s" % (config["holland:backup"]["plugin"], str(exc))
+            f"Error initializing {config['holland:backup']['plugin']} plugin: {str(exc)}"
         )
 
 
@@ -123,11 +123,11 @@ class BackupRunner(object):
                 break
             except OSError as exc:
                 if exc.errno != errno.EEXIST:
-                    raise BackupError("Failed to create spool: %s" % exc)
+                    raise BackupError(f"Failed to create spool: {str(exc)}")
                 LOG.debug("Failed to create spool.  Retrying in %d seconds.", i + 1)
                 time.sleep(i + 1)
         else:
-            raise BackupError("Failed to create a new backup directory for %s" % name)
+            raise BackupError(f"Failed to create a new backup directory for {name}")
 
         spool_entry.config.merge(config)
         spool_entry.validate_config()
@@ -187,7 +187,7 @@ class BackupRunner(object):
         if sys.exc_info() != (None, None, None) or spool_entry.config["holland:backup"]["failed"]:
             LOG.debug("sys.exc_info(): %r", sys.exc_info())
             self.apply_cb("failed-backup", spool_entry)
-            raise BackupError("Failed backup: %s" % name)
+            raise BackupError(f"Failed backup: {name}")
         self.apply_cb("after-backup", spool_entry)
 
     def free_required_space(self, name, required_bytes, dry_run=False):
@@ -214,7 +214,8 @@ class BackupRunner(object):
                 break
         else:
             LOG.info(
-                "Purging would only recover an additional %s", format_bytes(sum(to_purge.values()))
+                "Purging would only recover an additional %s",
+                format_bytes(sum(to_purge.values())),
             )
             LOG.info(
                 "Only %s total would be available, but the current " "backup requires %s",
@@ -337,10 +338,9 @@ class BackupRunner(object):
                     spool_entry.backupset, adjusted_bytes_required, dry_run
                 )
             ):
-                msg = ("Insufficient Disk Space. %s required, " "but only %s available on %s") % (
-                    format_bytes(adjusted_bytes_required),
-                    format_bytes(available_bytes),
-                    self.spool.path,
+                msg = (
+                    f"Insufficient Disk Space. {format_bytes(adjusted_bytes_required)} required, "
+                    f"but only {format_bytes(available_bytes)} available on {self.spool.path}"
                 )
                 LOG.error(msg)
                 if not dry_run:
