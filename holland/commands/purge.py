@@ -153,7 +153,10 @@ def purge_backupset(backupset, force=False, all_backups=False):
                     LOG.info("Purged %d backup%s", count, "s"[0 : bool(count)])
             else:
                 LOG.info("Skipping purge in dry-run mode.")
-            backupset.update_symlinks(enable=backup.config["holland:backup"]["create-symlinks"])
+            config = backup.config["holland:backup"]
+            backupset.update_symlinks(
+                enable=config["create-symlinks"], relative=config["relative-symlinks"]
+            )
 
 
 def purge_backup(backup, force=False):
