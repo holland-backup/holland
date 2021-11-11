@@ -101,7 +101,7 @@ def write_manifest(schema, open_stream, ext):
                 continue
             name = database.name
             encoded_name = encode(name)
-            line = f"{name} {encoded_name}.sql{ext}\n"
+            line = u"%s %s\n" % (name, encoded_name + ".sql" + ext)
             manifest_fileobj.write(line)
     finally:
         manifest_fileobj.close()
