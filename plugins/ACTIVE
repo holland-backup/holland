@@ -6,3 +6,5 @@ holland.backup.mysqldump
 holland.backup.mysql_lvm
 holland.backup.xtrabackup
 holland.backup.mongodump
+holland.backup.pgdump
+holland.backup.pg_basebackup

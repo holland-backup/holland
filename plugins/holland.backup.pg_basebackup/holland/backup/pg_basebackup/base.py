@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Backup functions for pg_dump"""
+"""Backup functions for pg_basebackup"""
 
 
 import logging
@@ -21,9 +21,6 @@ from holland.core.util.fmt import format_bytes
 
 # Holland general compression functions
 from holland.lib.compression import open_stream
-
-# holland-common safefilename encoding
-from holland.lib.safefilename import encode as encode_safe
 
 LOG = logging.getLogger(__name__)
 VER = None
@@ -51,12 +48,12 @@ def get_connection(config, pgdb="template1"):
     # set connection in autocommit mode
     connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
-    if config["pgdump"]["role"]:
+    if config["pg-basebackup"]["role"]:
         try:
             cursor = connection.cursor()
-            cursor.execute("SET ROLE %s" % config["pgdump"]["role"])
+            cursor.execute("SET ROLE %s" % config["pg-basebackup"]["role"])
         except:
-            raise PgError("Failed to set role to " + config["pgdump"]["role"])
+            raise PgError("Failed to set role to " + config["pg-basebackup"]["role"])
 
     global VER  # pylint: disable=W0603
     VER = connection.get_parameter_status("server_version")
@@ -101,8 +98,8 @@ def pg_databases(config, connection):  # pylint: disable=W0613
     return databases
 
 
-def run_pgdump(dbname, output_stream, connection_params, out_format="custom", env=None):
-    """Run pg_dump for the given database and write to the specified output
+def run_pg_basebackup(output_stream, connection_params, config, directory, env=None):
+    """Run pg_basebackup for the given database and write to the specified output
     stream.
 
     :param db: database name
@@ -110,11 +107,30 @@ def run_pgdump(dbname, output_stream, connection_params, out_format="custom", en
     :param output_stream: a file-like object - must have a fileno attribute
                           that is a real, open file descriptor
     """
-    args = ["pg_dump"] + connection_params + ["--format", out_format, dbname]
+    method = config["pg-basebackup"]["wal-method"]
+    checkpoint = config["pg-basebackup"]["checkpoint"]
+    out_format = config["pg-basebackup"]["format"]
+    args = [
+        "pg_basebackup",
+        "-F",
+        out_format,
+        "-D",
+        directory,
+        "-X",
+        method,
+    ]
 
-    LOG.info("%s > %s", subprocess.list2cmdline(args), output_stream.name)
+    if checkpoint != "none":
+        args += ["-c%s" % checkpoint]
+    args += connection_params
 
     stderr = tempfile.TemporaryFile()
+    if not output_stream:
+        output_stream = stderr
+        LOG.info("Compression settings are ignore with format %s", out_format)
+        LOG.info("%s", subprocess.list2cmdline(args))
+    else:
+        LOG.info("%s > %s", subprocess.list2cmdline(args), output_stream.name)
     try:
         try:
             returncode = subprocess.call(
@@ -129,19 +145,18 @@ def run_pgdump(dbname, output_stream, connection_params, out_format="custom", en
             LOG.error("%s", line.rstrip())
     finally:
         stderr.close()
-
     if returncode != 0:
         raise PgError("%s failed." % subprocess.list2cmdline(args))
 
 
 def backup_globals(backup_directory, config, connection_params, env=None):
     """Backup global Postgres data that wouldn't otherwise
-    be captured by pg_dump.
+    be captured by pg_basebackup.
 
-    Runs pg_dumpall -g > $backup_dir/globals.sql
+    Runs pg_backupall -g > $backup_dir/globals.sql
 
-    :param backup_directory: directory to save pg_dump output to
-    :param config: PgDumpPlugin config dictionary
+    :param backup_directory: directory to save pg_basebackup output to
+    :param config: PgBaseBackupPlugin config dictionary
     :raises: OSError, PgError on error
     """
 
@@ -169,18 +184,7 @@ def backup_globals(backup_directory, config, connection_params, env=None):
         stderr.close()
 
     if returncode != 0:
-        raise PgError("pg_dumpall command exited with failure code %d." % returncode)
-
-
-def generate_manifest(backups, path):
-    """ Prints the database manifest file """
-    manifest = open(os.path.join(path, "MANIFEST"), "w")
-    for dbname, dumpfile in backups:
-        try:
-            print("%s\t%s" % (dbname.encode("utf8"), os.path.basename(dumpfile)), file=manifest)
-        except UnicodeError as exc:
-            LOG.error("Failed to encode dbname %s: %s", dbname, exc)
-    manifest.close()
+        raise PgError("pg_basebackupall command exited with failure code %d." % returncode)
 
 
 def pgauth2args(config):
@@ -193,9 +197,9 @@ def pgauth2args(config):
         if value is not None:
             args.extend(["--%s" % key, str(value)])
 
-    if config["pgdump"]["role"]:
+    if config["pg-basebackup"]["role"]:
         if VER >= "8.4":
-            args.extend(["--role", config["pgdump"]["role"]])
+            args.extend(["--role", config["pg-basebackup"]["role"]])
         else:
             raise PgError(
                 "The --role option is available only in Postgres" " versions 8.4 and higher."
@@ -205,15 +209,9 @@ def pgauth2args(config):
 
 
 def pg_extra_options(config):
-    """ Returns extra cli options based on pgdump config """
+    """ Returns extra cli options based on pg_basebackup config """
     args = []
-    # normal compression doesn't make sense with --format=custom
-    # use pg_dump's builtin --compress option instead
-    if config["pgdump"]["format"] == "custom":
-        LOG.info("Ignore compression method, since custom format is in use.")
-        config["compression"]["method"] = "none"
-        args += ["--compress", str(config["compression"]["level"])]
-    additional_options = config["pgdump"]["additional-options"]
+    additional_options = config["pg-basebackup"]["additional-options"]
     if additional_options:
         args += shlex.split(additional_options)
     return args
@@ -231,15 +229,20 @@ def generate_pgpassfile(backup_directory, password):
     return fileobj.name
 
 
-def backup_pgsql(backup_directory, config, databases):
+def backup_pgsql(backup_directory, config):
     """Backup databases in a Postgres instance
 
-    :param backup_directory: directory to save pg_dump output to
-    :param config: PgDumpPlugin config dictionary
+    :param backup_directory: directory to save pg_basebackup output to
+    :param config: PgBaseBackupPlugin config dictionary
     :raises: OSError, PgError on error
     """
     connection_params = pgauth2args(config)
     extra_options = pg_extra_options(config)
+    out_format = config["pg-basebackup"]["format"]
+    method = config["pg-basebackup"]["wal-method"]
+
+    if out_format == "tar" and method == "stream":
+        raise PgError("The 'tar' format is not supported with the 'stream' method")
 
     pgenv = dict(os.environ)
 
@@ -252,45 +255,44 @@ def backup_pgsql(backup_directory, config, databases):
             )
         pgenv["PGPASSFILE"] = pgpass_file
 
-    backup_globals(backup_directory, config, connection_params, env=pgenv)
-
-    ext_map = {"custom": ".dump", "plain": ".sql", "tar": ".tar"}
-
-    backups = []
-    for dbname in databases:
-        out_format = config["pgdump"]["format"]
-
-        dump_name = encode_safe(dbname)
-        if dump_name != dbname:
-            LOG.warning("Encoded database %s as filename %s", dbname, dump_name)
-
-        filename = os.path.join(backup_directory, dump_name + ext_map[out_format])
-
+    if out_format == "tar":
+        filename = os.path.join(backup_directory, "all.tar")
         stream = open_stream(filename, "w", **config["compression"])
-        backups.append((dbname, stream.name))
-
-        run_pgdump(
-            dbname=dbname,
-            output_stream=stream,
-            connection_params=connection_params + extra_options,
-            out_format=out_format,
+        run_pg_basebackup(
+            stream,
+            connection_params + extra_options,
+            config,
+            "-",
             env=pgenv,
         )
-
         stream.close()
+    elif out_format == "plain":
+        run_pg_basebackup(
+            None,
+            connection_params + extra_options,
+            config,
+            backup_directory,
+            env=pgenv,
+        )
+    else:
+        raise PgError("Unsupported format")
 
-    generate_manifest(backups, backup_directory)
+    backup_globals(backup_directory, config, connection_params, env=pgenv)
 
 
-def dry_run(databases, config):
-    """ Logs what pg_dump command would be run """
+def dry_run(config):
+    """ Logs what pg_basebackup command would be run """
     args = pgauth2args(config)
 
+    cmd = [
+        "pg_basebackup",
+        "-F",
+        config["pg-basebackup"]["format"],
+        "-D",
+        "-",
+        "-X",
+        config["pg-basebackup"]["wal-method"],
+    ] + args
+
     LOG.info("pg_dumpall -g")
-    for database in databases:
-        LOG.info(
-            "pg_dump %s --format %s %s",
-            subprocess.list2cmdline(args),
-            config["pgdump"]["format"],
-            database,
-        )
+    LOG.info(subprocess.list2cmdline(cmd))
