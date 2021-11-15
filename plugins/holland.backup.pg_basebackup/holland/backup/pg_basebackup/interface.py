@@ -36,7 +36,6 @@ CONFIGSPEC = (
 format = option('tar','plain',default='tar')
 wal-method = option('none','fetch','stream',default='fetch')
 checkpoint = option('none','fast','spread',default='fast')
-role = string(default=None)
 additional-options = string(default=None)
 
 [pgauth]

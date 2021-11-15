@@ -48,13 +48,6 @@ def get_connection(config, pgdb="template1"):
     # set connection in autocommit mode
     connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
-    if config["pg-basebackup"]["role"]:
-        try:
-            cursor = connection.cursor()
-            cursor.execute("SET ROLE %s" % config["pg-basebackup"]["role"])
-        except:
-            raise PgError("Failed to set role to " + config["pg-basebackup"]["role"])
-
     global VER  # pylint: disable=W0603
     VER = connection.get_parameter_status("server_version")
     LOG.info("Server version %s", VER)
@@ -196,14 +189,6 @@ def pgauth2args(config):
         key = remap.get(param, param)
         if value is not None:
             args.extend(["--%s" % key, str(value)])
-
-    if config["pg-basebackup"]["role"]:
-        if VER >= "8.4":
-            args.extend(["--role", config["pg-basebackup"]["role"]])
-        else:
-            raise PgError(
-                "The --role option is available only in Postgres" " versions 8.4 and higher."
-            )
 
     return args
 
