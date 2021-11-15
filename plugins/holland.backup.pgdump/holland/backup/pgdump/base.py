@@ -215,7 +215,6 @@ def pg_extra_options(config):
         args += ["--compress", str(config["compression"]["level"])]
     additional_options = config["pgdump"]["additional-options"]
     if additional_options:
-        additional_options = additional_options.encode("utf8")
         args += shlex.split(additional_options)
     return args
 

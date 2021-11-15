@@ -1,4 +1,4 @@
-This plugin performs logical backups of a Postgres database by using the
+This plugin performs physical backups of a Postgres database by using the
 pg_basebackup command.  
 
 For more information please consult the holland manual or visit the holland

@@ -98,7 +98,7 @@ def pg_databases(config, connection):  # pylint: disable=W0613
     return databases
 
 
-def run_pg_basebackup(output_stream, connection_params, out_format, method, directory, env=None):
+def run_pg_basebackup(output_stream, connection_params, config, directory, env=None):
     """Run pg_basebackup for the given database and write to the specified output
     stream.
 
@@ -107,6 +107,9 @@ def run_pg_basebackup(output_stream, connection_params, out_format, method, dire
     :param output_stream: a file-like object - must have a fileno attribute
                           that is a real, open file descriptor
     """
+    method = config["pg-basebackup"]["wal-method"]
+    checkpoint = config["pg-basebackup"]["checkpoint"]
+    out_format = config["pg-basebackup"]["format"]
     args = [
         "pg_basebackup",
         "-F",
@@ -115,7 +118,11 @@ def run_pg_basebackup(output_stream, connection_params, out_format, method, dire
         directory,
         "-X",
         method,
-    ] + connection_params
+    ]
+
+    if checkpoint != "none":
+        args += ["-c%s" % checkpoint]
+    args += connection_params
 
     stderr = tempfile.TemporaryFile()
     if not output_stream:
@@ -204,11 +211,8 @@ def pgauth2args(config):
 def pg_extra_options(config):
     """ Returns extra cli options based on pg_basebackup config """
     args = []
-    # normal compression doesn't make sense with --format=custom
-    # use pg_basebackup's builtin --compress option instead
     additional_options = config["pg-basebackup"]["additional-options"]
     if additional_options:
-        additional_options = additional_options.encode("utf8")
         args += shlex.split(additional_options)
     return args
 
@@ -257,8 +261,7 @@ def backup_pgsql(backup_directory, config):
         run_pg_basebackup(
             stream,
             connection_params + extra_options,
-            out_format,
-            method,
+            config,
             "-",
             env=pgenv,
         )
@@ -267,8 +270,7 @@ def backup_pgsql(backup_directory, config):
         run_pg_basebackup(
             None,
             connection_params + extra_options,
-            out_format,
-            method,
+            config,
             backup_directory,
             env=pgenv,
         )
