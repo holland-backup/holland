@@ -21,6 +21,7 @@ from holland.core.util.fmt import format_bytes
 
 # Holland general compression functions
 from holland.lib.compression import open_stream
+from holland.lib.util import parse_arguments
 
 LOG = logging.getLogger(__name__)
 VER = None
@@ -222,7 +223,11 @@ def backup_pgsql(backup_directory, config):
     :raises: OSError, PgError on error
     """
     connection_params = pgauth2args(config)
-    extra_options = pg_extra_options(config)
+    extra_options = parse_arguments(
+        pg_extra_options(config),
+        backup_directory=backup_directory,
+        backupdir=backup_directory,
+    )
     out_format = config["pg-basebackup"]["format"]
     method = config["pg-basebackup"]["wal-method"]
 
@@ -268,16 +273,19 @@ def backup_pgsql(backup_directory, config):
 def dry_run(config):
     """ Logs what pg_basebackup command would be run """
     args = pgauth2args(config)
-
-    cmd = [
-        "pg_basebackup",
-        "-F",
-        config["pg-basebackup"]["format"],
-        "-D",
-        "-",
-        "-X",
-        config["pg-basebackup"]["wal-method"],
-    ] + args
+    cmd = (
+        [
+            "pg_basebackup",
+            "-F",
+            config["pg-basebackup"]["format"],
+            "-D",
+            "-",
+            "-X",
+            config["pg-basebackup"]["wal-method"],
+        ]
+        + args
+        + pg_extra_options(config)
+    )
 
     LOG.info("pg_dumpall -g")
     LOG.info(subprocess.list2cmdline(cmd))
