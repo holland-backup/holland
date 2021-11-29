@@ -6,7 +6,6 @@ import logging
 
 # Python stdlib
 import os
-import shlex
 import subprocess
 import tempfile
 
@@ -194,15 +193,6 @@ def pgauth2args(config):
     return args
 
 
-def pg_extra_options(config):
-    """ Returns extra cli options based on pg_basebackup config """
-    args = []
-    additional_options = config["pg-basebackup"]["additional-options"]
-    if additional_options:
-        args += shlex.split(additional_options)
-    return args
-
-
 def generate_pgpassfile(backup_directory, password):
     """ Creates a pgpass file from a given password """
     fileobj = open(os.path.join(backup_directory, "pgpass"), "w")
@@ -224,7 +214,7 @@ def backup_pgsql(backup_directory, config):
     """
     connection_params = pgauth2args(config)
     extra_options = parse_arguments(
-        pg_extra_options(config),
+        config["pg-basebackup"]["additional-options"],
         backup_directory=backup_directory,
         backupdir=backup_directory,
     )
@@ -284,7 +274,7 @@ def dry_run(config):
             config["pg-basebackup"]["wal-method"],
         ]
         + args
-        + pg_extra_options(config)
+        + config["pg-basebackup"]["additional-options"]
     )
 
     LOG.info("pg_dumpall -g")
