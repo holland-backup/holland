@@ -6,7 +6,6 @@ import logging
 
 # Python stdlib
 import os
-import shlex
 import subprocess
 import tempfile
 
@@ -21,6 +20,7 @@ from holland.core.util.fmt import format_bytes
 
 # Holland general compression functions
 from holland.lib.compression import open_stream
+from holland.lib.util import parse_arguments
 
 LOG = logging.getLogger(__name__)
 VER = None
@@ -193,15 +193,6 @@ def pgauth2args(config):
     return args
 
 
-def pg_extra_options(config):
-    """ Returns extra cli options based on pg_basebackup config """
-    args = []
-    additional_options = config["pg-basebackup"]["additional-options"]
-    if additional_options:
-        args += shlex.split(additional_options)
-    return args
-
-
 def generate_pgpassfile(backup_directory, password):
     """ Creates a pgpass file from a given password """
     fileobj = open(os.path.join(backup_directory, "pgpass"), "w")
@@ -222,7 +213,11 @@ def backup_pgsql(backup_directory, config):
     :raises: OSError, PgError on error
     """
     connection_params = pgauth2args(config)
-    extra_options = pg_extra_options(config)
+    extra_options = parse_arguments(
+        config["pg-basebackup"]["additional-options"],
+        backup_directory=backup_directory,
+        backupdir=backup_directory,
+    )
     out_format = config["pg-basebackup"]["format"]
     method = config["pg-basebackup"]["wal-method"]
 
@@ -268,16 +263,19 @@ def backup_pgsql(backup_directory, config):
 def dry_run(config):
     """ Logs what pg_basebackup command would be run """
     args = pgauth2args(config)
-
-    cmd = [
-        "pg_basebackup",
-        "-F",
-        config["pg-basebackup"]["format"],
-        "-D",
-        "-",
-        "-X",
-        config["pg-basebackup"]["wal-method"],
-    ] + args
+    cmd = (
+        [
+            "pg_basebackup",
+            "-F",
+            config["pg-basebackup"]["format"],
+            "-D",
+            "-",
+            "-X",
+            config["pg-basebackup"]["wal-method"],
+        ]
+        + args
+        + config["pg-basebackup"]["additional-options"]
+    )
 
     LOG.info("pg_dumpall -g")
     LOG.info(subprocess.list2cmdline(cmd))
