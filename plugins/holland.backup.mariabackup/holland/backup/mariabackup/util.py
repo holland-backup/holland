@@ -136,7 +136,7 @@ def determine_stream_method(stream):
     """Calculate the stream option from the holland config"""
     stream = stream.lower()
     if stream in ("mbstream", "xbstream"):
-        return "xbstream"
+        return stream
     if stream in ("no", "0", "false"):
         return None
     raise BackupError("Invalid mariabackup stream method '%s'" % stream)
