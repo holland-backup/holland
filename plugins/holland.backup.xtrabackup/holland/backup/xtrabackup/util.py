@@ -225,7 +225,8 @@ def build_xb_args(config, basedir, defaults_file=None, binary_xtrabackup=False):
         args.append("--slave-info")
     if safe_slave_backup:
         args.append("--safe-slave-backup")
-    args.append("--no-lock")
+    if no_lock:
+        args.append("--no-lock")
 
     if not strict:
         args.append("--strict=OFF")
