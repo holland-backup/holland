@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-version = "1.2.9"
+version = "1.2.10"
 
 setup(
     name="holland.backup.pg_basebackup",
