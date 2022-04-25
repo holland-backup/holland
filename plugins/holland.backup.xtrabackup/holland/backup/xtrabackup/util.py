@@ -229,8 +229,7 @@ def build_xb_args(config, basedir, defaults_file=None, binary_xtrabackup=False):
 
     if not strict:
         args.append("--strict=OFF")
-    if no_lock and not int(xtrabackup_version().split(".")[0]) >= 8:
-        LOG.debug("Remove '--no-timestamp' in version 8 and greater")
+    if int(xtrabackup_version().split(".")[0]) < 8:
         args.append("--no-timestamp")
 
     if not binary_xtrabackup:
