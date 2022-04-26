@@ -197,49 +197,46 @@ def build_xb_args(config, basedir, defaults_file=None, binary_xtrabackup=False):
     slave_info = config["slave-info"]
     safe_slave_backup = config["safe-slave-backup"]
     no_lock = config["no-lock"]
+    strict = config["strict"]
     # filter additional options to remove any empty values
     extra_opts = [_f for _f in config["additional-options"] if _f]
 
     args = [innobackupex]
+    if defaults_file:
+        args.append("--defaults-file=" + defaults_file)
+    if ibbackup:
+        args.append("--ibbackup=" + ibbackup)
+
     if not binary_xtrabackup:
-        if defaults_file:
-            args.append("--defaults-file=" + defaults_file)
-        if ibbackup:
-            args.append("--ibbackup=" + ibbackup)
         if stream:
             args.append("--stream=" + stream)
         else:
             basedir = join(basedir, "data")
         if tmpdir:
             args.append("--tmpdir=" + tmpdir)
-        if slave_info:
-            args.append("--slave-info")
-        if safe_slave_backup:
-            args.append("--safe-slave-backup")
-        if no_lock:
-            args.append("--no-lock")
-        args.append("--no-timestamp")
-        if extra_opts:
-            args.extend(extra_opts)
-        if basedir:
-            args.append(basedir)
     else:
-        if defaults_file:
-            args.append("--defaults-file=" + defaults_file)
         args.append("--backup")
-        if ibbackup:
-            args.append("--ibbackup=" + ibbackup)
         if stream:
             args.append("--stream=xbstream")
         else:
             args.append("--target-dir=%s" % join(basedir, "data"))
-        if slave_info:
-            args.append("--slave-info")
-        if safe_slave_backup:
-            args.append("--safe-slave-backup")
-        if no_lock:
-            args.append("--no-lock")
+
+    if slave_info:
+        args.append("--slave-info")
+    if safe_slave_backup:
+        args.append("--safe-slave-backup")
+    if no_lock:
+        args.append("--no-lock")
+
+    if not strict:
+        args.append("--strict=OFF")
+    if int(xtrabackup_version().split(".")[0]) < 8:
         args.append("--no-timestamp")
+
+    if not binary_xtrabackup:
+        if basedir:
+            args.append(basedir)
+    else:
         if extra_opts:
             args.extend(extra_opts)
     return args

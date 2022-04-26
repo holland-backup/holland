@@ -34,6 +34,7 @@ no-lock             = boolean(default=no)
 tmpdir              = string(default=None)
 additional-options  = force_list(default=list())
 pre-command         = string(default=None)
+strict             = boolean(default=yes)
 """
     + MYSQL_CLIENT_CONFIG_STRING
     + COMPRESSION_CONFIG_STRING
@@ -150,7 +151,9 @@ class XtrabackupPlugin(object):
         util.add_xtrabackup_defaults(self.defaults_path, tmpdir=tmpdir)
         args = util.build_xb_args(xb_cfg, backup_directory, self.defaults_path, binary_xtrabackup)
         util.execute_pre_command(
-            xb_cfg["pre-command"], backup_directory=backup_directory, backupdir=backup_directory
+            xb_cfg["pre-command"],
+            backup_directory=backup_directory,
+            backupdir=backup_directory,
         )
         stderr = self.open_xb_logfile()
         try:
