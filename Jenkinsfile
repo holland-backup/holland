@@ -18,20 +18,6 @@ python3 --version'''
       }
     }
 
-    stage('pylint holland') {
-      parallel {
-        stage('pylint holland') {
-          steps {
-            sh '''pylint holland
-
-'''
-          }
-        }
-
-
-      }
-    }
-
     stage('Install holland') {
       steps {
         sh '''# Move over to tmp to prevent file permissions issues
@@ -42,6 +28,18 @@ cd /tmp/holland
 # Install Holland
 python3 setup.py install
 
+# Install Plugins
+for i in `ls -d plugins/holland.*`
+do
+    cd /tmp/holland/${i}
+    python3 setup.py install
+    exit_code=$?
+    if [ $exit_code -ne 0 ]
+    then
+        echo "Failed installing $i"
+        exit $exit_code
+    fi
+done
 
 # Install Commvault script
 cd /tmp/holland/contrib/holland-commvault/
@@ -49,7 +47,17 @@ python3 setup.py install'''
       }
     }
 
-    stage('pylint plugins') {
+    stage('pylint holland') {
+      parallel {
+        stage('pylint holland') {
+          steps {
+            sh '''pylint holland
+
+'''
+          }
+        }
+
+        stage('pylint plugins') {
           steps {
             sh '''pylint_failed=0
 for d in $(ls -d ./plugins/*/holland ./contrib/holland-commvault/holland_commvault)
@@ -68,23 +76,9 @@ then
 fi'''
           }
         }
-    stage('Install plugins') {
-          steps {
-            sh '''
-# Install Plugins
-for i in `ls -d plugins/holland.*`
-do
-    cd /tmp/holland/${i}
-    python3 setup.py install
-    exit_code=$?
-    if [ $exit_code -ne 0 ]
-    then
-        echo "Failed installing $i"
-        exit $exit_code
-    fi
-done'''
-          }
-        }
+
+      }
+    }
 
     stage('Setup holland') {
       parallel {
