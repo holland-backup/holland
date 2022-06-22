@@ -158,6 +158,8 @@ disable=raw-checker-failed,
         raise-missing-from,
         unused-private-member,
         unspecified-encoding,
+        import-error,
+
         consider-using-f-string
 
 # Enable the message, report, category or checker with the given id(s). You can
@@ -205,7 +207,7 @@ max-returns=10
 max-statements=150
 
 # Minimum number of public methods for a class (see R0903).
-min-public-methods=2
+min-public-methods=1
 
 
 [EXCEPTIONS]
