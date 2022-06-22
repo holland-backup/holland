@@ -206,7 +206,7 @@ def pgauth2args(config):
             args.extend(["--role", config["pgdump"]["role"]])
         else:
             raise BackupError(
-                "The --role option is available only in Postgres" " versions 8.4 and higher."
+                "The --role option is available only in Postgres versions 8.4 and higher."
             )
 
     return args
@@ -255,7 +255,7 @@ def backup_pgsql(backup_directory, config, databases):
         pgpass_file = generate_pgpassfile(backup_directory, config["pgauth"]["password"])
         if "PGPASSFILE" in pgenv:
             LOG.warning(
-                "Overriding PGPASSFILE in environment with %s because " "a password is specified.",
+                "Overriding PGPASSFILE in environment with %s because a password is specified.",
                 pgpass_file,
             )
         pgenv["PGPASSFILE"] = pgpass_file

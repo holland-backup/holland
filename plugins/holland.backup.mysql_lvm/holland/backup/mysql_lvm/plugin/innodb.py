@@ -206,14 +206,14 @@ def check_innodb(pathinfo, ensure_subdir_of_datadir=False):
         space_mp = getmount(tablespace)
         if space_mp != datadir_mp:
             LOG.error(
-                "InnoDB shared tablespace %s is not on the same " "filesystem as the datadir %s",
+                "InnoDB shared tablespace %s is not on the same filesystem as the datadir %s",
                 tablespace,
                 datadir,
             )
             is_unsafe_for_lvm = True
         if ensure_subdir_of_datadir and not is_subdir(tablespace, datadir):
             LOG.error(
-                "InnoDB shared tablespace %s is not within a " "subdirectory of the datadir %s.",
+                "InnoDB shared tablespace %s is not within a subdirectory of the datadir %s.",
                 tablespace,
                 datadir,
             )
@@ -223,14 +223,14 @@ def check_innodb(pathinfo, ensure_subdir_of_datadir=False):
 
     if ib_logdir_mp != datadir_mp:
         LOG.error(
-            "innodb-log-group-home-dir %s is not on the same filesystem " "as the MySQL datadir %s",
+            "innodb-log-group-home-dir %s is not on the same filesystem as the MySQL datadir %s",
             ib_logdir,
             datadir,
         )
         is_unsafe_for_lvm = True
     if ensure_subdir_of_datadir and not is_subdir(ib_logdir, datadir):
         LOG.error(
-            "innodb-log-group-home-dir %s is not a subdirectory of " "the datadir %s.",
+            "innodb-log-group-home-dir %s is not a subdirectory of the datadir %s.",
             ib_logdir,
             datadir,
         )

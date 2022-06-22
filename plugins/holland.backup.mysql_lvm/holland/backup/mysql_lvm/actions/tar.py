@@ -54,7 +54,7 @@ class TarArchiveAction(object):
         if pre_args or post_args:
             warning_readme = os.path.join(archive_dirname, "NONSTD_TAR.txt")
             warning_log = open(warning_readme, "w")
-            print(("This tar file was generated with non-std " "args:"), file=warning_log)
+            print(("This tar file was generated with non-std args:"), file=warning_log)
             print(list2cmdline(argv), file=warning_log)
         archive_log = os.path.join(archive_dirname, "archive.log")
         process = Popen(
@@ -80,7 +80,7 @@ class TarArchiveAction(object):
 
         if process.returncode != 0:
             LOG.error("tar exited with non-zero status: %d", process.returncode)
-            LOG.error("Tailing up to the last 10 lines of archive.log for " "troubleshooting:")
+            LOG.error("Tailing up to the last 10 lines of archive.log for troubleshooting:")
             for line in open(archive_log, "r").readlines()[-10:]:
                 LOG.error(" ! %s", line.rstrip())
             raise CalledProcessError(process.returncode, "tar")

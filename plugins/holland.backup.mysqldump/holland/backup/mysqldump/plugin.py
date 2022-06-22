@@ -40,7 +40,12 @@ CONFIGSPEC = (
 extra-defaults      = boolean(default=no)
 mysql-binpath       = force_list(default=list())
 
-lock-method         = option('flush-lock', 'lock-tables', 'single-transaction', 'auto-detect', 'none', default='auto-detect')
+lock-method         = option('flush-lock',
+                             'lock-tables',
+                             'single-transaction',
+                             'auto-detect',
+                             'none',
+                             default='auto-detect')
 
 databases           = force_list(default=list('*'))
 exclude-databases   = force_list(default=list())
@@ -185,9 +190,9 @@ class MySQLDumpPlugin(object):
             if self.config["mysqldump"]["stop-slave"]:
                 slave_status = self.client.show_slave_status()
                 if not slave_status:
-                    raise BackupError("stop-slave enabled, but 'show slave " "status' failed")
+                    raise BackupError("stop-slave enabled, but 'show slave status' failed")
                 if slave_status and slave_status["slave_sql_running"] != "Yes":
-                    raise BackupError("stop-slave enabled, but replication is " "not running")
+                    raise BackupError("stop-slave enabled, but replication is not running")
                 if not self.dry_run:
                     _stop_slave(self.client, self.config)
             elif self.config["mysqldump"]["bin-log-position"]:
@@ -225,7 +230,10 @@ class MySQLDumpPlugin(object):
         extra_defaults = config["extra-defaults"]
         try:
             mysqldump = MySQLDump(
-                defaults_file, mysqldump_bin, extra_defaults=extra_defaults, mock_env=self.mock_env
+                defaults_file,
+                mysqldump_bin,
+                extra_defaults=extra_defaults,
+                mock_env=self.mock_env,
             )
         except MySQLDumpError as exc:
             raise BackupError(str(exc))
@@ -336,7 +344,7 @@ def collect_mysqldump_options(config, mysqldump, client):
         options.append("--flush-logs")
     if config["flush-privileges"]:
         if mysqldump.version < (5, 0, 26):
-            LOG.warning("--flush privileges is available only for mysqldump " "in 5.0.26+")
+            LOG.warning("--flush privileges is available only for mysqldump in 5.0.26+")
         else:
             options.append("--flush-privileges")
     if config["dump-routines"]:
@@ -360,7 +368,7 @@ def collect_mysqldump_options(config, mysqldump, client):
         options.append("--max-allowed-packet=" + config["max-allowed-packet"])
     if config["bin-log-position"]:
         if client.show_variable("log_bin") != "ON":
-            raise BackupError("bin-log-position requested but " "bin-log on server not active")
+            raise BackupError("bin-log-position requested but bin-log on server not active")
         options.append("--master-data=2")
     options.extend(config["additional-options"])
     return options
@@ -484,7 +492,7 @@ def exclude_invalid_views(schema, client, definitions_file):
                     invalid_view = True
                 else:
                     LOG.error(
-                        "Unexpected error when checking invalid " "view %s.%s: [%d] %s",
+                        "Unexpected error when checking invalid view %s.%s: [%d] %s",
                         schema_db.name,
                         table.name,
                         *exc.args
@@ -498,18 +506,22 @@ def exclude_invalid_views(schema, client, definitions_file):
                 )
                 if view_definition is None:
                     LOG.error(
-                        "!!! Failed to retrieve view definition for " "`%s`.`%s`",
+                        "!!! Failed to retrieve view definition for `%s`.`%s`",
                         schema_db.name,
                         table.name,
                     )
                     LOG.warning(
-                        "!!! View definition for `%s`.`%s` will " "not be included in this backup",
+                        "!!! View definition for `%s`.`%s` will not be included in this backup",
                         schema_db.name,
                         table.name,
                     )
                     continue
 
-                LOG.info("* Saving view definition for " "`%s`.`%s`", schema_db.name, table.name)
+                LOG.info(
+                    "* Saving view definition for `%s`.`%s`",
+                    schema_db.name,
+                    table.name,
+                )
                 invalid_views = invalid_views + "--\n-- Current View: `%s`.`%s`\n--\n%s;\n" % (
                     schema_db.name,
                     table.name,
