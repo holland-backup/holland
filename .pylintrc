@@ -159,7 +159,6 @@ disable=raw-checker-failed,
         unused-private-member,
         unspecified-encoding,
         import-error,
-
         consider-using-f-string
 
 # Enable the message, report, category or checker with the given id(s). You can
