@@ -8,7 +8,7 @@ and pg_dumpall
 import logging
 import os
 
-from holland.backup.pgdump.base import PgError, backup_pgsql, dbapi
+from holland.backup.pgdump.base import backup_pgsql, dbapi
 from holland.backup.pgdump.base import dry_run as pg_dry_run
 from holland.backup.pgdump.base import (
     get_connection,
@@ -68,10 +68,7 @@ class PgDump(object):
         self.target_directory = target_directory
         self.dry_run = dry_run
         self.config.validate_config(CONFIGSPEC)
-
-        self.connection = get_connection(self.config)
-        self.databases = pg_databases(self.config, self.connection)
-        LOG.info("Found databases: %s", ",".join(self.databases))
+        self.databases = None
 
     def estimate_backup_size(self):
         """Estimate the size (in bytes) of the backup this plugin would
@@ -82,9 +79,12 @@ class PgDump(object):
         """
 
         totalestimate = 0
+        connection = get_connection(self.config)
+        self.databases = pg_databases(self.config, connection)
+        LOG.info("Found databases: %s", ",".join(self.databases))
         for database in self.databases:
             try:
-                totalestimate += get_db_size(database, self.connection)
+                totalestimate += get_db_size(database, connection)
             except dbapi.DatabaseError as exc:
                 if exc.pgcode != "42883":  # 'missing function'
                     raise BackupError(
@@ -92,6 +92,7 @@ class PgDump(object):
                     )
                 totalestimate += self._estimate_legacy_size(database)
 
+        connection.close()
         return totalestimate
 
     def _estimate_legacy_size(self, database):
@@ -107,10 +108,11 @@ class PgDump(object):
         """
         Start a backup.
         """
-
-        # estimate and setup has completed at this point
-        # so ensure the connection is closed - we will never reuse this
-        self.connection.close()
+        if not self.databases:
+            connection = get_connection(self.config)
+            self.databases = pg_databases(self.config, connection)
+            LOG.info("Found databases: %s", ",".join(self.databases))
+            connection.close()
 
         if self.dry_run:
             # Very simply dry run information
@@ -132,7 +134,7 @@ class PgDump(object):
 
         try:
             backup_pgsql(backup_dir, self.config, self.databases)
-        except (OSError, PgError) as exc:
+        except (OSError, BackupError) as exc:
             LOG.debug("Failed to backup Postgres. %s", str(exc), exc_info=True)
             raise BackupError(str(exc))
 

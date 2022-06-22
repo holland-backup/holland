@@ -26,10 +26,6 @@ LOG = logging.getLogger(__name__)
 VER = None
 
 
-class PgError(BackupError):
-    """Raised when any error associated with Postgres occurs"""
-
-
 def get_connection(config, pgdb="template1"):
     """ Returns a connection to the PG database instance. """
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
@@ -41,9 +37,12 @@ def get_connection(config, pgdb="template1"):
         key = remap.get(key, key)
         if value is not None:
             args[key] = value
-    connection = dbapi.connect(database=pgdb, **args)
+    try:
+        connection = dbapi.connect(database=pgdb, **args)
+    except:
+        raise BackupError("Failed to connect to the Postgres database.")
     if not connection:
-        raise PgError("Failed to connect to the Postgres database.")
+        raise BackupError("Failed to connect to the Postgres database.")
 
     # set connection in autocommit mode
     connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
@@ -64,7 +63,7 @@ def get_db_size(dbname, connection):
         LOG.info("DB %s size %s", dbname, format_bytes(size))
         return size
     except:
-        raise PgError("Could not detmine database size.")
+        raise BackupError("Could not detmine database size.")
 
 
 def legacy_get_db_size(dbname, connection):
@@ -130,7 +129,9 @@ def run_pg_basebackup(output_stream, connection_params, config, directory, env=N
                 args, stdout=output_stream, stderr=stderr, env=env, close_fds=True
             )
         except OSError as exc:
-            raise PgError("Failed to execute '%s': [%d] %s" % (args[0], exc.errno, exc.strerror))
+            raise BackupError(
+                "Failed to execute '%s': [%d] %s" % (args[0], exc.errno, exc.strerror)
+            )
 
         stderr.flush()
         stderr.seek(0)
@@ -139,7 +140,7 @@ def run_pg_basebackup(output_stream, connection_params, config, directory, env=N
     finally:
         stderr.close()
     if returncode != 0:
-        raise PgError("%s failed." % subprocess.list2cmdline(args))
+        raise BackupError("%s failed." % subprocess.list2cmdline(args))
 
 
 def backup_globals(backup_directory, config, connection_params, env=None):
@@ -150,7 +151,7 @@ def backup_globals(backup_directory, config, connection_params, env=None):
 
     :param backup_directory: directory to save pg_basebackup output to
     :param config: PgBaseBackupPlugin config dictionary
-    :raises: OSError, PgError on error
+    :raises: OSError, BackupError on error
     """
 
     path = os.path.join(backup_directory, "global.sql")
@@ -166,7 +167,9 @@ def backup_globals(backup_directory, config, connection_params, env=None):
                 args, stdout=output_stream, stderr=stderr, env=env, close_fds=True
             )
         except OSError as exc:
-            raise PgError("Failed to execute '%s': [%d] %s" % (args[0], exc.errno, exc.strerror))
+            raise BackupError(
+                "Failed to execute '%s': [%d] %s" % (args[0], exc.errno, exc.strerror)
+            )
 
         output_stream.close()
         stderr.flush()
@@ -177,7 +180,7 @@ def backup_globals(backup_directory, config, connection_params, env=None):
         stderr.close()
 
     if returncode != 0:
-        raise PgError("pg_basebackupall command exited with failure code %d." % returncode)
+        raise BackupError("pg_basebackupall command exited with failure code %d." % returncode)
 
 
 def pgauth2args(config):
@@ -210,7 +213,7 @@ def backup_pgsql(backup_directory, config):
 
     :param backup_directory: directory to save pg_basebackup output to
     :param config: PgBaseBackupPlugin config dictionary
-    :raises: OSError, PgError on error
+    :raises: OSError, BackupError on error
     """
     connection_params = pgauth2args(config)
     extra_options = parse_arguments(
@@ -222,7 +225,7 @@ def backup_pgsql(backup_directory, config):
     method = config["pg-basebackup"]["wal-method"]
 
     if out_format == "tar" and method == "stream":
-        raise PgError("The 'tar' format is not supported with the 'stream' method")
+        raise BackupError("The 'tar' format is not supported with the 'stream' method")
 
     pgenv = dict(os.environ)
 
@@ -255,7 +258,7 @@ def backup_pgsql(backup_directory, config):
             env=pgenv,
         )
     else:
-        raise PgError("Unsupported format")
+        raise BackupError("Unsupported format")
 
     backup_globals(backup_directory, config, connection_params, env=pgenv)
 

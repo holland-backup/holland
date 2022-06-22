@@ -29,10 +29,6 @@ LOG = logging.getLogger(__name__)
 VER = None
 
 
-class PgError(BackupError):
-    """Raised when any error associated with Postgres occurs"""
-
-
 def get_connection(config, pgdb="template1"):
     """ Returns a connection to the PG database instance. """
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
@@ -44,9 +40,14 @@ def get_connection(config, pgdb="template1"):
         key = remap.get(key, key)
         if value is not None:
             args[key] = value
-    connection = dbapi.connect(database=pgdb, **args)
+
+    try:
+        connection = dbapi.connect(database=pgdb, **args)
+    except:
+        raise BackupError("Failed to connect to the Postgres database.")
+
     if not connection:
-        raise PgError("Failed to connect to the Postgres database.")
+        raise BackupError("Failed to connect to the Postgres database.")
 
     # set connection in autocommit mode
     connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
@@ -56,7 +57,7 @@ def get_connection(config, pgdb="template1"):
             cursor = connection.cursor()
             cursor.execute("SET ROLE %s" % config["pgdump"]["role"])
         except:
-            raise PgError("Failed to set role to " + config["pgdump"]["role"])
+            raise BackupError("Failed to set role to " + config["pgdump"]["role"])
 
     global VER  # pylint: disable=W0603
     VER = connection.get_parameter_status("server_version")
@@ -74,7 +75,7 @@ def get_db_size(dbname, connection):
         LOG.info("DB %s size %s", dbname, format_bytes(size))
         return size
     except:
-        raise PgError("Could not detmine database size.")
+        raise BackupError("Could not detmine database size.")
 
 
 def legacy_get_db_size(dbname, connection):
@@ -121,7 +122,9 @@ def run_pgdump(dbname, output_stream, connection_params, out_format="custom", en
                 args, stdout=output_stream, stderr=stderr, env=env, close_fds=True
             )
         except OSError as exc:
-            raise PgError("Failed to execute '%s': [%d] %s" % (args[0], exc.errno, exc.strerror))
+            raise BackupError(
+                "Failed to execute '%s': [%d] %s" % (args[0], exc.errno, exc.strerror)
+            )
 
         stderr.flush()
         stderr.seek(0)
@@ -131,7 +134,7 @@ def run_pgdump(dbname, output_stream, connection_params, out_format="custom", en
         stderr.close()
 
     if returncode != 0:
-        raise PgError("%s failed." % subprocess.list2cmdline(args))
+        raise BackupError("%s failed." % subprocess.list2cmdline(args))
 
 
 def backup_globals(backup_directory, config, connection_params, env=None):
@@ -142,7 +145,7 @@ def backup_globals(backup_directory, config, connection_params, env=None):
 
     :param backup_directory: directory to save pg_dump output to
     :param config: PgDumpPlugin config dictionary
-    :raises: OSError, PgError on error
+    :raises: OSError, BackupError on error
     """
 
     path = os.path.join(backup_directory, "global.sql")
@@ -158,7 +161,9 @@ def backup_globals(backup_directory, config, connection_params, env=None):
                 args, stdout=output_stream, stderr=stderr, env=env, close_fds=True
             )
         except OSError as exc:
-            raise PgError("Failed to execute '%s': [%d] %s" % (args[0], exc.errno, exc.strerror))
+            raise BackupError(
+                "Failed to execute '%s': [%d] %s" % (args[0], exc.errno, exc.strerror)
+            )
 
         output_stream.close()
         stderr.flush()
@@ -169,7 +174,7 @@ def backup_globals(backup_directory, config, connection_params, env=None):
         stderr.close()
 
     if returncode != 0:
-        raise PgError("pg_dumpall command exited with failure code %d." % returncode)
+        raise BackupError("pg_dumpall command exited with failure code %d." % returncode)
 
 
 def generate_manifest(backups, path):
@@ -177,7 +182,10 @@ def generate_manifest(backups, path):
     manifest = open(os.path.join(path, "MANIFEST"), "w")
     for dbname, dumpfile in backups:
         try:
-            print("%s\t%s" % (dbname.encode("utf8"), os.path.basename(dumpfile)), file=manifest)
+            print(
+                "%s\t%s" % (dbname.encode("utf8"), os.path.basename(dumpfile)),
+                file=manifest,
+            )
         except UnicodeError as exc:
             LOG.error("Failed to encode dbname %s: %s", dbname, exc)
     manifest.close()
@@ -197,7 +205,7 @@ def pgauth2args(config):
         if VER >= "8.4":
             args.extend(["--role", config["pgdump"]["role"]])
         else:
-            raise PgError(
+            raise BackupError(
                 "The --role option is available only in Postgres" " versions 8.4 and higher."
             )
 
@@ -236,7 +244,7 @@ def backup_pgsql(backup_directory, config, databases):
 
     :param backup_directory: directory to save pg_dump output to
     :param config: PgDumpPlugin config dictionary
-    :raises: OSError, PgError on error
+    :raises: OSError, BackupError on error
     """
     connection_params = pgauth2args(config)
     extra_options = pg_extra_options(config)
