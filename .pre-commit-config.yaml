@@ -1,12 +1,14 @@
 ---
+default_language_version:
+        python: python3.8
 repos:
 -   repo: https://github.com/ambv/black
     rev: 20.8b1
     hooks:
     -  id: black
        args: [--line-length=100]
--   repo: git://github.com/pre-commit/mirrors-pylint
-    rev: v2.6.0
+-   repo: https://github.com/pre-commit/mirrors-pylint
+    rev: v3.0.0a5
     hooks:
     -  id: pylint
 -   repo: https://github.com/pycqa/isort

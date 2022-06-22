@@ -217,7 +217,7 @@ class BackupRunner(object):
                 "Purging would only recover an additional %s", format_bytes(sum(to_purge.values()))
             )
             LOG.info(
-                "Only %s total would be available, but the current " "backup requires %s",
+                "Only %s total would be available, but the current backup requires %s",
                 format_bytes(available_bytes),
                 format_bytes(required_bytes),
             )
