@@ -40,12 +40,7 @@ CONFIGSPEC = (
 extra-defaults      = boolean(default=no)
 mysql-binpath       = force_list(default=list())
 
-lock-method         = option('flush-lock',
-                             'lock-tables',
-                             'single-transaction',
-                             'auto-detect',
-                             'none',
-                             default='auto-detect')
+lock-method         = option('flush-lock', 'lock-tables', 'single-transaction', 'auto-detect', 'none', default='auto-detect') # pylint: disable=line-too-long
 
 databases           = force_list(default=list('*'))
 exclude-databases   = force_list(default=list())
