@@ -246,7 +246,9 @@ class Backupset(object):
         return "%s [%s]" % (self.name, self.path)
 
     def __cmp__(self, other):
-        _cmp = lambda x, y: (x > y) - (x < y)
+        def _cmp(value1, value2):
+            return (value1 > value2) - (value1 < value2)
+
         return _cmp(self.name, other.name)
 
 
@@ -386,7 +388,9 @@ class Backup(object):
         )
 
     def __cmp__(self, other):
-        _cmp = lambda x, y: (x > y) - (x < y)
+        def _cmp(value1, value2):
+            return (value1 > value2) - (value1 < value2)
+
         return _cmp(
             self.config["holland:backup"]["start-time"],
             other.config["holland:backup"]["start-time"],

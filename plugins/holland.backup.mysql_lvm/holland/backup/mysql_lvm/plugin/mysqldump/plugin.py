@@ -130,7 +130,7 @@ class MysqlDumpLVMBackup(object):
         if self.config["mysqldump"]["bin-log-position"]:
             LOG.warning("bin-log-position is not supported with mysqldump-lvm.")
             LOG.warning(
-                "Replication status will be saved to the " "[mysql:replication] section in %s",
+                "Replication status will be saved to the [mysql:replication] section in %s",
                 self.config.filename,
             )
             self.config["mysqldump"]["bin-log-position"] = False

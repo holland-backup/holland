@@ -11,9 +11,39 @@ pipeline {
       steps {
         sh '''apt-get update
 apt-get install -y python3-pip python3-psycopg2 rsync
+pip3 install configobj
 pip3 install pylint
 pip3 install six
 python3 --version'''
+      }
+    }
+
+    stage('Install holland') {
+      steps {
+        sh '''# Move over to tmp to prevent file permissions issues
+mkdir -p /tmp/holland
+rsync -art $WORKSPACE/ /tmp/holland/
+cd /tmp/holland
+
+# Install Holland
+python3 setup.py install
+
+# Install Plugins
+for i in `ls -d plugins/holland.*`
+do
+    cd /tmp/holland/${i}
+    python3 setup.py install
+    exit_code=$?
+    if [ $exit_code -ne 0 ]
+    then
+        echo "Failed installing $i"
+        exit $exit_code
+    fi
+done
+
+# Install Commvault script
+cd /tmp/holland/contrib/holland-commvault/
+python3 setup.py install'''
       }
     }
 
@@ -47,35 +77,6 @@ fi'''
           }
         }
 
-      }
-    }
-
-    stage('Install holland') {
-      steps {
-        sh '''# Move over to tmp to prevent file permissions issues
-mkdir -p /tmp/holland
-rsync -art $WORKSPACE/ /tmp/holland/
-cd /tmp/holland
-
-# Install Holland
-python3 setup.py install
-
-# Install Plugins
-for i in `ls -d plugins/holland.*`
-do
-    cd /tmp/holland/${i}
-    python3 setup.py install
-    exit_code=$?
-    if [ $exit_code -ne 0 ]
-    then
-        echo "Failed installing $i"
-        exit $exit_code
-    fi
-done
-
-# Install Commvault script
-cd /tmp/holland/contrib/holland-commvault/
-python3 setup.py install'''
       }
     }
 

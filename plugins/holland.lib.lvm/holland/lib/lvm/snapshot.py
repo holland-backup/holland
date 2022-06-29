@@ -64,7 +64,7 @@ class Snapshot(object):
 
             if filesystem == "xfs":
                 LOG.info(
-                    "xfs filesystem detected on %s. " "Using mount -o nouuid",
+                    "xfs filesystem detected on %s. Using mount -o nouuid",
                     snapshot.device_name(),
                 )
                 options = "nouuid"
@@ -127,7 +127,7 @@ class Snapshot(object):
             snapshot.reload()
             if "S" in snapshot.lv_attr:
                 LOG.error(
-                    "Snapshot space (%s) exceeded. " "Snapshot %s is no longer valid",
+                    "Snapshot space (%s) exceeded. Snapshot %s is no longer valid",
                     snapshot.device_name(),
                     format_bytes(int(snapshot.lv_size)),
                 )

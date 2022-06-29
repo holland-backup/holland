@@ -15,7 +15,7 @@ ALL_DATABASES = object()
 def check_master_data(version, arg):
     """Validate --master-data against a mysqldump version"""
     if version < (4, 1, 8) and arg:
-        raise MyOptionError("--master-data only takes an argument in MySQL " ">= 4.1.8")
+        raise MyOptionError("--master-data only takes an argument in MySQL >= 4.1.8")
     if arg:
         try:
             value = int(arg)
@@ -23,7 +23,7 @@ def check_master_data(version, arg):
         except ValueError:
             raise MyOptionError("Invalid argument to --master-data: %r" % arg)
         except AssertionError:
-            raise MyOptionError("Argument to --master-data must be 1 or 2 " "not %r" % arg)
+            raise MyOptionError("Argument to --master-data must be 1 or 2 not %r" % arg)
 
 
 class MySQLDumpError(Exception):

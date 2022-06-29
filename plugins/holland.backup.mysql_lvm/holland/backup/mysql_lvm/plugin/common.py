@@ -66,14 +66,14 @@ def build_snapshot(config, logical_volume, suppress_tmpdir=False):
             _snapshot_size = snapshot_size
             snapshot_size = parse_bytes(snapshot_size) / extent_size
             LOG.info(
-                "Using requested snapshot-size %s " "rounded by extent-size %s to %s.",
+                "Using requested snapshot-size %s rounded by extent-size %s to %s.",
                 _snapshot_size,
                 format_bytes(extent_size),
                 format_bytes(snapshot_size * extent_size),
             )
             if snapshot_size < 1:
                 raise BackupError(
-                    "Requested snapshot-size (%s) is " "less than 1 extent" % _snapshot_size
+                    "Requested snapshot-size (%s) is less than 1 extent" % _snapshot_size
                 )
             if snapshot_size > int(logical_volume.vg_free_count):
                 LOG.info(
@@ -135,7 +135,7 @@ def _dry_run(target_directory, volume, snapshot, datadir):
     LOG.info("* Would mount on %s", snapshot.mountpoint or "generated temporary directory")
     if getmount(target_directory) == getmount(datadir):
         LOG.error(
-            "Backup directory %s is on the same filesystem as " "the source logical volume %s.",
+            "Backup directory %s is on the same filesystem as the source logical volume %s.",
             target_directory,
             volume.device_name(),
         )
