@@ -63,7 +63,7 @@ PARSER.set_defaults(
 SUBPARSER = PARSER.add_subparsers(dest="command")
 
 
-class Command(object):
+class Command:
     """Base Command class for implementing pluggable
     commmands.
 

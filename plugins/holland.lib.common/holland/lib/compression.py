@@ -57,7 +57,7 @@ def lookup_compression(method):
         raise OSError("Unsupported compression method '%s'" % method)
 
 
-class CompressionInput(object):
+class CompressionInput:
     """
     Class to create a compressed file descriptor for reading.  Functions like
     a standard file descriptor such as from open().
@@ -112,7 +112,7 @@ class CompressionInput(object):
         self.closed = True
 
 
-class CompressionOutput(object):
+class CompressionOutput:
     """
     Class to create a compressed file descriptor for writing.  Functions like
     a standard file descriptor such as from open().

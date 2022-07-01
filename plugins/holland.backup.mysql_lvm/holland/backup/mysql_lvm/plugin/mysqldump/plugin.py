@@ -58,7 +58,7 @@ log-error               = string(default=None)
 )
 
 
-class MysqlDumpLVMBackup(object):
+class MysqlDumpLVMBackup:
     """A Holland Backup plugin suitable for performing LVM snapshots of a
     filesystem underlying a live MySQL instance.
 

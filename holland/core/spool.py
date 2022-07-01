@@ -27,7 +27,7 @@ def timestamp_dir(when=None):
     return time.strftime("%Y%m%d_%H%M%S", time.localtime(when))
 
 
-class Spool(object):
+class Spool:
     """
     A directory spool where backups are saved
     """
@@ -132,7 +132,7 @@ class Spool(object):
         return iter(self.list_backupsets())
 
 
-class Backupset(object):
+class Backupset:
     """
     Define backupset
     """
@@ -276,7 +276,7 @@ relative-symlinks     = boolean(default=no)
 """.splitlines()
 
 
-class Backup(object):
+class Backup:
     """
     Representation of a backup instance.
     """

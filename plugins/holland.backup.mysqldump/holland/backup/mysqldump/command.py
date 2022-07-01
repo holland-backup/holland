@@ -34,7 +34,7 @@ class MyOptionError(Exception):
     """Exception class for MySQL Option validation"""
 
 
-class MyOptionChecker(object):
+class MyOptionChecker:
     """Container for adding and validating multiple options"""
 
     OPTION_ARG_CRE = re.compile(r"^(--[^=]+)(?:=(.+))?$", re.UNICODE)
@@ -62,7 +62,7 @@ class MyOptionChecker(object):
         self._options[my_option.option] = my_option
 
 
-class MyOption(object):
+class MyOption:
     """General MySQL command option"""
 
     def __init__(self, option, min_version=None, arg=None):
@@ -171,7 +171,7 @@ def mysqldump_version(command):
         raise MySQLDumpError("Failed to determine mysqldump version for %s" % command)
 
 
-class MySQLDump(object):
+class MySQLDump:
     """mysqldump command runner"""
 
     def __init__(self, defaults_file, cmd_path="mysqldump", extra_defaults=False, mock_env=None):

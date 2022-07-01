@@ -169,7 +169,7 @@ def call_hooks(event, entry):
     return 0
 
 
-class PurgeManager(object):
+class PurgeManager:
     """
     Find and clean up old backups
     """

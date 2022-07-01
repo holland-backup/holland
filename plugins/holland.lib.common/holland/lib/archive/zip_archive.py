@@ -9,7 +9,7 @@ import zipfile
 LOG = logging.getLogger(__name__)
 
 
-class ZipArchive(object):
+class ZipArchive:
     """
     Read, write, access Zip archives using zipfile.
     """

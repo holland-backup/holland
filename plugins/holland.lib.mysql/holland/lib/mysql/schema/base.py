@@ -14,7 +14,7 @@ LOG = logging.getLogger(__name__)
 TRANSACTIONAL_ENGINES = "innodb", "federated", "myisam_mrg", "memory", "view", "blackhole"
 
 
-class MySQLSchema(object):
+class MySQLSchema:
     """A catalog summary of a MySQL Instance"""
 
     def __init__(self):
@@ -168,7 +168,7 @@ class MySQLSchema(object):
         self.timestamp = time.time()
 
 
-class Database(object):
+class Database:
     """Representation of a MySQL Database
 
     Only the name an whether this database is
@@ -231,7 +231,7 @@ class Database(object):
     __repr__ = __str__
 
 
-class Table(object):
+class Table:
     """Representation of a MySQL Table"""
 
     __slots__ = ("database", "name", "data_size", "index_size", "engine", "excluded")
@@ -271,7 +271,7 @@ class Table(object):
         )
 
 
-class DatabaseIterator(object):
+class DatabaseIterator:
     """Iterate over databases returns by a MySQLClient instance
 
     client must have a show_databases() method
@@ -294,7 +294,7 @@ class DatabaseIterator(object):
                 yield Database(name)
 
 
-class TableIterator(object):
+class TableIterator:
     """Iterate over tables returned by the client instance
 
     client must have a show_table_metadata(database_name) method

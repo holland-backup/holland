@@ -70,7 +70,7 @@ pre-args = string(default=None)
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
 
-class MysqlLVMBackup(object):
+class MysqlLVMBackup:
     """
     A Holland Backup plugin suitable for performing LVM snapshots of a
     filesystem underlying a live MySQL instance.

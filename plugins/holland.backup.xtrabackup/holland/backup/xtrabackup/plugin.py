@@ -43,7 +43,7 @@ strict             = boolean(default=yes)
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
 
-class XtrabackupPlugin(object):
+class XtrabackupPlugin:
     """plugin for backuping database using xtrabackup"""
 
     #: control connection to mysql server

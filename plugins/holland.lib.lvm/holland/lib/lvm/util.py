@@ -121,7 +121,7 @@ def parse_bytes(units_string):
     return int(float(number) * 1024 ** (exponent))
 
 
-class SignalManager(object):
+class SignalManager:
     """Manage signals around critical sections"""
 
     def __init__(self):

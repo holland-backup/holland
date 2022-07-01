@@ -12,7 +12,7 @@ from ._mysqld import MySQLServer, generate_server_config, locate_mysqld_exe
 LOG = logging.getLogger(__name__)
 
 
-class InnodbRecoveryAction(object):
+class InnodbRecoveryAction:
     """Perform InnoDB recovery against a MySQL data directory """
 
     def __init__(self, mysqld_config):
