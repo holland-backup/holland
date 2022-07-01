@@ -9,7 +9,7 @@ from subprocess import CalledProcessError, Popen, list2cmdline
 LOG = logging.getLogger(__name__)
 
 
-class DirArchiveAction(object):
+class DirArchiveAction:
     """Copy datadir"""
 
     def __init__(self, snap_datadir, backup_datadir, config):

@@ -23,7 +23,7 @@ import re
 from subprocess import getstatusoutput
 
 
-class CmdOption(object):
+class CmdOption:
     """
     Create CmdOption class
     """

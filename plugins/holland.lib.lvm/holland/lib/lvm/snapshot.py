@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 __all__ = ["Snapshot", "CallbackFailuresError"]
 
 
-class Snapshot(object):
+class Snapshot:
     """Snapshot state machine"""
 
     def __init__(self, name, size, mountpoint):

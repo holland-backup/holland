@@ -33,7 +33,7 @@ additional-options = force_list(default=list())
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
 
-class MongoDump(object):
+class MongoDump:
     "MongoDB backup plugin for holland"
 
     def __init__(self, name, config, target_directory, dry_run=False):

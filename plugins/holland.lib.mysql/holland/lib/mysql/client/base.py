@@ -50,7 +50,7 @@ def flatten_list(a_list):
     )
 
 
-class MySQLClient(object):
+class MySQLClient:
     """pymysql Helper
 
     Provides common functions for reading meta-data

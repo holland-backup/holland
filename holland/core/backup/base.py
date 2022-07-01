@@ -22,7 +22,7 @@ class BackupError(Exception):
     """Error during a backup"""
 
 
-class BackupPlugin(object):
+class BackupPlugin:
     """
     Define a backup plugin
     """
@@ -81,7 +81,7 @@ def load_plugin(name, config, path, dry_run):
         )
 
 
-class BackupRunner(object):
+class BackupRunner:
     """
     Run backup
     """

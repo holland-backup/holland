@@ -4,7 +4,7 @@ import fnmatch
 import re
 
 
-class BaseFilter(object):
+class BaseFilter:
     """Filter a string based on a list of regular expression or glob patterns.
 
     This should be inherited and the __call__ overriden with a real
