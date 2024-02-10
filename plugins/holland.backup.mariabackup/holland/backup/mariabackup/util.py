@@ -72,7 +72,7 @@ def mariabackup_version():
         raise BackupError("Failed to run %s: [%d] %s" % cmdline, exc.errno, exc.strerror)
 
     for line in process.stdout:
-        LOG.info("%s", line.rstrip())
+        LOG.info("# %s", line.decode("UTF-8").rstrip())
     process.wait()
     if process.returncode != 0:
         raise BackupError("%s returned failure status [%d]" % (cmdline, process.returncode))
