@@ -40,6 +40,11 @@ class InnodbRecoveryAction(object):
         LOG.info("%s has stopped", mysqld_exe)
 
         if mysqld.returncode != 0:
+            LOG.error("Configuration file was:")
+            LOG.error("#######################")
+            for line in open(os.path.join(mycnf_path), "r"):
+                LOG.error("%s", line.rstrip())
+            LOG.error("#######################")
             datadir = self.mysqld_config["datadir"]
             for line in open(os.path.join(datadir, "innodb_recovery.log"), "r"):
                 LOG.error("%s", line.rstrip())

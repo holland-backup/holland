@@ -84,6 +84,9 @@ class Command(object):
     description = " "
 
     def __init__(self):
+        if self.name in SUBPARSER.choices:
+            self.optparser = SUBPARSER.choices[self.name]
+            return
         self.optparser = SUBPARSER.add_parser(
             self.name,
             help=f"{self.name} {self.description}",
