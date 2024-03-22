@@ -12,7 +12,7 @@ from pkg_resources import get_distribution
 LOG = logging.getLogger(__name__)
 HOLLAND_VERSION = get_distribution("holland").version
 HOLLAND_BANNER = f"""
-Holland Backup v%s
+Holland Backup v{HOLLAND_VERSION}
 Copyright (c) 2008-2018 Rackspace US, Inc.
 More info available at http://hollandbackup.org
 
@@ -21,7 +21,6 @@ More info available at http://hollandbackup.org
 [[[[[[[]]]]]]] [[[[[[[]]]]]]]
 [[[[[[[]]]]]]] [[[[[[[]]]]]]]
 
-{HOLLAND_VERSION}
 """
 
 HOLLAND_CONF = "/etc/holland/holland.conf"
