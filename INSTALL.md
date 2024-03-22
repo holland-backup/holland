@@ -68,7 +68,7 @@ Please see their documentation for details on how to install and use these conta
 ### Install base
 ** Requires Python Setuptool
 ```
-# python setup.py install
+# python3 -m pip install .
 ```
 
 ### Create documentation
@@ -81,20 +81,20 @@ Please see their documentation for details on how to install and use these conta
 ### Install common plugins
 ```
 # cd ${TARGET}/holland/plugins/holland.lib.common/
-# python setup.py install
+# python3 -m pip install .
 ```
 
 ### Most plugins require the holland.lib.mysql plugin
 ** The MySQldb connector requires gcc, mysql-devel, and python-devel
 ```
 # cd ${TARGET}/holland/plugins/holland.lib.mysql/
-# python setup.py install
+# python3 -m pip install .
 ```
 
 ### Install other plugins
 ```
 # cd ../holland.backup.{plugin name}
-# python setup.py install
+# python3 -m pip install .
 ```
 
 ### Setup configuration files
