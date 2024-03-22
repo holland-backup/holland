@@ -49,7 +49,7 @@ port = integer(default=None)
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
 
-class PgDump(object):
+class PgDump:
     """
     Postgres pg_dump backups
     """
