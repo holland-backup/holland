@@ -156,8 +156,7 @@ def main():
         except IOError:
             logging.info("Holland (commvault agent) failed to open/read status file")
             return 1
-        else:
-            status.close()
+        status.close()
         return ret
     except IOError as ex:
         logging.warning("Holland (commvault agent) IOError: %r", ex)

@@ -31,8 +31,7 @@ class Lock:
         except IOError as exc:
             self.lock = None
             raise LockError(str(exc), exc)
-        else:
-            return True
+        return True
 
     def is_locked(self):
         """Check for lock"""
@@ -48,5 +47,4 @@ class Lock:
             self.lock = None
         except IOError as exc:
             raise LockError(str(exc), exc)
-        else:
-            return True
+        return True

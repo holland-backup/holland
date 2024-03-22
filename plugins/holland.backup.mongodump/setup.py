@@ -15,7 +15,7 @@ setup(
     packages=find_packages(exclude=["ez_setup", "examples", "tests", "tests.*"]),
     namespace_packages=["holland", "holland.backup"],
     zip_safe=True,
-    install_requires=["pymongo"],
+    install_requires=["pymongo>=3.6"],
     # holland looks for plugins in holland.backup
     entry_points="""
       [holland.backup]

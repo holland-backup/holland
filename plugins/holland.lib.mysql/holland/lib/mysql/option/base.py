@@ -2,6 +2,7 @@
 
 http://dev.mysql.com/doc/refman/5.1/en/option-files.html
 """
+
 import codecs
 import logging
 import os
@@ -13,7 +14,7 @@ LOG = logging.getLogger(__name__)
 
 def merge_options(*defaults_files):
     """Merge multiple defaults files together"""
-    defaults_config = dict(client={})
+    defaults_config = {"client": {}}
 
     def merge(dst_dict, src_dict):
         """Merge two dictionaries non-destructively"""

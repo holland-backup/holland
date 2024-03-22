@@ -260,7 +260,7 @@ def xtrabackup_version():
             line = line.rstrip().decode("UTF-8")
         if "version" in line:
             xtrabackup_version = re.search(r"version\s*([\d.]+)", line).group(1)
-        LOG.info("%s", line)
+        LOG.info("# %s", line)
 
     process.wait()
     if process.returncode != 0:

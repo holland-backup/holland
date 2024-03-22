@@ -76,7 +76,7 @@ class MongoDump:
                 uri += "@"
             uri += self.config["mongodump"].get("host")
         client = MongoClient(uri)
-        dbs = client.database_names()
+        dbs = client.list_database_names()
         for database in dbs:
             c_db = client[database]
             tup = c_db.command("dbstats")
