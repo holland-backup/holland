@@ -21,7 +21,7 @@ binary = string(default=/usr/bin/sqlite3)
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
 
-class SQLitePlugin(object):
+class SQLitePlugin:
     """Define Plugin to backup SQLite"""
 
     def __init__(self, name, config, target_directory, dry_run=False):

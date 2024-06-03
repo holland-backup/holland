@@ -8,7 +8,7 @@ from holland.lib.mysql import MySQLError
 LOG = logging.getLogger(__name__)
 
 
-class RecordMySQLReplicationAction(object):
+class RecordMySQLReplicationAction:
     """Connect to MySQL"""
 
     def __init__(self, client, config):
