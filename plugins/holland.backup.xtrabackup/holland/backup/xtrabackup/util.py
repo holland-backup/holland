@@ -232,13 +232,11 @@ def build_xb_args(config, basedir, defaults_file=None, binary_xtrabackup=False):
         args.append("--strict=OFF")
     if int(xtrabackup_version().split(".")[0]) < 8:
         args.append("--no-timestamp")
-
+    if extra_opts:
+        args.extend(extra_opts)
     if not binary_xtrabackup:
         if basedir:
             args.append(basedir)
-    else:
-        if extra_opts:
-            args.extend(extra_opts)
     return args
 
 
