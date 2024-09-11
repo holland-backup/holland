@@ -77,7 +77,7 @@ estimate-method = string(default='plugin')
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
 
-class MySQLDumpPlugin(object):
+class MySQLDumpPlugin:
     """MySQLDump Backup Plugin interface for Holland"""
 
     CONFIGSPEC = CONFIGSPEC

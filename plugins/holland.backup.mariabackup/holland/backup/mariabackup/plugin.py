@@ -41,7 +41,7 @@ pre-command         = string(default=None)
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
 
-class MariabackupPlugin(object):
+class MariabackupPlugin:
     """control connection to mysql server"""
 
     mysql = None

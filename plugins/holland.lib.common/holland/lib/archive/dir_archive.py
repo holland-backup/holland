@@ -9,7 +9,7 @@ import subprocess
 LOG = logging.getLogger(__name__)
 
 
-class DirArchive(object):
+class DirArchive:
     """
     Read, write, access directory archives.  Treats a directory like an
     archive.
