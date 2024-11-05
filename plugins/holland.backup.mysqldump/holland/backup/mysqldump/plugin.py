@@ -567,10 +567,14 @@ def parse_size(units_string):
 
     units = "kKmMgGtTpPeE"
 
-    match = re.match(r"^(\d+(?:[.]\d+)?)([%s])$" % units, units_string)
+    match = re.match(r"^(\d+(?:[.]\d+)?)([%s]?)$" % units, units_string)
     if not match:
         raise ValueError("Invalid constant size syntax %r" % units_string)
     number, unit = match.groups()
+
+    if not unit:
+       return int(float(number))
+
     unit = unit.upper()
 
     exponent = "KMGTPE".find(unit)
