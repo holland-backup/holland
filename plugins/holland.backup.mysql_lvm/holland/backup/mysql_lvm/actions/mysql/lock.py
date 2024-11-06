@@ -5,7 +5,7 @@ import logging
 LOG = logging.getLogger(__name__)
 
 
-class FlushAndLockMySQLAction(object):
+class FlushAndLockMySQLAction:
     """Lock Database"""
 
     def __init__(self, client, extra_flush=True):

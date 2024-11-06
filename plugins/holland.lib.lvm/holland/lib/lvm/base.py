@@ -19,7 +19,7 @@ from holland.lib.lvm.util import getdevice
 LOG = logging.getLogger(__name__)
 
 
-class Volume(object):
+class Volume:
     """Abstract Volume object for LVM Volume implementations
 
     This class should not directly be instantiated, but rather one
