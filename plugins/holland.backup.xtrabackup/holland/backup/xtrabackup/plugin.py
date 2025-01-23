@@ -26,7 +26,7 @@ CONFIGSPEC = (
 global-defaults     = string(default='/etc/my.cnf')
 innobackupex        = string(default='innobackupex')
 ibbackup            = string(default=None)
-stream              = string(default=tar)
+stream              = string(default=xbstream)
 apply-logs          = boolean(default=yes)
 slave-info          = boolean(default=no)
 safe-slave-backup   = boolean(default=no)
