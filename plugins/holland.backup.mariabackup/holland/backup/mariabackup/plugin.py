@@ -92,12 +92,7 @@ class MariabackupPlugin(object):
         backup_directory = self.target_directory
         stream = util.determine_stream_method(config["stream"])
         if stream:
-            if stream == "tar":
-                archive_path = join(backup_directory, "backup.tar")
-            elif "stream" in stream:
-                archive_path = join(backup_directory, "backup.mb")
-            else:
-                raise BackupError("Unknown stream method '%s'" % stream)
+            archive_path = join(backup_directory, "backup.mb")
             try:
                 return open_stream(archive_path, "w", **self.config["compression"])
             except OSError as exc:
