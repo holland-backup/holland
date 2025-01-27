@@ -106,7 +106,8 @@ class MariabackupPlugin(object):
         mb_cfg = self.config["mariabackup"]
         args = util.build_mb_args(mb_cfg, self.target_directory, self.defaults_path)
         LOG.info("* mariabackup command: %s", list2cmdline(args))
-        args = ["mariabackup", "--defaults-file=" + self.defaults_path, "--help"]
+        bin_path = util.get_mariadb_backup_bin_path(self.config)
+        args = [bin_path, "--defaults-file=" + self.defaults_path, "--help"]
         cmdline = list2cmdline(args)
         LOG.info("* Verifying generated config '%s'", self.defaults_path)
         LOG.debug("* Verifying via command: %s", cmdline)

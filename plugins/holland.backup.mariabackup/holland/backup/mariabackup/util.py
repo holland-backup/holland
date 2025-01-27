@@ -9,7 +9,7 @@ Utility methods used by the mariabackup plugin
 import codecs
 import logging
 import tempfile
-from os.path import expanduser, isabs, join
+from os.path import expanduser, isabs, join, exists
 from string import Template
 from subprocess import PIPE, STDOUT, Popen, list2cmdline
 
@@ -58,12 +58,10 @@ def generate_defaults_file(defaults_file, include=(), auth_opts=None):
     return defaults_file
 
 
-def mariabackup_version():
+def mariabackup_version(mb_cfg):
     """Check Mariabackup version"""
-    mariabackup_binary = "mariabackup"
-    if not isabs(mariabackup_binary):
-        mariabackup_binary = which(mariabackup_binary)
-    mb_version = [mariabackup_binary, "--version"]
+    bin_path = get_mariadb_backup_bin_path(mb_cfg)
+    mb_version = [bin_path, "--version"]
     cmdline = list2cmdline(mb_version)
     LOG.info("Executing: %s", cmdline)
     try:
@@ -193,10 +191,7 @@ def add_mariabackup_defaults(defaults_path, **kwargs):
 
 def build_mb_args(config, basedir, defaults_file=None):
     """Build the commandline for mariabackup"""
-    innobackupex = config["innobackupex"]
-    if not isabs(innobackupex):
-        innobackupex = which(innobackupex)
-
+    bin_path = get_mariadb_backup_bin_path(config)
     ibbackup = config["ibbackup"]
     stream = determine_stream_method(config["stream"])
     tmpdir = evaluate_tmpdir(config["tmpdir"], basedir)
@@ -206,7 +201,7 @@ def build_mb_args(config, basedir, defaults_file=None):
     # filter additional options to remove any empty values
     extra_opts = [_f for _f in config["additional-options"] if _f]
 
-    args = [innobackupex]
+    args = [bin_path]
     if defaults_file:
         args.append("--defaults-file=" + defaults_file)
     args.append("--backup")
@@ -229,3 +224,35 @@ def build_mb_args(config, basedir, defaults_file=None):
     if basedir:
         args.append("--target-dir=" + basedir)
     return args
+
+def get_mariadb_backup_bin_path(mb_cfg):
+    """Return the full path to the MariaDB backup binary.
+
+    Checks config['innobackupex'] setting:
+    - If 'mariadb-backup' or 'mariabackup': searches PATH for mariadb-backup first
+      (preferred), then falls back to searching for mariabackup
+    - If relative path: resolve using PATH
+    - If absolute path: verify it exists
+
+    Raises BackupError if no valid binary is found.
+    """
+    bin_path = mb_cfg["innobackupex"]
+
+    if bin_path in ["mariabackup", "mariadb-backup"]:
+        try:
+            bin_path = which("mariadb-backup")
+            return bin_path
+        except BackupError:
+            pass
+
+        bin_path = which("mariabackup")
+        return bin_path
+
+    if not isabs(bin_path):
+        bin_path = which(bin_path)
+        return bin_path
+
+    if exists(bin_path):
+        return bin_path
+
+    raise BackupError("No command found '%s'" % bin_path)
