@@ -106,7 +106,7 @@ class MariabackupPlugin(object):
         mb_cfg = self.config["mariabackup"]
         args = util.build_mb_args(mb_cfg, self.target_directory, self.defaults_path)
         LOG.info("* mariabackup command: %s", list2cmdline(args))
-        bin_path = util.get_mariadb_backup_bin_path(self.config)
+        bin_path = util.get_mariadb_backup_bin_path(mb_cfg)
         args = [bin_path, "--defaults-file=" + self.defaults_path, "--help"]
         cmdline = list2cmdline(args)
         LOG.info("* Verifying generated config '%s'", self.defaults_path)
@@ -127,11 +127,11 @@ class MariabackupPlugin(object):
 
     def backup(self):
         """Perform Backup"""
-        util.mariabackup_version()
+        mb_cfg = self.config["mariabackup"]
+        util.mariabackup_version(mb_cfg)
         if self.dry_run:
             self.dryrun()
             return
-        mb_cfg = self.config["mariabackup"]
         backup_directory = self.target_directory
         tmpdir = util.evaluate_tmpdir(mb_cfg["tmpdir"], backup_directory)
         # innobackupex --tmpdir does not affect mariabackup
