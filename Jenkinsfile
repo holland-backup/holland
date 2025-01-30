@@ -14,6 +14,8 @@ apt-get install -y python3-pip python3-psycopg2 rsync
 pip3 install configobj
 pip3 install 'pylint>=2.17.0,<3.0.0'
 pip3 install six
+# Install pymongo with pip to get around error when holland-monogodump is installed via setup.py
+pip3 install 'pymongo>=3.6'
 python3 --version'''
       }
     }
