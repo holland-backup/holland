@@ -89,7 +89,7 @@ def apply_xtrabackup_logfile(xb_cfg, backupdir, binary_xtrabackup=False):
     """
     # run ${innobackupex} --apply-log ${backupdir}
     # only applies when streaming is not used
-    stream_method = determine_stream_method(xb_cfg["stream"])
+    stream_method = determine_stream_method(xb_cfg["stream"], binary_xtrabackup=binary_xtrabackup)
     if stream_method is not None:
         LOG.warning("Skipping --prepare/--apply-logs since backup is streamed")
         return
@@ -121,11 +121,12 @@ def apply_xtrabackup_logfile(xb_cfg, backupdir, binary_xtrabackup=False):
         raise BackupError("%s returned failure status [%d]" % (cmdline, process.returncode))
 
 
-def determine_stream_method(stream):
+def determine_stream_method(stream, binary_xtrabackup=False):
     """Calculate the stream option from the holland config"""
     stream = stream.lower()
+    # For xtrabackup >= 8.0 settings of tar/tar4idb/yes/1/true are ignored and force the use of xbstream
     if stream in ("yes", "1", "true", "tar", "tar4ibd"):
-        return "tar"
+        return "xbstream" if binary_xtrabackup else "tar"
     if stream in ("xbstream",):
         return "xbstream"
     if stream in ("no", "0", "false"):
@@ -192,7 +193,7 @@ def build_xb_args(config, basedir, defaults_file=None, binary_xtrabackup=False):
             innobackupex = which(innobackupex)
 
     ibbackup = config["ibbackup"]
-    stream = determine_stream_method(config["stream"])
+    stream = determine_stream_method(config["stream"], binary_xtrabackup=binary_xtrabackup)
     tmpdir = evaluate_tmpdir(config["tmpdir"], basedir)
     slave_info = config["slave-info"]
     safe_slave_backup = config["safe-slave-backup"]
