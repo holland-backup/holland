@@ -573,7 +573,7 @@ def parse_size(units_string):
     number, unit = match.groups()
 
     if not unit:
-       return int(float(number))
+        return int(float(number))
 
     unit = unit.upper()
 
