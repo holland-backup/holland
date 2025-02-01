@@ -13,7 +13,7 @@ foo_param = boolean(default=no)
 """.splitlines()
 
 
-class ExamplePlugin(object):
+class ExamplePlugin:
     """An example backup plugin for holland"""
 
     def __init__(self, name, config, target_directory, dry_run=False):

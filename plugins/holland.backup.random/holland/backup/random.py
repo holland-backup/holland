@@ -13,7 +13,7 @@ bytes = integer(default=50)
 """.splitlines()
 
 
-class RandomPlugin(object):
+class RandomPlugin:
     """Back up randomness"""
 
     def __init__(self, name, config, target_directory, dry_run=False):
