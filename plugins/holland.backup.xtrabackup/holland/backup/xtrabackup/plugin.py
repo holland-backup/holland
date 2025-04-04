@@ -26,7 +26,7 @@ CONFIGSPEC = (
 global-defaults     = string(default='/etc/my.cnf')
 innobackupex        = string(default='innobackupex')
 ibbackup            = string(default=None)
-stream              = string(default=tar)
+stream              = string(default=xbstream)
 apply-logs          = boolean(default=yes)
 slave-info          = boolean(default=no)
 safe-slave-backup   = boolean(default=no)
@@ -89,11 +89,11 @@ class XtrabackupPlugin(object):
         except IOError as exc:
             raise BackupError("[%d] %s" % (exc.errno, exc.strerror))
 
-    def open_xb_stdout(self):
+    def open_xb_stdout(self, binary_xtrabackup=False):
         """Open the stdout output for a streaming xtrabackup run"""
         config = self.config["xtrabackup"]
         backup_directory = self.target_directory
-        stream = util.determine_stream_method(config["stream"])
+        stream = util.determine_stream_method(config["stream"], binary_xtrabackup=binary_xtrabackup)
         if stream:
             if stream == "tar":
                 archive_path = join(backup_directory, "backup.tar")
@@ -157,7 +157,7 @@ class XtrabackupPlugin(object):
         )
         stderr = self.open_xb_logfile()
         try:
-            stdout = self.open_xb_stdout()
+            stdout = self.open_xb_stdout(binary_xtrabackup=binary_xtrabackup)
             exc = None
             try:
                 try:
