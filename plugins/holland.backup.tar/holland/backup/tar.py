@@ -25,7 +25,7 @@ directory = string(default='/home')
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
 
-class TarPlugin(object):
+class TarPlugin:
     """
     Define Tar Backup method
     """

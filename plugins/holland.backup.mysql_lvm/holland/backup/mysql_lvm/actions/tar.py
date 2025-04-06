@@ -12,7 +12,7 @@ from holland.core.backup import BackupError
 LOG = logging.getLogger(__name__)
 
 
-class TarArchiveAction(object):
+class TarArchiveAction:
     """Create tar file"""
 
     def __init__(self, snap_datadir, archive_stream, config):

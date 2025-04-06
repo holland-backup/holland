@@ -50,7 +50,7 @@ port = integer(default=None)
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
 
-class PgBaseBackup(object):
+class PgBaseBackup:
     """
     Postgres pg_basebackup backups
     """
