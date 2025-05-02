@@ -3,7 +3,6 @@
 import codecs
 import logging
 import os
-import re
 import textwrap
 from copy import deepcopy
 
@@ -30,6 +29,7 @@ from holland.lib.mysql import (
 )
 from holland.lib.mysql.client.base import MYSQL_CLIENT_CONFIG_STRING
 from holland.lib.mysql.option import build_mysql_config, write_options
+from holland.lib.mysql.util import parse_size
 
 LOG = logging.getLogger(__name__)
 
@@ -554,29 +554,3 @@ def add_exclusions(schema, config):
     except IOError:
         LOG.error("Failed to write ignore-table exclusions to %s", config)
         raise
-
-
-def parse_size(units_string):
-    """Parse a MySQL-like size string into bytes
-
-    >> parse_size('4G')
-    4294967296
-    """
-
-    units_string = str(units_string)
-
-    units = "kKmMgGtTpPeE"
-
-    match = re.match(r"^(\d+(?:[.]\d+)?)([%s]?)$" % units, units_string)
-    if not match:
-        raise ValueError("Invalid constant size syntax %r" % units_string)
-    number, unit = match.groups()
-
-    if not unit:
-        return int(float(number))
-
-    unit = unit.upper()
-
-    exponent = "KMGTPE".find(unit)
-
-    return int(float(number) * 1024 ** (exponent + 1))
