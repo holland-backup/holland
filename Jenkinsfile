@@ -7,131 +7,166 @@ pipeline {
 
   }
   stages {
-    stage('Setup Env') {
+    stage('Install General Dependencies') {
       steps {
-        sh '''apt-get update
-apt-get install -y python3-pip python3-psycopg2 rsync
-pip3 install configobj
-pip3 install 'pylint>=2.17.0,<3.0.0'
-pip3 install six
-# Install pymongo with pip to get around error when holland-monogodump is installed via setup.py
-pip3 install 'pymongo>=3.6'
-python3 --version'''
+        sh '''
+        # Install packages
+        apt-get update && \
+        apt-get -yq install python3-pip python3-psycopg2 python3-mysqldb rsync curl && \
+        pip3 install configobj 'pylint>=2.17.0,<3.0.0' six 'pymongo>=3.6' && \
+        python3 --version
+        '''
       }
     }
-
-    stage('Install holland') {
+    stage('Display OS Info') {
       steps {
-        sh '''# Move over to tmp to prevent file permissions issues
-mkdir -p /tmp/holland
-rsync -art $WORKSPACE/ /tmp/holland/
-cd /tmp/holland
-
-# Install Holland
-python3 setup.py install
-
-# Install Plugins
-for i in `ls -d plugins/holland.*`
-do
-    cd /tmp/holland/${i}
-    python3 setup.py install
-    exit_code=$?
-    if [ $exit_code -ne 0 ]
-    then
-        echo "Failed installing $i"
-        exit $exit_code
-    fi
-done
-
-# Install Commvault script
-cd /tmp/holland/contrib/holland-commvault/
-python3 setup.py install'''
+        sh 'cat /etc/os-release'
       }
     }
+    stage('Install Holland') {
+      steps {
+        sh '''
+        # Move over to tmp to prevent file permissions issues
+        mkdir -p /tmp/holland
+        rsync -art $WORKSPACE/ /tmp/holland/
+        cd /tmp/holland
 
-    stage('pylint holland') {
+        # Install Holland
+        python3 setup.py install
+
+        # Install Plugins
+        for i in `ls -d plugins/holland.*`
+        do
+            cd /tmp/holland/${i}
+            python3 setup.py install
+            exit_code=$?
+            if [ $exit_code -ne 0 ]
+            then
+                echo "Failed installing $i"
+                exit $exit_code
+            fi
+        done
+
+        # Create Holland directories and copy configs
+        mkdir -p /etc/holland/providers /etc/holland/backupsets /var/log/holland /var/spool/holland
+        cp ${WORKSPACE}/config/holland.conf /etc/holland/
+        cp ${WORKSPACE}/config/providers/* /etc/holland/providers/
+        '''
+      }
+    }
+    stage('Pylint Holland and Plugins') {
       parallel {
-        stage('pylint holland') {
+        stage('Pylint Holland') {
           steps {
-            sh '''pylint holland
-
-'''
+            sh 'pylint holland'
           }
         }
-
-        stage('pylint plugins') {
+        stage('Pylint Plugins') {
           steps {
-            sh '''pylint_failed=0
-for d in $(ls -d ./plugins/*/holland ./contrib/holland-commvault/holland_commvault)
-do
-    echo $d
-    pylint $d
-    if [ $? -ne 0 ] && [ $pylint_failed -ne 1 ]
-    then
-        pylint_failed=1
-    fi
-done
-if [ $pylint_failed -ne 0 ]
-then
-    echo "Pylint failed; please review above output."
-    exit $pylint_failed
-fi'''
+            sh '''
+            pylint_failed=0
+            for d in $(ls -d ./plugins/*/holland ./contrib/holland-commvault/holland_commvault)
+            do
+                echo $d
+                pylint $d
+                if [ $? -ne 0 ] && [ $pylint_failed -ne 1 ]
+                then
+                    pylint_failed=1
+                fi
+            done
+            if [ $pylint_failed -ne 0 ]
+            then
+                echo "Pylint failed; please review above output."
+                exit $pylint_failed
+            fi
+            '''
           }
         }
-
       }
     }
-
-    stage('Setup holland') {
-      parallel {
-        stage('Setup holland') {
-          steps {
-            sh '''mkdir -p /etc/holland/providers /etc/holland/backupsets /var/log/holland /var/spool/holland
-cp ${WORKSPACE}/config/holland.conf /etc/holland/
-cp ${WORKSPACE}/config/providers/* /etc/holland/providers/
-'''
-          }
-        }
-
-        stage('Setup Database') {
-          steps {
-            sh '''DEBIAN_FRONTEND=noninteractive apt-get -yq install mysql-server python3-mysqldb|| echo "Ignore errors"
-
-mkdir -p /var/log/mysql/
-touch /var/log/mysql/error.log
-chown -R mysql:mysql /var/log/mysql
-
-rm -rf /var/lib/mysql/*
-mysqld --initialize-insecure --user=mysql 2>>/dev/null >>/dev/null
-mkdir -p /var/run/mysqld
-chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
-mysqld_safe --user=mysql 2>>/dev/null >>/dev/null &
-sleep 20
-'''
-          }
-        }
-
-      }
-    }
-
-    stage('Test holland') {
+    stage('Setup MySQL Database') {
       steps {
-        sh '''holland mc --name mysqldump mysqldump
-holland mc -f /tmp/mysqldump.conf mysqldump
-holland bk mysqldump --dry-run
-holland bk mysqldump
-holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001 --bkset mysqldump
-holland mc --name default mysqldump
-holland_cvmysqlsv -bkplevel 1 -attempt 1 -job 123456 -cn 957072-661129 -vm Instance001
+        sh '''
+        # Install MySQL
+        export DEBIAN_FRONTEND=noninteractive && \
+        apt-get -yq install mysql-server mysql-client || echo "Ignore errors"
 
-# Stopgap measure to check for issue 213
-sed -i \'s|^estimate-method = plugin$|estimate-method = const:1K|\' /etc/holland/backupsets/mysqldump.conf
-holland bk mysqldump
+        # Initialize MySQL
+        rm -rf /var/lib/mysql/* && \
+        mysqld --initialize-insecure --user=mysql 2>>/dev/null >>/dev/null
 
-# test that split command is working as expected
-sed -i \'s|^split = no|split = yes|\' /etc/holland/backupsets/mysqldump.conf
-holland bk mysqldump
-'''
+        # Start MySQL
+        mysqld_safe --user=mysql 2>>/dev/null >>/dev/null &
+        sleep 10
+        '''
+      }
+    }
+    stage('Test Holland with MySQL') {
+      steps {
+        sh '''
+
+        # Test holland mc -f
+        holland mc -f /tmp/mysqldump.conf mysqldump
+
+        # Create a mysqldump backupset
+        holland mc --name mysqldump mysqldump
+
+        # Test holland bk mysqldump --dry-run
+        holland bk mysqldump --dry-run
+
+        # Test holland bk mysqldump
+        holland bk mysqldump
+
+        # Test to check for https://github.com/holland-backup/holland/issues/213
+        sed -i \'s|^estimate-method = plugin$|estimate-method = const:1K|\' /etc/holland/backupsets/mysqldump.conf
+        holland bk mysqldump
+
+        # Test that split command is working as expected
+        sed -i \'s|^split = no|split = yes|\' /etc/holland/backupsets/mysqldump.conf
+        holland bk mysqldump
+        '''
+      }
+    }
+    stage('Swap to MariaDB 10.11') {
+      steps {
+        sh '''
+        # Stop Running MySQL instance
+        mysqladmin shutdown
+
+        # Remove MySQL packages
+        rm -rf /etc/mysql /var/lib/mysql /var/log/mysql /var/run/mysqld && \
+        export DEBIAN_FRONTEND=noninteractive && \
+        apt-get -yq remove --purge mysql-server mysql-client mysql-common && \
+        apt-get -yq autoremove && \
+        apt-get -yq remove dbconfig-mysql
+
+        # Install MariaDB 10.11
+        curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup | bash -s -- --mariadb-server-version=mariadb-10.11 && \
+        apt-get update && \
+        apt-get -yq install mariadb-server mariadb-client
+
+        # Initialize MariaDB
+        rm -rf /var/lib/mysql && \
+        mysql_install_db --user=mysql --datadir=/var/lib/mysql --auth-root-authentication-method=normal
+
+        # Start MariaDB
+        mysqld_safe --user=mysql 2>>/dev/null >>/dev/null &
+        sleep 10
+        '''
+      }
+    }
+    stage('Test Holland with MariaDB') {
+      steps {
+        sh '''
+        # Create a maridb-dump backupset
+        holland mc --name mariadb-dump mariadb-dump
+
+        # Test holland bk maridb-dump --dry-run
+        holland bk mariadb-dump --dry-run
+
+        # Test holland bk maridb-dump
+        holland bk mariadb-dump
+        '''
       }
     }
 

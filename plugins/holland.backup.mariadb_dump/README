@@ -1,0 +1,12 @@
+This plugin performs logical backups of a MariaDB database by using the
+mariadb-dump command.  Quite a few options are supported including database and
+table filtering through inclusion/exclusion filtering directives.  Table
+exclusions always map to --ignore-table parameters and database exclusions are
+skipped by simply not passing them to the --database flags.
+
+Inline-compression of maria-dump output is supported and the default.  By
+default mechanism uses gzip -1 ("--fast") for fast but reasonable compression.
+bzip2, pbzip2, lzop and lzma (vi xz-utils) are also supported.
+
+For more information please consult the holland manual or visit the holland
+wiki at http://hollandbackup.org.
