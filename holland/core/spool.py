@@ -257,7 +257,7 @@ CONFIGSPEC = """
 plugin                  = string(default="")
 start-time              = float(default=0)
 stop-time               = float(default=0)
-failed-backup           = boolean(default=no)
+failed                  = boolean(default=no)
 estimated-size          = float(default=0)
 on-disk-size            = float(default=0)
 estimated-size-factor   = float(default=1.0)
@@ -341,28 +341,37 @@ class Backup(object):
         LOG.debug("Writing out config to %s", self.config.filename)
         self.config.write()
 
-    def _formatted_config(self):
-        cfg = dict(self.config["holland:backup"])
-        cfg["stop-time"] = format_datetime(cfg["stop-time"])
-        cfg["start-time"] = format_datetime(cfg["start-time"])
-        cfg["estimated-size"] = format_bytes(cfg["estimated-size"])
-        cfg["on-disk-size"] = format_bytes(cfg["on-disk-size"])
-        return cfg
-
     def info(self):
         """
-        get plugin info
+        Return formatted backup information in a key-value format.
+
+        The output is indented and formatted as:
+            backup-plugin   = <plugin_name>
+            backup-started  = <start_time>
+            backup-finished = <stop_time>
+            estimated size  = <estimated_size>
+            on-disk size    = <on_disk_size>
+
+        This format is used by the list-backups command to display detailed
+        backup information when the --verbose flag is used.
         """
         tmpl = Template(
             """
         backup-plugin   = ${plugin}
-        backup-started  = ${start-time}
-        backup-finished = ${stop-time}
-        estimated size  = ${estimated-size}
-        on-disk size    = ${on-disk-size}
+        backup-started  = ${start_time}
+        backup-finished = ${stop_time}
+        estimated size  = ${estimated_size}
+        on-disk size    = ${on_disk_size}
         """
         )
-        info_str = tmpl.safe_substitute(self._formatted_config())
+        cfg = {
+            'plugin': self.config.lookup('holland:backup.plugin'),
+            'start_time': format_datetime(self.config.lookup('holland:backup.start-time')),
+            'stop_time': format_datetime(self.config.lookup('holland:backup.stop-time')),
+            'estimated_size': format_bytes(self.config.lookup('holland:backup.estimated-size')),
+            'on_disk_size': format_bytes(self.config.lookup('holland:backup.on-disk-size')),
+        }
+        info_str = tmpl.safe_substitute(cfg)
         info_str = "\t" + dedent(info_str).lstrip()
         info_str = "\n\t\t".join(info_str.splitlines())
         return info_str
