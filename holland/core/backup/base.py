@@ -45,7 +45,7 @@ class BackupPlugin:
         preexec_fn=None,
         shell=None,
         env=None,
-    ):  # pylint: disable=too-many-positional-arguments
+    ):  # pylint: disable=too-many-arguments
         """Runs a command and optionally captures its output.
 
         Args:
