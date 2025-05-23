@@ -122,6 +122,23 @@ pipeline {
         '''
       }
     }
+    stage('Test Holland Command Plugin') {
+      steps {
+        sh '''
+        # Test holland bk dump-instance --dry-run
+        holland mc --name command command
+
+        # Set command setting in backupset config
+        sed -i 's|# command = "" # no default|command = rsync -av /var/lib/mysql {backup_data_dir}|' /etc/holland/backupsets/command.conf
+
+        # Test holland bk command --dry-run
+        holland bk command --dry-run
+
+        # Test holland bk command
+        holland bk command
+        '''
+      }
+    }
     stage('Test Holland with MySQL') {
       steps {
         sh '''
