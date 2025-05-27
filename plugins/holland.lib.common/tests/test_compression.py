@@ -4,7 +4,7 @@ import shutil
 import unittest
 from tempfile import mkdtemp
 
-from holland.lib import compression
+from holland.lib.common import compression
 
 
 class TestCompression(unittest.TestCase):

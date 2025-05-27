@@ -20,10 +20,10 @@ from holland.core.backup import BackupError
 from holland.core.util.fmt import format_bytes
 
 # Holland general compression functions
-from holland.lib.compression import open_stream
+from holland.lib.common.compression import open_stream
 
 # holland-common safefilename encoding
-from holland.lib.safefilename import encode as encode_safe
+from holland.lib.common.safefilename import encode as encode_safe
 
 LOG = logging.getLogger(__name__)
 VER = None

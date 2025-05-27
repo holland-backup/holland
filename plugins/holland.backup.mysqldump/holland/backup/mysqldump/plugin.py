@@ -10,7 +10,7 @@ from holland.backup.mysqldump.base import start
 from holland.backup.mysqldump.command import MyOptionError, MySQLDump, MySQLDumpError
 from holland.backup.mysqldump.mock import MockEnvironment
 from holland.core.backup import BackupError
-from holland.lib.compression import (
+from holland.lib.common.compression import (
     COMPRESSION_CONFIG_STRING,
     lookup_compression,
     open_stream,
