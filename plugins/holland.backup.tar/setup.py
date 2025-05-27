@@ -17,12 +17,11 @@ setup(
     include_package_data=True,
     zip_safe=True,
     test_suite="tests",
-    install_requires=[
-        # -*- Extra requirements: -*-
-    ],
-    entry_points="""
-      [holland.backup]
-      tar = holland.backup.tar:TarPlugin
-      """,
+    install_requires=[],
+    entry_points={
+        "holland.backup": [
+            "tar = holland.backup.tar:TarPlugin",
+        ],
+    },
     namespace_packages=["holland", "holland.backup"],
 )

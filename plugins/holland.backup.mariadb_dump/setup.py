@@ -22,10 +22,10 @@ setup(
     test_suite="tests",
     tests_require=["holland >= 0.9.6"],
     install_requires=[],
-    extras_require={"mysql": "holland.lib.mysql", "common": "holland.lib.common"},
-    entry_points="""
-      [holland.backup]
-      mariadb-dump = holland.backup.mariadb_dump:Provider [mysql, common]
-      """,
+    entry_points={
+        "holland.backup": [
+            "mariadb-dump = holland.backup.mariadb_dump:Provider",
+        ],
+    },
     namespace_packages=["holland", "holland.backup"],
 )

@@ -22,9 +22,10 @@ setup(
     install_requires=[
         # -*- Extra requirements: -*-
     ],
-    entry_points="""
-      [holland.backup]
-      example = holland.backup.example:ExamplePlugin
-      """,
+    entry_points={
+        "holland.backup": [
+            "example = holland.backup.example:ExamplePlugin",
+        ],
+    },
     namespace_packages=["holland", "holland.backup"],
 )

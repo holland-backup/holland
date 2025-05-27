@@ -22,11 +22,11 @@ setup(
     zip_safe=True,
     tests_require=["mocker==0.10.1", "coverage==2.85"],
     test_suite="tests",
-    entry_points="""
-      # -*- Entry points: -*-
-      [holland.lib]
-      mysql = holland.lib.mysql:MySQLClient
-      mycmdparser = holland.lib.mysql:MyCmdParser
-      """,
+    entry_points={
+        "holland.lib": [
+            "mysql = holland.lib.mysql:MySQLClient",
+            "mycmdparser = holland.lib.mysql:MyCmdParser",
+        ],
+    },
     namespace_packages=["holland", "holland.lib"],
 )

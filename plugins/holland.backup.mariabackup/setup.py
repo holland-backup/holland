@@ -17,13 +17,11 @@ setup(
     include_package_data=True,
     zip_safe=True,
     test_suite="tests",
-    install_requires=[
-        # -*- Emaria requirements: -*-
-    ],
-    extras_require={"mysql": "holland.lib.mysql", "common": "holland.lib.common"},
-    entry_points="""
-      [holland.backup]
-      mariabackup = holland.backup.mariabackup:MariabackupPlugin
-      """,
+    install_requires=[],
+    entry_points={
+        "holland.backup": [
+            "mariabackup = holland.backup.mariabackup:MariabackupPlugin",
+        ]
+    },
     namespace_packages=["holland", "holland.backup"],
 )

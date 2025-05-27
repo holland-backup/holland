@@ -22,13 +22,13 @@ setup(
     test_suite="tests",
     tests_require=["holland >= 0.9.6"],
     install_requires=[],
-    extras_require={"mysql": "holland.lib.mysql", "common": "holland.lib.common"},
-    entry_points="""
-      [holland.backup]
-      mysqldump = holland.backup.mysqldump:Provider [mysql, common]
-
-      [holland.restore]
-      mysqldump = holland.restore.mysqldump:MySQLRestore
-      """,
+    entry_points={
+        "holland.backup": [
+            "mysqldump = holland.backup.mysqldump:Provider",
+        ],
+        "holland.restore": [
+            "mysqldump = holland.restore.mysqldump:MySQLRestore",
+        ],
+    },
     namespace_packages=["holland", "holland.backup"],
 )

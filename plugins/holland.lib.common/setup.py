@@ -18,8 +18,5 @@ setup(
     include_package_data=True,
     zip_safe=True,
     install_requires=[],
-    entry_points="""
-      # -*- Entry points: -*-
-      """,
     namespace_packages=["holland", "holland.lib"],
 )
