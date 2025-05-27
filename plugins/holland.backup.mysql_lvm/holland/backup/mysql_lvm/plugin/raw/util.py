@@ -16,7 +16,7 @@ from holland.backup.mysql_lvm.plugin.common import (
 )
 from holland.backup.mysql_lvm.plugin.innodb import MySQLPathInfo, check_innodb
 from holland.core.backup import BackupError
-from holland.lib.compression import open_stream
+from holland.lib.common.compression import open_stream
 
 LOG = logging.getLogger(__name__)
 

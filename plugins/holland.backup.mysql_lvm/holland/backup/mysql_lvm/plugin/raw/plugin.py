@@ -11,7 +11,7 @@ from holland.backup.mysql_lvm.plugin.common import (
 from holland.backup.mysql_lvm.plugin.raw.util import setup_actions
 from holland.core.backup import BackupError
 from holland.core.util.path import directory_size
-from holland.lib.compression import COMPRESSION_CONFIG_STRING
+from holland.lib.common.compression import COMPRESSION_CONFIG_STRING
 from holland.lib.lvm import (
     CallbackFailuresError,
     LogicalVolume,
