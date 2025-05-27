@@ -23,10 +23,11 @@ setup(
     install_requires=[],
     tests_require=["nose", "mocker", "coverage"],
     test_suite="nose.collector",
-    entry_points="""
-      [holland.backup]
-      mysql-lvm = holland.backup.mysql_lvm:MysqlLVMBackup
-      mysqldump-lvm = holland.backup.mysql_lvm.plugin.mysqldump:MysqlDumpLVMBackup
-      """,
+    entry_points={
+        "holland.backup": [
+            "mysql-lvm = holland.backup.mysql_lvm:MysqlLVMBackup",
+            "mysqldump-lvm = holland.backup.mysql_lvm.plugin.mysqldump:MysqlDumpLVMBackup",
+        ],
+    },
     namespace_packages=["holland", "holland.backup"],
 )

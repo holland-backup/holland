@@ -19,12 +19,10 @@ setup(
     include_package_data=True,
     zip_safe=True,
     test_suite="tests",
-    install_requires=[
-        # -*- Extra requirements: -*-
-    ],
-    entry_points="""
-      [holland.backup]
-      command = holland.backup.command:CommandPlugin
-      """,
-    namespace_packages=["holland", "holland.backup"],
+    install_requires=[],
+    entry_points={
+        "holland.backup": [
+            "command = holland.backup.command:CommandPlugin",
+        ],
+    },
 )
