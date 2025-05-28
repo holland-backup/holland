@@ -5,7 +5,7 @@ import os
 from subprocess import PIPE, Popen
 
 from holland.core.backup import BackupError
-from holland.lib.compression import COMPRESSION_CONFIG_STRING, open_stream
+from holland.lib.common.compression import COMPRESSION_CONFIG_STRING, open_stream
 
 LOG = logging.getLogger(__name__)
 

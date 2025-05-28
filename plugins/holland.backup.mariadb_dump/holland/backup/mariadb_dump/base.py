@@ -6,7 +6,7 @@ import logging
 
 from holland.backup.mariadb_dump.command import ALL_DATABASES
 from holland.core.backup import BackupError
-from holland.lib.safefilename import encode
+from holland.lib.common.safefilename import encode
 
 LOG = logging.getLogger(__name__)
 

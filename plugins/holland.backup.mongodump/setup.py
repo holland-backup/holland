@@ -17,8 +17,9 @@ setup(
     zip_safe=True,
     install_requires=["pymongo>=3.6"],
     # holland looks for plugins in holland.backup
-    entry_points="""
-      [holland.backup]
-      mongodump = holland.backup.mongodump:MongoDump
-      """,
+    entry_points={
+        "holland.backup": [
+            "mongodump = holland.backup.mongodump:MongoDump",
+        ],
+    },
 )

@@ -1,0 +1,5 @@
+This plugin performs physical backups of a mysql database by using the
+mysqlsh command.
+
+For more information please consult the holland manual or visit the holland
+wiki at http://hollandbackup.org.

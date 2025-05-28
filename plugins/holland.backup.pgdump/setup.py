@@ -17,8 +17,9 @@ setup(
     zip_safe=True,
     install_requires=["psycopg2"],
     # holland looks for plugins in holland.backup
-    entry_points="""
-      [holland.backup]
-      pgdump = holland.backup.pgdump:PgDump
-      """,
+    entry_points={
+        "holland.backup": [
+            "pgdump = holland.backup.pgdump:PgDump",
+        ],
+    },
 )
