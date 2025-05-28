@@ -1,0 +1,6 @@
+This package provides a standard library used by plugins implementing MySQL
+functionality. It provides support for connections to a MySQL instance and
+generally interacting with a MySQL deployment.
+
+For more information please consult the holland manual or visit the holland
+wiki at http://hollandbackup.org.
