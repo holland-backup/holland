@@ -115,7 +115,7 @@ def dist_metainfo_dict(dist):
     Convert an Egg's PKG-INFO into a dict
     """
 
-    distmetadata = dist.get_metadata("PKG-INFO")
+    distmetadata = get_dist_metadata(dist)
     ret = Parser(policy=default).parsestr(distmetadata)
     return ret
 
@@ -126,8 +126,17 @@ def iter_plugininfo():
     """
     for plugin_dir in PLUGIN_DIRECTORIES:
         for dist in find_distributions(plugin_dir):
-            distmetadata = dist.get_metadata("PKG-INFO")
+            distmetadata = get_dist_metadata(dist)
             msg = Parser(policy=default).parsestr(distmetadata)
             filtered_keys = ["metadata-version", "home-page", "platform"]
             distinfo = [x for x in list(msg.items()) if x[0] not in filtered_keys]
             yield dist, dict(distinfo)
+
+
+def get_dist_metadata(dist):
+    """Get metadata from a distribution, handling both old and new formats"""
+    try:
+        # Try the old format first for now
+        return dist.get_metadata("PKG-INFO")
+    except (FileNotFoundError, KeyError, OSError):
+        return dist.get_metadata("METADATA")
