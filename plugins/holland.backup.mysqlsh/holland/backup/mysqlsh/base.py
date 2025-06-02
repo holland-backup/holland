@@ -157,7 +157,10 @@ class MySqlShBase(BackupPlugin):
 
             defaults_file = self.mysql.write_defaults_file(self.target_directory)
             cmd = self._generate_backup_cmd(defaults_file=defaults_file)
-            rc = self.run_command(cmd)
+            rc, stdout, _ = self.run_command(
+                cmd, capture_output=True, redirect_stderr_to_stdout=True
+            )
+            self.log.info("mysqlsh command output:\n%s", stdout)
             if rc != 0:
                 raise BackupError("Failed to backup instance")
 
