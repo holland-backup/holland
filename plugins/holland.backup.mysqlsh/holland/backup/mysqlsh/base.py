@@ -106,7 +106,7 @@ class MySqlShBase(BackupPlugin):
             "%s=%s" % (defaults_param, defaults_file),
             "--",
             "util",
-            self.CONFIG_KEY,
+            self.CONFIG_KEY.replace("mysqlsh-",""),
         ]
 
         # Add plugin specific positional arguments

@@ -13,7 +13,7 @@ MYSQLSH_INSTANCE_OPTIONS = {
     "include-schemas": {"type": "force_list", "default": []},
 }
 
-CONFIG_KEY = "dump-instance"
+CONFIG_KEY = "mysqlsh-dump-instance"
 CONFIGSPEC = generate_configspec(CONFIG_KEY, MYSQLSH_INSTANCE_OPTIONS)
 
 

@@ -147,34 +147,28 @@ pipeline {
         holland bk mysqldump
 
         # Create mysqlsh backupsets
-        holland mc --name dump-instance dump-instance
-        holland mc --name dump-schemas dump-schemas
+        holland mc --name mysqlsh-dump-instance mysqlsh-dump-instance
+        holland mc --name mysqlsh-dump-schemas mysqlsh-dump-schemas
 
         # Specify the schemas to dump for dump-schemas
-        sed -i 's/schemas = /schemas = mysql,sakila/' /etc/holland/backupsets/dump-schemas.conf
+        sed -i 's/schemas = /schemas = mysql,sakila/' /etc/holland/backupsets/mysqlsh-dump-schemas.conf
 
         # Create .my.cnf file for root user. This is needed for mysqlsh to work properly here in
         # this pipelline.
         printf '[client]\nuser=root\npassword=\nsocket=/var/run/mysqld/mysqld.sock\n' > ~/.my.cnf
         chmod 600 ~/.my.cnf
 
-        # Test holland bk dump-instance --dry-run
-        holland bk dump-instance --dry-run
+        # Test holland bk mysqlsh-dump-instance --dry-run
+        holland bk mysqlsh-dump-instance --dry-run
 
-        # Test holland bk dump-instance
-        holland bk dump-instance
+        # Test holland bk mysqlsh-dump-instance
+        holland bk mysqlsh-dump-instance
 
-        # Test holland bk dump-schemas --dry-run
-        holland bk dump-schemas --dry-run
+        # Test holland bk mysqlsh-dump-schemas --dry-run
+        holland bk mysqlsh-dump-schemas --dry-run
 
-        # Test holland bk dump-schemas
-        holland bk dump-schemas
-
-        # Test holland bk dump-instance --dry-run
-        holland bk dump-instance --dry-run
-
-        # Test holland bk dump-instance
-        holland bk dump-instance
+        # Test holland bk mysqlsh-dump-schemas
+        holland bk mysqlsh-dump-schemas
 
         # Remove .my.cnf file
         rm ~/.my.cnf
