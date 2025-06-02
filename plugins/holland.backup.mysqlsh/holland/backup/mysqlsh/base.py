@@ -81,6 +81,11 @@ class MySqlShBase(BackupPlugin):
         for opt_name, metadata in options.items():
             if self.plugin_config[opt_name] == metadata.get("default"):
                 continue
+            if opt_name in ["strip-definers", "create-invisible-pks"]:
+                args.append(
+                    "--compatibility=%s" % (opt_name.replace("-", "_"))
+                )
+                continue
             args.append(
                 "--%s=%s" % (kebab_to_camel(opt_name), self.plugin_config[opt_name])
             )

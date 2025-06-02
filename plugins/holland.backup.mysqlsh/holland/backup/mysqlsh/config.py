@@ -38,6 +38,8 @@ MYSQLSH_SHARED_OPTIONS = {
     "triggers": {"type": "boolean", "default": True},
     "exclude-triggers": {"type": "force_list", "default": []},
     "include-triggers": {"type": "force_list", "default": []},
+    "strip-definers": {"type": "boolean", "default": False},
+    "create-invisible-pks": {"type": "boolean", "default": False},
 }
 
 
