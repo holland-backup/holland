@@ -30,7 +30,7 @@ class ListPlugins(Command):
         """
         header = table[0]
         rest = table[1:]
-        fmt = "%-12s %-15s %-9s %-16s %s"
+        fmt = "%-12s %-22s %-9s %-16s %s"
         print(fmt % tuple(header))
         print("-" * 80)
         for row in rest:
