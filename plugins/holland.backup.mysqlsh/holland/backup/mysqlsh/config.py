@@ -12,8 +12,6 @@ BASE_OPTIONS = {
     "estimate-method": {"type": "string", "default": "plugin"},
     "extra-defaults": {"type": "boolean", "default": False},
     "stop-slave": {"type": "boolean", "default": False},
-    "dump-to-remote": {"type": "boolean", "default": False},
-    "output-url": {"type": "string", "default": None},
     "additional-options": {"type": "force_list", "default": []},
 }
 

@@ -32,24 +32,6 @@ class MySqlShBase(BackupPlugin):
         if parse_version(self.version) < (8, 0, 32):
             raise BackupError("mysqlsh version must be at least 8.0.32")
 
-        self._validate_mysqlsh_options()
-
-    def _validate_mysqlsh_options(self):
-        """Validate the options for the backup plugin."""
-        if (
-            self.plugin_config["dump-to-remote"]
-            and not self.plugin_config["output-url"]
-        ):
-            raise BackupError(
-                "output-url must be specified when dump-to-remote is enabled"
-            )
-
-        if (
-            not self.plugin_config["dump-to-remote"]
-            and self.plugin_config["output-url"]
-        ):
-            self.log.warning("output-url is ignored when dump-to-remote is disabled")
-
     def _get_bin_path(self):
         """Get the path to the mysqlsh executable."""
         if not self.plugin_config["executable"]:
@@ -140,11 +122,9 @@ class MySqlShBase(BackupPlugin):
     @property
     def output_url(self):
         """Get the appropriate output URL based on configuration."""
-        return (
-            self.plugin_config["output-url"]
-            if self.plugin_config["dump-to-remote"]
-            else self.local_output_url
-        )
+        # This just returns the local output URL for now. We can hook into here
+        # should we enable support for remote dumps.
+        return self.local_output_url
 
     def estimate_backup_size(self):
         """Estimate the size of the backup this plugin will generate"""
