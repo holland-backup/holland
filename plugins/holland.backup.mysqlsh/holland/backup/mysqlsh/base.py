@@ -32,6 +32,12 @@ class MySqlShBase(BackupPlugin):
         if parse_version(self.version) < (8, 0, 32):
             raise BackupError("mysqlsh version must be at least 8.0.32")
 
+        self._validate_mysqlsh_options()
+
+    def _validate_mysqlsh_options(self):
+        """Validate the options for the backup plugin."""
+        return
+
     def _get_bin_path(self):
         """Get the path to the mysqlsh executable."""
         if not self.plugin_config["executable"]:
