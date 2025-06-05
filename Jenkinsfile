@@ -12,9 +12,10 @@ pipeline {
         sh '''
         # Install packages
         apt-get update && \
-        apt-get -yq install python3-pip python3-psycopg2 python3-mysqldb rsync curl && \
+        apt-get -yq install python3-pip python3-psycopg2 python3-mysqldb rsync curl wget lsb-release gnupg2 locales && \
         pip3 install configobj 'pylint>=2.17.0,<3.0.0' six 'pymongo>=3.6' && \
         python3 --version
+        locale-gen en_US.UTF-8
         '''
       }
     }
@@ -87,17 +88,37 @@ pipeline {
     stage('Setup MySQL Database') {
       steps {
         sh '''
-        # Install MySQL
-        export DEBIAN_FRONTEND=noninteractive && \
-        apt-get -yq install mysql-server mysql-client || echo "Ignore errors"
+        export DEBIAN_FRONTEND=noninteractive
+
+        # Try to prevent mysql from starting automatically
+        echo 'exit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
+
+        # Using community repo to simplify installation of mysql-shell
+        wget https://dev.mysql.com/get/mysql-apt-config_0.8.29-1_all.deb
+        echo "mysql-apt-config mysql-apt-config/select-server select mysql-8.0" | debconf-set-selections
+        echo "mysql-apt-config mysql-apt-config/select-tools select Enabled" | debconf-set-selections
+        dpkg -i mysql-apt-config_0.8.29-1_all.deb
+
+        # Install mysql-server and mysql-shell
+        apt-get update && \
+        apt-get -yq install mysql-server mysql-shell
 
         # Initialize MySQL
         rm -rf /var/lib/mysql/* && \
-        mysqld --initialize-insecure --user=mysql 2>>/dev/null >>/dev/null
+        mysqld --initialize-insecure --user=mysql > /dev/null 2>&1
 
         # Start MySQL
-        mysqld_safe --user=mysql 2>>/dev/null >>/dev/null &
+        mysqld_safe --user=mysql > /dev/null 2>&1 &
         sleep 10
+
+        # Download and extract Sakila database
+        wget -q https://downloads.mysql.com/docs/sakila-db.tar.gz -O /tmp/sakila-db.tar.gz && \
+        tar -xzf /tmp/sakila-db.tar.gz -C /tmp && \
+        rm /tmp/sakila-db.tar.gz
+
+        # Populate MySQL with Sakila database
+        mysql -e "SOURCE /tmp/sakila-db/sakila-schema.sql;" && \
+        mysql -e "SOURCE /tmp/sakila-db/sakila-data.sql;"
         '''
       }
     }
@@ -124,6 +145,33 @@ pipeline {
         # Test that split command is working as expected
         sed -i \'s|^split = no|split = yes|\' /etc/holland/backupsets/mysqldump.conf
         holland bk mysqldump
+
+        # Create mysqlsh backupsets
+        holland mc --name mysqlsh-dump-instance mysqlsh-dump-instance
+        holland mc --name mysqlsh-dump-schemas mysqlsh-dump-schemas
+
+        # Specify the schemas to dump for dump-schemas
+        sed -i 's/schemas = /schemas = mysql,sakila/' /etc/holland/backupsets/mysqlsh-dump-schemas.conf
+
+        # Create .my.cnf file for root user. This is needed for mysqlsh to work properly here in
+        # this pipelline.
+        printf '[client]\nuser=root\npassword=\nsocket=/var/run/mysqld/mysqld.sock\n' > ~/.my.cnf
+        chmod 600 ~/.my.cnf
+
+        # Test holland bk mysqlsh-dump-instance --dry-run
+        holland bk mysqlsh-dump-instance --dry-run
+
+        # Test holland bk mysqlsh-dump-instance
+        holland bk mysqlsh-dump-instance
+
+        # Test holland bk mysqlsh-dump-schemas --dry-run
+        holland bk mysqlsh-dump-schemas --dry-run
+
+        # Test holland bk mysqlsh-dump-schemas
+        holland bk mysqlsh-dump-schemas
+
+        # Remove .my.cnf file
+        rm ~/.my.cnf
         '''
       }
     }
@@ -150,7 +198,7 @@ pipeline {
         mysql_install_db --user=mysql --datadir=/var/lib/mysql --auth-root-authentication-method=normal
 
         # Start MariaDB
-        mysqld_safe --user=mysql 2>>/dev/null >>/dev/null &
+        mysqld_safe --user=mysql > /dev/null 2>&1 &
         sleep 10
         '''
       }
