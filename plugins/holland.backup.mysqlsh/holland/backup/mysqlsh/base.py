@@ -46,7 +46,7 @@ class MySqlShBase(BackupPlugin):
 
     def _get_version(self):
         """Get the version of mysqlsh"""
-        cmd = [self.bin_path, "--version"]
+        cmd = [self.bin_path, "--log-level=1", "--log-file=/dev/null", "--version"]
         rc, stdout, _ = self.run_command(
             cmd, capture_output=True, redirect_stderr_to_stdout=True
         )
