@@ -99,6 +99,7 @@ class MySqlShBase(BackupPlugin):
         cmd = [
             self.bin_path,
             "%s=%s" % (defaults_param, defaults_file),
+            "--log-file=%s/mysqlsh.log" % (self.target_directory),
             "--",
             "util",
             self.CONFIG_KEY.replace("mysqlsh-", ""),
