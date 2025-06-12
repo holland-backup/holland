@@ -67,14 +67,10 @@ class MySqlShBase(BackupPlugin):
         """Return a list of named arguments from an options dict."""
         args = []
         for opt_name, metadata in options.items():
-            if self.plugin_config[opt_name] == metadata.get(
-                "default"
-            ) and not metadata.get("always_show", False):
+            if self.plugin_config[opt_name] == metadata.get("default"):
                 continue
             if opt_name in ["strip-definers", "create-invisible-pks"]:
                 args.append("--compatibility=%s" % (opt_name.replace("-", "_")))
-                continue
-            if opt_name == "bytes-per-chunk" and not self.plugin_config["chunking"]:
                 continue
             args.append(
                 "--%s=%s" % (kebab_to_camel(opt_name), self.plugin_config[opt_name])
