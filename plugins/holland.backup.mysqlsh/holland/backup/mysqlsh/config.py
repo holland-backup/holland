@@ -23,7 +23,7 @@ MYSQLSH_SHARED_OPTIONS = {
     "tz-utc": {"type": "boolean", "default": True},
     "compression": {"type": "string", "default": "zstd"},
     "chunking": {"type": "boolean", "default": True, "always_show": True},
-    "bytes-per-chunk": {"type": "string", "default": "32M", "always_show": True},
+    "bytes-per-chunk": {"type": "string", "default": "64M", "always_show": True},
     "ddl-only": {"type": "boolean", "default": False},
     "data-only": {"type": "boolean", "default": False},
     "exclude-tables": {"type": "force_list", "default": []},
