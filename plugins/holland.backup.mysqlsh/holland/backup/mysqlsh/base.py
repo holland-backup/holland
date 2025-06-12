@@ -100,6 +100,7 @@ class MySqlShBase(BackupPlugin):
             self.bin_path,
             "%s=%s" % (defaults_param, defaults_file),
             "--log-file=%s/mysqlsh.log" % (self.target_directory),
+            "--log-level=%s" % (self.plugin_config["log-level"]),
             "--",
             "util",
             self.CONFIG_KEY.replace("mysqlsh-", ""),

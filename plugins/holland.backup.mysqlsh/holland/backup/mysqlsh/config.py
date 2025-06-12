@@ -11,6 +11,7 @@ BASE_OPTIONS = {
     "bin-log-position": {"type": "boolean", "default": False},
     "estimate-method": {"type": "string", "default": "plugin"},
     "extra-defaults": {"type": "boolean", "default": False},
+    "log-level": {"type": "string", "default": "5"},
     "stop-slave": {"type": "boolean", "default": False},
     "additional-options": {"type": "force_list", "default": []},
 }
