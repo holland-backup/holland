@@ -5,6 +5,7 @@ Define how backup plugins will be called
 import errno
 import logging
 import os
+import subprocess
 import sys
 import time
 
@@ -22,7 +23,7 @@ class BackupError(Exception):
     """Error during a backup"""
 
 
-class BackupPlugin(object):
+class BackupPlugin:
     """
     Define a backup plugin
     """
@@ -32,6 +33,67 @@ class BackupPlugin(object):
         self.config = config
         self.target_directory = target_directory
         self.dry_run = dry_run
+        self.log = LOG
+
+    def run_command(
+        self,
+        cmd,
+        capture_output=False,
+        stdout=None,
+        stderr=None,
+        redirect_stderr_to_stdout=False,
+        preexec_fn=None,
+        env=None,
+    ):  # pylint: disable=too-many-arguments
+        """Runs a command and optionally captures its output.
+
+        Args:
+            cmd (list): The command to run.
+            capture_output (bool, optional): If True, captures stdout and stderr. Defaults to False.
+            stdout (file, optional): Where to send stdout to. Used when capture_output is False.
+            stderr (file, optional): Where to send stderr to. Used when capture_output is False.
+            redirect_stderr_to_stdout (bool, optional): If True, redirects stderr to stdout.
+            Defaults to False.
+            preexec_fn (callable, optional): Callable to run before the child process is executed.
+            to True for string commands. Defaults to None.
+            env (dict, optional): Environment variables to use for the new process.
+
+        Returns:
+            int or tuple: The command's return code as an int if capture_output is False,
+            or a tuple of (returncode, stdout, stderr) if capture_output is True.
+
+        Raises:
+            BackupError: If the command fails to execute.
+            TypeError: If cmd is not a list.
+        """
+        if not isinstance(cmd, list):
+            raise TypeError("cmd must be a list")
+
+        if capture_output:
+            out_fd = subprocess.PIPE
+            err_fd = subprocess.STDOUT if redirect_stderr_to_stdout else subprocess.PIPE
+        else:
+            out_fd = stdout
+            err_fd = stderr if not redirect_stderr_to_stdout else subprocess.STDOUT
+        try:
+            self.log.info("Executing: %s", repr(cmd))
+            p = subprocess.Popen(
+                cmd,
+                stdout=out_fd,
+                stderr=err_fd,
+                shell=False,
+                env=env,
+                universal_newlines=True,
+                preexec_fn=preexec_fn,
+            )
+            if capture_output:
+                stdout, stderr = p.communicate()
+                return p.returncode, stdout, stderr
+
+            return p.wait()
+
+        except OSError as ex:
+            raise BackupError("Failed to execute command: %s" % str(ex)) from ex
 
     def estimate_backup_size(self):
         """
@@ -40,18 +102,6 @@ class BackupPlugin(object):
         raise NotImplementedError()
 
     def backup(self):
-        """
-        placeholder
-        """
-        raise NotImplementedError()
-
-    def info(self):
-        """
-        placeholder
-        """
-        raise NotImplementedError()
-
-    def configspec(self):
         """
         placeholder
         """
