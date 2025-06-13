@@ -10,7 +10,6 @@ from holland.core.backup import BackupError, BackupPlugin
 CONFIGSPEC = """
 [command]
 command = string(default=None)
-log-output = boolean(default=True)
 create-backup-data-dir = boolean(default=False)
 """.splitlines()
 
@@ -65,16 +64,12 @@ class CommandPlugin(BackupPlugin):
             self.log.info("Dry run executing: %s", repr(cmd_parts))
             return
 
-        if self.plugin_config["log-output"]:
-            rc, stdout, _ = self.run_command(
-                cmd_parts,
-                capture_output=True,
-                redirect_stderr_to_stdout=True,
-                shell=False,
-            )
-            self.log.info(stdout)
-        else:
-            rc = self.run_command(cmd_parts, shell=False)
+        rc, stdout, _ = self.run_command(
+            cmd_parts,
+            capture_output=True,
+            redirect_stderr_to_stdout=True,
+        )
+        self.log.info("command output:\n%s", stdout)
 
         if rc != 0:
             raise BackupError("Command returned a non-zero exit code")
