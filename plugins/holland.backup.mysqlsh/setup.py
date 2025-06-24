@@ -18,8 +18,8 @@ setup(
     install_requires=[],
     entry_points={
         "holland.backup": [
-            "dump-instance = holland.backup.mysqlsh:MySqlShDumpInstance",
-            "dump-schemas = holland.backup.mysqlsh:MySqlShDumpSchemas",
+            "mysqlsh-dump-instance = holland.backup.mysqlsh:MySqlShDumpInstance",
+            "mysqlsh-dump-schemas = holland.backup.mysqlsh:MySqlShDumpSchemas",
         ]
     },
 )
