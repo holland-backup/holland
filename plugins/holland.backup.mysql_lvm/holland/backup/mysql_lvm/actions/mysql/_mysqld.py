@@ -6,7 +6,7 @@ from io import StringIO
 from subprocess import STDOUT, Popen, list2cmdline
 
 from holland.core.backup import BackupError
-from holland.lib.which import which
+from holland.lib.common.which import which
 
 LOG = logging.getLogger(__name__)
 

@@ -19,8 +19,8 @@ from holland.core.backup import BackupError
 from holland.core.util.fmt import format_bytes
 
 # Holland general compression functions
-from holland.lib.compression import open_stream
-from holland.lib.util import parse_arguments
+from holland.lib.common.compression import open_stream
+from holland.lib.common.util import parse_arguments
 
 LOG = logging.getLogger(__name__)
 VER = None

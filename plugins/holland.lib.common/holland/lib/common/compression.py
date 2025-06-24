@@ -11,7 +11,7 @@ import signal
 import subprocess
 from tempfile import TemporaryFile
 
-from holland.lib.which import which
+from holland.lib.common.which import which
 
 LOG = logging.getLogger(__name__)
 

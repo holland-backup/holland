@@ -17,7 +17,7 @@ from holland.backup.pg_basebackup.base import (
     pg_databases,
 )
 from holland.core.backup import BackupError
-from holland.lib.compression import COMPRESSION_CONFIG_STRING
+from holland.lib.common.compression import COMPRESSION_CONFIG_STRING
 
 LOG = logging.getLogger(__name__)
 

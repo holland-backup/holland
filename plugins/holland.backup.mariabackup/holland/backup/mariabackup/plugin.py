@@ -12,7 +12,7 @@ from subprocess import PIPE, STDOUT, Popen, list2cmdline
 from holland.backup.mariabackup import util
 from holland.core.backup import BackupError
 from holland.core.util.path import directory_size
-from holland.lib.compression import COMPRESSION_CONFIG_STRING, open_stream
+from holland.lib.common.compression import COMPRESSION_CONFIG_STRING, open_stream
 from holland.lib.mysql import connect
 from holland.lib.mysql.client.base import MYSQL_CLIENT_CONFIG_STRING
 from holland.lib.mysql.option import build_mysql_config

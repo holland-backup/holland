@@ -5,7 +5,7 @@ import os
 import tempfile
 import shutil
 import unittest
-from holland.lib.archive import DirArchive, TarArchive, ZipArchive
+from holland.lib.common.archive import DirArchive, TarArchive, ZipArchive
 
 
 class TestArchive(unittest.TestCase):

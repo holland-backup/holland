@@ -1,4 +1,5 @@
 from setuptools import find_packages, setup
+
 version = "1.2.12"
 
 setup(
@@ -15,9 +16,10 @@ setup(
     namespace_packages=["holland", "holland.backup"],
     zip_safe=True,
     install_requires=[],
-    entry_points="""
-      [holland.backup]
-      mysqlsh-dump-instance = holland.backup.mysqlsh:MySqlShDumpInstance
-      mysqlsh-dump-schemas = holland.backup.mysqlsh:MySqlShDumpSchemas
-      """,
+    entry_points={
+        "holland.backup": [
+            "mysqlsh-dump-instance = holland.backup.mysqlsh:MySqlShDumpInstance",
+            "mysqlsh-dump-schemas = holland.backup.mysqlsh:MySqlShDumpSchemas",
+        ]
+    },
 )
