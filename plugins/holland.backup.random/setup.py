@@ -19,12 +19,11 @@ setup(
     include_package_data=True,
     zip_safe=True,
     test_suite="tests",
-    install_requires=[
-        # -*- Extra requirements: -*-
-    ],
-    entry_points="""
-      [holland.backup]
-      random = holland.backup.random:RandomPlugin
-      """,
+    install_requires=[],
+    entry_points={
+        "holland.backup": [
+            "random = holland.backup.random:RandomPlugin",
+        ],
+    },
     namespace_packages=["holland", "holland.backup"],
 )

@@ -17,13 +17,11 @@ setup(
     include_package_data=True,
     zip_safe=True,
     test_suite="tests",
-    install_requires=[
-        # -*- Extra requirements: -*-
-    ],
-    extras_require={"mysql": "holland.lib.mysql", "common": "holland.lib.common"},
-    entry_points="""
-      [holland.backup]
-      xtrabackup = holland.backup.xtrabackup:XtrabackupPlugin
-      """,
+    install_requires=[],
+    entry_points={
+        "holland.backup": [
+            "xtrabackup = holland.backup.xtrabackup:XtrabackupPlugin",
+        ],
+    },
     namespace_packages=["holland", "holland.backup"],
 )

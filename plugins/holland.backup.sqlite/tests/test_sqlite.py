@@ -8,7 +8,7 @@ from tempfile import mkdtemp
 from configobj import ConfigObj
 
 from holland.backup.sqlite import SQLitePlugin
-from holland.lib.which import which
+from holland.lib.common.which import which
 
 
 class MockConfig(ConfigObj):

@@ -9,7 +9,7 @@ from holland.backup.mariadb_dump.base import start
 from holland.backup.mariadb_dump.command import MariaDBDump, MariaDBDumpError
 from holland.backup.mariadb_dump.mock import MockEnvironment
 from holland.core.backup import BackupError
-from holland.lib.compression import (
+from holland.lib.common.compression import (
     COMPRESSION_CONFIG_STRING,
     lookup_compression,
     open_stream,
@@ -29,7 +29,7 @@ from holland.lib.mysql import (
 from holland.lib.mysql.client.base import MYSQL_CLIENT_CONFIG_STRING
 from holland.lib.mysql.option import build_mysql_config, write_options
 from holland.lib.mysql.util import parse_size
-from holland.lib.util import get_cmd_path
+from holland.lib.common.util import get_cmd_path
 
 LOG = logging.getLogger(__name__)
 

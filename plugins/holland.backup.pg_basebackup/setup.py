@@ -16,9 +16,9 @@ setup(
     namespace_packages=["holland", "holland.backup"],
     zip_safe=True,
     install_requires=["psycopg2"],
-    # holland looks for plugins in holland.backup
-    entry_points="""
-      [holland.backup]
-      pg_basebackup = holland.backup.pg_basebackup:PgBaseBackup
-      """,
+    entry_points={
+        "holland.backup": [
+            "pg_basebackup = holland.backup.pg_basebackup:PgBaseBackup",
+        ]
+    },
 )

@@ -7,7 +7,7 @@ import re
 
 from holland.backup.mysqlsh.mysql import MySqlHelper
 from holland.core.backup import BackupError, BackupPlugin
-from holland.lib.util import get_cmd_path
+from holland.lib.common.util import get_cmd_path
 
 from .config import MYSQLSH_SHARED_OPTIONS
 from .utils import kebab_to_camel, parse_version
