@@ -206,7 +206,7 @@ pipeline {
         apt-get -yq remove dbconfig-mysql
 
         # Install MariaDB 10.11
-        curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup | bash -s -- --mariadb-server-version=mariadb-10.11 && \
+        curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup | bash -s -- --skip-os-eol-check --mariadb-server-version=mariadb-10.11 && \
         apt-get update && \
         apt-get -yq install mariadb-server mariadb-client
 
