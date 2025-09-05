@@ -25,4 +25,5 @@ setup(
             "command = holland.backup.command:CommandPlugin",
         ],
     },
+    namespace_packages=["holland", "holland.backup"],
 )
