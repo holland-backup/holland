@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-version = "1.3.0"
+version = "1.3.1"
 
 setup(
     name="holland.backup.command",
@@ -25,4 +25,5 @@ setup(
             "command = holland.backup.command:CommandPlugin",
         ],
     },
+    namespace_packages=["holland", "holland.backup"],
 )
