@@ -1,6 +1,6 @@
-from setuptools import find_packages, setup
+from setuptools import find_namespace_packages, setup
 
-version = "1.3.1"
+version = "1.4.0"
 
 setup(
     name="holland.backup.tar",
@@ -13,7 +13,7 @@ setup(
     author_email="holland-devel@googlegroups.com",
     url="http://www.hollandbackup.org/",
     license="GPLv2",
-    packages=find_packages(exclude=["ez_setup", "examples", "tests", "tests.*"]),
+    packages=find_namespace_packages(exclude=["ez_setup", "examples", "tests", "tests.*"]),
     include_package_data=True,
     zip_safe=True,
     test_suite="tests",
@@ -23,5 +23,4 @@ setup(
             "tar = holland.backup.tar:TarPlugin",
         ],
     },
-    namespace_packages=["holland", "holland.backup"],
 )

@@ -5,14 +5,14 @@ import logging
 import os
 import sys
 
-from pkg_resources import get_distribution
+from importlib.metadata import version
 
 from holland.core.command import parse_sys, print_help, run
 from holland.core.config.checks import is_logging_level
 from holland.core.util.bootstrap import bootstrap
 
 LOG = logging.getLogger(__name__)
-HOLLAND_VERSION = get_distribution("holland").version
+HOLLAND_VERSION = version("holland")
 
 # main entrypoint for holland's cmdshell 'hl'
 def main():

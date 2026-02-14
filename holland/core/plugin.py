@@ -4,17 +4,8 @@ Core plugin support
 
 import logging
 import os
-from email.parser import Parser
-from email.policy import default
-
-from pkg_resources import (
-    DistributionNotFound,
-    Environment,
-    VersionConflict,
-    find_distributions,
-    iter_entry_points,
-    working_set,
-)
+import sys
+from importlib.metadata import entry_points
 
 LOG = logging.getLogger(__name__)
 
@@ -31,26 +22,10 @@ def add_plugin_dir(plugin_dir):
     """
     Find available plugins
     """
-    if not os.path.isdir(plugin_dir):
+    if os.path.isdir(plugin_dir):
         LOG.debug("Adding plugin directory: %r", plugin_dir)
-        env = Environment([plugin_dir])
-        dists, errors = working_set.find_plugins(env)
-        for dist in dists:
-            LOG.debug("Adding distribution: %r", dist)
-            working_set.add(dist)
-
-        if errors:
-            for dist, error in list(errors.items()):
-                errmsg = None
-                if isinstance(error, DistributionNotFound):
-                    (req,) = error.args
-                    errmsg = "%r not found" % req.project_name
-                elif isinstance(error, VersionConflict):
-                    dist, req = error.args
-                    errmsg = "Version Conflict. Requested %s Found %s" % (req, dist)
-                else:
-                    errmsg = repr(error)
-                LOG.error("Failed to load %s: %r", dist, errmsg)
+        if plugin_dir not in sys.path:
+            sys.path.insert(0, plugin_dir)
         PLUGIN_DIRECTORIES.append(plugin_dir)
 
 
@@ -59,14 +34,15 @@ def load_first_entrypoint(group, name=None):
     load the first entrypoint in any distribution
     matching group and name
     """
-    for entry_points in iter_entry_points(group, name):
+    kwargs = {"group": group}
+    if name is not None:
+        kwargs["name"] = name
+    for ep in entry_points(**kwargs):
         try:
-            return entry_points.load()
-        except DistributionNotFound as ex:
-            raise PluginLoadError("Could not find dependency '%s'" % ex)
+            return ep.load()
         except ImportError as ex:
             raise PluginLoadError(ex)
-    raise PluginLoadError("'%s' not found" % ".".join((group, name)))
+    raise PluginLoadError("'%s' not found" % ".".join(filter(None, (group, name))))
 
 
 def load_backup_plugin(name):
@@ -88,11 +64,11 @@ def get_commands(include_aliases=True):
     Get list of avialable commands
     """
     cmds = {}
-    for entry_point in iter_entry_points("holland.commands"):
+    for ep in entry_points(group="holland.commands"):
         try:
-            cmdcls = entry_point.load()
+            cmdcls = ep.load()
         except ImportError as ex:
-            LOG.warning("Skipping command plugin %s: %s", entry_point.name, ex)
+            LOG.warning("Skipping command plugin %s: %s", ep.name, ex)
             continue
         cmds[cmdcls.name] = cmdcls
         if include_aliases:
@@ -106,37 +82,8 @@ def iter_plugins(group, name=None):
     Iterate over all unique distributions defining
     entrypoints with the given group and name
     """
-    for entry_point in working_set.iter_entry_points(group, name):
-        yield entry_point.name, dist_metainfo_dict(entry_point.dist)
-
-
-def dist_metainfo_dict(dist):
-    """
-    Convert an Egg's PKG-INFO into a dict
-    """
-
-    distmetadata = get_dist_metadata(dist)
-    ret = Parser(policy=default).parsestr(distmetadata)
-    return ret
-
-
-def iter_plugininfo():
-    """
-    Iterate over the plugins loaded so far
-    """
-    for plugin_dir in PLUGIN_DIRECTORIES:
-        for dist in find_distributions(plugin_dir):
-            distmetadata = get_dist_metadata(dist)
-            msg = Parser(policy=default).parsestr(distmetadata)
-            filtered_keys = ["metadata-version", "home-page", "platform"]
-            distinfo = [x for x in list(msg.items()) if x[0] not in filtered_keys]
-            yield dist, dict(distinfo)
-
-
-def get_dist_metadata(dist):
-    """Get metadata from a distribution, handling both old and new formats"""
-    try:
-        # Try the old format first for now
-        return dist.get_metadata("PKG-INFO")
-    except (FileNotFoundError, KeyError, OSError):
-        return dist.get_metadata("METADATA")
+    kwargs = {"group": group}
+    if name is not None:
+        kwargs["name"] = name
+    for ep in entry_points(**kwargs):
+        yield ep.name, ep.dist.metadata
