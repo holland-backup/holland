@@ -5,7 +5,8 @@ import re
 from textwrap import dedent
 from warnings import filterwarnings
 
-import pkg_resources
+from importlib.metadata import version as get_version
+
 import pymysql
 import pymysql.connections
 from pymysql import MySQLError, OperationalError, ProgrammingError
@@ -526,7 +527,7 @@ def connect(config, client_class=AutoMySQLClient):
         elif "password" in key:
             # Pass password to pymysql as bytes to
             # prevent encoding issues
-            pymysql_version = pkg_resources.get_distribution("pymysql").version
+            pymysql_version = get_version("pymysql")
             if int(pymysql_version.split(".")[0]) > 1:
                 args[key] = value.decode("utf-8")
             else:

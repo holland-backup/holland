@@ -7,10 +7,10 @@ import logging
 import os
 import sys
 
-from pkg_resources import get_distribution
+from importlib.metadata import version
 
 LOG = logging.getLogger(__name__)
-HOLLAND_VERSION = get_distribution("holland").version
+HOLLAND_VERSION = version("holland")
 HOLLAND_BANNER = f"""
 Holland Backup v%s
 Copyright (c) 2008-2018 Rackspace US, Inc.

@@ -1,6 +1,6 @@
-from setuptools import find_packages, setup
+from setuptools import find_namespace_packages, setup
 
-version = "1.3.1"
+version = "1.4.0"
 
 setup(
     name="holland",
@@ -15,11 +15,11 @@ setup(
     author_email="holland-devel@googlegroups.com",
     url="http://www.hollandbackup.org/",
     license="3-Clause BSD",
-    packages=find_packages(exclude=["ez_setup", "examples", "tests"]),
+    packages=find_namespace_packages(exclude=["ez_setup", "examples", "tests"]),
     include_package_data=True,
     zip_safe=True,
     test_suite="tests",
-    install_requires=["configobj>=4.6.0", "setuptools"],
+    install_requires=["configobj>=4.6.0"],
     entry_points={
         "console_scripts": [
             "holland = holland.core.cmdshell:main",
@@ -32,5 +32,4 @@ setup(
             "purge = holland.commands.purge:Purge",
         ],
     },
-    namespace_packages=["holland"],
 )
