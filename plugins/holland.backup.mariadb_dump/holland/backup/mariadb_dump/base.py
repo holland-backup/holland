@@ -64,6 +64,7 @@ def start(
                 additional_options,
             )
     else:
+        additional_options = [mariadb_dump_lock_option(lock_method, target_databases)]
         if target_databases is not ALL_DATABASES:
             target_databases = [db.name for db in target_databases]
         run_mariadb_dump(
