@@ -37,9 +37,9 @@ def load_first_entrypoint(group, name=None):
     kwargs = {"group": group}
     if name is not None:
         kwargs["name"] = name
-    for ep in entry_points(**kwargs):
+    for entry_point in entry_points(**kwargs):
         try:
-            return ep.load()
+            return entry_point.load()
         except ImportError as ex:
             raise PluginLoadError(ex)
     raise PluginLoadError("'%s' not found" % ".".join(filter(None, (group, name))))
@@ -64,11 +64,11 @@ def get_commands(include_aliases=True):
     Get list of avialable commands
     """
     cmds = {}
-    for ep in entry_points(group="holland.commands"):
+    for entry_point in entry_points(group="holland.commands"):
         try:
-            cmdcls = ep.load()
+            cmdcls = entry_point.load()
         except ImportError as ex:
-            LOG.warning("Skipping command plugin %s: %s", ep.name, ex)
+            LOG.warning("Skipping command plugin %s: %s", entry_point.name, ex)
             continue
         cmds[cmdcls.name] = cmdcls
         if include_aliases:
@@ -85,5 +85,5 @@ def iter_plugins(group, name=None):
     kwargs = {"group": group}
     if name is not None:
         kwargs["name"] = name
-    for ep in entry_points(**kwargs):
-        yield ep.name, ep.dist.metadata
+    for entry_point in entry_points(**kwargs):
+        yield entry_point.name, entry_point.dist.metadaentry_point
