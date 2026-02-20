@@ -5,7 +5,10 @@ Core plugin support
 import logging
 import os
 import sys
-from importlib.metadata import entry_points
+try:
+    from importlib import metadata
+except ImportError:
+    import importlib_metadata as metadata
 
 LOG = logging.getLogger(__name__)
 
@@ -37,7 +40,7 @@ def load_first_entrypoint(group, name=None):
     kwargs = {"group": group}
     if name is not None:
         kwargs["name"] = name
-    for entry_point in entry_points(**kwargs):
+    for entry_point in metadata.entry_points(**kwargs):
         try:
             return entry_point.load()
         except ImportError as ex:
@@ -64,7 +67,7 @@ def get_commands(include_aliases=True):
     Get list of avialable commands
     """
     cmds = {}
-    for entry_point in entry_points(group="holland.commands"):
+    for entry_point in metadata.entry_points(group="holland.commands"):
         try:
             cmdcls = entry_point.load()
         except ImportError as ex:
@@ -85,5 +88,5 @@ def iter_plugins(group, name=None):
     kwargs = {"group": group}
     if name is not None:
         kwargs["name"] = name
-    for entry_point in entry_points(**kwargs):
+    for entry_point in metadata.entry_points(**kwargs):
         yield entry_point.name, entry_point.dist.metadata

@@ -42,7 +42,7 @@ class Restore(Command):
         Command.__init__(self)
         self.optparser.disable_interspersed_args()
 
-    def run(self, cmd, opts, *args):
+    def run(self, *args):
         backup = SPOOL.find_backup(args[0])
         if not backup:
             logging.error("No backup found named %s", args[0])
