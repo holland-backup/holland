@@ -12,7 +12,7 @@ from . import setup, teardown
 
 
 class TestPhysicalVolume(unittest.TestCase):
-    """ Test pv commands"""
+    """Test pv commands"""
 
     tmpdir = None
 
@@ -50,17 +50,19 @@ class TestPhysicalVolume(unittest.TestCase):
         result = PhysicalVolume.search("/dev/loop0")
         self.assertTrue(not isinstance(result, Volume))
         phy_vol = next(result)
-        self.assertTrue(isinstance(phy_vol, PhysicalVolume), "not a physical volume? %r" % phy_vol)
+        self.assertTrue(
+            isinstance(phy_vol, PhysicalVolume), "not a physical volume? %r" % phy_vol
+        )
         self.assertRaises(StopIteration, result.__next__)
 
     def test_repr(self):
-        """ Test Name """
+        """Test Name"""
         phy_vol = PhysicalVolume.lookup("/dev/loop0")
         self.assertEqual(repr(phy_vol), "PhysicalVolume(device='/dev/loop0')")
 
 
 class TestVolumeGroup(unittest.TestCase):
-    """ Test vg commands"""
+    """Test vg commands"""
 
     tmpdir = None
 
@@ -75,7 +77,7 @@ class TestVolumeGroup(unittest.TestCase):
 
     def test_create(self):
         """Create VG"""
-        vol_group = VolumeGroup({"vg_name": "dba", "vg_extent_size": 4 * 1024 ** 2})
+        vol_group = VolumeGroup({"vg_name": "dba", "vg_extent_size": 4 * 1024**2})
         self.assertEqual(vol_group.vg_name, "dba")
         self.assertEqual(vol_group.vg_extent_size, 4194304)
 
@@ -110,7 +112,7 @@ class TestVolumeGroup(unittest.TestCase):
 
 
 class TestLogicalVolume(unittest.TestCase):
-    """ Test lv commands"""
+    """Test lv commands"""
 
     tmpdir = None
 

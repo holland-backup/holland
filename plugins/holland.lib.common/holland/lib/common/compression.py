@@ -153,7 +153,9 @@ class CompressionOutput:
                     stdout=subprocess.PIPE,
                     stderr=self.stderr,
                 )
-                self.split = subprocess.Popen(split_args, stdin=self.pid.stdout, stderr=self.stderr)
+                self.split = subprocess.Popen(
+                    split_args, stdin=self.pid.stdout, stderr=self.stderr
+                )
 
             else:
                 self.fileobj = io.open(path, "w")
@@ -203,7 +205,9 @@ class CompressionOutput:
                 cmp_f.name,
                 cmp_f.fileno(),
             )
-            pid = subprocess.Popen(argv, stdin=self.fileobj.fileno(), stdout=cmp_f.fileno())
+            pid = subprocess.Popen(
+                argv, stdin=self.fileobj.fileno(), stdout=cmp_f.fileno()
+            )
             status = pid.wait()
             LOG.debug("Return status: %s", status)
             os.unlink(self.fileobj.name)
@@ -221,7 +225,8 @@ class CompressionOutput:
                         LOG.error("%s: %s", self.argv[0], line.rstrip())
                     raise IOError(
                         errno.EPIPE,
-                        "Compression program '%s' exited with status %d" % (self.argv[0], status),
+                        "Compression program '%s' exited with status %d"
+                        % (self.argv[0], status),
                     )
                 for line in stderr:
                     if not line.strip():

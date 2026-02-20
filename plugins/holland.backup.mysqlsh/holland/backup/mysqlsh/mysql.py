@@ -27,6 +27,7 @@ def _get_mysql_error_msg(ex):
     message = ex.args[-1] if len(ex.args) > 1 else str(ex)
     return "MySQL error [%s]: %s" % (code, message)
 
+
 class MySqlHelper:
     """
     Helper class for MySQL specific operations for mysqlsh backups.
@@ -38,7 +39,6 @@ class MySqlHelper:
         self.plugin_config = plugin_config or {}
         self.client = connect(self.mysql_config["client"])
         self.schema = MySQLSchema()
-
 
     def write_defaults_file(self, target_directory):
         """Write the defaults file to the target directory."""

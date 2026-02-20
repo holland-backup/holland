@@ -12,7 +12,9 @@ setup(
     author_email="holland-devel@googlegroups.com",
     url="http://www.hollandbackup.org/",
     license="GNU GPLv2",
-    packages=find_namespace_packages(exclude=["ez_setup", "examples", "tests", "tests.*"]),
+    packages=find_namespace_packages(
+        exclude=["ez_setup", "examples", "tests", "tests.*"]
+    ),
     zip_safe=True,
     install_requires=[],
     entry_points={

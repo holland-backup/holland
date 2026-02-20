@@ -12,3 +12,6 @@ pylint_plugins:
 
 pylint: pylint_base pylint_plugins
 
+format: 
+	black .
+

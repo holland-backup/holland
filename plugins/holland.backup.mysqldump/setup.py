@@ -16,7 +16,9 @@ setup(
     author_email="holland-devel@googlegroups.com",
     url="http://hollandbackup.org",
     license="GNU GPLv2",
-    packages=find_namespace_packages(exclude=["ez_setup", "examples", "tests", "tests.*"]),
+    packages=find_namespace_packages(
+        exclude=["ez_setup", "examples", "tests", "tests.*"]
+    ),
     include_package_data=True,
     zip_safe=True,
     test_suite="tests",

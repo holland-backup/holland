@@ -59,7 +59,9 @@ class TarPlugin:
                 # verify the symlink and such exist before trying to get its size
                 if os.path.exists(filepointer):
                     total_size += os.path.getsize(filepointer)
-            LOG.debug("Debug: Checking size of %s directories in %s", len(dirnames), dirpath)
+            LOG.debug(
+                "Debug: Checking size of %s directories in %s", len(dirnames), dirpath
+            )
         return total_size
 
     def backup(self):
@@ -71,14 +73,20 @@ class TarPlugin:
         if not os.path.exists(self.config["tar"]["directory"]) or not os.path.isdir(
             self.config["tar"]["directory"]
         ):
-            raise BackupError("{0} is not a directory!".format(self.config["tar"]["directory"]))
-        out_name = "{0}.tar".format(self.config["tar"]["directory"].lstrip("/").replace("/", "_"))
+            raise BackupError(
+                "{0} is not a directory!".format(self.config["tar"]["directory"])
+            )
+        out_name = "{0}.tar".format(
+            self.config["tar"]["directory"].lstrip("/").replace("/", "_")
+        )
         outfile = os.path.join(self.target_directory, out_name)
         args = ["tar", "c", self.config["tar"]["directory"]]
         errlog = TemporaryFile()
         stream = open_stream(outfile, "w", **self.config["compression"])
         LOG.info("Executing: %s", list2cmdline(args))
-        pid = Popen(args, stdout=stream.fileno(), stderr=errlog.fileno(), close_fds=True)
+        pid = Popen(
+            args, stdout=stream.fileno(), stderr=errlog.fileno(), close_fds=True
+        )
         status = pid.wait()
         try:
             errlog.flush()

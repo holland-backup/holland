@@ -76,7 +76,8 @@ class XtrabackupPlugin:
             return directory_size(datadir)
         except OSError as exc:
             raise BackupError(
-                "Failed to calculate directory size: [%d] %s" % (exc.errno, exc.strerror)
+                "Failed to calculate directory size: [%d] %s"
+                % (exc.errno, exc.strerror)
             )
         finally:
             client.close()
@@ -93,7 +94,9 @@ class XtrabackupPlugin:
         """Open the stdout output for a streaming xtrabackup run"""
         config = self.config["xtrabackup"]
         backup_directory = self.target_directory
-        stream = util.determine_stream_method(config["stream"], binary_xtrabackup=binary_xtrabackup)
+        stream = util.determine_stream_method(
+            config["stream"], binary_xtrabackup=binary_xtrabackup
+        )
         if stream:
             if stream == "tar":
                 archive_path = join(backup_directory, "backup.tar")
@@ -130,7 +133,9 @@ class XtrabackupPlugin:
             LOG.error("! %s failed. Output follows below.", cmdline)
             for line in stdout.splitlines():
                 LOG.error("! %s", line)
-            raise BackupError("%s exited with failure status [%d]" % (cmdline, process.returncode))
+            raise BackupError(
+                "%s exited with failure status [%d]" % (cmdline, process.returncode)
+            )
 
     def backup(self):
         """Perform Backup"""
@@ -149,7 +154,9 @@ class XtrabackupPlugin:
         tmpdir = util.evaluate_tmpdir(xb_cfg["tmpdir"], backup_directory)
         # innobackupex --tmpdir does not affect xtrabackup
         util.add_xtrabackup_defaults(self.defaults_path, tmpdir=tmpdir)
-        args = util.build_xb_args(xb_cfg, backup_directory, self.defaults_path, binary_xtrabackup)
+        args = util.build_xb_args(
+            xb_cfg, backup_directory, self.defaults_path, binary_xtrabackup
+        )
         util.execute_pre_command(
             xb_cfg["pre-command"],
             backup_directory=backup_directory,
@@ -164,7 +171,9 @@ class XtrabackupPlugin:
                     util.run_xtrabackup(args, stdout, stderr)
                 except Exception as exc:
                     LOG.info("!! %s", exc)
-                    for line in open(join(self.target_directory, "xtrabackup.log"), "r"):
+                    for line in open(
+                        join(self.target_directory, "xtrabackup.log"), "r"
+                    ):
                         LOG.error("    ! %s", line.rstrip())
                     raise
             finally:

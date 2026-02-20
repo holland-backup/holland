@@ -73,7 +73,8 @@ class MariabackupPlugin:
             return directory_size(datadir)
         except OSError as exc:
             raise BackupError(
-                "Failed to calculate directory size: [%d] %s" % (exc.errno, exc.strerror)
+                "Failed to calculate directory size: [%d] %s"
+                % (exc.errno, exc.strerror)
             )
         finally:
             client.close()
@@ -123,7 +124,9 @@ class MariabackupPlugin:
             LOG.error("! %s failed. Output follows below.", cmdline)
             for line in stdout.splitlines():
                 LOG.error("! %s", line)
-            raise BackupError("%s exited with failure status [%d]" % (cmdline, process.returncode))
+            raise BackupError(
+                "%s exited with failure status [%d]" % (cmdline, process.returncode)
+            )
 
     def backup(self):
         """Perform Backup"""
@@ -138,7 +141,9 @@ class MariabackupPlugin:
         util.add_mariabackup_defaults(self.defaults_path, tmpdir=tmpdir)
         args = util.build_mb_args(mb_cfg, backup_directory, self.defaults_path)
         util.execute_pre_command(
-            mb_cfg["pre-command"], backup_directory=backup_directory, backupdir=backup_directory
+            mb_cfg["pre-command"],
+            backup_directory=backup_directory,
+            backupdir=backup_directory,
         )
         stderr = self.open_mb_logfile()
         try:
@@ -149,7 +154,9 @@ class MariabackupPlugin:
                     util.run_mariabackup(args, stdout, stderr)
                 except Exception as exc:
                     LOG.info("!! %s", exc)
-                    for line in open(join(self.target_directory, "mariabackup.log"), "r"):
+                    for line in open(
+                        join(self.target_directory, "mariabackup.log"), "r"
+                    ):
                         LOG.error("    ! %s", line.rstrip())
                     raise
             finally:

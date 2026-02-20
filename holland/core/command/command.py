@@ -45,10 +45,18 @@ PARSER.add_argument(
     help="Log verbose output",
 )
 PARSER.add_argument(
-    "-d", "--debug", action="store_const", const="debug", dest="log_level", help="Log debug output"
+    "-d",
+    "--debug",
+    action="store_const",
+    const="debug",
+    dest="log_level",
+    help="Log debug output",
 )
 PARSER.add_argument(
-    "-c", "--config-file", metavar="<file>", help="Read configuration from the given file"
+    "-c",
+    "--config-file",
+    metavar="<file>",
+    help="Read configuration from the given file",
 )
 PARSER.add_argument("-q", "--quiet", action="store_true", help="Don't log to console")
 PARSER.add_argument(

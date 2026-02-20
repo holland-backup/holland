@@ -43,7 +43,15 @@ def unescape_option_value(value):
 
     See: http://dev.mysql.com/doc/refman/5.0/en/option-files.html
     """
-    meta_mapping = {"b": "\b", "t": "\t", "n": "\n", "r": "\r", "\\": "\\", "s": " ", '"': '"'}
+    meta_mapping = {
+        "b": "\b",
+        "t": "\t",
+        "n": "\n",
+        "r": "\r",
+        "\\": "\\",
+        "s": " ",
+        '"': '"',
+    }
 
     return re.sub(r'\\(["btnr\\s])', lambda m: meta_mapping[m.group(1)], value)
 
@@ -75,7 +83,9 @@ def find_includes(include_directive):
     """Find includes for the given !include* directive"""
     directive, path = include_directive.split(None, 1)
     if directive == "!includedir":
-        return glob.glob(os.path.join(path, "*.cnf")) + glob.glob(os.path.join(path, "*.ini"))
+        return glob.glob(os.path.join(path, "*.cnf")) + glob.glob(
+            os.path.join(path, "*.ini")
+        )
     if directive == "!include":
         return path
     raise ParseError("Invalid include directive %s" % include_directive)

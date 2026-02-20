@@ -90,7 +90,8 @@ class PgBaseBackup:
             except dbapi.DatabaseError as exc:
                 if exc.pgcode != "42883":  # 'missing function'
                     raise BackupError(
-                        "Failed to estimate database size for " "%s: %s" % (database, exc)
+                        "Failed to estimate database size for "
+                        "%s: %s" % (database, exc)
                     )
                 totalestimate += self._estimate_legacy_size(database)
         connection.close()
@@ -103,7 +104,9 @@ class PgBaseBackup:
             connection.close()
             return size
         except dbapi.DatabaseError as exc:
-            raise BackupError("Failed to estimate database size for %s: %s" % (database, exc))
+            raise BackupError(
+                "Failed to estimate database size for %s: %s" % (database, exc)
+            )
 
     def backup(self):
         """

@@ -123,12 +123,18 @@ class MysqlLVMBackup:
         try:
             volume = LogicalVolume.lookup_from_fspath(datadir)
         except LookupError as exc:
-            raise BackupError("Failed to lookup logical volume for %s: %s" % (datadir, str(exc)))
+            raise BackupError(
+                "Failed to lookup logical volume for %s: %s" % (datadir, str(exc))
+            )
         except Exception as ex:
-            raise BackupError("Failed to lookup logical volume for %s: %s" % (datadir, str(ex)))
+            raise BackupError(
+                "Failed to lookup logical volume for %s: %s" % (datadir, str(ex))
+            )
 
         # create a snapshot manager
-        snapshot = build_snapshot(self.config["mysql-lvm"], volume, suppress_tmpdir=self.dry_run)
+        snapshot = build_snapshot(
+            self.config["mysql-lvm"], volume, suppress_tmpdir=self.dry_run
+        )
         # calculate where the datadirectory on the snapshot will be located
         rpath = relpath(datadir, getmount(datadir))
         snap_datadir = os.path.abspath(os.path.join(snapshot.mountpoint, rpath))

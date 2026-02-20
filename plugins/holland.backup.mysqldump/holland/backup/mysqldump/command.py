@@ -163,7 +163,9 @@ def mysqldump_version(command):
         return tuple(
             (
                 int(digit)
-                for digit in re.search(r"(\d+)[.](\d+)[.](\d+)", stdout.decode("utf-8")).groups()
+                for digit in re.search(
+                    r"(\d+)[.](\d+)[.](\d+)", stdout.decode("utf-8")
+                ).groups()
             )
         )
     except AttributeError:
@@ -174,7 +176,9 @@ def mysqldump_version(command):
 class MySQLDump:
     """mysqldump command runner"""
 
-    def __init__(self, defaults_file, cmd_path="mysqldump", extra_defaults=False, mock_env=None):
+    def __init__(
+        self, defaults_file, cmd_path="mysqldump", extra_defaults=False, mock_env=None
+    ):
         if not os.path.exists(cmd_path):
             raise MySQLDumpError("'%s' does not exist" % cmd_path)
         self.cmd_path = cmd_path
@@ -232,7 +236,9 @@ class MySQLDump:
             LOG.info("Executing: %s", subprocess.list2cmdline(args))
             popen = subprocess.Popen
         errlog = TemporaryFile()
-        pid = popen(args, stdout=stream.fileno(), stderr=errlog.fileno(), close_fds=True)
+        pid = popen(
+            args, stdout=stream.fileno(), stderr=errlog.fileno(), close_fds=True
+        )
         status = pid.wait()
         try:
             errlog.flush()
@@ -242,4 +248,6 @@ class MySQLDump:
         finally:
             errlog.close()
         if status != 0:
-            raise MySQLDumpError("mysqldump exited with non-zero status %d" % pid.returncode)
+            raise MySQLDumpError(
+                "mysqldump exited with non-zero status %d" % pid.returncode
+            )

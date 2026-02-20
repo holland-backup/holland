@@ -53,7 +53,9 @@ def generate_defaults_file(defaults_file, include=(), auth_opts=None):
         finally:
             fileobj.close()
     except IOError as exc:
-        raise BackupError("Failed to create %s: [%d] %s" % (defaults_file, exc.errno, exc.strerror))
+        raise BackupError(
+            "Failed to create %s: [%d] %s" % (defaults_file, exc.errno, exc.strerror)
+        )
 
     return defaults_file
 
@@ -67,13 +69,17 @@ def mariabackup_version(mb_cfg):
     try:
         process = Popen(mb_version, stdout=PIPE, stderr=STDOUT, close_fds=True)
     except OSError as exc:
-        raise BackupError("Failed to run %s: [%d] %s" % cmdline, exc.errno, exc.strerror)
+        raise BackupError(
+            "Failed to run %s: [%d] %s" % cmdline, exc.errno, exc.strerror
+        )
 
     for line in process.stdout:
         LOG.info("# %s", line.rstrip().decode("UTF-8"))
     process.wait()
     if process.returncode != 0:
-        raise BackupError("%s returned failure status [%d]" % (cmdline, process.returncode))
+        raise BackupError(
+            "%s returned failure status [%d]" % (cmdline, process.returncode)
+        )
 
 
 def run_mariabackup(args, stdout, stderr):
@@ -95,7 +101,9 @@ def run_mariabackup(args, stdout, stderr):
         raise BackupError("Terminated")
 
     if process.returncode != 0:
-        raise BackupError("mariabackup  exited with failure status [%d]" % process.returncode)
+        raise BackupError(
+            "mariabackup  exited with failure status [%d]" % process.returncode
+        )
 
 
 def apply_mariabackup_logfile(mb_cfg, backupdir):
@@ -108,7 +116,9 @@ def apply_mariabackup_logfile(mb_cfg, backupdir):
         return
 
     if "--compress" in mb_cfg["additional-options"]:
-        LOG.warning("Skipping --prepare since --compress option appears " "to have been used.")
+        LOG.warning(
+            "Skipping --prepare since --compress option appears " "to have been used."
+        )
         return
 
     innobackupex = mb_cfg["innobackupex"]
@@ -121,13 +131,17 @@ def apply_mariabackup_logfile(mb_cfg, backupdir):
     try:
         process = Popen(args, stdout=PIPE, stderr=STDOUT, close_fds=True)
     except OSError as exc:
-        raise BackupError("Failed to run %s: [%d] %s" % cmdline, exc.errno, exc.strerror)
+        raise BackupError(
+            "Failed to run %s: [%d] %s" % cmdline, exc.errno, exc.strerror
+        )
 
     for line in process.stdout:
         LOG.info("%s", line.rstrip())
     process.wait()
     if process.returncode != 0:
-        raise BackupError("%s returned failure status [%d]" % (cmdline, process.returncode))
+        raise BackupError(
+            "%s returned failure status [%d]" % (cmdline, process.returncode)
+        )
 
 
 def determine_stream_method(stream):
@@ -159,7 +173,9 @@ def execute_pre_command(pre_command, **kwargs):
     pre_command = Template(pre_command).safe_substitute(**kwargs)
     LOG.info("Executing pre-command: %s", pre_command)
     try:
-        process = Popen(pre_command, stdout=PIPE, stderr=STDOUT, shell=True, close_fds=True)
+        process = Popen(
+            pre_command, stdout=PIPE, stderr=STDOUT, shell=True, close_fds=True
+        )
     except OSError as exc:
         # missing executable
         raise BackupError("pre-command %s failed: %s" % (pre_command, exc.strerror))
@@ -184,7 +200,9 @@ def add_mariabackup_defaults(defaults_path, **kwargs):
             for key, value in kwargs.items():
                 print("%s = %s" % (key, value), file=fileobj)
         except IOError:
-            raise BackupError("Error writing mariabackup defaults to %s" % defaults_path)
+            raise BackupError(
+                "Error writing mariabackup defaults to %s" % defaults_path
+            )
     finally:
         fileobj.close()
 
@@ -224,6 +242,7 @@ def build_mb_args(config, basedir, defaults_file=None):
     if basedir:
         args.append("--target-dir=" + basedir)
     return args
+
 
 def get_mariadb_backup_bin_path(mb_cfg):
     """Return the full path to the MariaDB backup binary.

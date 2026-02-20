@@ -11,7 +11,14 @@ LOG = logging.getLogger(__name__)
 #: engines we consider 'transactional'
 #: transactional in this context means '--single-transaction'
 #: is probably a reasonable option for mysqldump
-TRANSACTIONAL_ENGINES = "innodb", "federated", "myisam_mrg", "memory", "view", "blackhole"
+TRANSACTIONAL_ENGINES = (
+    "innodb",
+    "federated",
+    "myisam_mrg",
+    "memory",
+    "view",
+    "blackhole",
+)
 
 
 class MySQLSchema:
@@ -215,7 +222,8 @@ class Database:
             [
                 table.size
                 for table in self.tables
-                if not table.excluded and table.engine not in ("mrg_myisam", "federated")
+                if not table.excluded
+                and table.engine not in ("mrg_myisam", "federated")
             ]
         )
 
@@ -258,16 +266,19 @@ class Table:
     is_transactional = property(is_transactional)
 
     def __str__(self):
-        data_size = "%.2fMB" % (self.data_size / 1024.0 ** 2)
-        index_size = "%.2fMB" % (self.index_size / 1024.0 ** 2)
-        return "%sTable(name=%r, data_size=%s, \
-               index_size=%s, engine=%s, txn=%s)" % (
-            self.excluded and "[EXCL]" or "",
-            self.name,
-            data_size,
-            index_size,
-            self.engine,
-            str(self.is_transactional),
+        data_size = "%.2fMB" % (self.data_size / 1024.0**2)
+        index_size = "%.2fMB" % (self.index_size / 1024.0**2)
+        return (
+            "%sTable(name=%r, data_size=%s, \
+               index_size=%s, engine=%s, txn=%s)"
+            % (
+                self.excluded and "[EXCL]" or "",
+                self.name,
+                data_size,
+                index_size,
+                self.engine,
+                str(self.is_transactional),
+            )
         )
 
 

@@ -152,9 +152,9 @@ class MySqlShBase(BackupPlugin):
                     # Ensure mysql:replication exists in the config to ensure we run the
                     # start_slave later regardless if we fail to get the replication config
                     self.config["mysql:replication"] = {}
-                    self.config["mysql:replication"] = (
-                        self.mysql.get_slave_replication_cfg()["slave_master_log_file"]
-                    )
+                    self.config[
+                        "mysql:replication"
+                    ] = self.mysql.get_slave_replication_cfg()["slave_master_log_file"]
                     self.log.info("MySQL replication has been stopped.")
             elif self.plugin_config["bin-log-position"]:
                 self.config["mysql:replication"] = self.mysql.get_master_data()

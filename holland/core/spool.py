@@ -169,7 +169,9 @@ class Backupset:
         """
         if retention_count < 0:
             raise ValueError("Invalid retention count %s" % retention_count)
-        for backup in itertools.islice(self.list_backups(reverse=True), retention_count, None):
+        for backup in itertools.islice(
+            self.list_backups(reverse=True), retention_count, None
+        ):
             backup.purge()
             yield backup
 
@@ -365,11 +367,19 @@ class Backup:
         """
         )
         cfg = {
-            'plugin': self.config.lookup('holland:backup.plugin'),
-            'start_time': format_datetime(self.config.lookup('holland:backup.start-time')),
-            'stop_time': format_datetime(self.config.lookup('holland:backup.stop-time')),
-            'estimated_size': format_bytes(self.config.lookup('holland:backup.estimated-size')),
-            'on_disk_size': format_bytes(self.config.lookup('holland:backup.on-disk-size')),
+            "plugin": self.config.lookup("holland:backup.plugin"),
+            "start_time": format_datetime(
+                self.config.lookup("holland:backup.start-time")
+            ),
+            "stop_time": format_datetime(
+                self.config.lookup("holland:backup.stop-time")
+            ),
+            "estimated_size": format_bytes(
+                self.config.lookup("holland:backup.estimated-size")
+            ),
+            "on_disk_size": format_bytes(
+                self.config.lookup("holland:backup.on-disk-size")
+            ),
         }
         info_str = tmpl.safe_substitute(cfg)
         info_str = "\t" + dedent(info_str).lstrip()
@@ -380,20 +390,23 @@ class Backup:
         """
         format plugin info
         """
-        return dedent(
-            """
+        return (
+            dedent(
+                """
         Backup: %s
         start-time:     %s
         stop-time:      %s
         estimated-size: %s
         on-disk-size:   %s
         """
-        ).strip() % (
-            self.name,
-            format_datetime(self.config.lookup("holland:backup.start-time")),
-            format_datetime(self.config.lookup("holland:backup.stop-time")),
-            format_bytes(self.config.lookup("holland:backup.estimated-size")),
-            format_bytes(self.config.lookup("holland:backup.on-disk-size")),
+            ).strip()
+            % (
+                self.name,
+                format_datetime(self.config.lookup("holland:backup.start-time")),
+                format_datetime(self.config.lookup("holland:backup.stop-time")),
+                format_bytes(self.config.lookup("holland:backup.estimated-size")),
+                format_bytes(self.config.lookup("holland:backup.on-disk-size")),
+            )
         )
 
     def __cmp__(self, other):

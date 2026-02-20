@@ -84,7 +84,9 @@ class BaseConfig(ConfigObj):
             if not error:
                 LOG.error("Missing parameter %s", ".".join(section_list + [key]))
             else:
-                LOG.error("Configuration error %s: %s", ".".join(section_list + [key]), error)
+                LOG.error(
+                    "Configuration error %s: %s", ".".join(section_list + [key]), error
+                )
 
         # warn about any unknown parameters before we potentially abort on
         # validation errors
@@ -92,13 +94,18 @@ class BaseConfig(ConfigObj):
         if not suppress_warnings:
             try:
                 for sections, name in get_extra_values(self):
-                    LOG.warning("Unknown parameter '%s' in section '%s'", name, ".".join(sections))
+                    LOG.warning(
+                        "Unknown parameter '%s' in section '%s'",
+                        name,
+                        ".".join(sections),
+                    )
             except NameError:
                 pass
 
         if errors is not True:
             raise ConfigError(
-                "Configuration errors were encountered while validating %r" % self.filename
+                "Configuration errors were encountered while validating %r"
+                % self.filename
             )
         return errors
 
