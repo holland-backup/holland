@@ -86,4 +86,4 @@ def iter_plugins(group, name=None):
     if name is not None:
         kwargs["name"] = name
     for entry_point in entry_points(**kwargs):
-        yield entry_point.name, entry_point.dist.metadaentry_point
+        yield entry_point.name, entry_point.dist.metadata
