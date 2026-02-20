@@ -9,7 +9,7 @@ from subprocess import CalledProcessError, Popen, list2cmdline
 LOG = logging.getLogger(__name__)
 
 
-class DirArchiveAction(object):
+class DirArchiveAction:
     """Copy datadir"""
 
     def __init__(self, snap_datadir, backup_datadir, config):
@@ -40,7 +40,9 @@ class DirArchiveAction(object):
 
         if process.returncode != 0:
             LOG.error("dir exited with non-zero status: %d", process.returncode)
-            LOG.error("Tailing up to the last 10 lines of archive.log for troubleshooting:")
+            LOG.error(
+                "Tailing up to the last 10 lines of archive.log for troubleshooting:"
+            )
             for line in open(archive_log, "r").readlines()[-10:]:
                 LOG.error(" ! %s", line.rstrip())
             raise CalledProcessError(process.returncode, "dir")

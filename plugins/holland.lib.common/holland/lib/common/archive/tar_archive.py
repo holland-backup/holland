@@ -27,7 +27,7 @@ def _make_tarinfo(name, size):
     return tarinfo
 
 
-class TarArchive(object):
+class TarArchive:
     """
     Read, write, access Tar archives.
     """

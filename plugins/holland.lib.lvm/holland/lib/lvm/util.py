@@ -5,7 +5,14 @@ import re
 import signal
 from math import log
 
-__all__ = ["getmount", "getdevice", "relpath", "format_bytes", "parse_bytes", "SignalManager"]
+__all__ = [
+    "getmount",
+    "getdevice",
+    "relpath",
+    "format_bytes",
+    "parse_bytes",
+    "SignalManager",
+]
 
 
 def getmount(getpath):
@@ -90,7 +97,7 @@ def format_bytes(nbytes, precision=2):
 
     return "%.*f%s" % (
         precision,
-        float(nbytes) / (1024 ** exponent),
+        float(nbytes) / (1024**exponent),
         ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][int(exponent)],
     )
 
@@ -121,7 +128,7 @@ def parse_bytes(units_string):
     return int(float(number) * 1024 ** (exponent))
 
 
-class SignalManager(object):
+class SignalManager:
     """Manage signals around critical sections"""
 
     def __init__(self):
@@ -129,7 +136,7 @@ class SignalManager(object):
         self._handlers = {}
 
     def trap(self, *signals):
-        """Request the set of signals to be trapped """
+        """Request the set of signals to be trapped"""
         for sig in signals:
             prev = signal.signal(sig, self._trap_signal)
             self._handlers[sig] = prev

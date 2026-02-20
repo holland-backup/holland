@@ -8,7 +8,7 @@ from holland.lib.mysql import MySQLError
 LOG = logging.getLogger(__name__)
 
 
-class RecordMySQLReplicationAction(object):
+class RecordMySQLReplicationAction:
     """Connect to MySQL"""
 
     def __init__(self, client, config):
@@ -21,7 +21,7 @@ class RecordMySQLReplicationAction(object):
 
 
 def record_master_status(client, config):
-    """Save status from master """
+    """Save status from master"""
     try:
         LOG.debug("Executing SHOW MASTER STATUS")
         master_status = client.show_master_status()
@@ -38,12 +38,13 @@ def record_master_status(client, config):
             )
     except MySQLError as exc:
         raise BackupError(
-            "MySQL error while acquiring master replication " "status [%d] %s" % exc.args
+            "MySQL error while acquiring master replication "
+            "status [%d] %s" % exc.args
         )
 
 
 def record_slave_status(client, config):
-    """Save status from slave """
+    """Save status from slave"""
     try:
         LOG.debug("Executing SHOW SLAVE STATUS")
         slave_status = client.show_slave_status()
@@ -58,7 +59,9 @@ def record_slave_status(client, config):
                 position,
             )
         else:
-            LOG.info("This MySQL server is not a slave. Nothing to record from SHOW SLAVE STATUS")
+            LOG.info(
+                "This MySQL server is not a slave. Nothing to record from SHOW SLAVE STATUS"
+            )
     except MySQLError as exc:
         raise BackupError(
             "MySQL error while acquiring slave replication " "status [%d] %s" % exc.args

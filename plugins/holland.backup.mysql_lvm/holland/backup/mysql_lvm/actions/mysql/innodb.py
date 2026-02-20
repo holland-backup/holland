@@ -12,8 +12,8 @@ from ._mysqld import MySQLServer, generate_server_config, locate_mysqld_exe
 LOG = logging.getLogger(__name__)
 
 
-class InnodbRecoveryAction(object):
-    """Perform InnoDB recovery against a MySQL data directory """
+class InnodbRecoveryAction:
+    """Perform InnoDB recovery against a MySQL data directory"""
 
     def __init__(self, mysqld_config):
         self.mysqld_config = mysqld_config
@@ -26,7 +26,9 @@ class InnodbRecoveryAction(object):
         mysqld_exe = locate_mysqld_exe(self.mysqld_config)
         LOG.info("Bootstrapping with %s", mysqld_exe)
 
-        mycnf_path = os.path.join(self.mysqld_config["datadir"], "my.innodb_recovery.cnf")
+        mycnf_path = os.path.join(
+            self.mysqld_config["datadir"], "my.innodb_recovery.cnf"
+        )
         self.mysqld_config["log-error"] = "innodb_recovery.log"
         my_conf = generate_server_config(self.mysqld_config, mycnf_path)
 

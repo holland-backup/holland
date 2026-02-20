@@ -31,7 +31,9 @@ class TestSQLite(unittest.TestCase):
     def setUpClass(cls):
         "set up test fixtures"
         cls.config = MockConfig()
-        cls.config["sqlite"] = {"databases": [os.path.join(os.path.dirname(__file__), "sqlite.db")]}
+        cls.config["sqlite"] = {
+            "databases": [os.path.join(os.path.dirname(__file__), "sqlite.db")]
+        }
         cls.config["compression"] = {"method": "gzip", "inline": "yes", "level": 1}
 
         # Disabling lint as unittest was failing on the BackupError exception
@@ -51,14 +53,18 @@ class TestSQLite(unittest.TestCase):
         """Test Dry run"""
         name = "sqlite/" + time.strftime("%Y%m%d_%H%M%S")
         dry_run = True
-        plugin = SQLitePlugin(name, self.__class__.config, self.__class__.config["tmpdir"], dry_run)
+        plugin = SQLitePlugin(
+            name, self.__class__.config, self.__class__.config["tmpdir"], dry_run
+        )
         plugin.backup()
 
     def test_sqlite_plugin(self):
         """Test backup"""
         name = "sqlite/" + time.strftime("%Y%m%d_%H%M%S")
         dry_run = False
-        plugin = SQLitePlugin(name, self.__class__.config, self.__class__.config["tmpdir"], dry_run)
+        plugin = SQLitePlugin(
+            name, self.__class__.config, self.__class__.config["tmpdir"], dry_run
+        )
         self.assertEqual(plugin.estimate_backup_size(), 2048)
         plugin.backup()
 
@@ -66,5 +72,7 @@ class TestSQLite(unittest.TestCase):
         """Test info"""
         name = "sqlite/" + time.strftime("%Y%m%d_%H%M%S")
         dry_run = False
-        plugin = SQLitePlugin(name, self.__class__.config, self.__class__.config["tmpdir"], dry_run)
+        plugin = SQLitePlugin(
+            name, self.__class__.config, self.__class__.config["tmpdir"], dry_run
+        )
         self.assertTrue(isinstance(plugin.info(), str))

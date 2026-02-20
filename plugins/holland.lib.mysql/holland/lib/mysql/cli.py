@@ -23,7 +23,7 @@ import re
 from subprocess import getstatusoutput
 
 
-class CmdOption(object):
+class CmdOption:
     """
     Create CmdOption class
     """
@@ -76,7 +76,13 @@ class MyCmdParser(dict):
         self.cli_options = list(self.values())
 
     def _run_cli_help(self):
-        args = [self.cli_path, "--no-defaults", "--loose-user=nobody", "--help", "--verbose"]
+        args = [
+            self.cli_path,
+            "--no-defaults",
+            "--loose-user=nobody",
+            "--help",
+            "--verbose",
+        ]
         cli_cmd = " ".join(args)
         status, cli_output = getstatusoutput(cli_cmd)
 

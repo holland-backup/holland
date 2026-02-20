@@ -57,7 +57,7 @@ def lookup_compression(method):
         raise OSError("Unsupported compression method '%s'" % method)
 
 
-class CompressionInput(object):
+class CompressionInput:
     """
     Class to create a compressed file descriptor for reading.  Functions like
     a standard file descriptor such as from open().
@@ -112,7 +112,7 @@ class CompressionInput(object):
         self.closed = True
 
 
-class CompressionOutput(object):
+class CompressionOutput:
     """
     Class to create a compressed file descriptor for writing.  Functions like
     a standard file descriptor such as from open().
@@ -153,7 +153,9 @@ class CompressionOutput(object):
                     stdout=subprocess.PIPE,
                     stderr=self.stderr,
                 )
-                self.split = subprocess.Popen(split_args, stdin=self.pid.stdout, stderr=self.stderr)
+                self.split = subprocess.Popen(
+                    split_args, stdin=self.pid.stdout, stderr=self.stderr
+                )
 
             else:
                 self.fileobj = io.open(path, "w")
@@ -203,7 +205,9 @@ class CompressionOutput(object):
                 cmp_f.name,
                 cmp_f.fileno(),
             )
-            pid = subprocess.Popen(argv, stdin=self.fileobj.fileno(), stdout=cmp_f.fileno())
+            pid = subprocess.Popen(
+                argv, stdin=self.fileobj.fileno(), stdout=cmp_f.fileno()
+            )
             status = pid.wait()
             LOG.debug("Return status: %s", status)
             os.unlink(self.fileobj.name)
@@ -221,7 +225,8 @@ class CompressionOutput(object):
                         LOG.error("%s: %s", self.argv[0], line.rstrip())
                     raise IOError(
                         errno.EPIPE,
-                        "Compression program '%s' exited with status %d" % (self.argv[0], status),
+                        "Compression program '%s' exited with status %d"
+                        % (self.argv[0], status),
                     )
                 for line in stderr:
                     if not line.strip():

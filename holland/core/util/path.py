@@ -76,7 +76,7 @@ def format_bytes(input_bytes, precision=2):
 
     return "%.*f%s" % (
         precision,
-        input_bytes / (1024 ** exponent),
+        input_bytes / (1024**exponent),
         ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][int(exponent)],
     )
 
@@ -162,5 +162,7 @@ def directory_size(path):
             except OSError:
                 pass
         for name in dirs:
-            LOG.debug("Debug: Determining size of directory %s", os.path.join(root, name))
+            LOG.debug(
+                "Debug: Determining size of directory %s", os.path.join(root, name)
+            )
     return result
