@@ -3,8 +3,5 @@
 build/
 .ropeproject/
 .vscode/
-<<<<<<< HEAD
-=======
 docs/
->>>>>>> master
 dist/
