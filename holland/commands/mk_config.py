@@ -199,7 +199,7 @@ class MkConfig(Command):
         except IndexError:
             pass
 
-    def run(self, cmd, opts, *plugin_type):
+    def run(self, opts, *plugin_type):
         if not plugin_type:
             print("Missing plugin name", file=sys.stderr)
             return 1

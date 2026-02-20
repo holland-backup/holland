@@ -24,17 +24,7 @@ class ListBackups(Command):
     args = [["-v", "--verbose"]]
     kargs = [{"action": "store_true", "help": "Verbose output"}]
 
-    @staticmethod
-    def print_table(table):
-        """
-        Format data and print data
-        """
-        rest = table[1:]
-        fmt = "%-28s %-9s %-16s %s"
-        for row in rest:
-            print(fmt % tuple(row))
-
-    def run(self, cmd, opts, *args):
+    def run(self, opts, *args):
         """
         get backup informantion and call print table
         """
@@ -67,3 +57,13 @@ class ListBackups(Command):
                     print(rec.sub("\t\t", plugin_info))
 
         return 0
+
+    @staticmethod
+    def print_table(table):
+        """
+        Format data and print data
+        """
+        rest = table[1:]
+        fmt = "%-28s %-9s %-16s %s"
+        for row in rest:
+            print(fmt % tuple(row))

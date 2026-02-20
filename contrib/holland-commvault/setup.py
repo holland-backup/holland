@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-version = "1.2.11"
+version = "1.4.0"
 
 setup(
     name="holland_commvault",

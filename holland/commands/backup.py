@@ -44,10 +44,7 @@ class Backup(Command):
     ]
     description = "Run backups for active backupsets"
 
-    def __init_(self):
-        Command.__init__(self)
-
-    def run(self, cmd, opts, *backupsets):
+    def run(self, opts, *backupsets):
         if not backupsets:
             backupsets = HOLLANDCFG.lookup("holland.backupsets")
             LOG.debug("No backupsets given. Using %r", backupsets)

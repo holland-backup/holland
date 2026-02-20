@@ -23,20 +23,7 @@ class ListPlugins(Command):
     args = []
     kargs = []
 
-    @staticmethod
-    def print_table(table):
-        """
-        Format and print table
-        """
-        header = table[0]
-        rest = table[1:]
-        fmt = "%-12s %-15s %-9s %-16s %s"
-        print(fmt % tuple(header))
-        print("-" * 80)
-        for row in rest:
-            print(fmt % tuple(row))
-
-    def run(self, cmd, opts, *args):
+    def run(self, *args):
         if args:
             print("The list-plugin command takes no arguments", file=sys.stderr)
         table_header = ["Plugin-Type", "Plugin-Name", "Version", "Author", "Summary"]
@@ -61,3 +48,16 @@ class ListPlugins(Command):
             self.print_table(table)
 
         return 0
+
+    @staticmethod
+    def print_table(table):
+        """
+        Format and print table
+        """
+        header = table[0]
+        rest = table[1:]
+        fmt = "%-12s %-22s %-9s %-16s %s"
+        print(fmt % tuple(header))
+        print("-" * 80)
+        for row in rest:
+            print(fmt % tuple(row))

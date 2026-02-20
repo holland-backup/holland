@@ -12,7 +12,7 @@ from subprocess import PIPE, STDOUT, Popen, list2cmdline
 from holland.backup.mariabackup import util
 from holland.core.backup import BackupError
 from holland.core.util.path import directory_size
-from holland.lib.compression import COMPRESSION_CONFIG_STRING, open_stream
+from holland.lib.common.compression import COMPRESSION_CONFIG_STRING, open_stream
 from holland.lib.mysql import connect
 from holland.lib.mysql.client.base import MYSQL_CLIENT_CONFIG_STRING
 from holland.lib.mysql.option import build_mysql_config
@@ -92,12 +92,7 @@ class MariabackupPlugin:
         backup_directory = self.target_directory
         stream = util.determine_stream_method(config["stream"])
         if stream:
-            if stream == "tar":
-                archive_path = join(backup_directory, "backup.tar")
-            elif "stream" in stream:
-                archive_path = join(backup_directory, "backup.mb")
-            else:
-                raise BackupError("Unknown stream method '%s'" % stream)
+            archive_path = join(backup_directory, "backup.mb")
             try:
                 return open_stream(archive_path, "w", **self.config["compression"])
             except OSError as exc:
@@ -111,7 +106,8 @@ class MariabackupPlugin:
         mb_cfg = self.config["mariabackup"]
         args = util.build_mb_args(mb_cfg, self.target_directory, self.defaults_path)
         LOG.info("* mariabackup command: %s", list2cmdline(args))
-        args = ["mariabackup", "--defaults-file=" + self.defaults_path, "--help"]
+        bin_path = util.get_mariadb_backup_bin_path(mb_cfg)
+        args = [bin_path, "--defaults-file=" + self.defaults_path, "--help"]
         cmdline = list2cmdline(args)
         LOG.info("* Verifying generated config '%s'", self.defaults_path)
         LOG.debug("* Verifying via command: %s", cmdline)
@@ -131,11 +127,11 @@ class MariabackupPlugin:
 
     def backup(self):
         """Perform Backup"""
-        util.mariabackup_version()
+        mb_cfg = self.config["mariabackup"]
+        util.mariabackup_version(mb_cfg)
         if self.dry_run:
             self.dryrun()
             return
-        mb_cfg = self.config["mariabackup"]
         backup_directory = self.target_directory
         tmpdir = util.evaluate_tmpdir(mb_cfg["tmpdir"], backup_directory)
         # innobackupex --tmpdir does not affect mariabackup

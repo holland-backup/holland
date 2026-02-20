@@ -55,7 +55,7 @@ class Purge(Command):
 
     description = "Purge the requested job runs"
 
-    def run(self, cmd, opts, *backups):
+    def run(self, opts, *backups):
         error = 0
 
         if not backups:

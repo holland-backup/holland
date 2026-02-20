@@ -7,10 +7,13 @@ import logging
 import os
 import sys
 
-from pkg_resources import get_distribution
+try:
+    from importlib import metadata
+except ImportError:
+    import importlib_metadata as metadata
 
 LOG = logging.getLogger(__name__)
-HOLLAND_VERSION = get_distribution("holland").version
+HOLLAND_VERSION = metadata.version("holland")
 HOLLAND_BANNER = f"""
 Holland Backup v{HOLLAND_VERSION}
 Copyright (c) 2008-2018 Rackspace US, Inc.
