@@ -40,6 +40,7 @@ class ExamplePlugin:
 
         :returns: int. size in bytes
         """
+        LOG.info("Example plugin - size of %s", self.name)
         return 0
 
     def backup(self):
@@ -57,4 +58,5 @@ class ExamplePlugin:
         :returns: str. A textual string description the backup referenced by
                        `self.config`
         """
+        LOG.info("Example plugin - Info for %s", self.name)
         return "Example plugin"

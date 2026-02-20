@@ -22,6 +22,11 @@ from holland.lib.mysql.option import build_mysql_config, write_options
 from holland.lib.mysql.util import parse_size
 
 
+def _get_mysql_error_msg(ex):
+    code = ex.args[-2] if len(ex.args) > 0 else "N/A"
+    message = ex.args[-1] if len(ex.args) > 1 else str(ex)
+    return "MySQL error [%s]: %s" % (code, message)
+
 class MySqlHelper:
     """
     Helper class for MySQL specific operations for mysqlsh backups.
@@ -34,10 +39,6 @@ class MySqlHelper:
         self.client = connect(self.mysql_config["client"])
         self.schema = MySQLSchema()
 
-    def _get_mysql_error_msg(self, ex):
-        code = ex.args[0] if len(ex.args) > 0 else "N/A"
-        message = ex.args[1] if len(ex.args) > 1 else str(ex)
-        return "MySQL error [%s]: %s" % (code, message)
 
     def write_defaults_file(self, target_directory):
         """Write the defaults file to the target directory."""
@@ -50,7 +51,7 @@ class MySqlHelper:
         try:
             self.client = connect(self.mysql_config["client"])
         except MySQLError as ex:
-            error_msg = self._get_mysql_error_msg(ex)
+            error_msg = _get_mysql_error_msg(ex)
             raise BackupError("Error reconnecting to MySQL: %s" % error_msg) from ex
 
     def get_master_data(self):
@@ -64,7 +65,7 @@ class MySqlHelper:
                     "master_log_pos": master_info["position"],
                 }
         except MySQLError as ex:
-            error_msg = self._get_mysql_error_msg(ex)
+            error_msg = _get_mysql_error_msg(ex)
             raise BackupError("Error determining master status: %s" % error_msg)
         return data
 
@@ -105,7 +106,7 @@ class MySqlHelper:
                 sizes.append(db.size)
             return float(sum(sizes))
         except MySQLError as ex:
-            error_msg = self._get_mysql_error_msg(ex)
+            error_msg = _get_mysql_error_msg(ex)
             raise BackupError("Error estimating schema size: %s" % error_msg) from ex
         finally:
             self.client.disconnect()
@@ -122,7 +123,7 @@ class MySqlHelper:
                 db_iter=db_iter, tbl_iter=tbl_iter, fast_iterate=fast_iterate
             )
         except MySQLError as ex:
-            error_msg = self._get_mysql_error_msg(ex)
+            error_msg = _get_mysql_error_msg(ex)
             raise BackupError("Failed to refresh schema: %s" % error_msg) from ex
 
         finally:
@@ -149,7 +150,7 @@ class MySqlHelper:
                     self.log.warning("ALERT! Slave position changed during backup!")
 
             except MySQLError as ex:
-                error_msg = self._get_mysql_error_msg(ex)
+                error_msg = _get_mysql_error_msg(ex)
                 self.log.warning("Failed to sanity check replication: %s", error_msg)
 
             try:
@@ -170,7 +171,7 @@ class MySqlHelper:
                         "ALERT! Binary log position changed during backup!"
                     )
             except MySQLError as ex:
-                error_msg = self._get_mysql_error_msg(ex)
+                error_msg = _get_mysql_error_msg(ex)
                 self.log.warning(
                     "Failed to sanity check master status before starting: %s",
                     error_msg,
@@ -179,7 +180,7 @@ class MySqlHelper:
             self.client.start_slave()
             self.log.info("Restarted slave")
         except MySQLError as ex:
-            error_msg = self._get_mysql_error_msg(ex)
+            error_msg = _get_mysql_error_msg(ex)
             raise BackupError("Error starting slave: %s" % error_msg) from ex
 
     def validate_slave_status(self):
@@ -196,7 +197,7 @@ class MySqlHelper:
             self.client.stop_slave(sql_thread_only=True)
             self.log.info("Stopped slave")
         except MySQLError as ex:
-            error_msg = self._get_mysql_error_msg(ex)
+            error_msg = _get_mysql_error_msg(ex)
             raise BackupError("Error stopping slave: %s" % error_msg) from ex
 
     def get_slave_replication_cfg(self):
@@ -212,7 +213,7 @@ class MySqlHelper:
                     "exec_master_log_pos"
                 )
         except MySQLError as ex:
-            error_msg = self._get_mysql_error_msg(ex)
+            error_msg = _get_mysql_error_msg(ex)
             raise BackupError("Error getting slave status: %s" % error_msg) from ex
 
         repl_config.update(self.get_master_data())
