@@ -22,7 +22,7 @@ class TestArchive(unittest.TestCase):
         shutil.rmtree(self.__class__.tmpdir)
 
     def test_dir_archive(self):
-        """Test DirArchive """
+        """Test DirArchive"""
         axv = DirArchive(os.path.join(self.__class__.tmpdir, "dir"))
         name_list = []
         for _ in range(1, 16):
@@ -36,7 +36,7 @@ class TestArchive(unittest.TestCase):
             self.assertTrue(name in name_list)
 
     def test_tar_archive(self):
-        """Test TarArchive """
+        """Test TarArchive"""
         axv = TarArchive(os.path.join(self.__class__.tmpdir, "tar"))
         name_list = []
 
@@ -51,7 +51,7 @@ class TestArchive(unittest.TestCase):
             self.assertTrue(name in name_list)
 
     def test_zip_archive(self):
-        """Test ZipArchive """
+        """Test ZipArchive"""
         axv = ZipArchive(os.path.join(self.__class__.tmpdir, "zip"))
         name_list = []
 

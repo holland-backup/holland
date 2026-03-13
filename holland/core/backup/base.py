@@ -120,18 +120,21 @@ def load_plugin(name, config, path, dry_run):
         raise BackupError(str(exc))
 
     try:
-        return plugin_cls(name=name, config=config, target_directory=path, dry_run=dry_run)
+        return plugin_cls(
+            name=name, config=config, target_directory=path, dry_run=dry_run
+        )
     # commenting out the below in case we actually want to handle this one day
     # except (KeyboardInterrupt, SystemExit):
     #     raise
     except Exception as exc:
         LOG.debug("Error while initializing %r : %s", plugin_cls, exc, exc_info=True)
         raise BackupError(
-            "Error initializing %s plugin: %s" % (config["holland:backup"]["plugin"], str(exc))
+            "Error initializing %s plugin: %s"
+            % (config["holland:backup"]["plugin"], str(exc))
         )
 
 
-class BackupRunner(object):
+class BackupRunner:
     """
     Run backup
     """
@@ -234,7 +237,10 @@ class BackupRunner(object):
         if dry_run:
             spool_entry.purge()
 
-        if sys.exc_info() != (None, None, None) or spool_entry.config["holland:backup"]["failed"]:
+        if (
+            sys.exc_info() != (None, None, None)
+            or spool_entry.config["holland:backup"]["failed"]
+        ):
             LOG.debug("sys.exc_info(): %r", sys.exc_info())
             self.apply_cb("failed-backup", spool_entry)
             raise BackupError("Failed backup: %s" % name)
@@ -264,7 +270,8 @@ class BackupRunner(object):
                 break
         else:
             LOG.info(
-                "Purging would only recover an additional %s", format_bytes(sum(to_purge.values()))
+                "Purging would only recover an additional %s",
+                format_bytes(sum(to_purge.values())),
             )
             LOG.info(
                 "Only %s total would be available, but the current backup requires %s",
@@ -304,7 +311,9 @@ class BackupRunner(object):
 
         historic_size_factor = config["historic-size-factor"]
 
-        old_backup_config = os.path.join(self.spool.path, spool_entry.backupset, "newest")
+        old_backup_config = os.path.join(
+            self.spool.path, spool_entry.backupset, "newest"
+        )
         if not os.path.exists(old_backup_config):
             LOG.debug("Missing backup.conf from last backup")
             return -1.0
@@ -354,7 +363,9 @@ class BackupRunner(object):
         """
         available_bytes = disk_free(spool_entry.path)
         estimated_bytes_required = float(plugin.estimate_backup_size())
-        spool_entry.config["holland:backup"]["estimated-size"] = estimated_bytes_required
+        spool_entry.config["holland:backup"][
+            "estimated-size"
+        ] = estimated_bytes_required
         LOG.info("Estimated Backup Size: %s", format_bytes(estimated_bytes_required))
 
         adjusted_bytes_required = self.historic_required_space(
@@ -387,7 +398,10 @@ class BackupRunner(object):
                     spool_entry.backupset, adjusted_bytes_required, dry_run
                 )
             ):
-                msg = ("Insufficient Disk Space. %s required, " "but only %s available on %s") % (
+                msg = (
+                    "Insufficient Disk Space. %s required, "
+                    "but only %s available on %s"
+                ) % (
                     format_bytes(adjusted_bytes_required),
                     format_bytes(available_bytes),
                     self.spool.path,

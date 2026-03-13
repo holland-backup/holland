@@ -11,7 +11,7 @@ from . import setup, teardown
 
 
 class TestSnapshot(unittest.TestCase):
-    """ Test Snapshot """
+    """Test Snapshot"""
 
     tmpdir = None
 
@@ -75,4 +75,6 @@ class TestSnapshot(unittest.TestCase):
             self.assertRaises(CallbackFailuresError, snapshot.start, log_vol)
             snapshot.unregister(evt, bad_callback)
             if snapshot.sigmgr._handlers:
-                raise Exception("sigmgr handlers still exist when checking event => %r", evt)
+                raise Exception(
+                    "sigmgr handlers still exist when checking event => %r", evt
+                )

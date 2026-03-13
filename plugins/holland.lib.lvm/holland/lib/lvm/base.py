@@ -19,7 +19,7 @@ from holland.lib.lvm.util import getdevice
 LOG = logging.getLogger(__name__)
 
 
-class Volume(object):
+class Volume:
     """Abstract Volume object for LVM Volume implementations
 
     This class should not directly be instantiated, but rather one
@@ -94,7 +94,9 @@ class PhysicalVolume(Volume):
             (volume,) = pvs(pathspec)
             return cls(volume)
         except (ValueError, LVMCommandError):
-            raise LookupError("No PhysicalVolume could be found for " "pathspec %r" % pathspec)
+            raise LookupError(
+                "No PhysicalVolume could be found for " "pathspec %r" % pathspec
+            )
 
     @classmethod
     def search(cls, pathspec=None):
@@ -133,7 +135,9 @@ class VolumeGroup(Volume):
             (volume,) = vgs(pathspec)
             return cls(volume)
         except (LVMCommandError, ValueError):
-            raise LookupError("No VolumeGroup could be found for pathspec %r" % pathspec)
+            raise LookupError(
+                "No VolumeGroup could be found for pathspec %r" % pathspec
+            )
 
     @classmethod
     def search(cls, pathspec=None):
@@ -170,7 +174,8 @@ class LogicalVolume(Volume):
         except (LVMCommandError, ValueError) as ex:
             # XX: Perhaps we should be more specific :)
             raise LookupError(
-                "No LogicalVolume could be found " "for pathspec %r, %s" % (pathspec, ex)
+                "No LogicalVolume could be found "
+                "for pathspec %r, %s" % (pathspec, ex)
             )
         except Exception as ex:
             raise OSError("unable to look up path %s" % ex)
@@ -303,7 +308,10 @@ class LogicalVolume(Volume):
             return device_info["type"]
         except (LVMCommandError, ValueError) as exc:
             LOG.debug(
-                "Failed looking up filesystem for %s => %r", self.device_name(), exc, exc_info=True
+                "Failed looking up filesystem for %s => %r",
+                self.device_name(),
+                exc,
+                exc_info=True,
             )
             raise
 

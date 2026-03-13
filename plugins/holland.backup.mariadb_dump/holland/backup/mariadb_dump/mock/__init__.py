@@ -11,7 +11,7 @@ except ImportError:
 __all__ = ["MockEnvironment"]
 
 
-class MockPopen(object):
+class MockPopen:
     """
     mock object to return to subclass.Popen
     """
@@ -39,7 +39,7 @@ class MockPopen(object):
         return 0
 
 
-class MockEnvironment(object):
+class MockEnvironment:
     """
     Setup environement for dry-run
     """

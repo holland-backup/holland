@@ -33,7 +33,7 @@ class MariaDBDumpOptionError(Exception):
     """Exception class for MariaDB Option validation"""
 
 
-class MariaDBDump(object):
+class MariaDBDump:
     """mariadb-dump command runner"""
 
     @classmethod

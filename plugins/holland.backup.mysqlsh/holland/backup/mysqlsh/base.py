@@ -34,7 +34,7 @@ class MySqlShBase(BackupPlugin):
 
         self._validate_mysqlsh_options()
 
-    def _validate_mysqlsh_options(self):
+    def _validate_mysqlsh_options(self):  # pylint: disable=no-self-use
         """Validate the options for the backup plugin."""
         return
 
@@ -77,11 +77,11 @@ class MySqlShBase(BackupPlugin):
             )
         return args
 
-    def _get_pos_args(self):
+    def _get_pos_args(self):  # pylint: disable=no-self-use
         """Return a list of positional arguments for the backup command."""
         return []
 
-    def _get_named_args(self):
+    def _get_named_args(self):  # pylint: disable=no-self-use
         """Return a list of named arguments for the backup command."""
         return []
 
@@ -152,9 +152,9 @@ class MySqlShBase(BackupPlugin):
                     # Ensure mysql:replication exists in the config to ensure we run the
                     # start_slave later regardless if we fail to get the replication config
                     self.config["mysql:replication"] = {}
-                    self.config["mysql:replication"] = (
-                        self.mysql.get_slave_replication_cfg()["slave_master_log_file"]
-                    )
+                    self.config[
+                        "mysql:replication"
+                    ] = self.mysql.get_slave_replication_cfg()["slave_master_log_file"]
                     self.log.info("MySQL replication has been stopped.")
             elif self.plugin_config["bin-log-position"]:
                 self.config["mysql:replication"] = self.mysql.get_master_data()

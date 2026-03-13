@@ -63,7 +63,10 @@ def main():
 
     parser = ArgumentParser()
     parser.add_argument(
-        "--config-file", "-c", metavar="<file>", help="Read configuration from the given file"
+        "--config-file",
+        "-c",
+        metavar="<file>",
+        help="Read configuration from the given file",
     )
 
     parser.add_argument(
@@ -73,7 +76,9 @@ def main():
         choices=["critical", "error", "warning", "info", "debug"],
         help="Specify the log level. " "One of: critical,error,warning,info,debug",
     )
-    parser.add_argument("--quiet", "-q", action="store_true", help="Don't log to console")
+    parser.add_argument(
+        "--quiet", "-q", action="store_true", help="Don't log to console"
+    )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
 
     parser.add_argument(
@@ -91,7 +96,9 @@ def main():
     parser.add_argument("-job", type=int)
     parser.add_argument("-vm")
     parser.add_argument("-cn")
-    parser.set_defaults(config_file=os.getenv("HOLLAND_CONFIG") or holland_conf, verbose=False)
+    parser.set_defaults(
+        config_file=os.getenv("HOLLAND_CONFIG") or holland_conf, verbose=False
+    )
 
     args, largs = parser.parse_known_args(sys.argv[1:])
     if args.log_level:
@@ -99,7 +106,9 @@ def main():
 
     bootstrap(args)
 
-    logging.info("Holland (commvault agent) %s started with pid %d", HOLLAND_VERSION, os.getpid())
+    logging.info(
+        "Holland (commvault agent) %s started with pid %d", HOLLAND_VERSION, os.getpid()
+    )
     # Commvault usually runs with a very low default limit for nofile
     # so a best effort is taken to raise that here.
     try:
@@ -141,14 +150,18 @@ def main():
         pid = pid_file.read()
         pid_file.close()
 
-        logging.info("Holland (commvault agent) is already running, waiting for the pid %s", pid)
+        logging.info(
+            "Holland (commvault agent) is already running, waiting for the pid %s", pid
+        )
         count = 0
         while os.path.isfile(pid_location):
             sleep(10)
             count = count + 1
             # ~14 hour timeout
             if count > 5040:
-                logging.info("Holland (commvault agent) timed out after %s seconds", count * 10)
+                logging.info(
+                    "Holland (commvault agent) timed out after %s seconds", count * 10
+                )
                 return 1
         try:
             status = open(status_file, "r")

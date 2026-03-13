@@ -12,7 +12,7 @@ class LockError(Exception):
         self.exc = exc
 
 
-class Lock(object):
+class Lock:
     """A simple flock based file lock implementation"""
 
     def __init__(self, path):

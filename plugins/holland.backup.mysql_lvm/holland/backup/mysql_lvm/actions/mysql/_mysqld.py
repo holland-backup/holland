@@ -24,7 +24,7 @@ def locate_mysqld_exe(config):
     raise BackupError("Failed to find mysqld binary")
 
 
-class MySQLServer(object):
+class MySQLServer:
     """Manage New MySQL Server"""
 
     def __init__(self, mysqld_exe, defaults_file):

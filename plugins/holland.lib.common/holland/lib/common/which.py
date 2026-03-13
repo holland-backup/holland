@@ -9,7 +9,7 @@ from holland.core.backup import BackupError
 
 
 def which(cmd):
-    """ Returns full path to command or else raises an error """
+    """Returns full path to command or else raises an error"""
     try:
         full_path = shutil.which(cmd)
         if full_path:

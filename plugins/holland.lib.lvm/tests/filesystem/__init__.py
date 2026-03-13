@@ -17,7 +17,8 @@ def setup(mnt_dir):
     subprocess.call("pvcreate %s" % LOOP_DEV, shell=True)
     subprocess.call("vgcreate %s %s" % (TEST_VG, LOOP_DEV), shell=True)
     subprocess.call(
-        "lvcreate -L%dK -n %s %s" % ((IMG_SIZE / 2) / 1024, TEST_LV, TEST_VG), shell=True
+        "lvcreate -L%dK -n %s %s" % ((IMG_SIZE / 2) / 1024, TEST_LV, TEST_VG),
+        shell=True,
     )
     subprocess.call("mkfs.ext3 /dev/%s/%s" % (TEST_VG, TEST_LV), shell=True)
     subprocess.call("mount /dev/%s/%s %s" % (TEST_VG, TEST_LV, mnt_dir), shell=True)

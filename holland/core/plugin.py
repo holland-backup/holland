@@ -5,6 +5,7 @@ Core plugin support
 import logging
 import os
 import sys
+
 try:
     from importlib import metadata
 except ImportError:

@@ -21,7 +21,7 @@ binary = string(default=/usr/bin/sqlite3)
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
 
-class SQLitePlugin(object):
+class SQLitePlugin:
     """Define Plugin to backup SQLite"""
 
     def __init__(self, name, config, target_directory, dry_run=False):
@@ -110,7 +110,9 @@ class SQLitePlugin(object):
                 dest = open("/dev/null", "w")
             else:
                 LOG.info("Backing up SQLite database at [%s]", path)
-                dest = os.path.join(self.target_directory, "%s.sql" % os.path.basename(path))
+                dest = os.path.join(
+                    self.target_directory, "%s.sql" % os.path.basename(path)
+                )
                 dest = open_stream(dest, "w", **self.config["compression"])
 
             process = Popen(

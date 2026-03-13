@@ -68,7 +68,7 @@ estimate-method     = string(default='plugin')
 CONFIGSPEC = CONFIGSPEC.splitlines()
 
 
-class MariaDBDumpPlugin(object):
+class MariaDBDumpPlugin:
     """mariadb-dump Backup Plugin interface for Holland"""
 
     CONFIGSPEC = CONFIGSPEC

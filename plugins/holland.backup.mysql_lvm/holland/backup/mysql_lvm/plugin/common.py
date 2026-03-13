@@ -48,7 +48,7 @@ def build_snapshot(config, logical_volume, suppress_tmpdir=False):
         snapshot_size = min(
             int(logical_volume.vg_free_count),
             (int(logical_volume.lv_size) * 0.2) / extent_size,
-            (15 * 1024 ** 3) / extent_size,
+            (15 * 1024**3) / extent_size,
         )
         LOG.info(
             "Auto-sizing snapshot-size to %s (%d extents)",
@@ -73,18 +73,23 @@ def build_snapshot(config, logical_volume, suppress_tmpdir=False):
             )
             if snapshot_size < 1:
                 raise BackupError(
-                    "Requested snapshot-size (%s) is less than 1 extent" % _snapshot_size
+                    "Requested snapshot-size (%s) is less than 1 extent"
+                    % _snapshot_size
                 )
             if snapshot_size > int(logical_volume.vg_free_count):
                 LOG.info(
                     "Snapshot size requested %s, but only %s available.",
                     config["snapshot-size"],
-                    format_bytes(int(logical_volume.vg_free_count) * extent_size, precision=4),
+                    format_bytes(
+                        int(logical_volume.vg_free_count) * extent_size, precision=4
+                    ),
                 )
                 LOG.info(
                     "Truncating snapshot-size to %d extents (%s)",
                     int(logical_volume.vg_free_count),
-                    format_bytes(int(logical_volume.vg_free_count) * extent_size, precision=4),
+                    format_bytes(
+                        int(logical_volume.vg_free_count) * extent_size, precision=4
+                    ),
                 )
                 snapshot_size = int(logical_volume.vg_free_count)
         except ValueError as exc:
@@ -132,7 +137,9 @@ def _dry_run(target_directory, volume, snapshot, datadir):
         snapshot.name,
         format_bytes(snapshot.size * int(volume.vg_extent_size)),
     )
-    LOG.info("* Would mount on %s", snapshot.mountpoint or "generated temporary directory")
+    LOG.info(
+        "* Would mount on %s", snapshot.mountpoint or "generated temporary directory"
+    )
     if getmount(target_directory) == getmount(datadir):
         LOG.error(
             "Backup directory %s is on the same filesystem as the source logical volume %s.",

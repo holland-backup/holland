@@ -49,7 +49,7 @@ def format_bytes(input_bytes, precision=2):
 
     return "%.*f%s" % (
         precision,
-        float(input_bytes) / (1024 ** exponent),
+        float(input_bytes) / (1024**exponent),
         ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][int(exponent)],
     )
 

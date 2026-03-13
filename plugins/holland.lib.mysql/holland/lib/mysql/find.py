@@ -8,7 +8,7 @@ import string
 LOG = logging.getLogger(__name__)
 
 
-class MySQLFind(object):
+class MySQLFind:
     """
     Create list of included and excluded tables
     """

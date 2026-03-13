@@ -51,7 +51,7 @@ def flatten_list(a_list):
     )
 
 
-class MySQLClient(object):
+class MySQLClient:
     """pymysql Helper
 
     Provides common functions for reading meta-data
@@ -156,7 +156,9 @@ class MySQLClient(object):
         try:
             cursor.execute(sql)
         except MySQLError as exc:
-            LOG.error("MySQL reported an error while running %s. [%d] %s", sql, *exc.args)
+            LOG.error(
+                "MySQL reported an error while running %s. [%d] %s", sql, *exc.args
+            )
             raise
         names = [info[0].lower() for info in cursor.description]
         result = []
@@ -170,9 +172,13 @@ class MySQLClient(object):
                 row["engine"] = "view"
                 comment = row.get("comment", "")
                 if "references invalid table" in comment:
-                    LOG.warning("Invalid view %s.%s: %s", row["database"], row["name"], comment)
+                    LOG.warning(
+                        "Invalid view %s.%s: %s", row["database"], row["name"], comment
+                    )
                 if "Incorrect key file" in comment:
-                    LOG.warning("Invalid table %s.%s: %s", row["database"], row["name"], comment)
+                    LOG.warning(
+                        "Invalid table %s.%s: %s", row["database"], row["name"], comment
+                    )
             else:
                 row["engine"] = row["engine"].lower()
             for key in list(row.keys()):
@@ -332,7 +338,10 @@ class MySQLClient(object):
                     return cursor.fetchone()[0]
             except MySQLError as exc:
                 LOG.debug(
-                    "INFORMATION_SCHEMA.VIEWS(%s,%s) failed: [%d] %s ", schema, name, *exc.args
+                    "INFORMATION_SCHEMA.VIEWS(%s,%s) failed: [%d] %s ",
+                    schema,
+                    name,
+                    *exc.args
                 )
             return None
         finally:
@@ -531,7 +540,9 @@ def connect(config, client_class=AutoMySQLClient):
             if int(pymysql_version.split(".")[0]) > 1:
                 args[key] = value.decode("utf-8")
             else:
-                LOG.debug("Using legacy password encoding, only ASCII characters are supported")
+                LOG.debug(
+                    "Using legacy password encoding, only ASCII characters are supported"
+                )
                 args["passwd"] = value
         elif isinstance(value, bytes):
             args[key] = value.decode("utf-8")

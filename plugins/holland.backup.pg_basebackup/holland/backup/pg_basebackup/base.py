@@ -27,7 +27,7 @@ VER = None
 
 
 def get_connection(config, pgdb="template1"):
-    """ Returns a connection to the PG database instance. """
+    """Returns a connection to the PG database instance."""
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     args = {}
     # remap pgauth parameters to what psycopg2.connect accepts
@@ -55,7 +55,7 @@ def get_connection(config, pgdb="template1"):
 
 
 def get_db_size(dbname, connection):
-    """ Returns int -> size of the database """
+    """Returns int -> size of the database"""
     try:
         cursor = connection.cursor()
         cursor.execute("SELECT pg_database_size('%s')" % dbname)
@@ -67,7 +67,7 @@ def get_db_size(dbname, connection):
 
 
 def legacy_get_db_size(dbname, connection):
-    """ Legacy method to return db int -> size. """
+    """Legacy method to return db int -> size."""
     cursor = connection.cursor()
     cursor.execute("SELECT SUM(relpages*8192) FROM pg_class")
     size = int(cursor.fetchone()[0])
@@ -83,7 +83,9 @@ def pg_databases(config, connection):  # pylint: disable=W0613
     in config['pgpass']
     """
     cursor = connection.cursor()
-    cursor.execute("SELECT datname FROM pg_database WHERE not datistemplate and datallowconn")
+    cursor.execute(
+        "SELECT datname FROM pg_database WHERE not datistemplate and datallowconn"
+    )
     databases = [db for db, in cursor]
     cursor.close()
     logging.debug("pg_databases() -> %r", databases)
@@ -180,11 +182,13 @@ def backup_globals(backup_directory, config, connection_params, env=None):
         stderr.close()
 
     if returncode != 0:
-        raise BackupError("pg_basebackupall command exited with failure code %d." % returncode)
+        raise BackupError(
+            "pg_basebackupall command exited with failure code %d." % returncode
+        )
 
 
 def pgauth2args(config):
-    """ Returns authentication options as cli arguments """
+    """Returns authentication options as cli arguments"""
     args = []
     remap = {"hostname": "host"}
     for param in ("hostname", "port", "username"):
@@ -197,7 +201,7 @@ def pgauth2args(config):
 
 
 def generate_pgpassfile(backup_directory, password):
-    """ Creates a pgpass file from a given password """
+    """Creates a pgpass file from a given password"""
     fileobj = open(os.path.join(backup_directory, "pgpass"), "w")
     # pgpass should always be 0600
     os.chmod(fileobj.name, 0o600)
@@ -230,7 +234,9 @@ def backup_pgsql(backup_directory, config):
     pgenv = dict(os.environ)
 
     if config["pgauth"]["password"] is not None:
-        pgpass_file = generate_pgpassfile(backup_directory, config["pgauth"]["password"])
+        pgpass_file = generate_pgpassfile(
+            backup_directory, config["pgauth"]["password"]
+        )
         if "PGPASSFILE" in pgenv:
             LOG.warning(
                 "Overriding PGPASSFILE in environment with %s because a password is specified.",
@@ -264,7 +270,7 @@ def backup_pgsql(backup_directory, config):
 
 
 def dry_run(config):
-    """ Logs what pg_basebackup command would be run """
+    """Logs what pg_basebackup command would be run"""
     args = pgauth2args(config)
     cmd = (
         [

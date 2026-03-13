@@ -109,7 +109,9 @@ def purge_backupset(backupset, force=False, all_backups=False):
             config.validate_config(CONFIGSPEC, suppress_warnings=True)
         except (IOError, ConfigError) as exc:
             LOG.error("Failed to load backupset '%s': %s", backupset.name, exc)
-            LOG.error("Aborting, because I could not tell how many backups to preserve.")
+            LOG.error(
+                "Aborting, because I could not tell how many backups to preserve."
+            )
             LOG.error(
                 "You can still purge the backupset by using the --all "
                 "option or specifying specific backups to purge"

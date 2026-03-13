@@ -4,14 +4,14 @@ import os
 
 # For 2.7 or newer use unittest.mock
 try:
-    from unittest.mock import MagicMock, ANY
+    from unittest.mock import ANY, MagicMock
 except ImportError:
-    from mock import MagicMock, ANY
+    from mock import ANY, MagicMock
 
 __all__ = ["MockEnvironment"]
 
 
-class MockPopen(object):
+class MockPopen:
     """
     mock object to return to subclass.Popen
     """
@@ -39,7 +39,7 @@ class MockPopen(object):
         return 0
 
 
-class MockEnvironment(object):
+class MockEnvironment:
     """
     Setup environement for dry-run
     """

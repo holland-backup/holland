@@ -81,6 +81,8 @@ class TestCompression(unittest.TestCase):
 
     def test_compression_bad_mode(self):
         """Test bad mode"""
-        filep = compression.open_stream(os.path.join(self.__class__.tmpdir, "foo"), "w", "gzip")
+        filep = compression.open_stream(
+            os.path.join(self.__class__.tmpdir, "foo"), "w", "gzip"
+        )
         filep.write(bytes("foo", "ascii"))
         filep.close()

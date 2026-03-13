@@ -13,7 +13,7 @@ from ._mysqld import MySQLServer, generate_server_config, locate_mysqld_exe
 LOG = logging.getLogger(__name__)
 
 
-class MySQLDumpDispatchAction(object):
+class MySQLDumpDispatchAction:
     """Setup environment for mysqldump"""
 
     def __init__(self, mysqldump_plugin, mysqld_config):

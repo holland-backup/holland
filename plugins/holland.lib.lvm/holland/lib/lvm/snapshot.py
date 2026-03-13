@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 __all__ = ["Snapshot", "CallbackFailuresError"]
 
 
-class Snapshot(object):
+class Snapshot:
     """Snapshot state machine"""
 
     def __init__(self, name, size, mountpoint):
@@ -134,7 +134,9 @@ class Snapshot(object):
             try:
                 if snapshot.is_mounted():
                     snapshot.unmount()
-                    LOG.info("Unmounting snapshot %s on cleanup", snapshot.device_name())
+                    LOG.info(
+                        "Unmounting snapshot %s on cleanup", snapshot.device_name()
+                    )
             except LVMCommandError as ex:
                 LOG.error("Failed to unmount snapshot %s", ex)
 
@@ -172,7 +174,9 @@ class Snapshot(object):
                 LOG.debug("Calling %s", event)
                 callback(event, *args, **kwargs)
             except:
-                LOG.debug("Callback %r failed for event %s", callback, event, exc_info=True)
+                LOG.debug(
+                    "Callback %r failed for event %s", callback, event, exc_info=True
+                )
                 exc = sys.exc_info()[1]
                 raise CallbackFailuresError([(callback, exc)])
 
